@@ -1,7 +1,6 @@
 package de.fau.teksample;
 
 import android.app.Activity;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -31,8 +30,6 @@ public class MainActivity extends AppCompatActivity {
 
         // For Android 6+ we have to make sure that we have the BT-LE permissions
         DsSensorManager.checkBtLePermissions(this, true);
-
-        Log.d(TAG, "Ver: " + Build.VERSION.SDK_INT);
     }
 
     /**
