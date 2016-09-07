@@ -31,6 +31,8 @@ public class MainActivity extends AppCompatActivity {
 
         // For Android 6+ we have to make sure that we have the BT-LE permissions
         DsSensorManager.checkBtLePermissions(this, true);
+
+        Log.d(TAG, "Ver: " + Build.VERSION.SDK_INT);
     }
 
     /**
