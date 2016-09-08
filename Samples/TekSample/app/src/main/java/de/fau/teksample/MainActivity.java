@@ -23,6 +23,11 @@ public class MainActivity extends AppCompatActivity {
      */
     DsBleSensor mSensor;
 
+    /**
+     * The data logger to write sensor data into a csv file.
+     */
+    CsvDataLogger mCsvDataLogger = new CsvDataLogger();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,26 +62,28 @@ public class MainActivity extends AppCompatActivity {
         return this;
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        // This callback is called by Android every time the app resumes control
-
-        // This codeblock allows to connect to a sensor directly.
-        /*String tekMac = "52:4D:4B:5F:01:55";
-        mSensor = new TEK(this, tekMac, mDataHandler);
+    /**
+     * Connect to a TEK sensor directly using the sensor's MAC address.
+     *
+     * @param macAddress MAC address of the sensor.
+     */
+    private void connectTekWithMac(String macAddress) {
+        mSensor = new TEK(this, macAddress, mDataHandler);
         mSensor.useHardwareSensor(DsSensor.HardwareSensor.ACCELEROMETER);
         mSensor.useHardwareSensor(DsSensor.HardwareSensor.LIGHT);
+        //mSensor.addDataHandler(mCsvDataLogger);
         try {
             mSensor.connect();
             mSensor.startStreaming();
         } catch (Exception e) {
             e.printStackTrace();
-        }*/
+        }
+    }
 
-
-        // Search for available BT LE devices
+    /**
+     * Connect to the first TEK sensor that is found when searching all BLE devices in the area.
+     */
+    private void connectFirstFoundTek() {
         try {
             DsSensorManager.searchBleDevices(this, new SensorFoundCallback() {
                 public boolean onKnownSensorFound(KnownSensor sensor) {
@@ -90,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
                         // ...select the desired hardware sensors...
                         mSensor.useHardwareSensor(DsSensor.HardwareSensor.ACCELEROMETER);
                         mSensor.useHardwareSensor(DsSensor.HardwareSensor.LIGHT);
+                        //mSensor.addDataHandler(mCsvDataLogger);
                         try {
                             // ...connect to it...
                             mSensor.connect();
@@ -107,6 +115,21 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // This callback is called by Android every time the app resumes control
+
+        // This codeblock allows to connect to a sensor directly.
+        /*String tekMac = "52:4D:4B:5F:01:55";
+        connectTekWithMac(tekMac);
+        */
+
+        // Search for available BT LE devices
+        connectFirstFoundTek();
     }
 
     @Override
