@@ -11,7 +11,6 @@ import de.fau.sensorlib.DsSensorManager;
 import de.fau.sensorlib.KnownSensor;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorFoundCallback;
-import de.fau.sensorlib.dataframe.SensorDataFrame;
 import de.fau.sensorlib.sensors.TEK;
 
 public class MainActivity extends AppCompatActivity {
@@ -33,25 +32,17 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // For Android 6+ we have to make sure that we have the BT-LE permissions
+        // For Android 6+ we have to make sure that we have the BLE permissions
         DsSensorManager.checkBtLePermissions(this, true);
+        // ...and permissions to write on the storage for csv file logging.
+        CsvDataLogger.requestStorageWritePermission(this);
     }
+
 
     /**
      * The data handler for our sensor which will receive callbacks whenever new data is available
      */
-    SensorDataProcessor mDataHandler = new SensorDataProcessor() {
-        @Override
-        public void onNewData(SensorDataFrame data) {
-            // This callback is called every time a new dataframe is available from the sensor.
-
-            // We first cast the dataframe to our TekDataFrame
-            TEK.TekDataFrame df = (TEK.TekDataFrame) data;
-
-            // We can now access the elements of the dataframe
-            Log.d(TAG, "DataFrame (" + df.getCounter() + "): " + df.toString());
-        }
-    };
+    SensorDataProcessor mDataHandler = new CustomDataProcessor();
 
     /**
      * Helper method to retrieve instance pointer in nested classes.
@@ -120,7 +111,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
         // This callback is called by Android every time the app resumes control
 
         // This codeblock allows to connect to a sensor directly.

@@ -1,6 +1,12 @@
 package de.fau.teksample;
 
+import android.Manifest;
+import android.app.Activity;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import java.io.File;
@@ -18,7 +24,7 @@ import de.fau.sensorlib.dataframe.SensorDataFrame;
 import de.fau.sensorlib.sensors.TEK;
 
 /**
- * Created by sgt on 2016-09-08.
+ * An instance of the SensorDataProcessor for logging all sensor data to two different csv files. One for ambient and one for inertial sensor data.
  */
 public class CsvDataLogger extends SensorDataProcessor {
 
@@ -26,6 +32,22 @@ public class CsvDataLogger extends SensorDataProcessor {
 
     FileWriter mCsvWriterInertial;
     FileWriter mCsvWriterAmbient;
+
+    /**
+     * Requests the write permission to external storage for Android 6+ devices.
+     *
+     * @param activity
+     */
+    public static void requestStorageWritePermission(Activity activity) {
+        if (Build.VERSION.SDK_INT < 23)
+            return;
+        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(activity,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                    0);
+        }
+    }
 
     @Override
     public void onNewData(SensorDataFrame sensorDataFrame) {
@@ -43,7 +65,7 @@ public class CsvDataLogger extends SensorDataProcessor {
                 mCsvWriterAmbient.flush();
             }
             // check if this data frame contains inertial sensor information
-            if (mCsvWriterInertial != null && df instanceof AccelDataFrame) {
+            if (mCsvWriterInertial != null && df instanceof AccelDataFrame && df instanceof GyroDataFrame && df instanceof MagDataFrame) {
                 AccelDataFrame adf = (AccelDataFrame) df;
                 GyroDataFrame gdf = (GyroDataFrame) df;
                 MagDataFrame mdf = (MagDataFrame) df;
@@ -75,6 +97,7 @@ public class CsvDataLogger extends SensorDataProcessor {
         File dataDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         File csvFileInertial = new File(dataDir, Calendar.getInstance().getTime().toString() + "-inertial.csv");
         File csvFileAmbient = new File(dataDir, Calendar.getInstance().getTime().toString() + "-ambient.csv");
+        Log.d(TAG, "csv: " + csvFileInertial.getAbsolutePath());
         try {
             // Create the csv file
             mCsvWriterInertial = new FileWriter(csvFileInertial);

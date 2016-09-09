@@ -53,3 +53,16 @@ SensorDataProcessor handler = new CustomDataHandler();
 sensor.addDataHandler(handler)
 ...
 ```
+
+## How to use sensor data frames
+You can check whether a data frame contains desired data by using Java reflection:
+```
+    @Override
+    public void onNewData(SensorDataFrame sensorDataFrame) {
+        // check if the data frame contains accelerometer data
+        if (sensorDataFrame instanceof AccelDataFrame) {
+            AccelDataFrame adf = (AccelDataFrame)sensorDataFrame;
+            Log.d(TAG, "X acceleration: " + adf.getAccelX());
+        }
+    }
+```
