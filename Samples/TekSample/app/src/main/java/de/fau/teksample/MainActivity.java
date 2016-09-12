@@ -59,13 +59,18 @@ public class MainActivity extends AppCompatActivity {
      * @param macAddress MAC address of the sensor.
      */
     private void connectTekWithMac(String macAddress) {
+        Log.d(TAG, "Connecting to " + macAddress);
         mSensor = new TEK(this, macAddress, mDataHandler);
         mSensor.useHardwareSensor(DsSensor.HardwareSensor.ACCELEROMETER);
         mSensor.useHardwareSensor(DsSensor.HardwareSensor.LIGHT);
         //mSensor.addDataHandler(mCsvDataLogger);
         try {
-            mSensor.connect();
-            mSensor.startStreaming();
+            if (mSensor.connect()) {
+                Log.d(TAG, "Connected");
+                mSensor.startStreaming();
+            } else {
+                Log.d(TAG, "Connection failed.");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -114,18 +119,20 @@ public class MainActivity extends AppCompatActivity {
         // This callback is called by Android every time the app resumes control
 
         // This codeblock allows to connect to a sensor directly.
-        /*String tekMac = "52:4D:4B:5F:01:55";
+        String tekMac = "52:4D:4B:5F:01:23";
         connectTekWithMac(tekMac);
-        */
+
 
         // Search for available BT LE devices
-        connectFirstFoundTek();
+        //connectFirstFoundTek();
     }
 
     @Override
     protected void onPause() {
         // If we lose control we disconnect the sensor.
         if (mSensor != null) {
+            Log.d(TAG, "Disconnecting sensor.");
+            mSensor.stopStreaming();
             mSensor.disconnect();
         }
         super.onPause();
