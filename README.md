@@ -1,6 +1,13 @@
 # SensorLib
 The SensorLib is a Java-based Android library that provides an easy-to-use interface to access various retail and development sensor systems in a unified way.
 
+## Compiling the library
+The library should be compiled against the latest Android SDK and should work right out of the box. For some sensors an additional external library (SDK) is necessary. You can usually download these from the sensor's specific SDK website.
+
+Right now, the following external libraries are required to compile all sensor modules:
+- myosdk-0.10.0.aar from the official Myo SDK website (required by sls-myo)
+- empalink-2.0.aar from the official Empatica SDK website (required by sls-empatica)
+
 ## Minimal example
 Using the SensorLib is very easy, insert the following code into your app activity for a minimal working example:
 ```

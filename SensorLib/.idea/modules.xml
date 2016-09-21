@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/SensorLib.iml" filepath="$PROJECT_DIR$/SensorLib.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sensorlib/sensorlib.iml" filepath="$PROJECT_DIR$/sensorlib/sensorlib.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sensorlibutils/sensorlibutils.iml" filepath="$PROJECT_DIR$/sensorlibutils/sensorlibutils.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sls-empatica/sls-empatica.iml" filepath="$PROJECT_DIR$/sls-empatica/sls-empatica.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sls-fitnessshirt/sls-fitnessshirt.iml" filepath="$PROJECT_DIR$/sls-fitnessshirt/sls-fitnessshirt.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sls-myo/sls-myo.iml" filepath="$PROJECT_DIR$/sls-myo/sls-myo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sls-shimmer/sls-shimmer.iml" filepath="$PROJECT_DIR$/sls-shimmer/sls-shimmer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sls-simblee/sls-simblee.iml" filepath="$PROJECT_DIR$/sls-simblee/sls-simblee.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sls-smartband2/sls-smartband2.iml" filepath="$PROJECT_DIR$/sls-smartband2/sls-smartband2.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sls-smartwatch/sls-smartwatch.iml" filepath="$PROJECT_DIR$/sls-smartwatch/sls-smartwatch.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sls-tek/sls-tek.iml" filepath="$PROJECT_DIR$/sls-tek/sls-tek.iml" />
+    </modules>
+  </component>
+</project>
