@@ -1,66 +1,34 @@
-/**
- * Copyright (C) 2015-2016 Digital Sports Group, Friedrich-Alexander University Erlangen-Nuremberg (FAU).
- * <p>
- * This file is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. If you reuse
- * this code you have to keep or cite this comment.
- */
 package de.fau.sensorlib.sensors;
 
 import android.content.Context;
 import android.os.DeadObjectException;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseIntArray;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.EnumSet;
 
-import de.fau.sensorlib.DsSensor;
 import de.fau.sensorlib.SensorDataProcessor;
+import de.fau.sensorlib.SimulatedSensor;
 import de.fau.shiftlist.ShiftListDouble;
 import de.fau.shiftlist.ShiftListLong;
 
-import static android.text.TextUtils.SimpleStringSplitter;
-
 /**
- * Original version by Robert Richer, Digital Sports Group, Pattern Recognition Lab, Department of Computer Science.
- * <p>
- * FAU Erlangen-Nürnberg
- * <p>
- * (c) 2014
- * <p>
- * This class is a sensor simulator that simulates both pre-recorded DailyHeart ECG data or data
- * from the MIT-BIH-Arrhythmia database.
- *
- * @author Robert Richer
+ * Created by Robert on 23.09.16.
  */
-public class BleEcgSimulatedSensor extends DsSensor {
+public class BleEcgSimulatedSensor extends SimulatedSensor {
 
-    /**
-     * Simulator Type
-     */
-    public enum Simulator {
-        DAILYHEART,
-        MIT_BIH
-    }
-
-    private static final String TAG = BleEcgSimulatedSensor.class.getSimpleName();
     private static final char mSeparator = '\n';
     private static final String mHeader = "samplingrate";
+
     /**
      * Signal simulating MIT-BIH files
      */
     private static WfDbEcgSignal mSimSignal;
-
-    private BufferedReader mBufferedReader;
-    private Simulator mType;
-    private Thread mThread;
     /**
      * MIT-BIH signal filename
      */
@@ -80,65 +48,48 @@ public class BleEcgSimulatedSensor extends DsSensor {
     private int mSimPlotIter;
 
 
-    public BleEcgSimulatedSensor(Context context, String deviceName, SensorDataProcessor dataHandler,
-                                 double samplingRate, String fileName, Simulator simType) {
-        super(context, deviceName, "SensorLib::BleEcgSimulatedSensor", dataHandler);
-        setSamplingRate(samplingRate);
-        mSigFileName = fileName;
-        mType = simType;
-        try {
-            mBufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(fileName)));
-            mBufferedReader.mark(Integer.MAX_VALUE);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    /**
+     * Simulator Type
+     */
+    public enum Simulator {
+        DAILYHEART,
+        MIT_BIH
+    }
+
+    private Simulator mSimType;
+
+
+    public BleEcgSimulatedSensor(Context context, String deviceName, SensorDataProcessor dataHandler, String fileName, Simulator simType, double samplingRate, boolean liveMode) {
+        super(context, deviceName, dataHandler, fileName, samplingRate, liveMode);
+        mSimType = simType;
     }
 
     @Override
-    protected EnumSet<HardwareSensor> providedSensors() {
-        return EnumSet.of(HardwareSensor.ECG);
-    }
-
-    public Simulator getType() {
-        return mType;
-    }
-
-    public void setType(Simulator simType) {
-        mType = simType;
-    }
-
-    /**
-     * Connects the different simulation types (DailyHeart or MIT-BIH)
-     */
-    public boolean connect() {
-        try {
-            super.connect();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        Log.e(TAG, "connect");
-
-        switch (mType) {
+    public boolean connect() throws Exception {
+        sendConnecting();
+        boolean ret = false;
+        switch (mSimType) {
             case DAILYHEART:
-                connectDailyHeart();
+                ret = connectDailyHeart();
                 break;
             case MIT_BIH:
-                connectMitBih();
+                ret = connectMitBih();
                 break;
         }
-        return true;
+        if (ret) {
+            sendConnected();
+        }
+        return ret && super.connect();
     }
-
 
     /**
      * connect DailyHeart simulator
      */
-    private void connectDailyHeart() {
+    private boolean connectDailyHeart() throws Exception {
         String line;
 
         if (getState() != SensorState.CONNECTING) {
-            return;
+            return false;
         }
 
         // reset BufferedReader
@@ -146,7 +97,7 @@ public class BleEcgSimulatedSensor extends DsSensor {
             mBufferedReader.reset();
         } catch (Exception e) {
             Log.e(TAG, "Cannot reset state of BufferedReader in connect().", e);
-            return;
+            return false;
         }
 
         // compute sampling rate from second line
@@ -163,19 +114,22 @@ public class BleEcgSimulatedSensor extends DsSensor {
                 Log.e(TAG, "Cannot read sampling rate from chosen file!");
                 Log.e(TAG, "Header 1 is wrong or missing.");
                 sendNotification("Invalid file format!");
-                sendDisconnected();
-                return;
+                disconnect();
+                return false;
             }
         } catch (IOException e) {
             Log.e(TAG, "Cannot read sampling rate from chosen file!");
             e.printStackTrace();
+            disconnect();
+            return false;
         }
-        sendConnected();
+
+        return true;
     }
 
-    private void connectMitBih() {
+    private boolean connectMitBih() {
         // load database record in seperate thread
-        mThread = new Thread(new Runnable() {
+        simThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 // get annotation filename
@@ -195,93 +149,33 @@ public class BleEcgSimulatedSensor extends DsSensor {
                     Log.e(TAG, "Error loading MIT-BIH sim file!");
                     return;
                 }
-
                 mSimPlotIter = 0;
-                sendConnected();
             }
 
         });
-        mThread.start();
+        simThread.start();
+        return true;
     }
 
-    /**
-     * Disconnects the Simulator
-     */
-    public void disconnect() {
-        super.disconnect();
-        if (getState() != SensorState.CONNECTED) {
-            return;
-        }
-        try {
-            mBufferedReader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        sendDisconnected();
-    }
-
-    /**
-     * Starts the Simulator
-     * <p/> New data will be received in a new {@link Thread}
-     */
-    public void startStreaming() {
-        Log.d(TAG, "start streaming");
-        switch (mType) {
+    @Override
+    protected void transmitData() {
+        switch (mSimType) {
             case DAILYHEART:
-                startDailyHeartStreaming();
+                transmitDailyHeartData();
                 break;
             case MIT_BIH:
-                startMitBihStreaming();
+                transmitMitBihData();
                 break;
         }
     }
 
-    public void startDailyHeartStreaming() {
-        if (getState() != SensorState.CONNECTED) {
-            return;
-        }
-        sendStartStreaming();
-        // receive data in new Thread
-        mThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                receiveDailyHeartData();
-            }
-        });
-        mThread.start();
-    }
+    private void transmitDailyHeartData() {
 
-    public void startMitBihStreaming() {
-        if (getState() != SensorState.CONNECTED) {
-            return;
-        }
-        sendStartStreaming();
-        // receive data in new Thread
-        mThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                receiveMitBihData();
-            }
-        });
-        mThread.start();
-    }
-
-    /**
-     * Stops the Simulator
-     */
-    public void stopStreaming() {
-        if (getState() != SensorState.STREAMING) {
-            return;
-        }
-        mThread.interrupt();
-        sendStopStreaming();
-        setState(SensorState.CONNECTED);
-    }
-
-    private void receiveDailyHeartData() {
+        int samplingInterval = (int) (1000d / this.getSamplingRate());
+        Log.d(TAG, "interval: " + samplingInterval + ", samplingrate: " + getSamplingRate());
 
         try {
-            SimpleStringSplitter splitter = new SimpleStringSplitter(mSeparator);
+            TextUtils.SimpleStringSplitter splitter = new TextUtils.SimpleStringSplitter(mSeparator);
             String line;
             // check if line contains recorded values
             int c = 0;
@@ -309,7 +203,7 @@ public class BleEcgSimulatedSensor extends DsSensor {
                     sendNewData(data);
                 }
 
-                Thread.sleep(4);
+                Thread.sleep(samplingInterval);
 
                 if (Thread.interrupted()) {
                     Log.e(TAG, "Thread interrupted!");
@@ -323,7 +217,7 @@ public class BleEcgSimulatedSensor extends DsSensor {
         }
     }
 
-    private void receiveMitBihData() {
+    private void transmitMitBihData() {
         try {
             // iterates through all values
             for (mSimPlotIter = 0; mSimPlotIter < mSimSignal.mValueList.getMaxSize(); mSimPlotIter++) {
@@ -395,7 +289,7 @@ public class BleEcgSimulatedSensor extends DsSensor {
                 times = new ArrayList<>((int) size);
 
                 // initialize string (line) splitter
-                SimpleStringSplitter splitter = new SimpleStringSplitter(',');
+                TextUtils.SimpleStringSplitter splitter = new TextUtils.SimpleStringSplitter(',');
                 String line;
 
                 // skip header lines
@@ -465,7 +359,7 @@ public class BleEcgSimulatedSensor extends DsSensor {
                 reader = new BufferedReader(new FileReader(fa));
 
                 // initialize string (line) buffer
-                splitter = new SimpleStringSplitter(' ');
+                splitter = new TextUtils.SimpleStringSplitter(' ');
 
                 // skip header lines
                 reader.readLine();
