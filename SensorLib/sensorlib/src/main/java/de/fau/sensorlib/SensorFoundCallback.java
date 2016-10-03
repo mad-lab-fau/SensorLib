@@ -7,6 +7,8 @@
  */
 package de.fau.sensorlib;
 
+import java.util.EnumSet;
+
 /**
  * Base class for all sensor discovery callback instances.
  */
@@ -16,6 +18,13 @@ public abstract class SensorFoundCallback {
      * @return true to continue scanning, false to cancel the scan.
      */
     public abstract boolean onKnownSensorFound(KnownSensor sensor);
+
+    public boolean onKnownSensorFound(KnownSensor sensor, int rssi) {
+        return true;
+    }
+
+    public void onSensorsSelected(EnumSet<DsSensor.HardwareSensor> selectedSensors) {
+    }
 
     /**
      * @param name    Name of the found sensor

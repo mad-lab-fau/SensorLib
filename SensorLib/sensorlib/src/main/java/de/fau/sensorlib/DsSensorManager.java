@@ -1,6 +1,6 @@
 /**
  * Copyright (C) 2016 Digital Sports Group, Friedrich-Alexander University Erlangen-Nuremberg (FAU).
- * <p>
+ * <p/>
  * This file is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. If you reuse
  * this code you have to keep or cite this comment.
@@ -12,7 +12,6 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.le.BluetoothLeScanner;
-import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanFilter;
 import android.bluetooth.le.ScanSettings;
 import android.content.Context;
@@ -39,6 +38,19 @@ public class DsSensorManager {
 
     private static final String TAG = DsSensorManager.class.getSimpleName();
 
+    public static final int REQUEST_ENABLE_BT = 0xBAAD;
+    public static final int REQUEST_PERMISSIONS = 0xF00D;
+
+    public static final int PERMISSIONS_MISSING = -1;
+
+    private static final String[] PERMISSIONS_BT_LE =
+            new String[]{
+                    Manifest.permission.BLUETOOTH,
+                    Manifest.permission.BLUETOOTH_ADMIN,
+                    Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+            };
+
     /**
      * method to list all available and connectable sensor within this framework.
      *
@@ -56,6 +68,7 @@ public class DsSensorManager {
         if (bta == null) {
             return sensorList;
         }
+
         Set<BluetoothDevice> pairedDevices = bta.getBondedDevices();
         // Get paired devices iterator
         // Loop over all paired devices
@@ -71,13 +84,14 @@ public class DsSensorManager {
         return sensorList;
     }
 
+
     /**
-     * @param sensorClass the type/class of sensor that should be looked for.
+     * @param sensor the type/class of sensor that should be looked for.
      * @return the first found sensor of the given class that can be connected to.
      */
-    public static KnownSensor getFirstConnectableSensor(KnownSensor sensorClass) {
+    public static KnownSensor getFirstConnectableSensor(KnownSensor sensor) {
         for (KnownSensor s : getConnectableSensors()) {
-            if (s.getClass() == sensorClass.getClass()) {
+            if (s.getClass() == sensor.getClass()) {
                 return s;
             }
         }
@@ -97,6 +111,7 @@ public class DsSensorManager {
         }
         return address;
     }
+
 
     /**
      * @param name name of the sensor to look for.
@@ -144,111 +159,119 @@ public class DsSensorManager {
         return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE);
     }
 
-
     /**
      * Tries to enable Bluetooth radio on this device.
      *
      * @param activity the current activity.
-     * @return the request code that can be used in onActivityResult for asynchronous feedback, or 0 if Bluetooth could not be enabled.
+     * @return the request code that can be used in onActivityResult for asynchronous feedback, or 0 if Bluetooth is already enabled.
      * @throws Exception
      */
     public static int enableBluetooth(Activity activity) throws Exception {
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-        if (adapter == null)
+        if (adapter == null) {
             throw new Exception("Bluetooth is not supported on this device.");
-        if (adapter.isEnabled())
+        }
+        if (adapter.isEnabled()) {
             return 0;
+        }
         Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-        int requestCode = 20541;
-        activity.startActivityForResult(enableBtIntent, requestCode);
-        return requestCode;
+        activity.startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        return REQUEST_ENABLE_BT;
     }
-
-    public static final int PERMISSIONS_MISSING = -1;
 
     /**
      * Checks whether the permissions required for BT-LE access were previously granted to the calling App (Android >=6). If not, they are requested.
      *
      * @param activity some App activity. Receives the user response callback (onRequestPermissionsResult).
-     * @return the ID that can be used to check for user response on the permission request (onRequestPermissionsResult).
+     * @return the request code that can be used to check for user response on the permission request (onRequestPermissionsResult),
+     * 0 if the permission does not need to be requested, or PERMISSIONS_MISSING if the permission should not be requested, but is missing.
      */
-    public static int checkBtLePermissions(Activity activity, boolean requestPermissions) {
+    public static int checkBtLePermissions(Activity activity, boolean requestPermissions) throws Exception {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             return 0;
         }
 
-        ArrayList<String> perms = new ArrayList<>(4);
-
-        int permissionCheck = ContextCompat.checkSelfPermission(activity, Manifest.permission.BLUETOOTH);
-        Log.d(TAG, "BLUETOOTH: " + (permissionCheck == PackageManager.PERMISSION_GRANTED));
-        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            perms.add(Manifest.permission.BLUETOOTH);
-            if (!requestPermissions)
-                return PERMISSIONS_MISSING;
+        if (!isBleSupported(activity)) {
+            throw new Exception("Bluetooth LE not supported!");
         }
 
-        permissionCheck = ContextCompat.checkSelfPermission(activity, Manifest.permission.BLUETOOTH_ADMIN);
-        Log.d(TAG, "BLUETOOTH_ADMIN: " + (permissionCheck == PackageManager.PERMISSION_GRANTED));
-        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            perms.add(Manifest.permission.BLUETOOTH_ADMIN);
-            if (!requestPermissions)
-                return PERMISSIONS_MISSING;
-        }
+        // Android SDK: An app must hold ACCESS_COARSE_LOCATION or ACCESS_FINE_LOCATION permission in order to get results.
+        // => one location permission is sufficient, check for that
+        boolean locationEnabled = false;
+        for (String permission : PERMISSIONS_BT_LE) {
+            boolean granted = (ContextCompat.checkSelfPermission(activity, permission)
+                    == PackageManager.PERMISSION_GRANTED);
+            Log.d(TAG, permission + ": " + granted);
 
-        permissionCheck = ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION);
-        Log.d(TAG, "ACCESS_COARSE_LOCATION: " + (permissionCheck == PackageManager.PERMISSION_GRANTED));
-        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            perms.add(Manifest.permission.ACCESS_COARSE_LOCATION);
-            if (!requestPermissions)
-                return PERMISSIONS_MISSING;
-        }
-
-        permissionCheck = ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION);
-        Log.d(TAG, "ACCESS_FINE_LOCATION: " + (permissionCheck == PackageManager.PERMISSION_GRANTED));
-        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
-            perms.add(Manifest.permission.ACCESS_FINE_LOCATION);
-            if (!requestPermissions)
-                return PERMISSIONS_MISSING;
-        }
-
-        int permissionCallbackId = 10562;
-        if (requestPermissions && perms.size() > 0) {
-            String[] sa = new String[perms.size()];
-            for (int i = 0; i < perms.size(); i++) {
-                sa[i] = perms.get(i);
+            if (Manifest.permission.ACCESS_COARSE_LOCATION.equals(permission) ||
+                    Manifest.permission.ACCESS_FINE_LOCATION.equals(permission)) {
+                locationEnabled |= granted;
             }
-            ActivityCompat.requestPermissions(activity, sa, permissionCallbackId);
-            return permissionCallbackId;
+
+            if (!granted) {
+                if (!requestPermissions && !locationEnabled) {
+                    return PERMISSIONS_MISSING;
+                } else if (requestPermissions) {
+                    ActivityCompat.requestPermissions(activity, new String[]{permission}, REQUEST_PERMISSIONS);
+                    return REQUEST_PERMISSIONS;
+                }
+            }
+        }
+
+        return 0;
+    }
+
+    public static int checkPermissions(Activity activity, String[] permissions, boolean requestPermissions) {
+        for (String permission : permissions) {
+            boolean granted = (ContextCompat.checkSelfPermission(activity, permission)
+                    == PackageManager.PERMISSION_GRANTED);
+            Log.d(TAG, permission + ": " + granted);
+
+            if (!granted) {
+                if (!requestPermissions) {
+                    return PERMISSIONS_MISSING;
+                } else {
+                    ActivityCompat.requestPermissions(activity, new String[]{permission}, REQUEST_PERMISSIONS);
+                    return REQUEST_PERMISSIONS;
+                }
+            }
         }
         return 0;
     }
 
-    private static Handler mBleScanHandler = new Handler();
+
+    private static Handler sBleScanHandler = new Handler();
     private static final long SCAN_PERIOD = 10500;
-    private static BluetoothLeScanner mBleScanner;
-    private static DsScanCallback mScanCallback;
+    private static BluetoothLeScanner sBleScanner;
+    private static DsScanCallback sScanCallback;
 
     /**
      * Cancels all running BLE discovery scans.
      */
     public static synchronized void cancelRunningScans() {
-        if (mScanCallback != null && mBleScanner != null) {
-            mBleScanner.stopScan(mScanCallback);
-            mScanCallback = null;
+        if (sScanCallback != null && sBleScanner != null) {
+            sBleScanner.stopScan(sScanCallback);
+            sScanCallback = null;
         }
     }
 
     /**
      * Search for BLE devices.
      *
+     * @param activity The calling activity
      * @param callback a callback implementation that receives notifications for found sensors.
      */
     public static void searchBleDevices(Activity activity, final SensorFoundCallback callback) throws Exception {
+
+        // check if Bluetooth is available (if not, it throws an exception) and enabled before scanning for Ble devices.
+        enableBluetooth(activity);
+
         if (checkBtLePermissions(activity, false) == PERMISSIONS_MISSING) {
             throw new Exception("The app does not have sufficient Android permissions to list available BLE devices.");
         }
-        mBleScanner = BluetoothAdapter.getDefaultAdapter().getBluetoothLeScanner();
-        if (mBleScanner == null) {
+
+        sBleScanner = BluetoothAdapter.getDefaultAdapter().getBluetoothLeScanner();
+        if (sBleScanner == null) {
             throw new Exception("BLE scanner unavailable.");
         }
 
@@ -261,62 +284,64 @@ public class DsSensorManager {
         // is an old scan still running? cancel it.
         cancelRunningScans();
         // create new scan callback
-        mScanCallback = new DsScanCallback(callback);
+        sScanCallback = new DsScanCallback(callback);
 
         // post a delayed runnable to stop the BLE scan after SCAN_PERIOD.
-        mBleScanHandler.postDelayed(new Runnable() {
+        sBleScanHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
                 Log.d(TAG, "...Stopping BLE scan.");
-                if (mScanCallback != null) {
-                    mBleScanner.stopScan(mScanCallback);
+                if (sScanCallback != null) {
+                    sBleScanner.stopScan(sScanCallback);
                 }
             }
         }, SCAN_PERIOD);
 
         // start the BLE scan
-        Log.d(TAG, "Starting BLE scan for " + SCAN_PERIOD / 1000 + "s ...");
-        mBleScanner.startScan(filters, settings, mScanCallback);
+        Log.d(TAG, "Starting BLE scan for " + SCAN_PERIOD / 1000 + " s ...");
+        sBleScanner.startScan(filters, settings, sScanCallback);
     }
 
-    public static void searchBleDeviceByNames(ScanCallback callback, String[] deviceNames) {
+    public static void searchBleDeviceByNames(final SensorFoundCallback callback, String[] deviceNames) {
         //Log.e(TAG, "Searching for BLE device...");
+
         List<ScanFilter> filterList = new ArrayList<>();
         for (String name : deviceNames) {
             filterList.add(new ScanFilter.Builder().setDeviceName(name).build());
         }
 
-        BluetoothLeScanner bleScanner;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            bleScanner = BluetoothAdapter.getDefaultAdapter().getBluetoothLeScanner();
-            if (bleScanner != null) {
-                bleScanner.startScan(filterList, new ScanSettings.Builder().build(), callback);
+            if (sBleScanner == null) {
+                sBleScanner = BluetoothAdapter.getDefaultAdapter().getBluetoothLeScanner();
+            }
+            if (sScanCallback == null) {
+                sScanCallback = new DsScanCallback(callback);
+            }
+
+            if (sBleScanner != null) {
+                sBleScanner.startScan(filterList, new ScanSettings.Builder().build(), sScanCallback);
             }
         }
     }
 
-    public static void searchBleDeviceByUUIDs(ScanCallback callback, UUID[] uuids) {
+    public static void searchBleDeviceByUUIDs(SensorFoundCallback callback, UUID[] uuids) {
         //Log.e(TAG, "Searching for BLE device...");
+
         List<ScanFilter> filterList = new ArrayList<>();
         for (UUID uuid : uuids) {
             filterList.add(new ScanFilter.Builder().setServiceUuid(new ParcelUuid(uuid)).build());
         }
 
-        BluetoothLeScanner bleScanner;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            bleScanner = BluetoothAdapter.getDefaultAdapter().getBluetoothLeScanner();
-            if (bleScanner != null) {
-                bleScanner.startScan(filterList, new ScanSettings.Builder().build(), callback);
+            if (sBleScanner == null) {
+                sBleScanner = BluetoothAdapter.getDefaultAdapter().getBluetoothLeScanner();
             }
-        }
-    }
+            if (sScanCallback == null) {
+                sScanCallback = new DsScanCallback(callback);
+            }
 
-    public static void cancelBleSearch(ScanCallback callback) {
-        BluetoothLeScanner bleScanner;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            bleScanner = BluetoothAdapter.getDefaultAdapter().getBluetoothLeScanner();
-            if (bleScanner != null) {
-                bleScanner.stopScan(callback);
+            if (sBleScanner != null) {
+                sBleScanner.startScan(filterList, new ScanSettings.Builder().build(), sScanCallback);
             }
         }
     }

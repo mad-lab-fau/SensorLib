@@ -48,10 +48,18 @@ public class DsScanCallback extends ScanCallback {
         KnownSensor s = KnownSensor.inferSensorClass(result.getDevice().getName(), result.getDevice().getAddress());
 
         boolean ret;
-        if (s != null)
-            ret = mSensorCallback.onKnownSensorFound(s);
-        else
+        if (s != null) {
+            // call this method for the DsSensorPickerFragment,
+            // because we need some information about the Bluetooth device
+            ret = mSensorCallback.onKnownSensorFound(s, result.getRssi());
+            // Logical OR because onKnownSensorFound(KnownSensor, BluetoothDevice)
+            // always returns true. If we should stop scanning, then this method returns
+            // false => ret == false.
+            ret &= mSensorCallback.onKnownSensorFound(s);
+        } else {
             ret = mSensorCallback.onUnknownSensorFound(result.getDevice().getName(), result.getDevice().getAddress());
+        }
+
         if (!ret) {
             DsSensorManager.cancelRunningScans();
         }
