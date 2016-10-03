@@ -1,0 +1,14 @@
+include ':app', ':sensorlib', 'sensorlibutils',
+        ':sls-simblee', 'sls-smartband2', 'sls-fitnessshirt',
+        'sls-shimmer', 'sls-smartwatch', 'sls-tek'
+
+project(':sensorlib').projectDir = new File('../../SensorLib/sensorlib')
+project(':sensorlibutils').projectDir = new File('../../SensorLib/sensorlibutils')
+//project(':sls-empatica').projectDir = new File('../../SensorLib/sls-empatica')
+project(':sls-fitnessshirt').projectDir = new File('../../SensorLib/sls-fitnessshirt')
+//project(':sls-myo').projectDir = new File('../../SensorLib/sls-myo')
+project(':sls-shimmer').projectDir = new File('../../SensorLib/sls-shimmer')
+project(':sls-simblee').projectDir = new File('../../SensorLib/sls-simblee')
+project(':sls-smartband2').projectDir = new File('../../SensorLib/sls-smartband2')
+project(':sls-smartwatch').projectDir = new File('../../SensorLib/sls-smartwatch')
+project(':sls-tek').projectDir = new File('../../SensorLib/sls-tek')
