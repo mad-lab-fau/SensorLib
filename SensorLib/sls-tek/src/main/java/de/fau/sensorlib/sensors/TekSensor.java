@@ -12,8 +12,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.util.Log;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
+import java.util.Arrays;
 import java.util.UUID;
 
 import de.fau.sensorlib.DsBleSensor;
@@ -26,6 +25,10 @@ import de.fau.sensorlib.dataframe.GyroDataFrame;
 import de.fau.sensorlib.dataframe.MagDataFrame;
 import de.fau.sensorlib.dataframe.QuaternionDataFrame;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
+
+import static android.bluetooth.BluetoothGattCharacteristic.FORMAT_SINT16;
+import static android.bluetooth.BluetoothGattCharacteristic.FORMAT_SINT32;
+import static android.bluetooth.BluetoothGattCharacteristic.FORMAT_SINT8;
 
 /**
  * Implementation of the Bosch TEK sensor system.
@@ -273,22 +276,20 @@ public class TekSensor extends DsBleSensor {
     @Override
     protected boolean onNewCharacteristicValue(BluetoothGattCharacteristic characteristic, boolean isChange) {
         SensorDataFrame df = null;
-        byte[] value = characteristic.getValue();
-
         //Log.d(TAG, "char value: " + characteristic.getUuid().toString() + " :: " + value);
 
         // Extract the dataframe from the raw byte data
         if (TEK_CHARACTERISTIC_INERTIAL_SENSOR.equals(characteristic.getUuid())) {
-            df = extractDataFrameInertial(value);
+            df = extractDataFrameInertial(characteristic);
         }
         if (TEK_CHARACTERISTIC_FUSION_SENSOR.equals(characteristic.getUuid())) {
-            df = extractDataFrameFusion(value);
+            df = extractDataFrameFusion(characteristic);
         }
         if (TEK_CHARACTERISTIC_ENVIRONMENTAL_SENSOR.equals(characteristic.getUuid())) {
-            df = extractDataFrameEnvironmental(value);
+            df = extractDataFrameEnvironmental(characteristic);
         }
         if (TEK_CHARACTERISTIC_3D_FUSION.equals(characteristic.getUuid())) {
-            df = extractDataFrame3dFusion(value);
+            df = extractDataFrame3dFusion(characteristic);
         }
 
         // If we could extract a DF, send it out and return from this method.
@@ -324,27 +325,50 @@ public class TekSensor extends DsBleSensor {
         return super.shouldEnableNotification(c);
     }
 
-    private double convertAccelerometerValue(short value) {
+    private double convertAccelerometerValue(int value) {
         return value * 0.0000625d;
     }
 
-    private double convertGyroValue(short value) {
+    private double convertGyroValue(int value) {
         return value / 16.4d;
     }
 
-    private double convertMagValue(short value) {
+    private double convertMagValue(int value) {
         return value * 0.0625d;
     }
 
 
-    private SensorDataFrame extractDataFrameInertial(byte[] data) {
-        if (data.length == 0)
+    private SensorDataFrame extractDataFrameInertial(BluetoothGattCharacteristic characteristic) {
+        if (characteristic.getValue().length == 0) {
             return null;
+        }
 
         TekImuDataFrame df = new TekImuDataFrame(this, System.currentTimeMillis());
 
-        // TODO: replace ByteBuffer
+        // TODO: replaced ByteBuffer
+        df.mCounter = (characteristic.getIntValue(FORMAT_SINT8, 0) & 0xFF);
+        int counter = 2;
+        df.mAx = convertAccelerometerValue(characteristic.getIntValue(FORMAT_SINT16, counter));
+        counter += 2;
+        df.mAy = convertAccelerometerValue(characteristic.getIntValue(FORMAT_SINT16, counter));
+        counter += 2;
+        df.mAz = convertAccelerometerValue(characteristic.getIntValue(FORMAT_SINT16, counter));
+        counter += 2;
 
+        df.mGx = convertGyroValue(characteristic.getIntValue(FORMAT_SINT16, counter));
+        counter += 2;
+        df.mGy = convertGyroValue(characteristic.getIntValue(FORMAT_SINT16, counter));
+        counter += 2;
+        df.mGz = convertGyroValue(characteristic.getIntValue(FORMAT_SINT16, counter));
+        counter += 2;
+
+        df.mMx = convertMagValue(characteristic.getIntValue(FORMAT_SINT16, counter));
+        counter += 2;
+        df.mMy = convertMagValue(characteristic.getIntValue(FORMAT_SINT16, counter));
+        counter += 2;
+        df.mMz = convertMagValue(characteristic.getIntValue(FORMAT_SINT16, counter));
+
+        /*
         ByteBuffer bb = ByteBuffer.wrap(data);
         bb.order(ByteOrder.BIG_ENDIAN);
 
@@ -362,19 +386,37 @@ public class TekSensor extends DsBleSensor {
         df.mMx = convertMagValue(bb.getShort(14));
         df.mMy = convertMagValue(bb.getShort(16));
         df.mMz = convertMagValue(bb.getShort(18));
+        */
 
         return df;
     }
 
-    private SensorDataFrame extractDataFrameFusion(byte[] data) {
-        if (data.length == 0)
+    private SensorDataFrame extractDataFrameFusion(BluetoothGattCharacteristic characteristic) {
+        if (characteristic.getValue().length == 0) {
             return null;
+        }
 
         TekFusionDataFrame df = new TekFusionDataFrame(this, System.currentTimeMillis());
 
         // TODO: replace ByteBuffer
+        df.mCounter = (characteristic.getIntValue(FORMAT_SINT8, 0) & 0xFF);
+        int counter = 2;
+        df.mQw = characteristic.getIntValue(FORMAT_SINT16, counter);
+        counter += 2;
+        df.mQx = characteristic.getIntValue(FORMAT_SINT16, counter);
+        counter += 2;
+        df.mQy = characteristic.getIntValue(FORMAT_SINT16, counter);
+        counter += 2;
+        df.mQz = characteristic.getIntValue(FORMAT_SINT16, counter);
 
-        ByteBuffer bb = ByteBuffer.wrap(data);
+        counter = 11;
+        df.mAx = convertAccelerometerValue(characteristic.getIntValue(FORMAT_SINT16, counter));
+        counter += 2;
+        df.mAy = convertAccelerometerValue(characteristic.getIntValue(FORMAT_SINT16, counter));
+        counter += 2;
+        df.mAz = convertAccelerometerValue(characteristic.getIntValue(FORMAT_SINT16, counter));
+
+        /*ByteBuffer bb = ByteBuffer.wrap(data);
         bb.order(ByteOrder.BIG_ENDIAN);
 
         byte in = data[0]; // whatever goes here
@@ -388,19 +430,27 @@ public class TekSensor extends DsBleSensor {
         df.mAx = convertAccelerometerValue(bb.getShort(11));
         df.mAy = convertAccelerometerValue(bb.getShort(13));
         df.mAz = convertAccelerometerValue(bb.getShort(15));
+        */
 
         return df;
     }
 
-    private SensorDataFrame extractDataFrameEnvironmental(byte[] data) {
-        if (data.length == 0)
+    private SensorDataFrame extractDataFrameEnvironmental(BluetoothGattCharacteristic characteristic) {
+        if (characteristic.getValue().length == 0) {
             return null;
+        }
 
         TekAmbientDataFrame df = new TekAmbientDataFrame(this, System.currentTimeMillis());
 
         // TODO: replace ByteBuffer
+        df.mCounter = (characteristic.getIntValue(FORMAT_SINT8, 0) & 0xFF);
+        df.mTemp = ((float) characteristic.getIntValue(FORMAT_SINT16, 2)) / 100.0f;
+        df.mHumidity = ((float) characteristic.getIntValue(FORMAT_SINT16, 5)) / 100.0f;
+        df.mPressure = ((float) characteristic.getIntValue(FORMAT_SINT32, 8)) / 100.0f;
+        df.mNoise = characteristic.getIntValue(FORMAT_SINT16, 13) & 0xFFFF;
+        df.mLight = characteristic.getIntValue(FORMAT_SINT32, 16);
 
-        ByteBuffer bb = ByteBuffer.wrap(data);
+        /*ByteBuffer bb = ByteBuffer.wrap(data);
         bb.order(ByteOrder.BIG_ENDIAN);
 
         byte in = data[0]; // whatever goes here
@@ -410,26 +460,30 @@ public class TekSensor extends DsBleSensor {
         df.mHumidity = bb.getShort(5) / 100f;
         df.mPressure = bb.getInt(8) / 100f;
         df.mNoise = bb.getShort(13) & 0xffff;
-        df.mLight = bb.getInt(16);
+        df.mLight = bb.getInt(16);*/
 
         return df;
     }
 
-    private SensorDataFrame extractDataFrame3dFusion(byte[] data) {
-        if (data.length == 0)
+    private SensorDataFrame extractDataFrame3dFusion(BluetoothGattCharacteristic characteristic) {
+        if (characteristic.getValue().length == 0) {
             return null;
+        }
 
         TekImuDataFrame df = new TekImuDataFrame(this, System.currentTimeMillis());
 
         // TODO: replace ByteBuffer
+        df.mCounter = characteristic.getIntValue(FORMAT_SINT8, 0);
+        Log.d(TAG, "3dFusion (" + df.mCounter + "): " + Arrays.toString(characteristic.getValue()));
 
-        ByteBuffer bb = ByteBuffer.wrap(data);
+        /*ByteBuffer bb = ByteBuffer.wrap(data);
         bb.order(ByteOrder.BIG_ENDIAN);
 
         byte in = data[0]; // whatever goes here
         df.mCounter = in & 0xFF;
 
         Log.d(TAG, "3dFusion (" + df.mCounter + "): " + data[10] + "; " + data[11] + "; " + data[12] + "; " + data[13]);
+        */
 
         return df;
     }

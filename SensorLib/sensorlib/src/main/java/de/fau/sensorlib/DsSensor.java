@@ -514,7 +514,6 @@ public abstract class DsSensor extends SensorInfo {
     }
 
 
-    // TODO: Not abstract anymore? In most of the cases, mDeviceClass.getAvailableSensors() has to be called
     /**
      * Informs about all (internal) existing/provided hardware sensors for this DsSensor. This has to be implemented by all sensor implementations.
      *
