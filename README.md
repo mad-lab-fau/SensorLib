@@ -1,6 +1,9 @@
 # SensorLib
 The SensorLib is a Java-based Android library that provides an easy-to-use interface to access various retail and development sensor systems in a unified way.
 
+## Structure
+The SensorLib is composed of the main library ("sensorlib") and multiple submodules, one for each sensor, each starting with the tag "sls-" (e.g. "sls-shimmer", "sls-tek" or "sls-empatica").
+
 ## Compiling the library
 The library should be compiled against the latest Android SDK and should work right out of the box. For some sensors an additional external library (SDK) is necessary. You can usually download these from the sensor's specific SDK website.
 
@@ -9,7 +12,28 @@ Right now, the following external libraries are required to compile all sensor m
 - empalink-2.0.aar from the official Empatica SDK website (required by sls-empatica)
 
 ## Minimal example
-Using the SensorLib is very easy, insert the following code into your app activity for a minimal working example:
+Using the SensorLib is very easy.
+
+First, you have to include the sensorlib.aar and the respective sensor-submodule you want to use into your build.gradle file. To do this, just add the following line to your build.gradle:
+```
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+}
+
+...
+
+dependencies {
+    ...
+    compile project(path: ':sensorlib')
+    compile project(':sls-tek')
+    ...
+}
+```
+
+
+Afterwards, just insert the following code into your app activity for a minimal working example:
 ```
 InternalSensor sensor = new InternalSensor(this, new SensorDataProcessor() {
     @Override

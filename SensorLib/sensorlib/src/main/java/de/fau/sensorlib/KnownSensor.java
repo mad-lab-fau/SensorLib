@@ -1,13 +1,4 @@
-/**
- * Copyright (C) 2016 Digital Sports Group, Friedrich-Alexander University Erlangen-Nuremberg (FAU).
- * <p>
- * This file is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. If you reuse
- * this code you have to keep or cite this comment.
- */
 package de.fau.sensorlib;
-
-import android.bluetooth.BluetoothDevice;
 
 /**
  * List of all known sensors implemented in the SensorLib with a descriptive and identifying String for each.
@@ -46,23 +37,6 @@ public enum KnownSensor {
     }
 
     /**
-     * @return the device name.
-     */
-    public String getDeviceName() {
-        return mDeviceName;
-    }
-
-    /**
-     * @return the address of a given implementation identified by this enum instance.
-     */
-    public String getDeviceAddress() {
-        return mDeviceAddress;
-    }
-
-    private String mDeviceName;
-    private String mDeviceAddress;
-
-    /**
      * Infers the most likely sensor class based on the device name.
      *
      * @param deviceName    the device name of the sensor/device.
@@ -77,8 +51,6 @@ public enum KnownSensor {
                 if (deviceName == null || deviceName.isEmpty())
                     continue;
                 if (deviceName.contains(str)) {
-                    s.mDeviceName = deviceName;
-                    s.mDeviceAddress = deviceAddress;
                     return s;
                 }
             }

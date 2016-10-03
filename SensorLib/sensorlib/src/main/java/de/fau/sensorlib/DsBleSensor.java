@@ -213,8 +213,8 @@ public class DsBleSensor extends DsSensor {
         super(context, deviceName, deviceAddress, dataHandler);
     }
 
-    public DsBleSensor(Context context, KnownSensor knownSensor, SensorDataProcessor dataHandler) {
-        this(context, knownSensor.getDeviceName(), knownSensor.getDeviceAddress(), dataHandler);
+    public DsBleSensor(Context context, SensorInfo knownSensor, SensorDataProcessor dataHandler) {
+        this(context, knownSensor.getName(), knownSensor.getDeviceAddress(), dataHandler);
     }
 
     /**

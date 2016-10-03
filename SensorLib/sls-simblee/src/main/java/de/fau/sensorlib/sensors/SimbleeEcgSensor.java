@@ -30,8 +30,8 @@ import java.util.UUID;
 
 import de.fau.sensorlib.DsSensor;
 import de.fau.sensorlib.DsSensorManager;
-import de.fau.sensorlib.KnownSensor;
 import de.fau.sensorlib.SensorDataProcessor;
+import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.EcgDataFrame;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
 
@@ -200,7 +200,7 @@ public class SimbleeEcgSensor extends DsSensor {
         }
     }
 
-    public SimbleeEcgSensor(Context context, KnownSensor knownSensor, SensorDataProcessor dataHandler) {
+    public SimbleeEcgSensor(Context context, SensorInfo knownSensor, SensorDataProcessor dataHandler) {
         super(context, knownSensor, dataHandler);
     }
 

@@ -17,7 +17,7 @@ public abstract class SensorFoundCallback {
      * @param sensor the KnownSensor that was found.
      * @return true to continue scanning, false to cancel the scan.
      */
-    public abstract boolean onKnownSensorFound(KnownSensor sensor);
+    public abstract boolean onKnownSensorFound(SensorInfo sensor);
 
     public boolean onKnownSensorFound(KnownSensor sensor, int rssi) {
         return true;

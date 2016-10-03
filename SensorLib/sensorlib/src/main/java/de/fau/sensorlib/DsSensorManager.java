@@ -56,12 +56,12 @@ public class DsSensorManager {
      *
      * @return list of available sensor or null
      */
-    public static List<KnownSensor> getConnectableSensors() {
+    public static List<SensorInfo> getConnectableSensors() {
         // Create sensor list
-        ArrayList<KnownSensor> sensorList = new ArrayList<>();
+        ArrayList<SensorInfo> sensorList = new ArrayList<>();
 
         // Add internal sensor
-        sensorList.add(KnownSensor.INTERNAL);
+        sensorList.add(SensorInfo.ANDROID_DEVICE_SENSORS);
 
         // Search for Bluetooth sensors
         BluetoothAdapter bta = BluetoothAdapter.getDefaultAdapter();
@@ -74,8 +74,17 @@ public class DsSensorManager {
         // Loop over all paired devices
         for (BluetoothDevice device : pairedDevices) {
             // Get next device
-            KnownSensor sensor = KnownSensor.inferSensorClass(device.getName(), device.getAddress());
+            SensorInfo sensor = new SensorInfo(device.getName(), device.getAddress());
             if (sensor != null) {
+                // check if it is already in our list
+                /*boolean in = false;
+                for (SensorInfo s : sensorList) {
+                    if (s.getDeviceAddress() != null && sensor.getDeviceAddress() != null && s.getDeviceAddress().equals(sensor.getDeviceAddress())) {
+                        in = true;
+                        break;
+                    }
+                }
+                if (!in)*/
                 sensorList.add(sensor);
             }
         }
@@ -89,9 +98,9 @@ public class DsSensorManager {
      * @param sensor the type/class of sensor that should be looked for.
      * @return the first found sensor of the given class that can be connected to.
      */
-    public static KnownSensor getFirstConnectableSensor(KnownSensor sensor) {
-        for (KnownSensor s : getConnectableSensors()) {
-            if (s.getClass() == sensor.getClass()) {
+    public static SensorInfo getFirstConnectableSensor(SensorInfo sensorInfo) {
+        for (SensorInfo s : getConnectableSensors()) {
+            if (s.getDeviceClass() == sensorInfo) {
                 return s;
             }
         }
@@ -104,10 +113,10 @@ public class DsSensorManager {
      * @return a human readable name (if available) for a given device address or the address string if a name is not available.
      */
     public static String getNameForDeviceAddress(String address) {
-        List<KnownSensor> sensors = getConnectableSensors();
-        for (KnownSensor s : sensors) {
+        List<SensorInfo> sensors = getConnectableSensors();
+        for (SensorInfo s : sensors) {
             if (s.getDeviceAddress().equals(address))
-                return s.getDeviceName();
+                return s.getName();
         }
         return address;
     }
@@ -118,9 +127,9 @@ public class DsSensorManager {
      * @return the address of the first sensor where the given name matches the sensor name exactly. Returns <code>null</code> if no matching sensor was found.
      */
     public static String findFirstMatchingAddressForName(String name) {
-        List<KnownSensor> sensors = getConnectableSensors();
-        for (KnownSensor s : sensors) {
-            if (s.getDeviceName().equals(name))
+        List<SensorInfo> sensors = getConnectableSensors();
+        for (SensorInfo s : sensors) {
+            if (s.getName().equals(name))
                 return s.getDeviceAddress();
         }
         return null;

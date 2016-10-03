@@ -10,18 +10,16 @@ package de.fau.sensorlib.sensors;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.content.Context;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.util.Log;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.UUID;
 
 import de.fau.sensorlib.DsBleSensor;
 import de.fau.sensorlib.DsSensor;
-import de.fau.sensorlib.KnownSensor;
+import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.dataframe.AccelDataFrame;
 import de.fau.sensorlib.dataframe.AmbientDataFrame;
@@ -243,8 +241,8 @@ public class TEK extends DsBleSensor {
      * @param sensor      KnownSensor to connect to, is reported back by BLE scan iteration
      * @param dataHandler a SensorDataProcessor instance that receives notifcations of new data, etc.
      */
-    public TEK(Context context, KnownSensor sensor, SensorDataProcessor dataHandler) {
-        this(context, sensor.getDeviceName(), sensor.getDeviceAddress(), dataHandler);
+    public TEK(Context context, SensorInfo sensor, SensorDataProcessor dataHandler) {
+        this(context, sensor.getName(), sensor.getDeviceAddress(), dataHandler);
     }
 
     /**

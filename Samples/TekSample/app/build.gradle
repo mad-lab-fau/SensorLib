@@ -32,4 +32,5 @@ dependencies {
     compile(name: 'androidplot-core-release', ext: 'aar')
     compile(name: 'sensorlib-debug', ext: 'aar')
     compile(name: 'sls-tek-debug', ext: 'aar')
+    compile(name: 'sls-shimmer-debug', ext: 'aar')
 }
