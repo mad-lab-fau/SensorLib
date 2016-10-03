@@ -1,6 +1,6 @@
 /**
  * Copyright (C) 2015-2016 Digital Sports Group, Friedrich-Alexander University Erlangen-Nuremberg (FAU).
- * <p>
+ * <p/>
  * This file is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. If you reuse
  * this code you have to keep or cite this comment.
@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -192,6 +191,7 @@ public class BleEcgSensor extends DsSensor {
             super(sensor, timestamp);
             this.ecg = ecg;
             this.timestamp = timestamp;
+            this.label = label;
         }
 
         @Override
@@ -256,12 +256,6 @@ public class BleEcgSensor extends DsSensor {
         sendStopStreaming();
     }
 
-    @Override
-    protected EnumSet<HardwareSensor> providedSensors() {
-        return EnumSet.of(
-                HardwareSensor.ECG);
-    }
-
     /**
      * Enables the specific ECG device
      *
@@ -313,7 +307,7 @@ public class BleEcgSensor extends DsSensor {
      * Reads the characteristics of the specific ECG device
      *
      * @param gatt           GATT client invoked
-     * @param descriptor
+     * @param descriptor     GATT descriptor
      * @param characteristic Characteristic that was written to the associated remote device
      */
     private void readEcgSensor(BluetoothGatt gatt, BluetoothGattDescriptor descriptor,

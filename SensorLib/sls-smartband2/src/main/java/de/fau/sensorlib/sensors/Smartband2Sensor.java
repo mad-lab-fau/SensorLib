@@ -11,8 +11,6 @@ import android.content.Context;
 import android.os.Handler;
 
 import de.fau.sensorlib.DsBleSensor;
-import de.fau.sensorlib.DsSensor;
-import de.fau.sensorlib.KnownSensor;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorInfo;
 
@@ -35,7 +33,7 @@ public class Smartband2Sensor extends DsBleSensor {
 
     @Override
     public boolean connect() throws Exception {
-        useHardwareSensor(DsSensor.HardwareSensor.HEART_RATE);
+        useHardwareSensor(HardwareSensor.HEART_RATE);
         return super.connect();
     }
 

@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.EnumSet;
 
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SimulatedSensor;
@@ -18,10 +19,14 @@ import de.fau.shiftlist.ShiftListDouble;
 import de.fau.shiftlist.ShiftListLong;
 
 /**
- * Created by Robert on 23.09.16.
+ * Sensor simulator that simulates both pre-recorded DailyHeart ECG data or data
+ * from the MIT-BIH-Arrhythmia database.
  */
 public class BleEcgSimulatedSensor extends SimulatedSensor {
 
+    /**
+     * Line separator
+     */
     private static final char mSeparator = '\n';
     private static final String mHeader = "samplingrate";
 
@@ -61,6 +66,7 @@ public class BleEcgSimulatedSensor extends SimulatedSensor {
 
     public BleEcgSimulatedSensor(Context context, String deviceName, SensorDataProcessor dataHandler, String fileName, Simulator simType, double samplingRate, boolean liveMode) {
         super(context, deviceName, dataHandler, fileName, samplingRate, liveMode);
+        mSigFileName = fileName;
         mSimType = simType;
     }
 
@@ -225,7 +231,7 @@ public class BleEcgSimulatedSensor extends SimulatedSensor {
                 BleEcgSensor.BleEcgDataFrame data =
                         new BleEcgSensor.BleEcgDataFrame(this, mSimSignal.mTimeList.get(mSimPlotIter),
                                 mSimSignal.mValueList.get(mSimPlotIter),
-                                (char) mSimSignal.labels.get((int) mSimSignal.mTimeList.get(mSimPlotIter).intValue()));
+                                (char) mSimSignal.labels.get(mSimSignal.mTimeList.get(mSimPlotIter).intValue()));
                 sendNewData(data);
                 Thread.sleep(2, 777777);
             }
@@ -399,5 +405,11 @@ public class BleEcgSimulatedSensor extends SimulatedSensor {
 
             return SensorState.CONNECTED;
         }
+    }
+
+    @Override
+    protected EnumSet<HardwareSensor> providedSensors() {
+        // Overrides hardcoded value from KnownSensor
+        return EnumSet.of(HardwareSensor.ECG);
     }
 }

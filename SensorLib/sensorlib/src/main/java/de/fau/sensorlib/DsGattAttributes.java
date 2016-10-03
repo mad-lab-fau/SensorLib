@@ -13,30 +13,27 @@ import java.util.UUID;
  */
 public class DsGattAttributes {
 
-    public static class BodySenorLocation {
-        public static final int OTHER = 0;
-        public static final int CHEST = 1;
-        public static final int WRIST = 2;
-        public static final int FINGER = 3;
-        public static final int HAND = 4;
-        public static final int EAR_LOBE = 5;
-        public static final int FOOT = 6;
+    public enum BodySenorLocation {
+        OTHER("Other"),
+        CHEST("Chest"),
+        WRIST("Wrist"),
+        FINGER("Finger"),
+        HAND("Hand"),
+        EAR_LOBE("Ear lobe"),
+        FOOT("Foot");
 
-        private static HashMap<Integer, String> locationMap = new HashMap<>();
+        private String mLocation;
 
-        static {
-            locationMap.put(OTHER, "Other");
-            locationMap.put(CHEST, "Chest");
-            locationMap.put(WRIST, "Wrist");
-            locationMap.put(FINGER, "Finger");
-            locationMap.put(HAND, "Hand");
-            locationMap.put(EAR_LOBE, "Ear lobe");
-            locationMap.put(FOOT, "Foot");
+        BodySenorLocation(String location) {
+            mLocation = location;
         }
 
-        public static String getLocation(int identifier) {
-            String location = locationMap.get(identifier);
-            return (location == null) ? "Unknown" : location;
+        public static String getLocation(BodySenorLocation location) {
+            return (location == null) ? "Unknown" : location.mLocation;
+        }
+
+        public static BodySenorLocation inferBodySensorLocation(int location) {
+            return BodySenorLocation.values()[location];
         }
     }
 

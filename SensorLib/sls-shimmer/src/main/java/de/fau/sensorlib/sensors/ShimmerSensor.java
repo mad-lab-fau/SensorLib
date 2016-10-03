@@ -18,7 +18,6 @@ import com.shimmerresearch.driver.ObjectCluster;
 import com.shimmerresearch.driver.Shimmer;
 
 import java.util.Collection;
-import java.util.EnumSet;
 
 import de.fau.sensorlib.DsSensor;
 import de.fau.sensorlib.DsSensorManager;
@@ -242,15 +241,6 @@ public class ShimmerSensor extends DsSensor {
         mInternalHandler = new ShimmerMessageHandler();
         shimmer = new Shimmer( context, mInternalHandler, myName, mSamplingRate, accelRange, gsrRange, setEnabledSensors, continousSync );
     }*/
-
-    @Override
-    protected EnumSet<HardwareSensor> providedSensors() {
-        return EnumSet.of(
-                HardwareSensor.ACCELEROMETER,
-                HardwareSensor.GYROSCOPE,
-                HardwareSensor.ECG,
-                HardwareSensor.EMG);
-    }
 
     public int getShimmerState() {
         return shimmer.getShimmerState();

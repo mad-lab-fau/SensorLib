@@ -24,7 +24,6 @@ import java.io.FileWriter;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.EnumSet;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -270,11 +269,6 @@ public class SimbleeEcgSensor extends DsSensor {
         }
         mBluetoothGatt.disconnect();
         sendStopStreaming();
-    }
-
-    @Override
-    protected EnumSet<HardwareSensor> providedSensors() {
-        return EnumSet.of(HardwareSensor.ECG, HardwareSensor.ACCELEROMETER);
     }
 
     /**

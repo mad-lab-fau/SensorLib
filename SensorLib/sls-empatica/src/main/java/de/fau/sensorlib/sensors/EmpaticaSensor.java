@@ -239,7 +239,9 @@ public class EmpaticaSensor extends DsSensor {
 
         @Override
         public void didReceiveBatteryLevel(float level, double timestamp) {
-            sendNewData(new SimpleDataFrame(this.getSensor(), timestamp * EMPA_TIMESTAMP_TO_MILLISECONDS, 4, level));
+            // moved to getBatteryLevel()
+            //sendNewData(new SimpleDataFrame(this.getSensor(), timestamp * EMPA_TIMESTAMP_TO_MILLISECONDS, 4, level));
+            mBatteryLevel = (int) level;
         }
     }
 
@@ -292,14 +294,11 @@ public class EmpaticaSensor extends DsSensor {
         sendStopStreaming();
     }
 
-    @Override
-    protected EnumSet<HardwareSensor> providedSensors() {
-        return EnumSet.of(
-                HardwareSensor.ACCELEROMETER,
-                HardwareSensor.BLOOD_VOLUME_PRESSURE,
-                HardwareSensor.GALVANIC_SKIN_RESPONSE,
-                HardwareSensor.HEART_RATE);
-    }
+    private int mBatteryLevel;
 
+    @Override
+    public int getBatteryLevel() {
+        return mBatteryLevel;
+    }
 
 }

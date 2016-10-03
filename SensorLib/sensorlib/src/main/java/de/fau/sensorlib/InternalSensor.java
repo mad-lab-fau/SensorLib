@@ -8,19 +8,20 @@
 package de.fau.sensorlib;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-
-import java.util.EnumSet;
+import android.os.BatteryManager;
 
 import de.fau.sensorlib.dataframe.AccelDataFrame;
 import de.fau.sensorlib.dataframe.AmbientDataFrame;
 import de.fau.sensorlib.dataframe.GyroDataFrame;
+import de.fau.sensorlib.dataframe.MagDataFrame;
 import de.fau.sensorlib.dataframe.OrientationDataFrame;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
-import de.fau.sensorlib.dataframe.MagDataFrame;
 
 /**
  * Implementation of the internal/hardware sensors of the Android device.
@@ -211,19 +212,18 @@ public class InternalSensor extends DsSensor implements SensorEventListener {
      * @param dataHandler method to provide unified data handling
      */
     public InternalSensor(Context context, SensorDataProcessor dataHandler) {
-        super(context, "Internal", "n/a", dataHandler);
+        super(context, "<Internal>", "n/a", dataHandler);
     }
 
     @Override
-    protected EnumSet<HardwareSensor> providedSensors() {
-        return EnumSet.of(
-                HardwareSensor.ACCELEROMETER,
-                HardwareSensor.GYROSCOPE,
-                HardwareSensor.MAGNETOMETER,
-                HardwareSensor.ORIENTATION,
-                HardwareSensor.LIGHT,
-                HardwareSensor.PRESSURE,
-                HardwareSensor.TEMPERATURE);
+    public int getBatteryLevel() {
+        Intent batteryIntent = mContext.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        if (batteryIntent == null) {
+            return 0;
+        }
+        int batteryLevel = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
+        int batteryScale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, 1);
+        return (int) (((float) batteryLevel / batteryScale) * 100.0f);
     }
 
     @Override
@@ -245,33 +245,33 @@ public class InternalSensor extends DsSensor implements SensorEventListener {
 
         mSensorManager = (SensorManager) super.mContext.getSystemService(Context.SENSOR_SERVICE);
         if (mSelectedHwSensors.contains(HardwareSensor.ACCELEROMETER)) {
-            Sensor sensorAcc = this.mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+            Sensor sensorAcc = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
             mSensorManager.registerListener(this, sensorAcc, samplingRate);
         }
         if (mSelectedHwSensors.contains(HardwareSensor.ORIENTATION)) {
-            Sensor sensorGrav = this.mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
-            Sensor sensorMag = this.mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+            Sensor sensorGrav = mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
+            Sensor sensorMag = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
             mSensorManager.registerListener(this, sensorGrav, samplingRate);
             mSensorManager.registerListener(this, sensorMag, samplingRate);
         }
         if (mSelectedHwSensors.contains(HardwareSensor.GYROSCOPE)) {
-            Sensor sensorGyro = this.mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+            Sensor sensorGyro = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
             mSensorManager.registerListener(this, sensorGyro, samplingRate);
         }
         if (mSelectedHwSensors.contains(HardwareSensor.MAGNETOMETER)) {
-            Sensor sensorMag = this.mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+            Sensor sensorMag = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
             mSensorManager.registerListener(this, sensorMag, samplingRate);
         }
         if (mSelectedHwSensors.contains(HardwareSensor.LIGHT)) {
-            Sensor sensorLight = this.mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+            Sensor sensorLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
             mSensorManager.registerListener(this, sensorLight, samplingRate);
         }
         if (mSelectedHwSensors.contains(HardwareSensor.PRESSURE)) {
-            Sensor sensorPress = this.mSensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE);
+            Sensor sensorPress = mSensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE);
             mSensorManager.registerListener(this, sensorPress, samplingRate);
         }
         if (mSelectedHwSensors.contains(HardwareSensor.TEMPERATURE)) {
-            Sensor sensorTemp = this.mSensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE);
+            Sensor sensorTemp = mSensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE);
             mSensorManager.registerListener(this, sensorTemp, samplingRate);
         }
 

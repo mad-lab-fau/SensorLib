@@ -33,7 +33,7 @@ public class DsBleSensor extends DsSensor {
     /**
      * Sensors available on the BLE device after discovery. Not available on class instantiation.
      */
-    EnumSet<HardwareSensor> mAvailableSensors = EnumSet.noneOf(HardwareSensor.class);
+    EnumSet<HardwareSensor> mAvailableSensors = mDeviceClass.getAvailableSensors();
 
     /**
      * Bluetooth adapter.
@@ -55,13 +55,22 @@ public class DsBleSensor extends DsSensor {
     private String mFirmwareRevision;
     private String mSoftwareRevision;
     private long mSensorSystemID;
-    private byte mBodyLocation;
+    private DsGattAttributes.BodySenorLocation mBodyLocation;
 
     /**
      * 0-100 (%).
      */
     private int mBatteryLevel;
+    private boolean mHasBatteryMeasurement = false;
 
+
+    @Override
+    public boolean hasBatteryMeasurement() {
+        // Overrides hardcoded value from KnownSensor
+        return mHasBatteryMeasurement;
+    }
+
+    @Override
     public int getBatteryLevel() {
         return mBatteryLevel;
     }
@@ -226,7 +235,8 @@ public class DsBleSensor extends DsSensor {
         // First we check conditions that are regularly encountered (whenever values change)
         if (DsGattAttributes.BATTERY_LEVEL.equals(characteristic.getUuid())) {
             mBatteryLevel = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0);
-            //mBatteryLevel = DsGattAttributes.valueToInt8(characteristic);
+            // Once battery level was read it means that battery measurement is available
+            mHasBatteryMeasurement = true;
             Log.d(TAG, "Battery level: " + mBatteryLevel);
         } else if (DsGattAttributes.HEART_RATE_MEASUREMENT.equals(characteristic.getUuid())) {
             BleHeartRateMeasurement hrm = new BleHeartRateMeasurement(characteristic, this);
@@ -240,29 +250,24 @@ public class DsBleSensor extends DsSensor {
         // the following are more or less one-time reads
         else if (DsGattAttributes.DEVICE_NAME.equals(characteristic.getUuid())) {
             mName = characteristic.getStringValue(0);
-            //mName = DsGattAttributes.valueToString(characteristic);
             Log.d(TAG, "Name: " + mName);
         } else if (DsGattAttributes.SERIAL_NUMBER_STRING.equals(characteristic.getUuid())) {
             mSerialNumber = characteristic.getStringValue(0);
-            //mSerialNumber = DsGattAttributes.valueToString(characteristic);
             Log.d(TAG, "Serial number: " + mSerialNumber);
         } else if (DsGattAttributes.FIRMWARE_REVISION_STRING.equals(characteristic.getUuid())) {
             mFirmwareRevision = characteristic.getStringValue(0);
-            //mFirmwareRevision = DsGattAttributes.valueToString(characteristic);
             Log.d(TAG, "Firmware revision: " + mFirmwareRevision);
         } else if (DsGattAttributes.SOFTWARE_REVISION_STRING.equals(characteristic.getUuid())) {
             mSoftwareRevision = characteristic.getStringValue(0);
             Log.d(TAG, "Software revision: " + mSoftwareRevision);
         } else if (DsGattAttributes.MANUFACTURER_NAME_STRING.equals(characteristic.getUuid())) {
             mManufacturer = characteristic.getStringValue(0);
-            //mManufacturer = DsGattAttributes.valueToString(characteristic);
             Log.d(TAG, "Manufacturer: " + mManufacturer);
         } else if (DsGattAttributes.SYSTEM_ID.equals(characteristic.getUuid())) {
             mSensorSystemID = DsGattAttributes.valueToInt64(characteristic);
             Log.d(TAG, "Sensor System ID: " + mSensorSystemID);
         } else if (DsGattAttributes.BODY_SENSOR_LOCATION.equals(characteristic.getUuid())) {
-            mBodyLocation = characteristic.getValue()[0];
-            //mBodyLocation = DsGattAttributes.valueToInt8(characteristic);
+            mBodyLocation = DsGattAttributes.BodySenorLocation.inferBodySensorLocation(characteristic.getValue()[0]);
             Log.d(TAG, "Body location: " + DsGattAttributes.BodySenorLocation.getLocation(mBodyLocation));
         } else {
             return false;
@@ -314,8 +319,6 @@ public class DsBleSensor extends DsSensor {
         mGatt.disconnect();
         mGatt.close();
         mGatt = null;
-        // TODO: "sendDisconnected" is called at "onConnectionStateChange" when the GATT successfully disconnected, to no need to call it here
-        //sendDisconnected();
     }
 
     @Override
@@ -422,9 +425,9 @@ public class DsBleSensor extends DsSensor {
      * @return true if notifications should be enabled for this Characteristic.
      */
     protected boolean shouldEnableNotification(BluetoothGattCharacteristic c) {
-        if (DsGattAttributes.HEART_RATE_MEASUREMENT.equals(c.getUuid()) && shouldUseHardwareSensor(HardwareSensor.HEART_RATE)) {
+        if (shouldUseHardwareSensor(HardwareSensor.HEART_RATE) && DsGattAttributes.HEART_RATE_MEASUREMENT.equals(c.getUuid())) {
             return true;
-        } else if (DsGattAttributes.BLOOD_PRESSURE.equals(c.getUuid()) && shouldUseHardwareSensor(HardwareSensor.BLOOD_PRESSURE)) {
+        } else if (shouldUseHardwareSensor(HardwareSensor.BLOOD_PRESSURE) && DsGattAttributes.BLOOD_PRESSURE.equals(c.getUuid())) {
             return true;
         } else if (DsGattAttributes.BATTERY_LEVEL.equals(c.getUuid())) {
             return true;
@@ -460,6 +463,7 @@ public class DsBleSensor extends DsSensor {
 
     @Override
     protected EnumSet<HardwareSensor> providedSensors() {
+        // Overrides hardcoded value from KnownSensor
         return mAvailableSensors;
     }
 }

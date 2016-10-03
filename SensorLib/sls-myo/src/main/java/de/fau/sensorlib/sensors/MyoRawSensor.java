@@ -355,10 +355,4 @@ public class MyoRawSensor extends DsSensor {
         }
     }
 
-    @Override
-    protected EnumSet<HardwareSensor> providedSensors() {
-        return EnumSet.of(HardwareSensor.EMG);
-    }
-
-
 }

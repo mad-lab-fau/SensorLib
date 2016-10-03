@@ -24,7 +24,7 @@ import de.fau.sensorlib.dataframe.SensorDataFrame;
  */
 public abstract class DsSensor extends SensorInfo {
 
-    protected static final String TAG = "DsSensor";
+    protected static final String TAG = DsSensor.class.getSimpleName();
 
     protected static final int MESSAGE_NEW_DATA = 1010;
     protected static final int MESSAGE_NOTIFICATION = 1011;
@@ -90,23 +90,34 @@ public abstract class DsSensor extends SensorInfo {
      * Possible supported hardware sensors.
      */
     public enum HardwareSensor {
-        ACCELEROMETER,
-        ECG,
-        EMG,
-        GYROSCOPE,
-        MAGNETOMETER,
-        LIGHT,
-        PRESSURE,
-        TEMPERATURE,
-        RESPIRATION,
-        HEART_RATE,
-        BLOOD_PRESSURE,
-        BLOOD_VOLUME_PRESSURE,
-        GALVANIC_SKIN_RESPONSE,
-        GESTURE,
-        ORIENTATION,
-        NOISE,
-        HUMIDITY;
+        ACCELEROMETER("ACC"),
+        GYROSCOPE("GYR"),
+        MAGNETOMETER("MAG"),
+        LIGHT("LUX"),
+        PRESSURE("PRES"),
+        TEMPERATURE("TEMP"),
+        ECG("ECG"),
+        EMG("EMG"),
+        HEART_RATE("HR"),
+        RESPIRATION("RESP"),
+        BLOOD_PRESSURE("BP"),
+        BLOOD_VOLUME_PRESSURE("BVP"),
+        GALVANIC_SKIN_RESPONSE("GSR"),
+        ORIENTATION("ORI"),
+        QUATERNION("QUA"),
+        GESTURE("GES"),
+        NOISE("NOIS"),
+        HUMIDITY("HUM");
+
+        private String mShortDescription;
+
+        HardwareSensor(String shortDescription) {
+            mShortDescription = shortDescription;
+        }
+
+        public String getShortDescription() {
+            return mShortDescription;
+        }
 
         public static boolean isInertial(HardwareSensor s) {
             return s == ACCELEROMETER || s == GYROSCOPE || s == MAGNETOMETER;
@@ -115,6 +126,7 @@ public abstract class DsSensor extends SensorInfo {
         public static boolean isAmbient(HardwareSensor s) {
             return s == LIGHT || s == PRESSURE || s == TEMPERATURE || s == NOISE || s == HUMIDITY;
         }
+
     }
 
 
@@ -501,12 +513,24 @@ public abstract class DsSensor extends SensorInfo {
         return providedSensors().contains(hwSensor);
     }
 
+
+    // TODO: Not abstract anymore? In most of the cases, mDeviceClass.getAvailableSensors() has to be called
     /**
      * Informs about all (internal) existing/provided hardware sensors for this DsSensor. This has to be implemented by all sensor implementations.
      *
      * @return an enum containing all the available/provided hardware sensors.
      */
-    protected abstract EnumSet<HardwareSensor> providedSensors();
+    protected EnumSet<HardwareSensor> providedSensors() {
+        return mDeviceClass.getAvailableSensors();
+    }
+
+    public boolean hasBatteryMeasurement() {
+        return mDeviceClass.hasBatteryMeasurement();
+    }
+
+    public int getBatteryLevel() {
+        return 0;
+    }
 
     /**
      * Sends an onNotify to all external handlers.

@@ -16,8 +16,6 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.Wearable;
 
-import java.util.EnumSet;
-
 import de.fau.sensorlib.DsSensor;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.dataframe.AccelDataFrame;
@@ -122,14 +120,6 @@ public class SmartWatch extends DsSensor {
         instance = this;
         mConnected = false;
         sendSensorCreated();
-    }
-
-    @Override
-    protected EnumSet<HardwareSensor> providedSensors() {
-        return EnumSet.of(
-                HardwareSensor.ACCELEROMETER,
-                HardwareSensor.GYROSCOPE,
-                HardwareSensor.MAGNETOMETER);
     }
 
     /**

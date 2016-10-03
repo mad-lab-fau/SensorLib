@@ -14,23 +14,23 @@ import android.util.Log;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.EnumSet;
 import java.util.UUID;
 
 import de.fau.sensorlib.DsBleSensor;
 import de.fau.sensorlib.DsSensor;
-import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.SensorDataProcessor;
+import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.AccelDataFrame;
 import de.fau.sensorlib.dataframe.AmbientDataFrame;
 import de.fau.sensorlib.dataframe.GyroDataFrame;
 import de.fau.sensorlib.dataframe.MagDataFrame;
+import de.fau.sensorlib.dataframe.QuaternionDataFrame;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
 
 /**
  * Implementation of the Bosch TEK sensor system.
  */
-public class TEK extends DsBleSensor {
+public class TekSensor extends DsBleSensor {
 
     protected static final UUID TEK_CHARACTERISTIC_TOP75_PRIVATE_SERVICE = UUID.fromString("00007500-0000-1000-8000-00805f9b34fb");
     protected static final UUID TEK_CHARACTERISTIC_TOP75_HCTM_SERVICE = UUID.fromString("00007700-0000-1000-8000-00805f9b34fb");
@@ -132,7 +132,7 @@ public class TEK extends DsBleSensor {
     /**
      * The TEK data frame containing fusion (Quaternion) data.
      */
-    public class TekFusionDataFrame extends TekDataFrame implements AccelDataFrame {
+    public class TekFusionDataFrame extends TekDataFrame implements AccelDataFrame, QuaternionDataFrame {
         protected double mQw, mQx, mQy, mQz;
         protected double mAx, mAy, mAz;
 
@@ -161,18 +161,22 @@ public class TEK extends DsBleSensor {
             return mAz;
         }
 
+        @Override
         public double getQuaternionW() {
             return mQw;
         }
 
+        @Override
         public double getQuaternionX() {
             return mQx;
         }
 
+        @Override
         public double getQuaternionY() {
             return mQy;
         }
 
+        @Override
         public double getQuaternionZ() {
             return mQz;
         }
@@ -230,7 +234,7 @@ public class TEK extends DsBleSensor {
      * @param deviceAddress the device's MAC address.
      * @param dataHandler   a SensorDataProcessor instance that receives notifcations of new data, etc.
      */
-    public TEK(Context context, String deviceName, String deviceAddress, SensorDataProcessor dataHandler) {
+    public TekSensor(Context context, String deviceName, String deviceAddress, SensorDataProcessor dataHandler) {
         super(context, deviceName, deviceAddress, dataHandler);
     }
 
@@ -241,7 +245,7 @@ public class TEK extends DsBleSensor {
      * @param sensor      KnownSensor to connect to, is reported back by BLE scan iteration
      * @param dataHandler a SensorDataProcessor instance that receives notifcations of new data, etc.
      */
-    public TEK(Context context, SensorInfo sensor, SensorDataProcessor dataHandler) {
+    public TekSensor(Context context, SensorInfo sensor, SensorDataProcessor dataHandler) {
         this(context, sensor.getName(), sensor.getDeviceAddress(), dataHandler);
     }
 
@@ -252,7 +256,7 @@ public class TEK extends DsBleSensor {
      * @param deviceAddress the device's MAC address.
      * @param dataHandler   a SensorDataProcessor instance that receives notifcations of new data, etc.
      */
-    public TEK(Context context, String deviceAddress, SensorDataProcessor dataHandler) {
+    public TekSensor(Context context, String deviceAddress, SensorDataProcessor dataHandler) {
         this(context, null, deviceAddress, dataHandler);
     }
 
@@ -261,14 +265,9 @@ public class TEK extends DsBleSensor {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                TEK.super.startStreaming();
+                TekSensor.super.startStreaming();
             }
         }, 2500);
-    }
-
-    @Override
-    public void stopStreaming() {
-
     }
 
     @Override
@@ -279,16 +278,16 @@ public class TEK extends DsBleSensor {
         //Log.d(TAG, "char value: " + characteristic.getUuid().toString() + " :: " + value);
 
         // Extract the dataframe from the raw byte data
-        if (characteristic.getUuid().equals(TEK_CHARACTERISTIC_INERTIAL_SENSOR)) {
+        if (TEK_CHARACTERISTIC_INERTIAL_SENSOR.equals(characteristic.getUuid())) {
             df = extractDataFrameInertial(value);
         }
-        if (characteristic.getUuid().equals(TEK_CHARACTERISTIC_FUSION_SENSOR)) {
+        if (TEK_CHARACTERISTIC_FUSION_SENSOR.equals(characteristic.getUuid())) {
             df = extractDataFrameFusion(value);
         }
-        if (characteristic.getUuid().equals(TEK_CHARACTERISTIC_ENVIRONMENTAL_SENSOR)) {
+        if (TEK_CHARACTERISTIC_ENVIRONMENTAL_SENSOR.equals(characteristic.getUuid())) {
             df = extractDataFrameEnvironmental(value);
         }
-        if (characteristic.getUuid().equals(TEK_CHARACTERISTIC_3D_FUSION)) {
+        if (TEK_CHARACTERISTIC_3D_FUSION.equals(characteristic.getUuid())) {
             df = extractDataFrame3dFusion(value);
         }
 
@@ -304,13 +303,13 @@ public class TEK extends DsBleSensor {
 
     @Override
     protected boolean shouldEnableNotification(BluetoothGattCharacteristic c) {
-        if (c.getUuid().equals(TEK_CHARACTERISTIC_INERTIAL_SENSOR)) {
+        if (TEK_CHARACTERISTIC_INERTIAL_SENSOR.equals(c.getUuid())) {
             return shouldUseInertialSensor();
         }
-        if (c.getUuid().equals(TEK_CHARACTERISTIC_ENVIRONMENTAL_SENSOR)) {
+        if (TEK_CHARACTERISTIC_ENVIRONMENTAL_SENSOR.equals(c.getUuid())) {
             return shouldUseAmbientSensor();
         }
-        if (c.getUuid().equals(TEK_CHARACTERISTIC_FUSION_SENSOR)) {
+        if (TEK_CHARACTERISTIC_FUSION_SENSOR.equals(c.getUuid())) {
             return shouldUseInertialSensor();
         }
         /*if (c.getUuid().equals(TEK_CHARACTERISTIC_3D_FUSION)) {
@@ -323,11 +322,6 @@ public class TEK extends DsBleSensor {
             return true;
         }*/
         return super.shouldEnableNotification(c);
-    }
-
-    @Override
-    protected EnumSet<HardwareSensor> providedSensors() {
-        return EnumSet.noneOf(HardwareSensor.class);
     }
 
     private double convertAccelerometerValue(short value) {
@@ -348,6 +342,8 @@ public class TEK extends DsBleSensor {
             return null;
 
         TekImuDataFrame df = new TekImuDataFrame(this, System.currentTimeMillis());
+
+        // TODO: replace ByteBuffer
 
         ByteBuffer bb = ByteBuffer.wrap(data);
         bb.order(ByteOrder.BIG_ENDIAN);
@@ -376,6 +372,8 @@ public class TEK extends DsBleSensor {
 
         TekFusionDataFrame df = new TekFusionDataFrame(this, System.currentTimeMillis());
 
+        // TODO: replace ByteBuffer
+
         ByteBuffer bb = ByteBuffer.wrap(data);
         bb.order(ByteOrder.BIG_ENDIAN);
 
@@ -400,6 +398,8 @@ public class TEK extends DsBleSensor {
 
         TekAmbientDataFrame df = new TekAmbientDataFrame(this, System.currentTimeMillis());
 
+        // TODO: replace ByteBuffer
+
         ByteBuffer bb = ByteBuffer.wrap(data);
         bb.order(ByteOrder.BIG_ENDIAN);
 
@@ -420,6 +420,8 @@ public class TEK extends DsBleSensor {
             return null;
 
         TekImuDataFrame df = new TekImuDataFrame(this, System.currentTimeMillis());
+
+        // TODO: replace ByteBuffer
 
         ByteBuffer bb = ByteBuffer.wrap(data);
         bb.order(ByteOrder.BIG_ENDIAN);

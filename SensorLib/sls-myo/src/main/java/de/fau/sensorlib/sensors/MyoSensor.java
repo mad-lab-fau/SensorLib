@@ -386,13 +386,4 @@ public class MyoSensor extends DsSensor {
         sendStopStreaming();
     }
 
-    @Override
-    protected EnumSet<HardwareSensor> providedSensors() {
-        return EnumSet.of(
-                HardwareSensor.GESTURE,
-                HardwareSensor.ACCELEROMETER,
-                HardwareSensor.GYROSCOPE,
-                HardwareSensor.ORIENTATION
-        );
-    }
 }

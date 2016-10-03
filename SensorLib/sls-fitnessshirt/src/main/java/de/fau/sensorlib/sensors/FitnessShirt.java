@@ -17,8 +17,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.nio.ByteBuffer;
-import java.util.EnumSet;
 import java.util.UUID;
 
 import de.fau.sensorlib.DsSensor;
@@ -133,21 +131,11 @@ public class FitnessShirt extends DsSensor {
     }
 
     public FitnessShirt(Context context, BluetoothDevice btDevice, SensorDataProcessor dataHandler) {
-        super(context, btDevice.getName(), btDevice.getAddress(), dataHandler);
-        setSamplingRate(256);
+        this(context, btDevice.getName(), btDevice.getAddress(), dataHandler);
     }
 
     public FitnessShirt(Context context, String deviceName, String deviceAddress, SensorDataProcessor dataHandler) {
         super(context, deviceName, deviceAddress, dataHandler, 256);
-    }
-
-    @Override
-    protected EnumSet<HardwareSensor> providedSensors() {
-        return EnumSet.of(
-                HardwareSensor.ACCELEROMETER,
-                HardwareSensor.ECG,
-                HardwareSensor.RESPIRATION,
-                HardwareSensor.HEART_RATE);
     }
 
     @Override
@@ -222,7 +210,7 @@ public class FitnessShirt extends DsSensor {
 
     private boolean connectUsingReflection() {
         try {
-            Method m = btDevice.getClass().getMethod("createRfcommSocket", new Class[]{int.class});
+            Method m = btDevice.getClass().getMethod("createRfcommSocket", int.class);
             btSocket = (BluetoothSocket) m.invoke(btDevice, 1);
             btSocket.connect();
         } catch (NoSuchMethodException e1) {

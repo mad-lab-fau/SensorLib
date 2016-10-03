@@ -8,12 +8,14 @@
 package de.fau.sensorlib;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.BatteryManager;
 import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
-import java.util.EnumSet;
 
 import de.fau.sensorlib.dataframe.AccelDataFrame;
 import de.fau.sensorlib.dataframe.AnnotatedDataFrame;
@@ -178,8 +180,14 @@ public class SimulatedSensor extends DsSensor {
     }
 
     @Override
-    protected EnumSet<HardwareSensor> providedSensors() {
-        return EnumSet.allOf(HardwareSensor.class);
+    public int getBatteryLevel() {
+        Intent batteryIntent = mContext.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        if (batteryIntent == null) {
+            return 0;
+        }
+        int batteryLevel = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
+        int batteryScale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, 1);
+        return (int) (((float) batteryLevel / batteryScale) * 100.0f);
     }
 
     @Override
@@ -225,7 +233,7 @@ public class SimulatedSensor extends DsSensor {
 
     protected void transmitData() {
         //init variables for live mode
-        double startTime = System.nanoTime();
+        //double startTime = System.nanoTime();
         double samplingInterval = 1000d / this.getSamplingRate();
         double samplingIntervalNano = 1.0e9d / mSamplingRate;
 
