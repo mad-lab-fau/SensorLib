@@ -85,7 +85,9 @@ public class DsSensorManager {
                     }
                 }
                 if (!in)*/
-                sensorList.add(sensor);
+                if (!sensorList.contains(sensor)) {
+                    sensorList.add(sensor);
+                }
             }
         }
 
@@ -98,9 +100,9 @@ public class DsSensorManager {
      * @param sensor the type/class of sensor that should be looked for.
      * @return the first found sensor of the given class that can be connected to.
      */
-    public static SensorInfo getFirstConnectableSensor(SensorInfo sensorInfo) {
+    public static SensorInfo getFirstConnectableSensor(KnownSensor sensor) {
         for (SensorInfo s : getConnectableSensors()) {
-            if (s.getDeviceClass() == sensorInfo) {
+            if (s.getDeviceClass() == sensor) {
                 return s;
             }
         }

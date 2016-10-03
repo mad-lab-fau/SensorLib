@@ -19,7 +19,7 @@ public abstract class SensorFoundCallback {
      */
     public abstract boolean onKnownSensorFound(SensorInfo sensor);
 
-    public boolean onKnownSensorFound(KnownSensor sensor, int rssi) {
+    public boolean onKnownSensorFound(SensorInfo sensor, int rssi) {
         return true;
     }
 
