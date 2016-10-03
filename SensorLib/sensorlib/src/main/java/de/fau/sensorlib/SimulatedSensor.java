@@ -1,6 +1,6 @@
 /**
  * Copyright (C) 2016 Digital Sports Group, Friedrich-Alexander University Erlangen-Nuremberg (FAU).
- * <p>
+ * <p/>
  * This file is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. If you reuse
  * this code you have to keep or cite this comment.
@@ -10,24 +10,30 @@ package de.fau.sensorlib;
 import android.content.Context;
 import android.util.Log;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.util.EnumSet;
 
-import de.fau.sensorlib.dataframe.AnnotatedDataFrame;
-import de.fau.sensorlib.dataframe.SensorDataFrame;
 import de.fau.sensorlib.dataframe.AccelDataFrame;
+import de.fau.sensorlib.dataframe.AnnotatedDataFrame;
 import de.fau.sensorlib.dataframe.EcgDataFrame;
 import de.fau.sensorlib.dataframe.EmgDataFrame;
 import de.fau.sensorlib.dataframe.GyroDataFrame;
 import de.fau.sensorlib.dataframe.RespirationDataFrame;
+import de.fau.sensorlib.dataframe.SensorDataFrame;
 
 /**
  * Implementation of a simulated sensor. It receives predefined data in the constructor that is then
  * streamed back to the caller while simulating the behavior of other sensor implementations.
  */
 public class SimulatedSensor extends DsSensor {
+
     SimulatedDataFrame[] simData;
-    boolean liveMode;
-    private Thread simThread;
+    protected BufferedReader mBufferedReader;
+    protected boolean liveMode;
+    protected boolean usesFile;
+    protected Thread simThread;
 
     /**
      * Default constructor.
@@ -44,11 +50,34 @@ public class SimulatedSensor extends DsSensor {
         simData = simulatedData;
         setSamplingRate(samplingRate);
         this.liveMode = liveMode;
-        sendSensorCreated();
+        this.usesFile = false;
+    }
+
+    /**
+     * Default constructor when reading from external storage.
+     *
+     * @param context      context.
+     * @param deviceName   name for the sensor.
+     * @param dataHandler  data handler.
+     * @param fileName     file name of the file to be simulated.
+     * @param samplingRate sampling rate at which the samples should be sent.
+     * @param liveMode     live mode (real time sampling) or continuous mode.
+     */
+    public SimulatedSensor(Context context, String deviceName, SensorDataProcessor dataHandler, String fileName, double samplingRate, boolean liveMode) {
+        super(context, deviceName, "SensorLib::SimulatedSensor::" + deviceName, dataHandler);
+        try {
+            mBufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(fileName)));
+            mBufferedReader.mark(Integer.MAX_VALUE);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        setSamplingRate(samplingRate);
+        this.liveMode = liveMode;
+        this.usesFile = true;
     }
 
     public static class SimulatedDataFrame extends SensorDataFrame implements AccelDataFrame, AnnotatedDataFrame, EcgDataFrame, EmgDataFrame, GyroDataFrame, RespirationDataFrame {
-        protected SimulatedDataFrame(DsSensor fromSensor, double timestamp) {
+        public SimulatedDataFrame(DsSensor fromSensor, double timestamp) {
             super(fromSensor, timestamp);
         }
 
@@ -104,7 +133,7 @@ public class SimulatedSensor extends DsSensor {
 
         @Override
         public Object getAnnotation() {
-            return Character.valueOf(label);
+            return label;
         }
 
         @Override
@@ -156,18 +185,24 @@ public class SimulatedSensor extends DsSensor {
     @Override
     public boolean connect() throws Exception {
         super.connect();
-        startStreaming();
         return true;
     }
 
     @Override
     public void disconnect() {
         super.disconnect();
+        if (getState() != SensorState.CONNECTED) {
+            return;
+        }
         stopStreaming();
+        sendDisconnected();
     }
 
     @Override
     public void startStreaming() {
+        if (getState() != SensorState.CONNECTED) {
+            return;
+        }
         simThread = new Thread(
                 new Runnable() {
                     public void run() {
@@ -175,20 +210,24 @@ public class SimulatedSensor extends DsSensor {
                     }
                 });
         simThread.start();
+        sendStartStreaming();
     }
 
     @Override
     public void stopStreaming() {
+        if (getState() != SensorState.STREAMING) {
+            return;
+        }
         simThread.interrupt();
+        sendStopStreaming();
+        setState(SensorState.CONNECTED);
     }
 
-    private void transmitData() {
+    protected void transmitData() {
         //init variables for live mode
         double startTime = System.nanoTime();
         double samplingInterval = 1000d / this.getSamplingRate();
         double samplingIntervalNano = 1.0e9d / mSamplingRate;
-
-        sendStartStreaming();
 
         //loop over samples
         for (int i = 0; i < simData.length; i++) {

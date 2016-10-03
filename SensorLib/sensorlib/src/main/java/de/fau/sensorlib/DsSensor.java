@@ -1,6 +1,6 @@
 /**
  * Copyright (C) 2015-2016 Digital Sports Group, Friedrich-Alexander University Erlangen-Nuremberg (FAU).
- * <p>
+ * <p/>
  * This file is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. If you reuse
  * this code you have to keep or cite this comment.
@@ -24,7 +24,7 @@ import de.fau.sensorlib.dataframe.SensorDataFrame;
  */
 public abstract class DsSensor extends SensorInfo {
 
-    private static final String TAG = "DsSensor";
+    protected static final String TAG = "DsSensor";
 
     protected static final int MESSAGE_NEW_DATA = 1010;
     protected static final int MESSAGE_NOTIFICATION = 1011;
