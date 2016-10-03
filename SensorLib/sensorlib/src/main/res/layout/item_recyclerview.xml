@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="96dp"
+    android:layout_margin="10dp"
+    card_view:cardCornerRadius="@dimen/cardview_default_radius"
+    card_view:cardElevation="@dimen/cardview_default_elevation">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="8dp">
+
+        <TextView
+            android:id="@+id/tv_sensor_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/tv_sensor_address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_sensor_name" />
+
+        <TextView
+            android:id="@+id/tv_sensor_rssi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:text="@string/placeholder_rssi" />
+
+        <ImageView
+            android:id="@+id/iv_battery"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignTop="@+id/gv_sensors"
+            android:tint="@color/sensor_not_available"
+            android:src="@drawable/ic_battery_not_available" />
+
+        <GridView
+            android:id="@+id/gv_sensors"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/tv_sensor_address"
+            android:layout_marginTop="4dp"
+            android:layout_toStartOf="@+id/iv_battery"
+            android:horizontalSpacing="1dp"
+            android:numColumns="9"
+            android:verticalSpacing="0dp" />
+
+    </RelativeLayout>
+
+</android.support.v7.widget.CardView>
