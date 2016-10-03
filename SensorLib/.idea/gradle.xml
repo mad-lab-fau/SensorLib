@@ -11,6 +11,7 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/sensorlib" />
             <option value="$PROJECT_DIR$/sensorlibutils" />
+            <option value="$PROJECT_DIR$/sls-bitalino" />
             <option value="$PROJECT_DIR$/sls-empatica" />
             <option value="$PROJECT_DIR$/sls-fitnessshirt" />
             <option value="$PROJECT_DIR$/sls-myo" />
@@ -21,22 +22,7 @@
             <option value="$PROJECT_DIR$/sls-tek" />
           </set>
         </option>
-        <option name="myModules">
-          <set>
-            <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/sensorlib" />
-            <option value="$PROJECT_DIR$/sensorlibutils" />
-            <option value="$PROJECT_DIR$/sls-empatica" />
-            <option value="$PROJECT_DIR$/sls-fitnessshirt" />
-            <option value="$PROJECT_DIR$/sls-myo" />
-            <option value="$PROJECT_DIR$/sls-shimmer" />
-            <option value="$PROJECT_DIR$/sls-simblee" />
-            <option value="$PROJECT_DIR$/sls-smartband2" />
-            <option value="$PROJECT_DIR$/sls-smartwatch" />
-            <option value="$PROJECT_DIR$/sls-tek" />
-          </set>
-        </option>
+        <option name="resolveModulePerSourceSet" value="false" />
       </GradleProjectSettings>
     </option>
   </component>

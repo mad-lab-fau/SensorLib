@@ -13,12 +13,9 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
-import com.androidplot.util.PlotStatistics;
-import com.androidplot.xy.BoundaryMode;
 import com.androidplot.xy.LineAndPointFormatter;
 import com.androidplot.xy.PointLabelFormatter;
 import com.androidplot.xy.SimpleXYSeries;
-import com.androidplot.xy.StepMode;
 import com.androidplot.xy.XYPlot;
 
 import java.util.List;
@@ -29,6 +26,7 @@ import de.fau.sensorlib.DsSensorManager;
 import de.fau.sensorlib.KnownSensor;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorFoundCallback;
+import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.AccelDataFrame;
 import de.fau.sensorlib.dataframe.AmbientDataFrame;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
@@ -105,22 +103,22 @@ public class MainActivity extends AppCompatActivity {
         }*/
 
 
-        List<KnownSensor> list = DsSensorManager.getConnectableSensors();
-        for (KnownSensor s : list) {
-            Log.d(TAG, "Sensor found: " + s.getDeviceName());
+        List<SensorInfo> list = DsSensorManager.getConnectableSensors();
+        for (SensorInfo s : list) {
+            Log.d(TAG, "Sensor found: " + s.getName());
         }
 
         try {
             DsSensorManager.searchBleDevices(this, new SensorFoundCallback() {
-                public boolean onKnownSensorFound(KnownSensor sensor) {
-                    Log.d(TAG, "BLE Sensor found: " + sensor.getDeviceName());
+                public boolean onKnownSensorFound(SensorInfo sensor) {
+                    Log.d(TAG, "BLE Sensor found: " + sensor.getName());
 
                     // we check what kind of sensor we found
-                    if (sensor == KnownSensor.GENERIC_BLE) {
+                    if (sensor.getDeviceClass() == KnownSensor.GENERIC_BLE) {
                         // ignore default/unknown BLE sensors
                         //if (sensor.getDeviceName().contains("miCoach")) {
 
-                    } else if (sensor == KnownSensor.TEK) {
+                    } else if (sensor.getDeviceClass() == KnownSensor.TEK) {
                         // this is a TEK sensor, create and connect it.
                         mSensor = new TEK(getThis(), sensor, mDataHandler);
                         mSensor.useHardwareSensor(DsSensor.HardwareSensor.ACCELEROMETER);

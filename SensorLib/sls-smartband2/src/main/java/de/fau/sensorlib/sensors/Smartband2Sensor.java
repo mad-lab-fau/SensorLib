@@ -14,6 +14,7 @@ import de.fau.sensorlib.DsBleSensor;
 import de.fau.sensorlib.DsSensor;
 import de.fau.sensorlib.KnownSensor;
 import de.fau.sensorlib.SensorDataProcessor;
+import de.fau.sensorlib.SensorInfo;
 
 /**
  * Implementation for the Sony Smartband 2.
@@ -24,7 +25,7 @@ public class Smartband2Sensor extends DsBleSensor {
 
     private static final String DEVICE_NAME = "SWR12";
 
-    public Smartband2Sensor(Context context, KnownSensor knownSensor, SensorDataProcessor dataHandler) {
+    public Smartband2Sensor(Context context, SensorInfo knownSensor, SensorDataProcessor dataHandler) {
         super(context, knownSensor, dataHandler);
     }
 

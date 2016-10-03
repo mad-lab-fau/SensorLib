@@ -25,3 +25,14 @@ dependencies {
     compile 'com.google.guava:guava:19.0-rc2'
     testCompile 'junit:junit:4.12'
 }
+
+tasks.create(name: 'copyApk', type: Copy) {
+    from 'build/outputs/aar'
+    into '../../Precompiled'
+}
+
+tasks.whenTaskAdded { task ->
+    if (task.name == 'mockableAndroidJar') {
+        task.dependsOn 'copyApk'
+    }
+}

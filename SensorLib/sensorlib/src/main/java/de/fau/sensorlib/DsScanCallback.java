@@ -45,10 +45,11 @@ public class DsScanCallback extends ScanCallback {
 
         Log.d(TAG, "New BLE device: " + result.getDevice().getName() + "@" + result.getRssi());
 
-        KnownSensor s = KnownSensor.inferSensorClass(result.getDevice().getName(), result.getDevice().getAddress());
+
+        SensorInfo s = new SensorInfo(result.getDevice().getName(), result.getDevice().getAddress());
 
         boolean ret;
-        if (s != null)
+        if (s.getDeviceClass() != null)
             ret = mSensorCallback.onKnownSensorFound(s);
         else
             ret = mSensorCallback.onUnknownSensorFound(result.getDevice().getName(), result.getDevice().getAddress());

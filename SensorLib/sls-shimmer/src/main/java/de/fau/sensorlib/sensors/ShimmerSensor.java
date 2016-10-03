@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.EnumSet;
 
 import de.fau.sensorlib.DsSensor;
+import de.fau.sensorlib.DsSensorManager;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.dataframe.AccelDataFrame;
 import de.fau.sensorlib.dataframe.EcgDataFrame;
@@ -222,6 +223,10 @@ public class ShimmerSensor extends DsSensor {
                 e.printStackTrace();
             }
         }
+    }
+
+    public ShimmerSensor(Context context, String macAddress, SensorDataProcessor dataHandler) {
+        this(context, DsSensorManager.findBtDevice(macAddress), dataHandler);
     }
 
     public ShimmerSensor(Context context, BluetoothDevice btDevice, SensorDataProcessor dataHandler) {

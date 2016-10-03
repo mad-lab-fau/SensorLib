@@ -22,7 +22,7 @@ import de.fau.sensorlib.dataframe.SensorDataFrame;
 /**
  * The base class for all sensor-implementations in the SensorLib.
  */
-public abstract class DsSensor {
+public abstract class DsSensor extends SensorInfo {
 
     private static final String TAG = "DsSensor";
 
@@ -39,15 +39,7 @@ public abstract class DsSensor {
 
     public static final String DATA_BROADCAST_INTENT_ACTION = "de.fau.sensorlib.DataBroadcast";
 
-    /**
-     * The address under which this device can be found, e.g. this can be the Bluetooth MAC-address, or the IP-address for WLAN-connected sensors.
-     */
-    protected String mDeviceAddress = "n/a";
 
-    /**
-     * The descriptive name of this sensor. Should be Human-readable and Human-understandable.
-     */
-    protected String mName = "Unknown";
 
     /**
      * The sampling rate in Hz that is used to acquire data samples from the sensor.
@@ -221,6 +213,7 @@ public abstract class DsSensor {
      * @param dataHandler   a default/initial data handler for sensor data and notifications.
      */
     public DsSensor(Context context, String deviceName, String deviceAddress, SensorDataProcessor dataHandler) {
+        super(deviceName, deviceAddress);
         mName = deviceName;
         mDeviceAddress = deviceAddress;
         mContext = context;
@@ -256,8 +249,8 @@ public abstract class DsSensor {
      * @param knownSensor the KnownSensor to associate with.
      * @param dataHandler the data handler.
      */
-    public DsSensor(Context context, KnownSensor knownSensor, SensorDataProcessor dataHandler) {
-        this(context, knownSensor.getDeviceName(), knownSensor.getDeviceAddress(), dataHandler);
+    public DsSensor(Context context, SensorInfo knownSensor, SensorDataProcessor dataHandler) {
+        this(context, knownSensor.getName(), knownSensor.getDeviceAddress(), dataHandler);
     }
 
 
