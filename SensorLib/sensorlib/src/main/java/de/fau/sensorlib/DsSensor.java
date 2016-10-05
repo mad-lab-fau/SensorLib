@@ -319,7 +319,7 @@ public abstract class DsSensor extends SensorInfo {
      * If no hardware sensor was selected by calling one of the useHardwareSensor(s) methods, all available hardware sensors will automatically be used.
      *
      * @return true if the connection has been established successfully. False otherwise.
-     * @throws Exception
+     * @throws DsException
      */
     @CallSuper
     public boolean connect() throws Exception {

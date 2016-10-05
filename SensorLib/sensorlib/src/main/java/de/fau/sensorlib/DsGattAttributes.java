@@ -2,7 +2,6 @@ package de.fau.sensorlib;
 
 import android.bluetooth.BluetoothGattCharacteristic;
 
-import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.HashMap;
@@ -350,26 +349,6 @@ public class DsGattAttributes {
     public static String lookup(UUID uuid) {
         String name = attributes.get(uuid);
         return name == null ? "<unknown: " + uuid + ">" : name;
-    }
-    /*public static String lookup(String uuid) {
-        String name = attributes.get(uuid);
-        return name == null ? "<unknown: " + uuid + ">" : name;
-    }*/
-
-
-    public static String valueToString(BluetoothGattCharacteristic chara) {
-        ByteBuffer bb = ByteBuffer.wrap(chara.getValue());
-        bb.order(ByteOrder.LITTLE_ENDIAN);
-
-        String str = "";
-        byte c;
-        try {
-            while ((c = bb.get()) != 0) {
-                str += (char) c;
-            }
-        } catch (BufferUnderflowException ignored) {
-        }
-        return str;
     }
 
 

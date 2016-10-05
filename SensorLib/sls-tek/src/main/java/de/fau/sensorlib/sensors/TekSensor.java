@@ -345,7 +345,7 @@ public class TekSensor extends DsBleSensor {
 
         TekImuDataFrame df = new TekImuDataFrame(this, System.currentTimeMillis());
 
-        // TODO: replaced ByteBuffer
+        // TODO: replaced ByteBuffer, check if possible
         df.mCounter = (characteristic.getIntValue(FORMAT_SINT8, 0) & 0xFF);
         int counter = 2;
         df.mAx = convertAccelerometerValue(characteristic.getIntValue(FORMAT_SINT16, counter));
@@ -398,7 +398,7 @@ public class TekSensor extends DsBleSensor {
 
         TekFusionDataFrame df = new TekFusionDataFrame(this, System.currentTimeMillis());
 
-        // TODO: replace ByteBuffer
+        // TODO: replaced ByteBuffer, check if possible
         df.mCounter = (characteristic.getIntValue(FORMAT_SINT8, 0) & 0xFF);
         int counter = 2;
         df.mQw = characteristic.getIntValue(FORMAT_SINT16, counter);
@@ -472,7 +472,7 @@ public class TekSensor extends DsBleSensor {
 
         TekImuDataFrame df = new TekImuDataFrame(this, System.currentTimeMillis());
 
-        // TODO: replace ByteBuffer
+        // TODO: replaced ByteBuffer, check if possible
         df.mCounter = characteristic.getIntValue(FORMAT_SINT8, 0);
         Log.d(TAG, "3dFusion (" + df.mCounter + "): " + Arrays.toString(characteristic.getValue()));
 

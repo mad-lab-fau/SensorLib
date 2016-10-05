@@ -11,6 +11,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.shimmerresearch.driver.FormatCluster;
@@ -19,6 +20,8 @@ import com.shimmerresearch.driver.Shimmer;
 
 import java.util.Collection;
 
+import de.fau.sensorlib.DsException;
+import de.fau.sensorlib.DsException.DsExceptionType;
 import de.fau.sensorlib.DsSensor;
 import de.fau.sensorlib.DsSensorManager;
 import de.fau.sensorlib.SensorDataProcessor;
@@ -224,11 +227,11 @@ public class ShimmerSensor extends DsSensor {
         }
     }
 
-    public ShimmerSensor(Context context, String macAddress, SensorDataProcessor dataHandler) {
+    public ShimmerSensor(Context context, String macAddress, SensorDataProcessor dataHandler) throws Exception {
         this(context, DsSensorManager.findBtDevice(macAddress), dataHandler);
     }
 
-    public ShimmerSensor(Context context, BluetoothDevice btDevice, SensorDataProcessor dataHandler) {
+    public ShimmerSensor(Context context, @NonNull BluetoothDevice btDevice, SensorDataProcessor dataHandler) {
         super(context, btDevice.getName(), btDevice.getAddress(), dataHandler);
         mShimmerHandler = new ShimmerMessageHandler();
         sendSensorCreated();
@@ -280,7 +283,7 @@ public class ShimmerSensor extends DsSensor {
         super.connect();
         // check requested sensors
         if (mSelectedHwSensors.isEmpty())
-            throw new Exception("No hardware sensors selected.");
+            throw new DsException(DsExceptionType.noSensorsSelected);
 
         calTimestamp = new CalibratedTimestamp(mSamplingRate);
         if (shimmer == null) {

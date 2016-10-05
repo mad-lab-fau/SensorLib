@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import de.fau.sensorlib.DsException.DsExceptionType;
+
 
 /**
  * The SensorManager comprises several static methods that can be used for convenience tasks related
@@ -144,21 +146,19 @@ public class DsSensorManager {
      * @param deviceAddress the address for the device for which a BluetoothDevice should be returned.
      * @return the found BluetoothDevice, or null on error.
      */
-    public static BluetoothDevice findBtDevice(String deviceAddress) {
-        BluetoothAdapter ba = BluetoothAdapter.getDefaultAdapter();
-        if (ba == null) {
-            Log.d(TAG, "Failed to get default BT adapter.");
-            return null;
+    public static BluetoothDevice findBtDevice(String deviceAddress) throws Exception {
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        if (adapter == null) {
+            throw new DsException(DsExceptionType.btNotSupported);
         }
 
-        if (!ba.isEnabled()) {
-            Log.d(TAG, "Can't find device. Bluetooth is not enabled.");
-            return null; // TODO: maybe we should throw some sensible exceptions here?
+        if (!adapter.isEnabled()) {
+            throw new DsException(DsExceptionType.btNotActivated);
         }
 
-        ba.cancelDiscovery();
+        adapter.cancelDiscovery();
 
-        return ba.getRemoteDevice(deviceAddress);
+        return adapter.getRemoteDevice(deviceAddress);
     }
 
 
@@ -180,7 +180,7 @@ public class DsSensorManager {
     public static int enableBluetooth(Activity activity) throws Exception {
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         if (adapter == null) {
-            throw new Exception("Bluetooth is not supported on this device.");
+            throw new DsException(DsExceptionType.btNotSupported);
         }
         if (adapter.isEnabled()) {
             return 0;
@@ -203,7 +203,7 @@ public class DsSensorManager {
         }
 
         if (!isBleSupported(activity)) {
-            throw new Exception("Bluetooth LE not supported!");
+            throw new DsException(DsExceptionType.bleNotSupported);
         }
 
         // Android SDK: An app must hold ACCESS_COARSE_LOCATION or ACCESS_FINE_LOCATION permission in order to get results.
@@ -232,6 +232,16 @@ public class DsSensorManager {
         return 0;
     }
 
+    /**
+     * Checks whether the specified permissions are already granted by the application and
+     * (if desired) requests them.
+     *
+     * @param activity           Calling activity that receives the response callback (onRequestPermissionsResult)
+     * @param permissions        String of permissions to check
+     * @param requestPermissions true to request the permissions if not granted
+     * @return the request code that can be used to check for user response on the permission request (onRequestPermissionsResult),
+     * 0 if the permission does not need to be requested, or PERMISSIONS_MISSING if the permission should not be requested, but is missing.
+     */
     public static int checkPermissions(Activity activity, String[] permissions, boolean requestPermissions) {
         for (String permission : permissions) {
             boolean granted = (ContextCompat.checkSelfPermission(activity, permission)
@@ -278,12 +288,12 @@ public class DsSensorManager {
         enableBluetooth(activity);
 
         if (checkBtLePermissions(activity, false) == PERMISSIONS_MISSING) {
-            throw new Exception("The app does not have sufficient Android permissions to list available BLE devices.");
+            throw new DsException(DsExceptionType.permissionsMissing);
         }
 
         sBleScanner = BluetoothAdapter.getDefaultAdapter().getBluetoothLeScanner();
         if (sBleScanner == null) {
-            throw new Exception("BLE scanner unavailable.");
+            throw new DsException(DsExceptionType.bleScannerError);
         }
 
         // set scan settings and filters

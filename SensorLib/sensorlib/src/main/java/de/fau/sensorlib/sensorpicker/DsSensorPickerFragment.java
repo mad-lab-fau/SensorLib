@@ -46,12 +46,13 @@ import de.fau.sensorlib.SensorFoundCallback;
 import de.fau.sensorlib.SensorInfo;
 
 /**
- * The {@link DsSensorPickerFragment} is a {@link DialogFragment} that discovers and lists all currently available sensors.
+ * {@link DialogFragment} that discovers and lists all currently available sensors.
  */
 public class DsSensorPickerFragment extends DialogFragment {
 
     private static final String TAG = DsSensorPickerFragment.class.getSimpleName();
 
+    // Keys for getting sensor information from Bundle
     private static final String KEY_SENSOR_RSSI = "key_sensor_rssi";
     private static final String KEY_SENSOR_ADDRESS = "key_sensor_address";
     private static final String KEY_SENSOR_NAME = "key_sensor_name";
@@ -65,8 +66,10 @@ public class DsSensorPickerFragment extends DialogFragment {
 
     private BluetoothAdapter mBluetoothAdapter;
 
+
     public class DsRecyclerAdapter extends RecyclerView.Adapter<DsViewHolder> implements DsViewHolder.ItemClickListener {
 
+        // Underlying dataset
         private List<Bundle> mDataset;
 
         @Override
@@ -76,7 +79,6 @@ public class DsSensorPickerFragment extends DialogFragment {
             String address = mDataset.get(position).getString(KEY_SENSOR_ADDRESS);
             mSensorFoundCallback.onKnownSensorFound(new SensorInfo(name, address, sensor));
             createSelectSensorDialog(sensor);
-            //mSensorsSelectedCallback.onSensorsSelected()
         }
 
         DsRecyclerAdapter() {
@@ -92,16 +94,16 @@ public class DsSensorPickerFragment extends DialogFragment {
         @Override
         public void onBindViewHolder(final DsViewHolder holder, int position) {
             final KnownSensor sensor = (KnownSensor) mDataset.get(position).getSerializable(KEY_SENSOR_ADDRESS);
-            String name = mDataset.get(position).getString(KEY_SENSOR_NAME);
-            String address = mDataset.get(position).getString(KEY_SENSOR_ADDRESS);
-            int rssi = mDataset.get(position).getInt(KEY_SENSOR_RSSI);
             if (sensor == null) {
                 return;
             }
-            Log.d(TAG, name + ", " + address);
+            String name = mDataset.get(position).getString(KEY_SENSOR_NAME);
+            String address = mDataset.get(position).getString(KEY_SENSOR_ADDRESS);
+            int rssi = mDataset.get(position).getInt(KEY_SENSOR_RSSI);
             holder.mSensorNameTextView.setText(name);
             holder.mSensorInformationTextView.setText(address);
             holder.mSensorRssi.setText(mContext.getString(R.string.placeholder_rssi, rssi));
+            // if battery measurement is available for sensor
             if (sensor.hasBatteryMeasurement()) {
                 holder.mBatteryImageView.setImageResource(R.drawable.ic_battery_available);
                 holder.mBatteryImageView.setColorFilter(ContextCompat.getColor(mContext, R.color.sensor_available));
@@ -123,7 +125,13 @@ public class DsSensorPickerFragment extends DialogFragment {
             return (mDataset == null) ? 0 : mDataset.size();
         }
 
-
+        /**
+         * Adds element at the specified position and
+         * notifies the {@link DsRecyclerAdapter} that the underlying list has changed.
+         *
+         * @param position Insert position
+         * @param element  Sensor element as {@link Bundle}
+         */
         public void addAt(int position, Bundle element) {
             if (!mDataset.contains(element)) {
                 mDataset.add(position, element);
@@ -132,38 +140,61 @@ public class DsSensorPickerFragment extends DialogFragment {
             }
         }
 
+        /**
+         * Adds element to the end of the list and
+         * notifies the {@link DsRecyclerAdapter} that the underlying list has changed.
+         *
+         * @param element Sensor element as {@link Bundle}
+         */
         public void add(Bundle element) {
             addAt(mDataset.size(), element);
         }
 
 
+        /**
+         * Removes element at the specified position and
+         * notifies the {@link DsRecyclerAdapter} that the underlying list has changed.
+         *
+         * @param position Position to remove
+         */
         public void removeAt(int position) {
             mDataset.remove(position);
             notifyItemRemoved(position);
             notifyItemRangeChanged(position, mDataset.size() - position);
         }
 
-
+        /**
+         * Removes element of the end of the list and
+         * notifies the {@link DsRecyclerAdapter} that the underlying list has changed.
+         */
         public void remove() {
             removeAt(mDataset.size() - 1);
         }
     }
 
+    /**
+     * Creates a Dialog to choose from the desired {@link HardwareSensor}
+     * for the selected sensor device.
+     *
+     * @param sensor Selected Sensor
+     */
     private void createSelectSensorDialog(final KnownSensor sensor) {
         AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
 
         final EnumSet<HardwareSensor> selectedSensors = EnumSet.noneOf(HardwareSensor.class);
 
+        // Get available HardwareSensors for the selected sensor device
         EnumSet<HardwareSensor> availableSensors = sensor.getAvailableSensors();
         final HardwareSensor[] availableSensorsArray = new HardwareSensor[availableSensors.size()];
         availableSensors.toArray(availableSensorsArray);
 
         String[] sensorNames = new String[availableSensorsArray.length];
         for (int i = 0; i < sensorNames.length; i++) {
+            // Reformat names of Hardware Sensors with WordUtils (e.g. HEART_RATE => Heart Rate)
             sensorNames[i] = WordUtils.capitalizeFully(availableSensorsArray[i].name().replace('_', ' '));
         }
-        builder.setTitle(R.string.string_select_sensors);
 
+        builder.setTitle(R.string.string_select_sensors);
         builder.setMultiChoiceItems(sensorNames, null, new DialogInterface.OnMultiChoiceClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which, boolean isChecked) {
@@ -174,10 +205,10 @@ public class DsSensorPickerFragment extends DialogFragment {
                 }
             }
         });
-
         builder.setPositiveButton(R.string.string_ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                // notify Callback with the selected hardware sensors and close sensor picker
                 mSensorFoundCallback.onSensorsSelected(selectedSensors);
                 DsSensorPickerFragment.this.dismiss();
             }
@@ -194,12 +225,12 @@ public class DsSensorPickerFragment extends DialogFragment {
 
     public static class DsViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        TextView mSensorNameTextView;
-        TextView mSensorInformationTextView;
-        TextView mSensorRssi;
-        ImageView mBatteryImageView;
-        GridView mSensorGridView;
-        ItemClickListener mItemClickListener;
+        private TextView mSensorNameTextView;
+        private TextView mSensorInformationTextView;
+        private TextView mSensorRssi;
+        private ImageView mBatteryImageView;
+        private GridView mSensorGridView;
+        private ItemClickListener mItemClickListener;
 
         DsViewHolder(View itemView, ItemClickListener listener) {
             super(itemView);
@@ -223,11 +254,13 @@ public class DsSensorPickerFragment extends DialogFragment {
         }
     }
 
+    /**
+     * Adapter for GridView that lists all hardware sensors
+     * and highlights the available hardware sensors.
+     */
     public static class DsGridAdapter extends BaseAdapter {
 
         private Context mContext;
-
-        private HardwareSensor[] mAllSensors = HardwareSensor.values();
 
         DsGridAdapter(Context context) {
             this.mContext = context;
@@ -235,7 +268,7 @@ public class DsSensorPickerFragment extends DialogFragment {
 
         @Override
         public int getCount() {
-            return mAllSensors.length;
+            return HardwareSensor.values().length;
         }
 
         @Override
@@ -270,11 +303,11 @@ public class DsSensorPickerFragment extends DialogFragment {
         getDialog().setTitle("DsSensorPickerFragment");
 
         DsRecyclerView recyclerView = (DsRecyclerView) rootView.findViewById(R.id.recyclerview);
-        recyclerView.setEmptyView(rootView.findViewById(android.R.id.empty));
         recyclerView.setAdapter(mAdapter);
         mProgressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
         mProgressBarTextView = (TextView) rootView.findViewById(R.id.tv_discovering);
 
+        // Intent filter to listen when bluetooth devices are found and discovery has finished
         IntentFilter filter = new IntentFilter();
         filter.addAction(BluetoothDevice.ACTION_FOUND);
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
@@ -289,10 +322,12 @@ public class DsSensorPickerFragment extends DialogFragment {
 
     public void startSensorDiscovery() {
         try {
+            // Check for (and if needed request) neccessary BTLE permissions
             DsSensorManager.checkBtLePermissions(getActivity(), true);
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         // Add internal sensor (can always be selected)
         Bundle internalSensor = new Bundle();
         internalSensor.putSerializable(KEY_SENSOR_ADDRESS, KnownSensor.inferSensorClass("Internal", ""));
@@ -342,7 +377,7 @@ public class DsSensorPickerFragment extends DialogFragment {
             mContext.unregisterReceiver(mSensorDiscoveryReceiver);
         } catch (IllegalArgumentException ignored) {
             // In case BroadcastReceiver for Bluetooth discovery is
-            // already unregistered: ignore exception...
+            // already unregistered (e.g. when Discovery has already finished): ignore exception...
         }
     }
 
@@ -377,7 +412,7 @@ public class DsSensorPickerFragment extends DialogFragment {
                     mProgressBarTextView.setText(getResources().getString(R.string.string_results));
                 } catch (IllegalArgumentException ignored) {
                     // In case BroadcastReceiver for Bluetooth discovery is
-                    // already unregistered: ignore exception...
+                    // already unregistered (e.g. when View was destroyed): ignore exception...
                 }
             }
         }

@@ -5,7 +5,23 @@ package de.fau.sensorlib;
  */
 public class SensorInfo {
 
+    // TODO: Move to InternalSensor? No need to have it in all sensor classes...
     public static final SensorInfo ANDROID_DEVICE_SENSORS = new SensorInfo("<Internal Sensor>", "n/a", KnownSensor.INTERNAL);
+
+    /**
+     * The descriptive name of this sensor. Should be Human-readable and Human-understandable.
+     */
+    protected String mName = "Unknown";
+
+    /**
+     * The address under which this device can be found, e.g. this can be the Bluetooth MAC-address, or the IP-address for WLAN-connected sensors.
+     */
+    protected String mDeviceAddress = "n/a";
+
+    /**
+     * The class of the device, if it is known and implemented in the sensorlib.
+     */
+    protected KnownSensor mDeviceClass = null;
 
     /**
      * @return the device name.
@@ -27,21 +43,6 @@ public class SensorInfo {
     public KnownSensor getDeviceClass() {
         return mDeviceClass;
     }
-
-    /**
-     * The descriptive name of this sensor. Should be Human-readable and Human-understandable.
-     */
-    protected String mName = "Unknown";
-
-    /**
-     * The address under which this device can be found, e.g. this can be the Bluetooth MAC-address, or the IP-address for WLAN-connected sensors.
-     */
-    protected String mDeviceAddress = "n/a";
-
-    /**
-     * The class of the device, if it is known and implemented in the sensorlib.
-     */
-    protected KnownSensor mDeviceClass = null;
 
     /**
      * Default constructor. The sensor class is inferred from the name or device address.

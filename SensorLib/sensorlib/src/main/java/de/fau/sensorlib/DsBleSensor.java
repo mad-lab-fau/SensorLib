@@ -7,7 +7,6 @@
  */
 package de.fau.sensorlib;
 
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
@@ -28,17 +27,13 @@ import de.fau.sensorlib.dataframe.BleHeartRateMeasurement;
  * Implementation of a generic BLE device communication class.
  */
 public class DsBleSensor extends DsSensor {
+
     protected final static String TAG = DsBleSensor.class.getSimpleName();
 
     /**
      * Sensors available on the BLE device after discovery. Not available on class instantiation.
      */
-    EnumSet<HardwareSensor> mAvailableSensors = mDeviceClass.getAvailableSensors();
-
-    /**
-     * Bluetooth adapter.
-     */
-    protected BluetoothAdapter mBtAdapter;
+    private EnumSet<HardwareSensor> mAvailableSensors = mDeviceClass.getAvailableSensors();
 
     /**
      * Bluetooth device.
@@ -75,6 +70,11 @@ public class DsBleSensor extends DsSensor {
         return mBatteryLevel;
     }
 
+    /**
+     * Returns the Body Sensor Location.
+     *
+     * @return Body Sensor Location as String
+     */
     public String getBodyLocation() {
         return DsGattAttributes.BodySenorLocation.getLocation(mBodyLocation);
     }
@@ -282,18 +282,19 @@ public class DsBleSensor extends DsSensor {
             return false;
         }
 
-        mBtAdapter = BluetoothAdapter.getDefaultAdapter();
+        // Already covered by DsSensorManager.findBtDevice()
+        /*mBtAdapter = BluetoothAdapter.getDefaultAdapter();
         if (mBtAdapter == null) {
             Log.e(TAG, "No BT adapter.");
             setState(SensorState.INITIALIZED);
             return false;
-        }
+        }*/
 
         // connection already existed?
         if (mGatt != null) {
             if (!mGatt.connect()) {
                 setState(SensorState.DISCONNECTED);
-                Log.d(TAG, "GATT not connected, returnin...");
+                Log.d(TAG, "GATT not connected, returning...");
                 return false;
             }
         }
