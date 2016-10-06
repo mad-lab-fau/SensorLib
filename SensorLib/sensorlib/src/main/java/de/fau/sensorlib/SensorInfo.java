@@ -5,9 +5,6 @@ package de.fau.sensorlib;
  */
 public class SensorInfo {
 
-    // TODO: Move to InternalSensor? No need to have it in all sensor classes...
-    public static final SensorInfo ANDROID_DEVICE_SENSORS = new SensorInfo("<Internal Sensor>", "n/a", KnownSensor.INTERNAL);
-
     /**
      * The descriptive name of this sensor. Should be Human-readable and Human-understandable.
      */

@@ -63,7 +63,7 @@ public class DsSensorManager {
         ArrayList<SensorInfo> sensorList = new ArrayList<>();
 
         // Add internal sensor
-        sensorList.add(SensorInfo.ANDROID_DEVICE_SENSORS);
+        sensorList.add(InternalSensor.ANDROID_DEVICE_SENSORS);
 
         // Search for Bluetooth sensors
         BluetoothAdapter bta = BluetoothAdapter.getDefaultAdapter();
