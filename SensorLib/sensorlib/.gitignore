@@ -38,4 +38,4 @@ captures/
 *.jks
 
 # Exclude Precompiled sensorlib libraries
-Precompiled
+../../Precompiled
