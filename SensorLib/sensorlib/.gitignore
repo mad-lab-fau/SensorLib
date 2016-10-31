@@ -37,5 +37,5 @@ captures/
 # Keystore files
 *.jks
 
-# Precompiled sensorlib libraries
+# Exclude Precompiled sensorlib libraries
 Precompiled
