@@ -40,6 +40,7 @@ import java.util.List;
 
 import de.fau.sensorlib.DsSensor.HardwareSensor;
 import de.fau.sensorlib.DsSensorManager;
+import de.fau.sensorlib.InternalSensor;
 import de.fau.sensorlib.KnownSensor;
 import de.fau.sensorlib.R;
 import de.fau.sensorlib.SensorFoundCallback;
@@ -74,7 +75,9 @@ public class DsSensorPickerFragment extends DialogFragment {
 
         @Override
         public void onItemClick(View view, int position) {
-            KnownSensor sensor = (KnownSensor) mDataset.get(position).getSerializable(KEY_SENSOR_ADDRESS);
+            Log.d(TAG, "onItemClick: " + position);
+
+            KnownSensor sensor = (KnownSensor) mDataset.get(position).getSerializable(KEY_KNOWN_SENSOR);
             String name = mDataset.get(position).getString(KEY_SENSOR_NAME);
             String address = mDataset.get(position).getString(KEY_SENSOR_ADDRESS);
             mSensorFoundCallback.onKnownSensorFound(new SensorInfo(name, address, sensor));
@@ -82,7 +85,7 @@ public class DsSensorPickerFragment extends DialogFragment {
         }
 
         DsRecyclerAdapter() {
-            mDataset = new ArrayList<>(1);
+            mDataset = new ArrayList<>(0);
         }
 
         @Override
@@ -93,7 +96,7 @@ public class DsSensorPickerFragment extends DialogFragment {
 
         @Override
         public void onBindViewHolder(final DsViewHolder holder, int position) {
-            final KnownSensor sensor = (KnownSensor) mDataset.get(position).getSerializable(KEY_SENSOR_ADDRESS);
+            final KnownSensor sensor = (KnownSensor) mDataset.get(position).getSerializable(KEY_KNOWN_SENSOR);
             if (sensor == null) {
                 return;
             }
@@ -136,7 +139,7 @@ public class DsSensorPickerFragment extends DialogFragment {
             if (!mDataset.contains(element)) {
                 mDataset.add(position, element);
                 notifyItemInserted(position);
-                notifyItemRangeChanged(position, mDataset.size() - position);
+                notifyItemRangeChanged(position, mDataset.size() - position - 1);
             }
         }
 
@@ -330,7 +333,10 @@ public class DsSensorPickerFragment extends DialogFragment {
 
         // Add internal sensor (can always be selected)
         Bundle internalSensor = new Bundle();
-        internalSensor.putSerializable(KEY_SENSOR_ADDRESS, KnownSensor.inferSensorClass("Internal", ""));
+        internalSensor.putSerializable(KEY_KNOWN_SENSOR, InternalSensor.ANDROID_DEVICE_SENSORS.getDeviceClass());
+        internalSensor.putInt(KEY_SENSOR_RSSI, 0);
+        internalSensor.putString(KEY_SENSOR_NAME, InternalSensor.ANDROID_DEVICE_SENSORS.getName());
+        internalSensor.putString(KEY_SENSOR_ADDRESS, InternalSensor.ANDROID_DEVICE_SENSORS.getDeviceAddress());
         mAdapter.add(internalSensor);
 
         // Start with BLE scan...
@@ -348,6 +354,7 @@ public class DsSensorPickerFragment extends DialogFragment {
                     bundle.putString(KEY_SENSOR_NAME, sensor.getName());
                     bundle.putSerializable(KEY_KNOWN_SENSOR, sensor.getDeviceClass());
                     bundle.putInt(KEY_SENSOR_RSSI, rssi);
+                    Log.e(TAG, "KNOWN SENSOR FOUND: " + sensor.getName() + ", class: " + sensor.getDeviceClass());
                     mAdapter.add(bundle);
                     return true;
                 }
@@ -401,8 +408,10 @@ public class DsSensorPickerFragment extends DialogFragment {
                 if (sensor != null) {
                     // Add the sensor to the RecyclerAdapter
                     Bundle bundle = new Bundle();
-                    bundle.putSerializable(KEY_SENSOR_ADDRESS, sensor);
+                    bundle.putSerializable(KEY_KNOWN_SENSOR, sensor);
                     bundle.putInt(KEY_SENSOR_RSSI, rssi);
+                    bundle.putString(KEY_SENSOR_NAME, device.getName());
+                    bundle.putString(KEY_SENSOR_ADDRESS, device.getAddress());
                     mAdapter.add(bundle);
                 }
             } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {

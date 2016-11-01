@@ -77,7 +77,7 @@ public class DsSensorManager {
         for (BluetoothDevice device : pairedDevices) {
             // Get next device
             SensorInfo sensor = new SensorInfo(device.getName(), device.getAddress());
-            if (sensor != null) {
+            if (sensor.getDeviceClass() != null) {
                 // check if it is already in our list
                 /*boolean in = false;
                 for (SensorInfo s : sensorList) {

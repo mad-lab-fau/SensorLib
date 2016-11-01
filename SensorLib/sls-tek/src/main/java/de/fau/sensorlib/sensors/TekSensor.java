@@ -442,7 +442,7 @@ public class TekSensor extends DsBleSensor {
 
         TekAmbientDataFrame df = new TekAmbientDataFrame(this, System.currentTimeMillis());
 
-        // TODO: replace ByteBuffer
+        // TODO: replaced ByteBuffer, check if possible
         df.mCounter = (characteristic.getIntValue(FORMAT_SINT8, 0) & 0xFF);
         df.mTemp = ((float) characteristic.getIntValue(FORMAT_SINT16, 2)) / 100.0f;
         df.mHumidity = ((float) characteristic.getIntValue(FORMAT_SINT16, 5)) / 100.0f;

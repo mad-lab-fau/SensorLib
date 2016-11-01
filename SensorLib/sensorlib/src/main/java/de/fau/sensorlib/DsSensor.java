@@ -98,6 +98,8 @@ public abstract class DsSensor extends SensorInfo {
         TEMPERATURE("TEMP"),
         ECG("ECG"),
         EMG("EMG"),
+        EEG_RAW("EEG"),
+        EEG_FREQ_BANDS("EEG"),
         HEART_RATE("HR"),
         RESPIRATION("RESP"),
         BLOOD_PRESSURE("BP"),

@@ -107,6 +107,13 @@ public enum KnownSensor {
     SMARTBAND2("Smartband 2", new String[]{"SWR12"},
             EnumSet.of(
                     HardwareSensor.HEART_RATE
+            ), true),
+    MUSE("Muse", new String[]{"Muse"},
+            EnumSet.of(
+                    HardwareSensor.EEG_RAW,
+                    HardwareSensor.EEG_FREQ_BANDS,
+                    HardwareSensor.GYROSCOPE,
+                    HardwareSensor.ACCELEROMETER
             ), true);
     // =============================================================================================
 

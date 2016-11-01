@@ -7,6 +7,7 @@
       <module fileurl="file://$PROJECT_DIR$/../../SensorLib/sensorlib/sensorlib.iml" filepath="$PROJECT_DIR$/../../SensorLib/sensorlib/sensorlib.iml" />
       <module fileurl="file://$PROJECT_DIR$/../../SensorLib/sensorlibutils/sensorlibutils.iml" filepath="$PROJECT_DIR$/../../SensorLib/sensorlibutils/sensorlibutils.iml" />
       <module fileurl="file://$PROJECT_DIR$/../../SensorLib/sls-fitnessshirt/sls-fitnessshirt.iml" filepath="$PROJECT_DIR$/../../SensorLib/sls-fitnessshirt/sls-fitnessshirt.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../SensorLib/sls-muse/sls-muse.iml" filepath="$PROJECT_DIR$/../../SensorLib/sls-muse/sls-muse.iml" />
       <module fileurl="file://$PROJECT_DIR$/../../SensorLib/sls-shimmer/sls-shimmer.iml" filepath="$PROJECT_DIR$/../../SensorLib/sls-shimmer/sls-shimmer.iml" />
       <module fileurl="file://$PROJECT_DIR$/../../SensorLib/sls-simblee/sls-simblee.iml" filepath="$PROJECT_DIR$/../../SensorLib/sls-simblee/sls-simblee.iml" />
       <module fileurl="file://$PROJECT_DIR$/../../SensorLib/sls-smartband2/sls-smartband2.iml" filepath="$PROJECT_DIR$/../../SensorLib/sls-smartband2/sls-smartband2.iml" />
