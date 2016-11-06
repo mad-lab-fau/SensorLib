@@ -92,7 +92,7 @@ public class MuseSensor extends DsSensor {
         private MuseDataPacketType packetType;
 
         private double[] eegRaw;
-        private double[] eegBands;
+        private double[] eegBand;
 
         /**
          * Creates a sensor data frame.
@@ -104,46 +104,60 @@ public class MuseSensor extends DsSensor {
             super(fromSensor, timestamp);
         }
 
-        @Override
-        public double getEegSample() {
-            return eegRaw[0];
-        }
-
-        public double[] getRawEegChannels() {
-            return eegRaw;
-        }
-
-        public double[] getEegBands() {
-            return eegBands;
-        }
-
         public MuseDataPacketType getPacketType() {
             return packetType;
         }
 
         @Override
-        public double getAlphaBandSample() {
-            return 0;
+        public double[] getRawEeg() {
+            if (packetType != MuseDataPacketType.EEG) {
+                return null;
+            }
+            return eegRaw;
+        }
+
+        public double[] getEegBand() {
+            return eegBand;
         }
 
         @Override
-        public double getBetaBandSample() {
-            return 0;
+        public double[] getAlphaBand() {
+            if (packetType != MuseDataPacketType.ALPHA_ABSOLUTE) {
+                return null;
+            }
+            return eegBand;
         }
 
         @Override
-        public double getGammaBandSample() {
-            return 0;
+        public double[] getBetaBand() {
+            if (packetType != MuseDataPacketType.BETA_ABSOLUTE) {
+                return null;
+            }
+            return eegBand;
         }
 
         @Override
-        public double getThetaBandSample() {
-            return 0;
+        public double[] getGammaBand() {
+            if (packetType != MuseDataPacketType.GAMMA_ABSOLUTE) {
+                return null;
+            }
+            return eegBand;
         }
 
         @Override
-        public double getDeltaBandSample() {
-            return 0;
+        public double[] getThetaBand() {
+            if (packetType != MuseDataPacketType.THETA_ABSOLUTE) {
+                return null;
+            }
+            return eegBand;
+        }
+
+        @Override
+        public double[] getDeltaBand() {
+            if (packetType != MuseDataPacketType.DELTA_ABSOLUTE) {
+                return null;
+            }
+            return eegBand;
         }
     }
 
@@ -362,9 +376,8 @@ public class MuseSensor extends DsSensor {
      * Receive callback to this method each time the headband sends a MuseDataPacket.
      *
      * @param packet The data packet containing the data from the headband (eg. EEG data)
-     * @param muse   The headband that sent the information.
      */
-    private void receiveMuseDataPacket(final MuseDataPacket packet, final Muse muse) {
+    private void receiveMuseDataPacket(final MuseDataPacket packet) {
         SensorDataFrame df;
 
         switch (packet.packetType()) {
@@ -398,10 +411,9 @@ public class MuseSensor extends DsSensor {
      * Artifacts are generated when eye blinks are detected, the jaw is clenched and
      * when the headband is put on or removed.
      *
-     * @param p    The artifact packet with the data from the headband.
-     * @param muse The headband that sent the information.
+     * @param p The artifact packet with the data from the headband.
      */
-    private void receiveMuseArtifactPacket(final MuseArtifactPacket p, final Muse muse) {
+    private void receiveMuseArtifactPacket(final MuseArtifactPacket p) {
         extractArtifactChannels(p);
     }
 
@@ -420,9 +432,9 @@ public class MuseSensor extends DsSensor {
                 df.eegRaw[eeg.ordinal()] = packet.getEegChannelValue(eeg);
             }
         } else {
-            df.eegBands = new double[Eeg.values().length];
+            df.eegBand = new double[Eeg.values().length];
             for (Eeg eeg : Eeg.values()) {
-                df.eegBands[eeg.ordinal()] = packet.getEegChannelValue(eeg);
+                df.eegBand[eeg.ordinal()] = packet.getEegChannelValue(eeg);
             }
         }
 
@@ -502,12 +514,12 @@ public class MuseSensor extends DsSensor {
 
         @Override
         public void receiveMuseDataPacket(final MuseDataPacket p, final Muse muse) {
-            mSensor.receiveMuseDataPacket(p, muse);
+            mSensor.receiveMuseDataPacket(p);
         }
 
         @Override
         public void receiveMuseArtifactPacket(final MuseArtifactPacket p, final Muse muse) {
-            mSensor.receiveMuseArtifactPacket(p, muse);
+            mSensor.receiveMuseArtifactPacket(p);
         }
     }
 }

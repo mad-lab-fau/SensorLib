@@ -1,21 +1,38 @@
 package de.fau.sensorlib.dataframe;
 
 /**
- * Created by Robert on 10/31/16.
+ * EEG data frame.
  */
-
 public interface EegDataFrame {
 
-    double getEegSample();
+    /**
+     * @return Returns the raw EEG samples
+     */
+    double[] getRawEeg();
 
-    double getAlphaBandSample();
+    /**
+     * @return Returns the Alpha band samples
+     */
+    double[] getAlphaBand();
 
-    double getBetaBandSample();
+    /**
+     * @return Returns the Beta band samples
+     */
+    double[] getBetaBand();
 
-    double getGammaBandSample();
+    /**
+     * @return Returns the Gamma band samples
+     */
+    double[] getGammaBand();
 
-    double getThetaBandSample();
+    /**
+     * @return Returns the Theta band samples
+     */
+    double[] getThetaBand();
 
-    double getDeltaBandSample();
+    /**
+     * @return Returns the Delta band samples
+     */
+    double[] getDeltaBand();
 
 }
