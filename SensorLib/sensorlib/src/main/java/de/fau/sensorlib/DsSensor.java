@@ -40,7 +40,6 @@ public abstract class DsSensor extends SensorInfo {
     public static final String DATA_BROADCAST_INTENT_ACTION = "de.fau.sensorlib.DataBroadcast";
 
 
-
     /**
      * The sampling rate in Hz that is used to acquire data samples from the sensor.
      */

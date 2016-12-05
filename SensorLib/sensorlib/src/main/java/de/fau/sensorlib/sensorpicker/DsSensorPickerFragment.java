@@ -341,7 +341,7 @@ public class DsSensorPickerFragment extends DialogFragment {
 
         // Start with BLE scan...
         try {
-            DsSensorManager.searchBleDevices(getActivity(), new SensorFoundCallback() {
+            DsSensorManager.searchBleDevices(new SensorFoundCallback() {
                 @Override
                 public boolean onKnownSensorFound(SensorInfo sensor) {
                     return true;

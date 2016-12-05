@@ -279,17 +279,16 @@ public class DsSensorManager {
     /**
      * Search for BLE devices.
      *
-     * @param activity The calling activity
      * @param callback a callback implementation that receives notifications for found sensors.
      */
-    public static void searchBleDevices(Activity activity, final SensorFoundCallback callback) throws Exception {
+    public static void searchBleDevices(final SensorFoundCallback callback) throws Exception {
 
-        // check if Bluetooth is available (if not, it throws an exception) and enabled before scanning for Ble devices.
+        /*// check if Bluetooth is available (if not, it throws an exception) and enabled before scanning for Ble devices.
         enableBluetooth(activity);
 
         if (checkBtLePermissions(activity, false) == PERMISSIONS_MISSING) {
             throw new DsException(DsExceptionType.permissionsMissing);
-        }
+        }*/
 
         sBleScanner = BluetoothAdapter.getDefaultAdapter().getBluetoothLeScanner();
         if (sBleScanner == null) {

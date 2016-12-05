@@ -122,7 +122,7 @@ public class MuseSensor extends DsSensor {
 
         @Override
         public double[] getAlphaBand() {
-            if (packetType != MuseDataPacketType.ALPHA_ABSOLUTE) {
+            if (packetType != MuseDataPacketType.ALPHA_RELATIVE) {
                 return null;
             }
             return eegBand;
@@ -130,7 +130,7 @@ public class MuseSensor extends DsSensor {
 
         @Override
         public double[] getBetaBand() {
-            if (packetType != MuseDataPacketType.BETA_ABSOLUTE) {
+            if (packetType != MuseDataPacketType.BETA_RELATIVE) {
                 return null;
             }
             return eegBand;
@@ -138,7 +138,7 @@ public class MuseSensor extends DsSensor {
 
         @Override
         public double[] getGammaBand() {
-            if (packetType != MuseDataPacketType.GAMMA_ABSOLUTE) {
+            if (packetType != MuseDataPacketType.GAMMA_RELATIVE) {
                 return null;
             }
             return eegBand;
@@ -146,7 +146,7 @@ public class MuseSensor extends DsSensor {
 
         @Override
         public double[] getThetaBand() {
-            if (packetType != MuseDataPacketType.THETA_ABSOLUTE) {
+            if (packetType != MuseDataPacketType.THETA_RELATIVE) {
                 return null;
             }
             return eegBand;
@@ -154,7 +154,7 @@ public class MuseSensor extends DsSensor {
 
         @Override
         public double[] getDeltaBand() {
-            if (packetType != MuseDataPacketType.DELTA_ABSOLUTE) {
+            if (packetType != MuseDataPacketType.DELTA_RELATIVE) {
                 return null;
             }
             return eegBand;
@@ -278,18 +278,27 @@ public class MuseSensor extends DsSensor {
 
     @Override
     public void disconnect() {
-        mMuse.disconnect(true);
         super.disconnect();
+        mMuse.disconnect(true);
+        sendDisconnected();
     }
 
     @Override
     public void startStreaming() {
+        for (HardwareSensor sensor : mSelectedHwSensors) {
+            registerListener(sensor);
+        }
         mMuse.enableDataTransmission(true);
+        sendStartStreaming();
     }
 
     @Override
     public void stopStreaming() {
         mMuse.enableDataTransmission(false);
+        for (HardwareSensor sensor : mSelectedHwSensors) {
+            unregisterListener(sensor);
+        }
+        sendStopStreaming();
     }
 
     private void onMusesFound() {
@@ -307,18 +316,17 @@ public class MuseSensor extends DsSensor {
         }
     }
 
-    @Override
-    public boolean useHardwareSensor(HardwareSensor sensor) {
+    private void registerListener(HardwareSensor sensor) {
         switch (sensor) {
             case EEG_RAW:
                 mMuse.registerDataListener(mDataListener, MuseDataPacketType.EEG);
                 break;
             case EEG_FREQ_BANDS:
-                mMuse.registerDataListener(mDataListener, MuseDataPacketType.ALPHA_ABSOLUTE);
-                mMuse.registerDataListener(mDataListener, MuseDataPacketType.BETA_ABSOLUTE);
-                mMuse.registerDataListener(mDataListener, MuseDataPacketType.GAMMA_ABSOLUTE);
-                mMuse.registerDataListener(mDataListener, MuseDataPacketType.DELTA_ABSOLUTE);
-                mMuse.registerDataListener(mDataListener, MuseDataPacketType.THETA_ABSOLUTE);
+                mMuse.registerDataListener(mDataListener, MuseDataPacketType.ALPHA_RELATIVE);
+                mMuse.registerDataListener(mDataListener, MuseDataPacketType.BETA_RELATIVE);
+                mMuse.registerDataListener(mDataListener, MuseDataPacketType.GAMMA_RELATIVE);
+                mMuse.registerDataListener(mDataListener, MuseDataPacketType.DELTA_RELATIVE);
+                mMuse.registerDataListener(mDataListener, MuseDataPacketType.THETA_RELATIVE);
                 break;
             case ACCELEROMETER:
                 mMuse.registerDataListener(mDataListener, MuseDataPacketType.ACCELEROMETER);
@@ -327,7 +335,27 @@ public class MuseSensor extends DsSensor {
                 mMuse.registerDataListener(mDataListener, MuseDataPacketType.GYRO);
                 break;
         }
-        return super.useHardwareSensor(sensor);
+    }
+
+    private void unregisterListener(HardwareSensor sensor) {
+        switch (sensor) {
+            case EEG_RAW:
+                mMuse.unregisterDataListener(mDataListener, MuseDataPacketType.EEG);
+                break;
+            case EEG_FREQ_BANDS:
+                mMuse.unregisterDataListener(mDataListener, MuseDataPacketType.ALPHA_RELATIVE);
+                mMuse.unregisterDataListener(mDataListener, MuseDataPacketType.BETA_RELATIVE);
+                mMuse.unregisterDataListener(mDataListener, MuseDataPacketType.GAMMA_RELATIVE);
+                mMuse.unregisterDataListener(mDataListener, MuseDataPacketType.DELTA_RELATIVE);
+                mMuse.unregisterDataListener(mDataListener, MuseDataPacketType.THETA_RELATIVE);
+                break;
+            case ACCELEROMETER:
+                mMuse.unregisterDataListener(mDataListener, MuseDataPacketType.ACCELEROMETER);
+                break;
+            case GYROSCOPE:
+                mMuse.unregisterDataListener(mDataListener, MuseDataPacketType.GYRO);
+                break;
+        }
     }
 
     public boolean shouldUseArtifactSensor(boolean enable) {
@@ -360,12 +388,14 @@ public class MuseSensor extends DsSensor {
         }
 
         if (currentState == ConnectionState.CONNECTED) {
-            Log.d(TAG, "Muse connected:" + muse.getName());
+            Log.d(TAG, "Muse connected: " + muse.getName());
             sendConnected();
         }
 
+        //if (currentState == ConnectionState.)
+
         if (currentState == ConnectionState.DISCONNECTED) {
-            Log.d(TAG, "Muse disconnected:" + muse.getName());
+            Log.d(TAG, "Muse disconnected: " + muse.getName());
             // We have disconnected from the headband, so set our cached copy to null.
             this.mMuse = null;
             sendDisconnected();
@@ -382,11 +412,11 @@ public class MuseSensor extends DsSensor {
 
         switch (packet.packetType()) {
             case EEG:
-            case ALPHA_ABSOLUTE:
-            case BETA_ABSOLUTE:
-            case DELTA_ABSOLUTE:
-            case THETA_ABSOLUTE:
-            case GAMMA_ABSOLUTE:
+            case ALPHA_RELATIVE:
+            case BETA_RELATIVE:
+            case DELTA_RELATIVE:
+            case THETA_RELATIVE:
+            case GAMMA_RELATIVE:
                 df = extractEegChannels(packet);
                 break;
             case ACCELEROMETER:
@@ -414,7 +444,7 @@ public class MuseSensor extends DsSensor {
      * @param p The artifact packet with the data from the headband.
      */
     private void receiveMuseArtifactPacket(final MuseArtifactPacket p) {
-        extractArtifactChannels(p);
+        sendNewData(extractArtifactChannels(p));
     }
 
     @Override
