@@ -43,6 +43,9 @@ public class DsSensorManager {
     public static final int REQUEST_ENABLE_BT = 0xBAAD;
     public static final int REQUEST_PERMISSIONS = 0xF00D;
 
+    public static final int BT_ENABLED = 0;
+
+    public static final int PERMISSIONS_GRANTED = 0;
     public static final int PERMISSIONS_MISSING = -1;
 
     private static final String[] PERMISSIONS_BT_LE =
@@ -183,7 +186,7 @@ public class DsSensorManager {
             throw new DsException(DsExceptionType.btNotSupported);
         }
         if (adapter.isEnabled()) {
-            return 0;
+            return BT_ENABLED;
         }
         Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
         activity.startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
@@ -199,7 +202,7 @@ public class DsSensorManager {
      */
     public static int checkBtLePermissions(Activity activity, boolean requestPermissions) throws Exception {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return 0;
+            return PERMISSIONS_GRANTED;
         }
 
         if (!isBleSupported(activity)) {
@@ -229,7 +232,7 @@ public class DsSensorManager {
             }
         }
 
-        return 0;
+        return PERMISSIONS_GRANTED;
     }
 
     /**
@@ -257,7 +260,7 @@ public class DsSensorManager {
                 }
             }
         }
-        return 0;
+        return PERMISSIONS_GRANTED;
     }
 
 

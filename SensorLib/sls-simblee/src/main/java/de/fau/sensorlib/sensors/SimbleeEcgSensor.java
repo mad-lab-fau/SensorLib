@@ -41,6 +41,8 @@ public class SimbleeEcgSensor extends DsSensor {
 
     private static final String TAG = SimbleeEcgSensor.class.getSimpleName();
 
+    public static final String DEVICE_NAME = "Simblee";
+
     public final static String ACTION_CONNECTED =
             "com.simblee.ACTION_CONNECTED";
     public final static String ACTION_DISCONNECTED =
