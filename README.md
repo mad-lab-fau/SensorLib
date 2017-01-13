@@ -26,8 +26,8 @@ repositories {
 
 dependencies {
     ...
-    compile(name: ':sensorlib', ext: 'aar')
-    compile(name: ':sls-tek', ext: 'aar')
+    compile(name: 'sensorlib', ext: 'aar')
+    compile(name: 'sls-tek', ext: 'aar')
     ...
 }
 ```
