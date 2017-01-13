@@ -139,12 +139,8 @@ public class FitnessShirt extends DsSensor {
     }
 
     @Override
-    public boolean connect() {
-        try {
-            super.connect();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public boolean connect() throws Exception {
+        super.connect();
 
         btDevice = DsSensorManager.findBtDevice(mDeviceAddress);
         if (btDevice == null)

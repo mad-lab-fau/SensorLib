@@ -44,8 +44,6 @@ public class DsScanCallback extends ScanCallback {
         mScannedAddresses.add(result.getDevice().getAddress());
 
         Log.d(TAG, "New BLE device: " + result.getDevice().getName() + "@" + result.getRssi());
-
-
         SensorInfo s = new SensorInfo(result.getDevice().getName(), result.getDevice().getAddress());
 
         boolean ret;

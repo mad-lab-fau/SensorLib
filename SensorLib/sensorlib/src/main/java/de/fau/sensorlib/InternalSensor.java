@@ -28,8 +28,9 @@ import de.fau.sensorlib.dataframe.SensorDataFrame;
  */
 public class InternalSensor extends DsSensor implements SensorEventListener {
 
-    private SensorManager mSensorManager;
+    public static final SensorInfo ANDROID_DEVICE_SENSORS = new SensorInfo("<Internal Sensor>", "n/a", KnownSensor.INTERNAL);
 
+    private SensorManager mSensorManager;
 
     /**
      * Combine all possible single data frames into one sensor specific data frame

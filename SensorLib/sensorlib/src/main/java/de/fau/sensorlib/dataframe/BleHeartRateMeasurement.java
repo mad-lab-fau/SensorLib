@@ -22,6 +22,7 @@ public class BleHeartRateMeasurement extends SensorDataFrame implements HeartRat
     byte mFlags;
     int mBeatsPerMinute;
     int mEnergyExpendedInJoule;
+    boolean mHasSensorContact;
     List<Double> mRrIntervals = new ArrayList<>();
 
     public BleHeartRateMeasurement(BluetoothGattCharacteristic c, DsSensor sensor) {
@@ -45,7 +46,7 @@ public class BleHeartRateMeasurement extends SensorDataFrame implements HeartRat
 
         if (hasSensorContactStatus()) {
             if ((mFlags & (0x01 << 1)) != 0) {
-                // TODO
+                mHasSensorContact = true;
             }
         }
 

@@ -5,7 +5,9 @@ import java.util.EnumSet;
 import de.fau.sensorlib.DsSensor.HardwareSensor;
 
 /**
- * List of all known sensors implemented in the SensorLib with a descriptive and identifying String for each.
+ * List of all known sensors implemented in the SensorLib with
+ * a descriptive and identifying String for each, a set of available hardware sensors,
+ * and if the sensor device offers battery measurement.
  */
 public enum KnownSensor {
     // =============================================================================================
@@ -105,6 +107,13 @@ public enum KnownSensor {
     SMARTBAND2("Smartband 2", new String[]{"SWR12"},
             EnumSet.of(
                     HardwareSensor.HEART_RATE
+            ), true),
+    MUSE("Muse", new String[]{"Muse"},
+            EnumSet.of(
+                    HardwareSensor.EEG_RAW,
+                    HardwareSensor.EEG_FREQ_BANDS,
+                    HardwareSensor.GYROSCOPE,
+                    HardwareSensor.ACCELEROMETER
             ), true);
     // =============================================================================================
 
@@ -125,7 +134,7 @@ public enum KnownSensor {
     /**
      * Boolean indicating whether the sensor device offers battery measurement
      */
-    boolean mHasBatteryMeasurement;
+    private boolean mHasBatteryMeasurement;
 
     /**
      * Default constructor.
@@ -140,10 +149,20 @@ public enum KnownSensor {
         mHasBatteryMeasurement = hasBatteryMeasurement;
     }
 
+    /**
+     * Returns a set of available hardware sensors.
+     *
+     * @return Set of available hardware sensors for the sensor device
+     */
     public EnumSet<HardwareSensor> getAvailableSensors() {
         return mAvailableSensors;
     }
 
+    /**
+     * Checks if the sensor offers battery measurement.
+     *
+     * @return true if battery measurement is available, false otherwise
+     */
     public boolean hasBatteryMeasurement() {
         return mHasBatteryMeasurement;
     }
@@ -156,6 +175,7 @@ public enum KnownSensor {
      * @return the KnownSensors enum corresponding to the given deviceName or null if it could not be associated with any entry.
      */
     public static KnownSensor inferSensorClass(String deviceName, String deviceAddress) {
+        // TODO: Do we need the device address as parameter?
         for (KnownSensor s : KnownSensor.values()) {
             if (s.mIdentifyingKeywords == null || s.mIdentifyingKeywords.length <= 0) {
                 continue;

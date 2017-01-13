@@ -40,7 +40,6 @@ public abstract class DsSensor extends SensorInfo {
     public static final String DATA_BROADCAST_INTENT_ACTION = "de.fau.sensorlib.DataBroadcast";
 
 
-
     /**
      * The sampling rate in Hz that is used to acquire data samples from the sensor.
      */
@@ -98,6 +97,8 @@ public abstract class DsSensor extends SensorInfo {
         TEMPERATURE("TEMP"),
         ECG("ECG"),
         EMG("EMG"),
+        EEG_RAW("EEG"),
+        EEG_FREQ_BANDS("EEG"),
         HEART_RATE("HR"),
         RESPIRATION("RESP"),
         BLOOD_PRESSURE("BP"),
@@ -319,7 +320,7 @@ public abstract class DsSensor extends SensorInfo {
      * If no hardware sensor was selected by calling one of the useHardwareSensor(s) methods, all available hardware sensors will automatically be used.
      *
      * @return true if the connection has been established successfully. False otherwise.
-     * @throws Exception
+     * @throws DsException
      */
     @CallSuper
     public boolean connect() throws Exception {
