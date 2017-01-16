@@ -38,7 +38,7 @@ public class DsScanCallback extends ScanCallback {
     public synchronized void onScanResult(int callbackType, ScanResult result) {
         // check if we already reported this device in this scan iteration
         if (mScannedAddresses.contains(result.getDevice().getAddress())) {
-            Log.d(TAG, "Skipping BLE device: already discovered.");
+            //Log.d(TAG, "Skipping BLE device: already discovered.");
             return;
         }
         mScannedAddresses.add(result.getDevice().getAddress());

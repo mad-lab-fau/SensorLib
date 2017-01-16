@@ -13,7 +13,7 @@ public enum KnownSensor {
     // =============================================================================================
     // = List of all implemented sensors in the SensorLib
     // =============================================================================================
-    INTERNAL("<Internal>", new String[]{"n/a"},
+    INTERNAL("<Internal>", new String[]{"Internal"},
             EnumSet.of(
                     HardwareSensor.ACCELEROMETER,
                     HardwareSensor.GYROSCOPE,
@@ -29,7 +29,7 @@ public enum KnownSensor {
                     HardwareSensor.class
             ), false),
 
-    GENERIC_SIMULATED("Generic Simulated Sensor", new String[]{"n/a"},
+    GENERIC_SIMULATED("Generic Simulated Sensor", new String[]{"Simulator"},
             EnumSet.noneOf(
                     HardwareSensor.class
             ), true),
