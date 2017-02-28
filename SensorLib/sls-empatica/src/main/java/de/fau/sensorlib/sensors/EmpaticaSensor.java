@@ -19,10 +19,9 @@ import com.empatica.empalink.config.EmpaStatus;
 import com.empatica.empalink.delegate.EmpaDataDelegate;
 import com.empatica.empalink.delegate.EmpaStatusDelegate;
 
-import java.util.EnumSet;
-
 import de.fau.sensorlib.DsSensor;
 import de.fau.sensorlib.SensorDataProcessor;
+import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.AccelDataFrame;
 import de.fau.sensorlib.dataframe.BloodVolumePressureDataFrame;
 import de.fau.sensorlib.dataframe.GalvanicSkinResponseDataFrame;
@@ -46,10 +45,12 @@ import de.fau.sensorlib.dataframe.SimpleDataFrame;
  * (4) sensor found notification: connect to the sensor
  */
 public class EmpaticaSensor extends DsSensor {
-    private static final String API_KEY = "91ccc9f23095423aa29af3802c737e41";
+    private static final String API_KEY = "2e588653185f41e2b59c26868e04dd53";
     private EmpaDeviceManager mDeviceManager = null;
 
     private static final double EMPA_TIMESTAMP_TO_MILLISECONDS = 1000d;
+
+    private EmpaStatus mEmpaStatus;
 
     public static class EmpaticaAccelDataFrame extends SensorDataFrame implements AccelDataFrame {
         double ax, ay, az;
@@ -146,18 +147,18 @@ public class EmpaticaSensor extends DsSensor {
         @Override
         public void didUpdateStatus(EmpaStatus empaStatus) {
             Log.d(this.getClass().getSimpleName(), "didUpdateStatus: " + empaStatus.name());
-
+            mEmpaStatus = empaStatus;
             // ready signalized that the Empatica-API can be used
             if (empaStatus == EmpaStatus.READY) {
                 sendSensorCreated();
 
                 // if we have a connection request pending, we immediately start searching for the sensor.
-                if (getState() == SensorState.CONNECTING) {
-                    mDeviceManager.startScanning();
+                /*if (getState() == SensorState.CONNECTING) {
+                    Log.e(TAG, "connecting...");
                 } else {
                     // if no connection request was made, set sensor to initialized so we wait for a call to connect before searching for the sensor
                     setState(SensorState.INITIALIZED);
-                }
+                }*/
             } else if (empaStatus == EmpaStatus.CONNECTED) {
                 Log.d(getDeviceName(), "connected.");
                 setState(SensorState.CONNECTED);
@@ -245,34 +246,30 @@ public class EmpaticaSensor extends DsSensor {
         }
     }
 
+    public EmpaticaSensor(Context context, SensorInfo knownSensor, SensorDataProcessor dataHandler) {
+        this(context, knownSensor.getName(), knownSensor.getDeviceAddress(), dataHandler);
+    }
 
     public EmpaticaSensor(Context context, String deviceName, String deviceAddress, SensorDataProcessor dataHandler) {
         super(context, deviceName, deviceAddress, dataHandler);
-        //init( context );
+        init(context);
     }
 
     public EmpaticaSensor(Context context, String deviceName, String deviceAddress, SensorDataProcessor dataHandler, double desiredSamplingRate) {
         super(context, deviceName, deviceAddress, dataHandler, desiredSamplingRate);
-        //init( context );
+        init(context);
     }
 
     private void init(Context context) {
         mInternalHandler = new EmpaticaInternalHandler(this);
         mDeviceManager = new EmpaDeviceManager(context, (EmpaDataDelegate) mInternalHandler, (EmpaStatusDelegate) mInternalHandler);
         mDeviceManager.authenticateWithAPIKey(API_KEY);
-        //sendSensorCreated();
     }
 
     @Override
     public boolean connect() throws Exception {
         super.connect();
-        //if (getState() == SensorState.INITIALIZED)
-        {
-            //  mDeviceManager.startScanning();
-        }
-        init(mContext);
-
-        setState(SensorState.CONNECTING);
+        mDeviceManager.startScanning();
 
         return true;
     }
@@ -280,7 +277,9 @@ public class EmpaticaSensor extends DsSensor {
     @Override
     public void disconnect() {
         super.disconnect();
-        mDeviceManager.disconnect();
+        if (mDeviceManager != null) {
+            mDeviceManager.disconnect();
+        }
         sendDisconnected();
     }
 
@@ -299,6 +298,10 @@ public class EmpaticaSensor extends DsSensor {
     @Override
     public int getBatteryLevel() {
         return mBatteryLevel;
+    }
+
+    public EmpaStatus getEmpaStatus() {
+        return mEmpaStatus;
     }
 
 }

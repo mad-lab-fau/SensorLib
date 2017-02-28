@@ -110,10 +110,7 @@ public class MuseSensor extends DsSensor {
 
         @Override
         public double[] getRawEeg() {
-            if (packetType != MuseDataPacketType.EEG) {
-                return null;
-            }
-            return eegRaw;
+            return (packetType == MuseDataPacketType.EEG) ? eegBand : null;
         }
 
         public double[] getEegBand() {
@@ -122,42 +119,27 @@ public class MuseSensor extends DsSensor {
 
         @Override
         public double[] getAlphaBand() {
-            if (packetType != MuseDataPacketType.ALPHA_RELATIVE) {
-                return null;
-            }
-            return eegBand;
+            return (packetType == MuseDataPacketType.ALPHA_RELATIVE) ? eegBand : null;
         }
 
         @Override
         public double[] getBetaBand() {
-            if (packetType != MuseDataPacketType.BETA_RELATIVE) {
-                return null;
-            }
-            return eegBand;
+            return (packetType == MuseDataPacketType.BETA_RELATIVE) ? eegBand : null;
         }
 
         @Override
         public double[] getGammaBand() {
-            if (packetType != MuseDataPacketType.GAMMA_RELATIVE) {
-                return null;
-            }
-            return eegBand;
+            return (packetType == MuseDataPacketType.GAMMA_RELATIVE) ? eegBand : null;
         }
 
         @Override
         public double[] getThetaBand() {
-            if (packetType != MuseDataPacketType.THETA_RELATIVE) {
-                return null;
-            }
-            return eegBand;
+            return (packetType == MuseDataPacketType.THETA_RELATIVE) ? eegBand : null;
         }
 
         @Override
         public double[] getDeltaBand() {
-            if (packetType != MuseDataPacketType.DELTA_RELATIVE) {
-                return null;
-            }
-            return eegBand;
+            return (packetType == MuseDataPacketType.DELTA_RELATIVE) ? eegBand : null;
         }
     }
 
@@ -279,7 +261,7 @@ public class MuseSensor extends DsSensor {
     @Override
     public void disconnect() {
         super.disconnect();
-        mMuse.disconnect(true);
+        mMuse.disconnect();
         sendDisconnected();
     }
 
