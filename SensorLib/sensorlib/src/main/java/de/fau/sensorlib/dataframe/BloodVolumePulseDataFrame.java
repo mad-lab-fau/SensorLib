@@ -10,6 +10,6 @@ package de.fau.sensorlib.dataframe;
 /**
  * Blood volume pressure.
  */
-public interface BloodVolumePressureDataFrame {
-    double getBloodVolumePressure();
+public interface BloodVolumePulseDataFrame {
+    double getBloodVolumePulse();
 }

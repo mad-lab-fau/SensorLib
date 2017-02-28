@@ -23,8 +23,8 @@ import de.fau.sensorlib.DsSensor;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.AccelDataFrame;
-import de.fau.sensorlib.dataframe.BloodVolumePressureDataFrame;
-import de.fau.sensorlib.dataframe.GalvanicSkinResponseDataFrame;
+import de.fau.sensorlib.dataframe.BloodVolumePulseDataFrame;
+import de.fau.sensorlib.dataframe.EdaDataFrame;
 import de.fau.sensorlib.dataframe.HeartRateDataFrame;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
 import de.fau.sensorlib.dataframe.SimpleDataFrame;
@@ -84,7 +84,7 @@ public class EmpaticaSensor extends DsSensor {
         }
     }
 
-    public static class EmpaticaBvpDataFrame extends SensorDataFrame implements BloodVolumePressureDataFrame {
+    public static class EmpaticaBvpDataFrame extends SensorDataFrame implements BloodVolumePulseDataFrame {
         double bvp;
 
         public EmpaticaBvpDataFrame(DsSensor fromSensor, double timestamp, double bvp) {
@@ -93,7 +93,7 @@ public class EmpaticaSensor extends DsSensor {
         }
 
         @Override
-        public double getBloodVolumePressure() {
+        public double getBloodVolumePulse() {
             return bvp;
         }
     }
@@ -117,7 +117,7 @@ public class EmpaticaSensor extends DsSensor {
         }
     }
 
-    public static class EmpaticaGsrDataFrame extends SensorDataFrame implements GalvanicSkinResponseDataFrame {
+    public static class EmpaticaEdaDataFrame extends SensorDataFrame implements EdaDataFrame {
         double gsr;
 
         /**
@@ -126,13 +126,13 @@ public class EmpaticaSensor extends DsSensor {
          * @param fromSensor the sensor from which this data frame originated.
          * @param timestamp  the timestamp in milliseconds when this data frame was generated on the sensor.
          */
-        public EmpaticaGsrDataFrame(DsSensor fromSensor, double timestamp, double gsr) {
+        public EmpaticaEdaDataFrame(DsSensor fromSensor, double timestamp, double gsr) {
             super(fromSensor, timestamp);
             this.gsr = gsr;
         }
 
         @Override
-        public double getGalvanicSkinResponse() {
+        public double getElectrodermalActivity() {
             return gsr;
         }
     }
@@ -211,7 +211,7 @@ public class EmpaticaSensor extends DsSensor {
         @Override
         public void didReceiveGSR(float gsr, double timestamp) {
             // galvanic skin response
-            sendNewData(new EmpaticaGsrDataFrame(this.getSensor(), timestamp * EMPA_TIMESTAMP_TO_MILLISECONDS, gsr));
+            sendNewData(new EmpaticaEdaDataFrame(this.getSensor(), timestamp * EMPA_TIMESTAMP_TO_MILLISECONDS, gsr));
         }
 
         @Override
@@ -228,7 +228,7 @@ public class EmpaticaSensor extends DsSensor {
 
         @Override
         public void didReceiveTemperature(float temp, double timestamp) {
-            //Log.d( this.getClass().getSimpleName(), "Temp: " + temp );
+            Log.d(this.getClass().getSimpleName(), "Temp: " + temp);
             sendNewData(new SimpleDataFrame(this.getSensor(), timestamp * EMPA_TIMESTAMP_TO_MILLISECONDS, 3, temp));
         }
 
