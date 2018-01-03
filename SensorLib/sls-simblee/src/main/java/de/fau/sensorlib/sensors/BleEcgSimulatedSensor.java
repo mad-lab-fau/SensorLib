@@ -183,15 +183,11 @@ public class BleEcgSimulatedSensor extends SimulatedSensor {
         try {
             TextUtils.SimpleStringSplitter splitter = new TextUtils.SimpleStringSplitter(mSeparator);
             String line;
-            // check if line contains recorded values
-            int c = 0;
             int timeStamp = 0;
             while ((line = mBufferedReader.readLine()) != null) {
-                // file contains values
-                if (c == 0) {
-                    c++;
+                if (line.length() == 0) {
+                    continue;
                 }
-
                 // new instance
                 splitter.setString(line);
                 int time = 0;
@@ -200,7 +196,12 @@ public class BleEcgSimulatedSensor extends SimulatedSensor {
                     time = timeStamp++;
                 }
                 if (splitter.hasNext()) {
-                    ecg = Double.parseDouble(splitter.next());
+                    try {
+                        ecg = Double.parseDouble(splitter.next());
+                    } catch (NumberFormatException e) {
+                        Log.e(TAG, e.getMessage());
+                        continue;
+                    }
                 }
                 BleEcgSensor.BleEcgDataFrame data = new BleEcgSensor.BleEcgDataFrame(this, time, ecg);
 
@@ -216,8 +217,8 @@ public class BleEcgSimulatedSensor extends SimulatedSensor {
                     return;
                 }
             }
-            sendNotification("Record ended.");
             stopStreaming();
+            sendNotification("Record ended.");
         } catch (Exception e) {
             Log.e(TAG, "Error during data reading", e);
         }

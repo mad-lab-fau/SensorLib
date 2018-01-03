@@ -108,6 +108,10 @@ public enum KnownSensor {
             EnumSet.of(
                     HardwareSensor.HEART_RATE
             ), true),
+    FIT_SMART("FIT SMART", new String[]{"FIT SMART"},
+            EnumSet.of(
+                    HardwareSensor.HEART_RATE
+            ), true),
     MUSE("Muse", new String[]{"Muse"},
             EnumSet.of(
                     HardwareSensor.EEG_RAW,

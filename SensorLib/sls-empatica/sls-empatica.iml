@@ -115,5 +115,6 @@
     <orderEntry type="library" exported="" name="empalink-2.1" level="project" />
     <orderEntry type="library" exported="" name="cardview-v7-24.2.1" level="project" />
     <orderEntry type="module" module-name="sensorlib" exported="" />
+    <orderEntry type="library" exported="" name="commons-lang3-3.0" level="project" />
   </component>
 </module>
