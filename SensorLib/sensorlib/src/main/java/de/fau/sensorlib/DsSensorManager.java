@@ -326,8 +326,6 @@ public class DsSensorManager {
     }
 
     public static void searchBleDeviceByNames(final SensorFoundCallback callback, String[] deviceNames) {
-        //Log.e(TAG, "Searching for BLE device...");
-
         List<ScanFilter> filterList = new ArrayList<>();
         for (String name : deviceNames) {
             filterList.add(new ScanFilter.Builder().setDeviceName(name).build());

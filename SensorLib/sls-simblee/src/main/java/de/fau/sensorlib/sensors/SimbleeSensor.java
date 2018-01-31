@@ -64,7 +64,7 @@ public class SimbleeSensor extends DsSensor {
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             String name = gatt.getDevice().getName();
 
-            Log.e(TAG, "error: " + status + ", " + newState);
+            //Log.e(TAG, "error: " + status + ", " + newState);
 
             if (status == BluetoothGatt.GATT_SUCCESS &&
                     newState == BluetoothProfile.STATE_CONNECTED) {
@@ -152,7 +152,7 @@ public class SimbleeSensor extends DsSensor {
 
             if (gatt.getDevice().getName().equals(mName)) {
                 byte[] values = characteristic.getValue();
-                Log.d(TAG, "values: " + Arrays.toString(values));
+                Log.d(TAG, "values: " + characteristic.getStringValue(0));
                 sendNewData(new SimbleeDataFrame(SimbleeSensor.this, timestamp++, values[0]));
             }
         }
