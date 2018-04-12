@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2016 Digital Sports Group, Friedrich-Alexander University Erlangen-Nuremberg (FAU).
+/*
+ * Copyright (C) 2018 Machine Learning and Data Analytics Lab, Friedrich-Alexander-Universität Erlangen-Nürnberg (FAU).
  * <p>
  * This file is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. If you reuse
@@ -8,6 +8,7 @@
 package de.fau.sensorlib;
 
 import de.fau.sensorlib.dataframe.SensorDataFrame;
+import de.fau.sensorlib.sensors.AbstractSensor;
 
 /**
  * Base abstract class for all sensor data processors/handlers.
@@ -26,7 +27,7 @@ public abstract class SensorDataProcessor {
      *
      * @param sensor the corresponding sensor.
      */
-    public void onSensorCreated(DsSensor sensor) {
+    public void onSensorCreated(AbstractSensor sensor) {
     }
 
     /**
@@ -34,7 +35,7 @@ public abstract class SensorDataProcessor {
      *
      * @param sensor the corresponding sensor.
      */
-    public void onConnected(DsSensor sensor) {
+    public void onConnected(AbstractSensor sensor) {
     }
 
     /**
@@ -42,7 +43,7 @@ public abstract class SensorDataProcessor {
      *
      * @param sensor the corresponding sensor.
      */
-    public void onConnecting(DsSensor sensor) {
+    public void onConnecting(AbstractSensor sensor) {
 
     }
 
@@ -51,7 +52,7 @@ public abstract class SensorDataProcessor {
      *
      * @param sensor the corresponding sensor.
      */
-    public void onDisconnected(DsSensor sensor) {
+    public void onDisconnected(AbstractSensor sensor) {
     }
 
     /**
@@ -59,7 +60,7 @@ public abstract class SensorDataProcessor {
      *
      * @param sensor the corresponding sensor.
      */
-    public void onConnectionLost(DsSensor sensor) {
+    public void onConnectionLost(AbstractSensor sensor) {
 
     }
 
@@ -68,7 +69,7 @@ public abstract class SensorDataProcessor {
      *
      * @param sensor the corresponding sensor.
      */
-    public void onStartStreaming(DsSensor sensor) {
+    public void onStartStreaming(AbstractSensor sensor) {
     }
 
     /**
@@ -76,7 +77,7 @@ public abstract class SensorDataProcessor {
      *
      * @param sensor the corresponding sensor.
      */
-    public void onStopStreaming(DsSensor sensor) {
+    public void onStopStreaming(AbstractSensor sensor) {
     }
 
     /**
@@ -86,7 +87,7 @@ public abstract class SensorDataProcessor {
      *
      * @param sensor the corresponding sensor.
      */
-    public void onSamplingRateChanged(DsSensor sensor, double newSamplingRate) {
+    public void onSamplingRateChanged(AbstractSensor sensor, double newSamplingRate) {
     }
 
     /**
@@ -95,6 +96,6 @@ public abstract class SensorDataProcessor {
      * @param sensor       the corresponding sensor.
      * @param notification an object extended class (usually a string) that contains the notification.
      */
-    public void onNotify(DsSensor sensor, Object notification) {
+    public void onNotify(AbstractSensor sensor, Object notification) {
     }
 }

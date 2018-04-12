@@ -12,19 +12,30 @@
         android:layout_height="match_parent"
         android:layout_margin="8dp">
 
+        <CheckBox
+            android:id="@+id/checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginEnd="8dp" />
+
         <TextView
             android:id="@+id/tv_sensor_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
+            android:layout_toEndOf="@id/checkbox"
             android:textSize="16sp" />
 
         <TextView
             android:id="@+id/tv_sensor_address"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/tv_sensor_name" />
+            android:layout_below="@id/tv_sensor_name"
+            android:layout_toEndOf="@id/checkbox"
+            android:textSize="12sp" />
 
         <TextView
             android:id="@+id/tv_sensor_rssi"
@@ -48,9 +59,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_alignParentStart="true"
             android:layout_below="@+id/tv_sensor_address"
             android:layout_marginTop="4dp"
+            android:layout_toEndOf="@id/checkbox"
             android:layout_toStartOf="@+id/iv_battery"
             android:horizontalSpacing="1dp"
             android:numColumns="9"

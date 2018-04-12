@@ -13,7 +13,7 @@ import android.os.SystemClock;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.fau.sensorlib.DsSensor;
+import de.fau.sensorlib.sensors.AbstractSensor;
 
 /**
  * Represents a heart rate measurement specified in the BLE standard.
@@ -25,7 +25,7 @@ public class BleHeartRateMeasurement extends SensorDataFrame implements HeartRat
     boolean mHasSensorContact;
     List<Double> mRrIntervals = new ArrayList<>();
 
-    public BleHeartRateMeasurement(BluetoothGattCharacteristic c, DsSensor sensor) {
+    public BleHeartRateMeasurement(BluetoothGattCharacteristic c, AbstractSensor sensor) {
         super(sensor, SystemClock.elapsedRealtime());
 
         int offset = 0;

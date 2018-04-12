@@ -1,12 +1,26 @@
 <resources>
-    <string name="app_name">SensorLib</string>
-
-    <string name="string_results">Discovery results:</string>
-    <string name="string_discovery">Discovering sensors...</string>
+    <string name="app_name">sensorlib</string>
 
     <string name="string_ok">OK</string>
     <string name="string_cancel">Cancel</string>
-    <string name="string_select_sensors">Select sensors:</string>
 
+    <!-- Sensor Picker -->
+    <string name="string_scan_results">Scan results</string>
+    <string name="string_scan">Scanning for sensors…</string>
+    <string name="string_select_sensors">Select sensors:</string>
     <string name="placeholder_rssi">\@ %1$d dB</string>
+    <string name="placeholder_battery_level">%1$d %%</string>
+
+    <!-- Status Bar -->
+    <string name="status_bar_disconnected">%1$s disconnected</string>
+    <string name="status_bar_connecting">%1$s connecting</string>
+    <string name="status_bar_connected">%1$s connected</string>
+    <string name="status_bar_streaming">%1$s streaming</string>
+    <string name="status_bar_simulating">%1$s simulating</string>
+
+    <!-- Streaming Footer -->
+    <string name="start">Start</string>
+    <string name="pause">Pause</string>
+    <string name="stop">Stop</string>
+    <string name="string_fab">FAB</string>
 </resources>

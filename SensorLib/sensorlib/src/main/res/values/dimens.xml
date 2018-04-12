@@ -1,0 +1,10 @@
+<resources>
+
+    <!-- Battery Bar -->
+    <dimen name="grid_spacing">5dp</dimen>
+
+    <!-- Streaming Footer -->
+    <dimen name="fab_size">56dp</dimen>
+    <dimen name="height_footer">70dp</dimen>
+    <dimen name="overlap_footer">-48dp</dimen>
+</resources>

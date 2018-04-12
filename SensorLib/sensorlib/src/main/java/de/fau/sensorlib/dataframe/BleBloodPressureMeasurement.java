@@ -10,7 +10,7 @@ package de.fau.sensorlib.dataframe;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.os.SystemClock;
 
-import de.fau.sensorlib.DsSensor;
+import de.fau.sensorlib.sensors.AbstractSensor;
 
 /**
  * Blood pressure measurement from the BT LE standard.
@@ -28,7 +28,7 @@ public class BleBloodPressureMeasurement extends SensorDataFrame implements Bloo
     private int mMeasurementStatus;
 
 
-    public BleBloodPressureMeasurement(BluetoothGattCharacteristic c, DsSensor sensor) {
+    public BleBloodPressureMeasurement(BluetoothGattCharacteristic c, AbstractSensor sensor) {
         super(sensor, SystemClock.elapsedRealtime());
         mFlags = c.getValue()[0];
         int offset = 1;

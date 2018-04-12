@@ -27,8 +27,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-import de.fau.sensorlib.DsSensor;
-import de.fau.sensorlib.DsSensorManager;
+import de.fau.sensorlib.BleSensorManager;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.EcgDataFrame;
@@ -37,7 +36,7 @@ import de.fau.sensorlib.dataframe.SensorDataFrame;
 /**
  * Custom BLE ECG sensor implementation.
  */
-public class BleEcgSensor extends DsSensor {
+public class BleEcgSensor extends AbstractSensor {
 
     private static final String TAG = BleEcgSensor.class.getSimpleName();
 
@@ -176,18 +175,18 @@ public class BleEcgSensor extends DsSensor {
         char label;
         public long timestamp;
 
-        public BleEcgDataFrame(DsSensor sensor, long timestamp) {
+        public BleEcgDataFrame(AbstractSensor sensor, long timestamp) {
             super(sensor, timestamp);
 
         }
 
-        public BleEcgDataFrame(DsSensor sensor, long timestamp, double ecg) {
+        public BleEcgDataFrame(AbstractSensor sensor, long timestamp, double ecg) {
             super(sensor, timestamp);
             this.ecg = ecg;
             this.timestamp = timestamp;
         }
 
-        public BleEcgDataFrame(DsSensor sensor, long timestamp, double ecg, char label) {
+        public BleEcgDataFrame(AbstractSensor sensor, long timestamp, double ecg, char label) {
             super(sensor, timestamp);
             this.ecg = ecg;
             this.timestamp = timestamp;
@@ -221,7 +220,7 @@ public class BleEcgSensor extends DsSensor {
     @Override
     public boolean connect() throws Exception {
         super.connect();
-        BluetoothDevice device = DsSensorManager.findBtDevice(mDeviceAddress);
+        BluetoothDevice device = BleSensorManager.findBtDevice(mDeviceAddress);
         if (device != null) {
             mBluetoothGatt = device.connectGatt(mContext, true, mGattCallback);
             mWriter = new BleEcgDataWriter();

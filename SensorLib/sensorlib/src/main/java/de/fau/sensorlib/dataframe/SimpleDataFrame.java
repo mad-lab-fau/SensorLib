@@ -8,7 +8,7 @@
 package de.fau.sensorlib.dataframe;
 
 
-import de.fau.sensorlib.DsSensor;
+import de.fau.sensorlib.sensors.AbstractSensor;
 
 /**
  * A simple implementation of the SensorDataFrame that contains an int identifier and a double value.
@@ -23,7 +23,7 @@ public class SimpleDataFrame extends SensorDataFrame {
      * @param fromSensor the sensor from which this data frame originated.
      * @param timestamp  the timestamp in milliseconds when this data frame was generated on the sensor.
      */
-    public SimpleDataFrame(DsSensor fromSensor, double timestamp, int identifier, double value) {
+    public SimpleDataFrame(AbstractSensor fromSensor, double timestamp, int identifier, double value) {
         super(fromSensor, timestamp);
         mIdentifier = identifier;
         mValue = value;

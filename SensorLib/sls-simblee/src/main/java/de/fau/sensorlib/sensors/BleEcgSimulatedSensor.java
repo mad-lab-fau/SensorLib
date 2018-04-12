@@ -14,7 +14,8 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 
 import de.fau.sensorlib.SensorDataProcessor;
-import de.fau.sensorlib.SimulatedSensor;
+import de.fau.sensorlib.enums.HardwareSensor;
+import de.fau.sensorlib.enums.SensorState;
 import de.fau.shiftlist.ShiftListDouble;
 import de.fau.shiftlist.ShiftListLong;
 
@@ -65,7 +66,7 @@ public class BleEcgSimulatedSensor extends SimulatedSensor {
 
 
     public BleEcgSimulatedSensor(Context context, String deviceName, SensorDataProcessor dataHandler, String fileName, Simulator simType, double samplingRate, boolean liveMode) {
-        super(context, deviceName, dataHandler, fileName, samplingRate, liveMode);
+        super(context, deviceName, fileName, dataHandler, samplingRate, liveMode);
         mSigFileName = fileName;
         mSimType = simType;
     }
@@ -135,7 +136,7 @@ public class BleEcgSimulatedSensor extends SimulatedSensor {
 
     private boolean connectMitBih() {
         // load database record in seperate thread
-        simThread = new Thread(new Runnable() {
+        /*simThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 // get annotation filename
@@ -159,7 +160,7 @@ public class BleEcgSimulatedSensor extends SimulatedSensor {
             }
 
         });
-        simThread.start();
+        simThread.start();*/
         return true;
     }
 
@@ -176,7 +177,6 @@ public class BleEcgSimulatedSensor extends SimulatedSensor {
     }
 
     private void transmitDailyHeartData() {
-
         int samplingInterval = (int) (1000d / this.getSamplingRate());
         Log.d(TAG, "interval: " + samplingInterval + ", samplingrate: " + getSamplingRate());
 

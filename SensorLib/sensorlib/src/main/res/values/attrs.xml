@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="StatusBar">
+        <attr name="state" format="enum">
+            <enum name="undefined" value="0" />
+            <enum name="initialized" value="1" />
+            <enum name="disconnected" value="2" />
+            <enum name="connection_lost" value="3" />
+            <enum name="connecting" value="4" />
+            <enum name="connected" value="5" />
+            <enum name="streaming" value="6" />
+            <enum name="simulating" value="7" />
+        </attr>
+
+        <attr name="sensor_name" format="string" />
+    </declare-styleable>
+
+</resources>

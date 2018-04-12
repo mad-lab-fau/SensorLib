@@ -10,25 +10,25 @@ package de.fau.sensorlib.sensors;
 import android.content.Context;
 import android.os.Handler;
 
-import de.fau.sensorlib.DsBleSensor;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorInfo;
+import de.fau.sensorlib.enums.HardwareSensor;
 
 /**
  * Implementation for the Sony Smartband 2.
  */
-public class Smartband2Sensor extends DsBleSensor {
+public class Smartband2Sensor extends GenericBleSensor {
 
     private static final String TAG = Smartband2Sensor.class.getSimpleName();
 
     private static final String DEVICE_NAME = "SWR12";
 
     public Smartband2Sensor(Context context, SensorInfo knownSensor, SensorDataProcessor dataHandler) {
-        super(context, knownSensor, dataHandler);
+        this(context, knownSensor.getName(), knownSensor.getDeviceAddress(), dataHandler);
     }
 
     public Smartband2Sensor(Context context, String deviceName, String deviceAddress, SensorDataProcessor dataHandler) {
-        super(context, deviceName, deviceAddress, dataHandler);
+        super(context, deviceName, deviceAddress, dataHandler, -1);
     }
 
     @Override

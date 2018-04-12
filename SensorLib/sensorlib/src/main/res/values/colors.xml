@@ -1,8 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- Sensor Picker -->
     <color name="sensor_available">#455A64</color>
     <color name="sensor_not_available">#CFD8DC</color>
 
+
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
+
+    <color name="accent">#F50057</color>
+
+
+    <!-- Status Bar -->
+    <color name="status_bar_disconnected">#F44336</color>
+    <color name="status_bar_connecting">#FF9800</color>
+    <color name="status_bar_connected">#8BC34A</color>
+    <color name="status_bar_streaming">#4CAF50</color>
+    <color name="status_bar_simulating">#03A9F4</color>
+
+    <!-- Streaming Footer -->
+    <color name="button_pause_color">#FFC107</color>
+    <color name="button_pause_color_pressed">#FFA000</color>
+    <color name="button_stop_color">#D32F2F</color>
+    <color name="button_stop_color_pressed">#B71C1C</color>
 
 </resources>

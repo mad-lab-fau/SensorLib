@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2016 Digital Sports Group, Friedrich-Alexander University Erlangen-Nuremberg (FAU).
+/*
+ * Copyright (C) 2018 Machine Learning and Data Analytics Lab, Friedrich-Alexander-Universität Erlangen-Nürnberg (FAU).
  * <p>
  * This file is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. If you reuse
@@ -8,17 +8,28 @@
 package de.fau.sensorlib.dataframe;
 
 /**
- * Created by gradl on 08.10.2015.
+ * Acceleration data frame.
  */
 public interface AccelDataFrame {
 
-    String EXTRA_ACCEL_X = "accX";
-    String EXTRA_ACCEL_Y = "accY";
-    String EXTRA_ACCEL_Z = "accZ";
-
+    /**
+     * Returns the acceleration x value.
+     *
+     * @return x value
+     */
     double getAccelX();
 
+    /**
+     * Returns the acceleration y value.
+     *
+     * @return y value
+     */
     double getAccelY();
 
+    /**
+     * Returns the acceleration z value.
+     *
+     * @return z value
+     */
     double getAccelZ();
 }
