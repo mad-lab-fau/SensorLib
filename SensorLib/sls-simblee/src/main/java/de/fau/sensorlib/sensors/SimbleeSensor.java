@@ -54,6 +54,26 @@ public class SimbleeSensor extends GenericBleSensor {
         BleGattAttributes.addCharacteristic(SIMBLEE_CONFIG, "Simblee Configuration");
     }
 
+    /**
+     * Sensor commands for communication with SimbleeSensor. Used with the Sensor Config Characteristic
+     */
+    private enum SimbleeSensorCommands {
+        /**
+         * Start Streaming Command
+         */
+        START_STREAMING((byte) 0xC2),
+        /**
+         * Stop Streaming Command
+         */
+        STOP_STREAMING((byte) 0xC1);
+
+        private byte cmd;
+
+        SimbleeSensorCommands(byte cmd) {
+            this.cmd = cmd;
+        }
+    }
+
 
     /**
      * Global counter for incoming packages (local counter only has 16 bit)
@@ -83,6 +103,9 @@ public class SimbleeSensor extends GenericBleSensor {
 
     private void extractSensorData(BluetoothGattCharacteristic characteristic) {
         byte[] values = characteristic.getValue();
+        if (values.length == 0) {
+            return;
+        }
         int offset = 0;
         double[] accel = new double[3];
         double[] ecg = new double[2];
@@ -175,17 +198,25 @@ public class SimbleeSensor extends GenericBleSensor {
 
     @Override
     public void startStreaming() {
-        super.startStreaming();
-        if (mLoggingEnabled) {
-            mDataLogger = new SimbleeDataLogger(mContext);
+        if (send(SimbleeSensorCommands.START_STREAMING)) {
+            super.startStreaming();
+            if (mLoggingEnabled) {
+                mDataLogger = new SimbleeDataLogger(mContext);
+            }
+        } else {
+            Log.e(TAG, "startStreaming failed!");
         }
     }
 
     @Override
     public void stopStreaming() {
-        super.stopStreaming();
-        if (mDataLogger != null) {
-            mDataLogger.completeLogger();
+        if (send(SimbleeSensorCommands.STOP_STREAMING)) {
+            super.stopStreaming();
+            if (mDataLogger != null) {
+                mDataLogger.completeLogger();
+            }
+        } else {
+            Log.e(TAG, "stopStreaming failed!");
         }
     }
 
@@ -222,10 +253,24 @@ public class SimbleeSensor extends GenericBleSensor {
         }
     }
 
-    public boolean send(byte[] data) {
-        BluetoothGattCharacteristic characteristic =
-                mStreamingService.getCharacteristic(SIMBLEE_CONFIG);
+    /**
+     * Send command to sensor via Config Characteristic
+     *
+     * @param cmd Sensor Command
+     * @return true if data has been successfully sent, false otherwise
+     */
+    private boolean send(SimbleeSensorCommands cmd) {
+        Log.d(TAG, "Sending " + cmd + " command to " + getName());
+        return send(new byte[]{cmd.cmd});
+    }
 
+    public boolean send(byte[] data) {
+        if (mStreamingService == null) {
+            Log.w(TAG, "Service not found");
+            return false;
+        }
+
+        BluetoothGattCharacteristic characteristic = mStreamingService.getCharacteristic(SIMBLEE_CONFIG);
         if (characteristic == null) {
             Log.w(TAG, "Send characteristic not found");
             return false;
