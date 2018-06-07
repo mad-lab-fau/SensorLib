@@ -27,6 +27,7 @@ public enum HardwareSensor {
     RESPIRATION("RESP"),
     BLOOD_PRESSURE("BP"),
     BLOOD_VOLUME_PRESSURE("BVP"),
+    PPG("PPG"),
     GALVANIC_SKIN_RESPONSE("GSR"),
     ORIENTATION("ORI"),
     QUATERNION("QUA"),

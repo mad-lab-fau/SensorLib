@@ -127,11 +127,12 @@ public enum KnownSensor {
                     HardwareSensor.GYROSCOPE,
                     HardwareSensor.ACCELEROMETER
             ), true),
-    HOOP_SENSOR("Hoop Sensor", new String[]{"NRF52", "Hoop", "HOOP", "Portabiles"},
+    HOOP_SENSOR("Hoop Sensor", new String[]{"Hoop", "HOOP", "Portabiles"},
             EnumSet.of(
                     HardwareSensor.ACCELEROMETER,
                     HardwareSensor.GYROSCOPE
-            ), true);
+            ), true),
+    NILSPOD_PPG("NilsPod_PPG", new String[]{"NRF52"}, EnumSet.of(HardwareSensor.ACCELEROMETER, HardwareSensor.PPG), true);
     // =============================================================================================
 
     /**
