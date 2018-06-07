@@ -6,5 +6,7 @@
     <!-- Streaming Footer -->
     <dimen name="fab_size">56dp</dimen>
     <dimen name="height_footer">70dp</dimen>
+    <dimen name="elevation_fab">5dp</dimen>
+    <dimen name="elevation_fab_pressed">10dp</dimen>
     <dimen name="overlap_footer">-48dp</dimen>
 </resources>

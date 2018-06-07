@@ -19,7 +19,6 @@ import com.empatica.empalink.config.EmpaStatus;
 import com.empatica.empalink.delegate.EmpaDataDelegate;
 import com.empatica.empalink.delegate.EmpaStatusDelegate;
 
-import de.fau.sensorlib.DsSensor;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.AccelDataFrame;
@@ -28,6 +27,7 @@ import de.fau.sensorlib.dataframe.EdaDataFrame;
 import de.fau.sensorlib.dataframe.HeartRateDataFrame;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
 import de.fau.sensorlib.dataframe.SimpleDataFrame;
+import de.fau.sensorlib.enums.SensorState;
 
 /**
  * Empatica sensor (https://www.empatica.com/)
@@ -44,7 +44,7 @@ import de.fau.sensorlib.dataframe.SimpleDataFrame;
  * (3) if a connect call comes in and Empatica API is not READY yet, set sensor state to CONNECTING, otherwise, start search for the sensor
  * (4) sensor found notification: connect to the sensor
  */
-public class EmpaticaSensor extends DsSensor {
+public class EmpaticaSensor extends AbstractSensor {
     private static final String API_KEY = "2e588653185f41e2b59c26868e04dd53";
     private EmpaDeviceManager mDeviceManager = null;
 
@@ -61,7 +61,7 @@ public class EmpaticaSensor extends DsSensor {
          * @param fromSensor the sensor from which this data frame originated.
          * @param timestamp  the timestamp in milliseconds when this data frame was generated on the sensor.
          */
-        public EmpaticaAccelDataFrame(DsSensor fromSensor, double timestamp, double x, double y, double z) {
+        public EmpaticaAccelDataFrame(AbstractSensor fromSensor, double timestamp, double x, double y, double z) {
             super(fromSensor, timestamp);
             ax = x;
             ay = y;
@@ -87,7 +87,7 @@ public class EmpaticaSensor extends DsSensor {
     public static class EmpaticaBvpDataFrame extends SensorDataFrame implements BloodVolumePulseDataFrame {
         double bvp;
 
-        public EmpaticaBvpDataFrame(DsSensor fromSensor, double timestamp, double bvp) {
+        public EmpaticaBvpDataFrame(AbstractSensor fromSensor, double timestamp, double bvp) {
             super(fromSensor, timestamp);
             this.bvp = bvp;
         }
@@ -101,7 +101,7 @@ public class EmpaticaSensor extends DsSensor {
     public static class EmpaticaIbiDataFrame extends SensorDataFrame implements HeartRateDataFrame {
         double ibi;
 
-        public EmpaticaIbiDataFrame(DsSensor fromSensor, double timestamp, double ibi) {
+        public EmpaticaIbiDataFrame(AbstractSensor fromSensor, double timestamp, double ibi) {
             super(fromSensor, timestamp);
             this.ibi = ibi;
         }
@@ -126,7 +126,7 @@ public class EmpaticaSensor extends DsSensor {
          * @param fromSensor the sensor from which this data frame originated.
          * @param timestamp  the timestamp in milliseconds when this data frame was generated on the sensor.
          */
-        public EmpaticaEdaDataFrame(DsSensor fromSensor, double timestamp, double gsr) {
+        public EmpaticaEdaDataFrame(AbstractSensor fromSensor, double timestamp, double gsr) {
             super(fromSensor, timestamp);
             this.gsr = gsr;
         }
@@ -140,7 +140,7 @@ public class EmpaticaSensor extends DsSensor {
 
     private class EmpaticaInternalHandler extends InternalHandler implements EmpaDataDelegate, EmpaStatusDelegate {
 
-        public EmpaticaInternalHandler(DsSensor sensor) {
+        public EmpaticaInternalHandler(AbstractSensor sensor) {
             super(sensor);
         }
 

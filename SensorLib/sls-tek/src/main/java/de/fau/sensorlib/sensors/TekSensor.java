@@ -15,8 +15,6 @@ import android.util.Log;
 import java.util.Arrays;
 import java.util.UUID;
 
-import de.fau.sensorlib.DsBleSensor;
-import de.fau.sensorlib.DsSensor;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.AccelDataFrame;
@@ -33,7 +31,7 @@ import static android.bluetooth.BluetoothGattCharacteristic.FORMAT_SINT8;
 /**
  * Implementation of the Bosch TEK sensor system.
  */
-public class TekSensor extends DsBleSensor {
+public class TekSensor extends GenericBleSensor {
 
     protected static final UUID TEK_CHARACTERISTIC_TOP75_PRIVATE_SERVICE = UUID.fromString("00007500-0000-1000-8000-00805f9b34fb");
     protected static final UUID TEK_CHARACTERISTIC_TOP75_HCTM_SERVICE = UUID.fromString("00007700-0000-1000-8000-00805f9b34fb");
@@ -62,7 +60,7 @@ public class TekSensor extends DsBleSensor {
          * @param fromSensor the sensor from which this data frame originated.
          * @param timestamp  the timestamp in milliseconds when this data frame was generated on the sensor.
          */
-        public TekDataFrame(DsSensor fromSensor, double timestamp) {
+        public TekDataFrame(AbstractSensor fromSensor, double timestamp) {
             super(fromSensor, timestamp);
         }
     }
@@ -82,7 +80,7 @@ public class TekSensor extends DsBleSensor {
          * @param fromSensor the sensor from which this data frame originated.
          * @param timestamp  the timestamp in milliseconds when this data frame was generated on the sensor.
          */
-        public TekImuDataFrame(DsSensor fromSensor, double timestamp) {
+        public TekImuDataFrame(AbstractSensor fromSensor, double timestamp) {
             super(fromSensor, timestamp);
         }
 
@@ -145,7 +143,7 @@ public class TekSensor extends DsBleSensor {
          * @param fromSensor the sensor from which this data frame originated.
          * @param timestamp  the timestamp in milliseconds when this data frame was generated on the sensor.
          */
-        public TekFusionDataFrame(DsSensor fromSensor, double timestamp) {
+        public TekFusionDataFrame(AbstractSensor fromSensor, double timestamp) {
             super(fromSensor, timestamp);
         }
 
@@ -198,7 +196,7 @@ public class TekSensor extends DsBleSensor {
          * @param fromSensor the sensor from which this data frame originated.
          * @param timestamp  the timestamp in milliseconds when this data frame was generated on the sensor.
          */
-        public TekAmbientDataFrame(DsSensor fromSensor, double timestamp) {
+        public TekAmbientDataFrame(AbstractSensor fromSensor, double timestamp) {
             super(fromSensor, timestamp);
         }
 

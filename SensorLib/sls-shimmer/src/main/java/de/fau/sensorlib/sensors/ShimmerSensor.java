@@ -20,21 +20,21 @@ import com.shimmerresearch.driver.Shimmer;
 
 import java.util.Collection;
 
-import de.fau.sensorlib.DsException;
-import de.fau.sensorlib.DsException.DsExceptionType;
-import de.fau.sensorlib.DsSensor;
-import de.fau.sensorlib.DsSensorManager;
+import de.fau.sensorlib.BleSensorManager;
 import de.fau.sensorlib.SensorDataProcessor;
+import de.fau.sensorlib.SensorException;
 import de.fau.sensorlib.dataframe.AccelDataFrame;
 import de.fau.sensorlib.dataframe.EcgDataFrame;
 import de.fau.sensorlib.dataframe.EmgDataFrame;
 import de.fau.sensorlib.dataframe.GyroDataFrame;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
+import de.fau.sensorlib.enums.HardwareSensor;
+import de.fau.sensorlib.enums.SensorState;
 
 /**
  * Implementation of the SHIMMER BT sensors.
  */
-public class ShimmerSensor extends DsSensor {
+public class ShimmerSensor extends AbstractSensor {
     Shimmer shimmer;
     int accelRange = 0;
     CalibratedTimestamp calTimestamp;
@@ -56,7 +56,7 @@ public class ShimmerSensor extends DsSensor {
         double emg;
         char label;
 
-        public ShimmerDataFrame(DsSensor fromSensor, double timestamp) {
+        public ShimmerDataFrame(AbstractSensor fromSensor, double timestamp) {
             super(fromSensor, timestamp);
         }
 
@@ -228,7 +228,7 @@ public class ShimmerSensor extends DsSensor {
     }
 
     public ShimmerSensor(Context context, String macAddress, SensorDataProcessor dataHandler) throws Exception {
-        this(context, DsSensorManager.findBtDevice(macAddress), dataHandler);
+        this(context, BleSensorManager.findBtDevice(macAddress), dataHandler);
     }
 
     public ShimmerSensor(Context context, @NonNull BluetoothDevice btDevice, SensorDataProcessor dataHandler) {
@@ -283,7 +283,7 @@ public class ShimmerSensor extends DsSensor {
         super.connect();
         // check requested sensors
         if (mSelectedHwSensors.isEmpty())
-            throw new DsException(DsExceptionType.noSensorsSelected);
+            throw new SensorException(SensorException.SensorExceptionType.noSensorsSelected);
 
         calTimestamp = new CalibratedTimestamp(mSamplingRate);
         if (shimmer == null) {

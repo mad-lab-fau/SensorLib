@@ -19,20 +19,18 @@ import android.util.Log;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Queue;
 import java.util.UUID;
 
-import de.fau.sensorlib.DsSensor;
-import de.fau.sensorlib.DsSensorManager;
+import de.fau.sensorlib.BleSensorManager;
 import de.fau.sensorlib.SensorDataProcessor;
 
 /**
  * Implementation of the Myo sensor that reports raw EMG data from the Myo band, instead of abstract gestures
  */
-public class MyoRawSensor extends DsSensor {
+public class MyoRawSensor extends AbstractSensor {
 
     private static final String TAG = MyoRawSensor.class.getSimpleName();
 
@@ -318,7 +316,7 @@ public class MyoRawSensor extends DsSensor {
             return mMyoGattCallback.getBluetoothGatt().connect();
         }
 
-        BluetoothDevice device = DsSensorManager.findBtDevice(mDeviceAddress);
+        BluetoothDevice device = BleSensorManager.findBtDevice(mDeviceAddress);
         if (device != null) {
             sendNotification("Connecting to... " + device.getName());
             sendConnecting();

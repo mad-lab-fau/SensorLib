@@ -20,9 +20,6 @@ import com.thalmic.myo.Quaternion;
 import com.thalmic.myo.Vector3;
 import com.thalmic.myo.XDirection;
 
-import java.util.EnumSet;
-
-import de.fau.sensorlib.DsSensor;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.dataframe.AccelDataFrame;
 import de.fau.sensorlib.dataframe.GestureDataFrame;
@@ -35,7 +32,7 @@ import static de.fau.sensorlib.dataframe.GestureDataFrame.Gesture;
 /**
  * Implementation of the Myo band sensor (https://www.myo.com/).
  */
-public class MyoSensor extends DsSensor {
+public class MyoSensor extends AbstractSensor {
 
     public static class MyoAccelDataFrame extends SensorDataFrame implements AccelDataFrame {
 
@@ -47,7 +44,7 @@ public class MyoSensor extends DsSensor {
          * @param fromSensor the sensor from which this data frame originated.
          * @param timestamp  the timestamp in milliseconds when this data frame was generated on the sensor.
          */
-        public MyoAccelDataFrame(DsSensor fromSensor, double timestamp) {
+        public MyoAccelDataFrame(AbstractSensor fromSensor, double timestamp) {
             super(fromSensor, timestamp);
         }
 
@@ -57,7 +54,7 @@ public class MyoSensor extends DsSensor {
          * @param fromSensor the sensor from which this data frame originated.
          * @param timestamp  the timestamp in milliseconds when this data frame was generated on the sensor.
          */
-        public MyoAccelDataFrame(DsSensor fromSensor, double timestamp, double x, double y, double z) {
+        public MyoAccelDataFrame(AbstractSensor fromSensor, double timestamp, double x, double y, double z) {
             super(fromSensor, timestamp);
             ax = x;
             ay = y;
@@ -92,7 +89,7 @@ public class MyoSensor extends DsSensor {
          * @param fromSensor the sensor from which this data frame originated.
          * @param timestamp  the timestamp in milliseconds when this data frame was generated on the sensor.
          */
-        public MyoGyroDataFrame(DsSensor fromSensor, double timestamp) {
+        public MyoGyroDataFrame(AbstractSensor fromSensor, double timestamp) {
             super(fromSensor, timestamp);
         }
 
@@ -102,7 +99,7 @@ public class MyoSensor extends DsSensor {
          * @param fromSensor the sensor from which this data frame originated.
          * @param timestamp  the timestamp in milliseconds when this data frame was generated on the sensor.
          */
-        public MyoGyroDataFrame(DsSensor fromSensor, double timestamp, double x, double y, double z) {
+        public MyoGyroDataFrame(AbstractSensor fromSensor, double timestamp, double x, double y, double z) {
             super(fromSensor, timestamp);
             gx = x;
             gy = y;
@@ -135,7 +132,7 @@ public class MyoSensor extends DsSensor {
          * @param fromSensor the sensor from which this data frame originated.
          * @param timestamp  the timestamp in milliseconds when this data frame was generated on the sensor.
          */
-        public MyoOrientationDataFrame(DsSensor fromSensor, double timestamp) {
+        public MyoOrientationDataFrame(AbstractSensor fromSensor, double timestamp) {
             super(fromSensor, timestamp);
         }
 
@@ -145,7 +142,7 @@ public class MyoSensor extends DsSensor {
          * @param fromSensor the sensor from which this data frame originated.
          * @param timestamp  the timestamp in milliseconds when this data frame was generated on the sensor.
          */
-        public MyoOrientationDataFrame(DsSensor fromSensor, double timestamp, double roll, double pitch, double yaw) {
+        public MyoOrientationDataFrame(AbstractSensor fromSensor, double timestamp, double roll, double pitch, double yaw) {
             super(fromSensor, timestamp);
             this.roll = roll;
             this.pitch = pitch;
@@ -178,7 +175,7 @@ public class MyoSensor extends DsSensor {
          * @param fromSensor the sensor from which this data frame originated.
          * @param timestamp  the timestamp in milliseconds when this data frame was generated on the sensor.
          */
-        public MyoGestureDataFrame(DsSensor fromSensor, double timestamp) {
+        public MyoGestureDataFrame(AbstractSensor fromSensor, double timestamp) {
             super(fromSensor, timestamp);
         }
 
@@ -188,7 +185,7 @@ public class MyoSensor extends DsSensor {
          * @param fromSensor the sensor from which this data frame originated.
          * @param timestamp  the timestamp in milliseconds when this data frame was generated on the sensor.
          */
-        public MyoGestureDataFrame(DsSensor fromSensor, double timestamp, Gesture gesture) {
+        public MyoGestureDataFrame(AbstractSensor fromSensor, double timestamp, Gesture gesture) {
             super(fromSensor, timestamp);
             this.gesture = gesture;
         }

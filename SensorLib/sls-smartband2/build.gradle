@@ -21,5 +21,17 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(path: ':sensorlib')
-    implementation 'com.android.support:appcompat-v7:27.1.0'
+    implementation 'com.android.support:appcompat-v7:27.1.1'
+}
+
+
+tasks.create(name: 'copyApk', type: Copy) {
+    from 'build/outputs/aar'
+    into '../../Precompiled'
+}
+
+tasks.whenTaskAdded { task ->
+    if (task.name == 'mockableAndroidJar') {
+        task.dependsOn 'copyApk'
+    }
 }

@@ -19,8 +19,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.UUID;
 
-import de.fau.sensorlib.DsSensor;
-import de.fau.sensorlib.DsSensorManager;
+import de.fau.sensorlib.BleSensorManager;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.dataframe.AccelDataFrame;
 import de.fau.sensorlib.dataframe.EcgDataFrame;
@@ -31,7 +30,7 @@ import de.fau.sensorlib.dataframe.SensorDataFrame;
 /**
  * Implementation of the Fraunhofer FitnessSHIRT.
  */
-public class FitnessShirt extends DsSensor {
+public class FitnessShirt extends AbstractSensor {
     //generic UUID for serial port protocol
     private static final UUID SPP_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
@@ -55,12 +54,8 @@ public class FitnessShirt extends DsSensor {
         long heartRate;
         int ax, ay, az;
 
-        public FitnessShirtDataFrame(DsSensor fromSensor, double timestamp) {
+        public FitnessShirtDataFrame(AbstractSensor fromSensor, double timestamp) {
             super(fromSensor, timestamp);
-        }
-
-        protected void setTimestamp(double timestamp) {
-            this.timestamp = timestamp;
         }
 
         @Override
@@ -142,7 +137,7 @@ public class FitnessShirt extends DsSensor {
     public boolean connect() throws Exception {
         super.connect();
 
-        btDevice = DsSensorManager.findBtDevice(mDeviceAddress);
+        btDevice = BleSensorManager.findBtDevice(mDeviceAddress);
         if (btDevice == null)
             return false;
 

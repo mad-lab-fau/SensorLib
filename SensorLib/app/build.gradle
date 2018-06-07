@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion "24.0.1"
+    compileSdkVersion 27
+    buildToolsVersion '27.0.3'
 
     defaultConfig {
         applicationId "de.fau.sensorlib"
         minSdkVersion 21
-        targetSdkVersion 24
+        targetSdkVersion 27
         versionCode 1
         versionName "1.0"
     }
@@ -26,8 +26,8 @@ repositories {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile project(path: ':sensorlib')
-    compile project(':sls-tek')
-    compile(name: 'androidplot-core-release', ext: 'aar')
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation project(path: ':sensorlib')
+    implementation project(':sls-tek')
+    implementation(name: 'androidplot-core-release', ext: 'aar')
 }

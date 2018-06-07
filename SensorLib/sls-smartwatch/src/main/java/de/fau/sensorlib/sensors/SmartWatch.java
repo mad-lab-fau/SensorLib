@@ -16,7 +16,6 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.Wearable;
 
-import de.fau.sensorlib.DsSensor;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.dataframe.AccelDataFrame;
 import de.fau.sensorlib.dataframe.GyroDataFrame;
@@ -27,7 +26,7 @@ import de.fau.sensorlib.dataframe.SensorDataFrame;
 /**
  * Implementation for the Motorola Smartwatch.
  */
-public class SmartWatch extends DsSensor {
+public class SmartWatch extends AbstractSensor {
 
 
     /**
@@ -39,7 +38,7 @@ public class SmartWatch extends DsSensor {
         public double gx, gy, gz;
         public double mx, my, mz;
 
-        public SmartWatchSensorDataFrame(DsSensor fromSensor, double timestamp) {
+        public SmartWatchSensorDataFrame(AbstractSensor fromSensor, double timestamp) {
             super(fromSensor, timestamp);
         }
 
@@ -91,7 +90,7 @@ public class SmartWatch extends DsSensor {
 
 
     // Log tag
-    private final String TAG = "SL/SmartWatch";
+    private final String TAG = SmartWatch.class.getSimpleName();
 
     // Google Wearable API
     private GoogleApiClient mGoogleApiClient;
