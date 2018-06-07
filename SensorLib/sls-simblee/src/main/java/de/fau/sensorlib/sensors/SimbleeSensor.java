@@ -134,7 +134,7 @@ public class SimbleeSensor extends GenericBleSensor {
         }
 
         SimbleeDataFrame df = new SimbleeDataFrame(this, globalCounter * (2 << 15) + localCounter, accel, ecg);
-        //Log.d(TAG, df.toString());
+        Log.d(TAG, df.toString());
         sendNewData(df);
         lastCounter = localCounter;
         if (mLoggingEnabled) {
