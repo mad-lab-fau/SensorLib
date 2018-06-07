@@ -203,7 +203,10 @@ public class NilsPodPpgSensor extends GenericBleSensor {
                 globalCounter++;
             }
 
-            NilsPodPpgDataFrame df = new NilsPodPpgDataFrame(this, globalCounter * (2 << 14) + localCounter, accel, gyro);
+            // TODO Just a quick dirty hack!
+            //NilsPodPpgDataFrame df = new NilsPodPpgDataFrame(this, globalCounter * (2 << 14) + localCounter, accel, gyro);
+            NilsPodPpgDataFrame df = new NilsPodPpgDataFrame(this, globalCounter * (2 << 14) + localCounter, new double[3], new double[3], new double[]{accel[0], gyro[0]});
+            Log.d(TAG, df.toString());
             // send new data to the SensorDataProcessor
             sendNewData(df);
             lastCounter = localCounter;
@@ -361,7 +364,7 @@ public class NilsPodPpgSensor extends GenericBleSensor {
 
         @Override
         public String toString() {
-            return "<" + originatingSensor.getDeviceName() + ">\tctr=" + timestamp + ", accel: " + Arrays.toString(accel) + ", gyro: " + Arrays.toString(gyro);
+            return "<" + originatingSensor.getDeviceName() + ">\tctr=" + timestamp + ", accel: " + Arrays.toString(accel) + ", gyro: " + Arrays.toString(gyro) + ", ppg: " + Arrays.toString(ppg);
         }
 
         @Override
