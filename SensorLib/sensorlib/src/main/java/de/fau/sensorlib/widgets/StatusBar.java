@@ -121,7 +121,7 @@ public class StatusBar extends RelativeLayout implements SensorEventListener {
     }
 
     @Override
-    public void onSensorMessage(AbstractSensor sensor, SensorMessage messsage) {
+    public void onSensorMessage(AbstractSensor sensor, SensorMessage message) {
 
     }
 }
