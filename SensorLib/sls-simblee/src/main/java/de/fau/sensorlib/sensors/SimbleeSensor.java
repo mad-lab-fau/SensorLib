@@ -101,49 +101,6 @@ public class SimbleeSensor extends GenericBleSensor {
     private SimbleeDataLogger mDataLogger;
 
 
-    private void extractSensorData(BluetoothGattCharacteristic characteristic) {
-        byte[] values = characteristic.getValue();
-        if (values.length == 0) {
-            return;
-        }
-        int offset = 0;
-        double[] accel = new double[3];
-        double[] ecg = new double[2];
-        int localCounter;
-        for (int i = 0; i < 3; i++) {
-            accel[i] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
-            offset += 2;
-        }
-
-        for (int i = 0; i < 2; i++) {
-            int tmp = ((values[offset] & 0xFF) | ((values[offset + 1] & 0xFF) << 8) | ((values[offset + 2] & 0xFF) << 16));
-            tmp = tmp << 8;
-            // shift to fill 32 bit integer with sign bit
-            ecg[i] = tmp >> 16;
-            offset += 3;
-        }
-
-        localCounter = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
-
-        if ((localCounter - lastCounter) % (2 << 15) > 1) {
-            Log.w(TAG, this + ": BLE Packet Loss!");
-        }
-        // increment global counter if local counter overflows
-        if (localCounter < lastCounter) {
-            globalCounter++;
-        }
-
-        SimbleeDataFrame df = new SimbleeDataFrame(this, globalCounter * (2 << 15) + localCounter, accel, ecg);
-        Log.d(TAG, df.toString());
-        sendNewData(df);
-        lastCounter = localCounter;
-        if (mLoggingEnabled) {
-            mDataLogger.writeData(df);
-        }
-
-    }
-
-
     public static class SimbleeDataFrame extends SensorDataFrame implements AccelDataFrame, EcgDataFrame {
 
         private long timestamp;
@@ -251,6 +208,49 @@ public class SimbleeSensor extends GenericBleSensor {
             mStreamingService = service;
             mAvailableSensors.addAll(KnownSensor.SIMBLEE.getAvailableSensors());
         }
+    }
+
+    private void extractSensorData(BluetoothGattCharacteristic characteristic) {
+        byte[] values = characteristic.getValue();
+        if (values.length == 0) {
+            return;
+        }
+        int offset = 0;
+        double[] accel = new double[3];
+        double[] ecg = new double[2];
+        int localCounter;
+        for (int i = 0; i < 3; i++) {
+            accel[i] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
+            offset += 2;
+        }
+
+        for (int i = 0; i < 2; i++) {
+            int tmp = ((values[offset] & 0xFF) | ((values[offset + 1] & 0xFF) << 8) | ((values[offset + 2] & 0xFF) << 16));
+            tmp = tmp << 8;
+            // shift to fill 32 bit integer with sign bit
+            ecg[i] = tmp >> 16;
+            offset += 3;
+        }
+
+        localCounter = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
+
+        if (((localCounter - lastCounter) % (2 << 15)) > 1) {
+            Log.w(TAG, this + ": BLE Packet Loss!");
+        }
+        // increment global counter if local counter overflows
+        if (localCounter < lastCounter) {
+            globalCounter++;
+        }
+
+        SimbleeDataFrame df = new SimbleeDataFrame(this, globalCounter * (2 << 15) + localCounter, accel, ecg);
+        Log.d(TAG, "global: " + globalCounter + ", last: " + lastCounter + ", local: " + localCounter);
+        //Log.d(TAG, df.toString());
+        sendNewData(df);
+        lastCounter = localCounter;
+        if (mLoggingEnabled) {
+            mDataLogger.writeData(df);
+        }
+
     }
 
     /**
