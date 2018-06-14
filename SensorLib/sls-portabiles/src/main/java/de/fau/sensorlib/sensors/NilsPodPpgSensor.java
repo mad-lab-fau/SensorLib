@@ -31,6 +31,7 @@ import de.fau.sensorlib.BleGattAttributes;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.AccelDataFrame;
+import de.fau.sensorlib.dataframe.BarometerDataFrame;
 import de.fau.sensorlib.dataframe.GyroDataFrame;
 import de.fau.sensorlib.dataframe.PpgDataFrame;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
@@ -55,7 +56,7 @@ public class NilsPodPpgSensor extends GenericBleSensor {
      */
     private static final UUID NILSPOD_STREAMING = UUID.fromString("6e400003-b5a3-f393-e0a9-e50e24dcca9e");
 
-    private static final int PACKET_SIZE = 14;
+    private static final int PACKET_SIZE = 20;
 
 
     // Adding custom Hoop BLE UUIDs to known UUID pool
@@ -167,8 +168,10 @@ public class NilsPodPpgSensor extends GenericBleSensor {
     private void extractSensorData(BluetoothGattCharacteristic characteristic) {
         byte[] values = characteristic.getValue();
 
+        Log.d(TAG, "data received: " + Arrays.toString(values));
+
         // one data packet always has size PACKET_SIZE
-        if (values.length % PACKET_SIZE != 0) {
+        if (values.length == 0 || values.length % PACKET_SIZE != 0) {
             Log.e(TAG, "Wrong BLE Packet Size!");
             return;
         }
@@ -178,6 +181,8 @@ public class NilsPodPpgSensor extends GenericBleSensor {
             int offset = i;
             double[] gyro = new double[3];
             double[] accel = new double[3];
+            double baro;
+            double[] ppg = new double[2];
             int localCounter;
 
             // extract gyroscope data
@@ -191,8 +196,18 @@ public class NilsPodPpgSensor extends GenericBleSensor {
                 offset += 2;
             }
 
-            // extract packet counter (only 15 bit, therefore getIntValue() method not applicable)
-            localCounter = (values[offset + 1] & 0xFF) | ((values[offset] & 0x7F) << 8);
+            baro = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
+            baro = (baro + 101325.0) / 100.0;
+            offset += 2;
+
+            for (int j = 0; j < 2; j++) {
+                ppg[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
+                offset += 2;
+            }
+
+            // extract packet counter (always the last 2 bytes in the packet.
+            // counter only has 15 bit, therefore getIntValue() method not applicable)
+            localCounter = (values[PACKET_SIZE - 1] & 0xFF) | ((values[PACKET_SIZE - 2] & 0x7F) << 8);
 
             // check if packets have been lost
             if (((localCounter - lastCounter) % (2 << 14)) > 1) {
@@ -203,9 +218,7 @@ public class NilsPodPpgSensor extends GenericBleSensor {
                 globalCounter++;
             }
 
-            // TODO Just a quick dirty hack!
-            //NilsPodPpgDataFrame df = new NilsPodPpgDataFrame(this, globalCounter * (2 << 14) + localCounter, accel, gyro);
-            NilsPodPpgDataFrame df = new NilsPodPpgDataFrame(this, globalCounter * (2 << 14) + localCounter, new double[3], new double[3], new double[]{accel[0], gyro[0]});
+            NilsPodPpgDataFrame df = new NilsPodPpgDataFrame(this, globalCounter * (2 << 14) + localCounter, accel, gyro, baro, ppg);
             Log.d(TAG, df.toString());
             // send new data to the SensorDataProcessor
             sendNewData(df);
@@ -286,10 +299,11 @@ public class NilsPodPpgSensor extends GenericBleSensor {
     /**
      * Data frame to store data received from the NilsPod Sensor
      */
-    public static class NilsPodPpgDataFrame extends SensorDataFrame implements AccelDataFrame, GyroDataFrame, PpgDataFrame {
+    public static class NilsPodPpgDataFrame extends SensorDataFrame implements AccelDataFrame, GyroDataFrame, BarometerDataFrame, PpgDataFrame {
 
         private double[] accel;
         private double[] gyro;
+        private double baro;
         private double[] ppg;
         private long timestamp;
 
@@ -302,14 +316,19 @@ public class NilsPodPpgSensor extends GenericBleSensor {
          * @param gyro      array storing gyroscope values
          */
         public NilsPodPpgDataFrame(GenericBleSensor sensor, long timestamp, double[] accel, double[] gyro) {
-            super(sensor, timestamp);
-            if (accel.length != 3 || gyro.length != 3) {
-                throw new IllegalArgumentException("Illegal array size for " + ((accel.length != 3) ? "acceleration" : "gyroscope") + " values! ");
-            }
-            this.accel = accel;
-            this.gyro = gyro;
-            this.ppg = new double[0];
-            this.timestamp = timestamp;
+            this(sensor, timestamp, accel, gyro, 0.0, new double[0]);
+        }
+
+        /**
+         * Creates a new data frame for sensor data
+         *
+         * @param sensor    Originating sensor
+         * @param timestamp Incremental counter for each data frame
+         * @param accel     array storing acceleration values
+         * @param gyro      array storing gyroscope values
+         */
+        public NilsPodPpgDataFrame(GenericBleSensor sensor, long timestamp, double[] accel, double[] gyro, double baro) {
+            this(sensor, timestamp, accel, gyro, baro, new double[0]);
         }
 
         /**
@@ -321,30 +340,16 @@ public class NilsPodPpgSensor extends GenericBleSensor {
          * @param gyro      array storing gyroscope values
          * @param ppg       array storing PPG values
          */
-        public NilsPodPpgDataFrame(GenericBleSensor sensor, long timestamp, double[] accel, double[] gyro, double[] ppg) {
+        public NilsPodPpgDataFrame(GenericBleSensor sensor, long timestamp, double[] accel, double[] gyro, double baro, double[] ppg) {
             super(sensor, timestamp);
             if (accel.length != 3 || gyro.length != 3) {
                 throw new IllegalArgumentException("Illegal array size for " + ((accel.length != 3) ? "acceleration" : "gyroscope") + " values! ");
             }
+            this.timestamp = timestamp;
             this.accel = accel;
             this.gyro = gyro;
+            this.baro = baro;
             this.ppg = ppg;
-            this.timestamp = timestamp;
-        }
-
-        @Override
-        public double getGyroX() {
-            return gyro[0];
-        }
-
-        @Override
-        public double getGyroY() {
-            return gyro[1];
-        }
-
-        @Override
-        public double getGyroZ() {
-            return gyro[2];
         }
 
         @Override
@@ -363,8 +368,23 @@ public class NilsPodPpgSensor extends GenericBleSensor {
         }
 
         @Override
-        public String toString() {
-            return "<" + originatingSensor.getDeviceName() + ">\tctr=" + timestamp + ", accel: " + Arrays.toString(accel) + ", gyro: " + Arrays.toString(gyro) + ", ppg: " + Arrays.toString(ppg);
+        public double getGyroX() {
+            return gyro[0];
+        }
+
+        @Override
+        public double getGyroY() {
+            return gyro[1];
+        }
+
+        @Override
+        public double getGyroZ() {
+            return gyro[2];
+        }
+
+        @Override
+        public double getBarometerPressure() {
+            return baro;
         }
 
         @Override
@@ -383,6 +403,12 @@ public class NilsPodPpgSensor extends GenericBleSensor {
             }
             return -1;
         }
+
+        @Override
+        public String toString() {
+            return "<" + originatingSensor.getDeviceName() + ">\tctr=" + timestamp + ", accel: " + Arrays.toString(accel) + ", gyro: " + Arrays.toString(gyro) + ", baro: " + baro + ", ppg: " + Arrays.toString(ppg);
+        }
+
     }
 
 
@@ -414,7 +440,7 @@ public class NilsPodPpgSensor extends GenericBleSensor {
         /**
          * Directory name where data will be stored on the external storage
          */
-        private String dirName = "HoopSensorRecordings";
+        private String dirName = "BloodPressureSensorRecordings";
         private BufferedWriter mBufferedWriter;
         private File mFileHandler;
         private boolean mStorageWritable;
@@ -445,6 +471,7 @@ public class NilsPodPpgSensor extends GenericBleSensor {
          * @return true if permissions have been granted, false otherwise
          */
         private boolean checkPermissions() {
+            // TODO: Add request permissions!
             return ContextCompat.checkSelfPermission(mContext, Manifest.permission.READ_EXTERNAL_STORAGE)
                     == PackageManager.PERMISSION_GRANTED &&
                     ContextCompat.checkSelfPermission(mContext, Manifest.permission.WRITE_EXTERNAL_STORAGE)
@@ -542,7 +569,8 @@ public class NilsPodPpgSensor extends GenericBleSensor {
                 try {
                     String line = (data.getTimestamp() + SEPARATOR) +
                             (data.getAccelX() + SEPARATOR + data.getAccelY() + SEPARATOR + data.getAccelZ() + SEPARATOR) +
-                            (data.getGyroX() + SEPARATOR + data.getGyroY() + SEPARATOR + data.getGyroZ()) +
+                            (data.getGyroX() + SEPARATOR + data.getGyroY() + SEPARATOR + data.getGyroZ() + SEPARATOR) +
+                            (data.getBarometerPressure() + SEPARATOR) +
                             (data.getPpg() + SEPARATOR + data.getPpgSecondary()) + DELIMITER;
                     //Log.d(TAG, line);
                     mBufferedWriter.write(line);
