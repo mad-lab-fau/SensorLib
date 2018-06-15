@@ -168,8 +168,6 @@ public class NilsPodPpgSensor extends GenericBleSensor {
     private void extractSensorData(BluetoothGattCharacteristic characteristic) {
         byte[] values = characteristic.getValue();
 
-        Log.d(TAG, "data received: " + Arrays.toString(values));
-
         // one data packet always has size PACKET_SIZE
         if (values.length == 0 || values.length % PACKET_SIZE != 0) {
             Log.e(TAG, "Wrong BLE Packet Size!");
@@ -572,7 +570,6 @@ public class NilsPodPpgSensor extends GenericBleSensor {
                             (data.getGyroX() + SEPARATOR + data.getGyroY() + SEPARATOR + data.getGyroZ() + SEPARATOR) +
                             (data.getBarometerPressure() + SEPARATOR) +
                             (data.getPpg() + SEPARATOR + data.getPpgSecondary()) + DELIMITER;
-                    //Log.d(TAG, line);
                     mBufferedWriter.write(line);
                 } catch (IOException e) {
                     e.printStackTrace();
