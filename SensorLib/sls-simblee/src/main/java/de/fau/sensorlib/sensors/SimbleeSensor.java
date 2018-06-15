@@ -34,6 +34,7 @@ import de.fau.sensorlib.dataframe.AccelDataFrame;
 import de.fau.sensorlib.dataframe.EcgDataFrame;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
 import de.fau.sensorlib.enums.KnownSensor;
+import de.fau.sensorlib.enums.SensorState;
 
 /**
  * Implementation of the Simblee sensor.
@@ -182,7 +183,7 @@ public class SimbleeSensor extends GenericBleSensor {
         if (super.onNewCharacteristicValue(characteristic, isChange)) {
             return true;
         } else {
-            if (SIMBLEE_RECEIVE.equals(characteristic.getUuid())) {
+            if (SIMBLEE_RECEIVE.equals(characteristic.getUuid()) && getState().ordinal() > SensorState.CONNECTING.ordinal()) {
                 extractSensorData(characteristic);
                 return true;
             }
@@ -243,8 +244,7 @@ public class SimbleeSensor extends GenericBleSensor {
         }
 
         SimbleeDataFrame df = new SimbleeDataFrame(this, globalCounter * (2 << 15) + localCounter, accel, ecg);
-        Log.d(TAG, "global: " + globalCounter + ", last: " + lastCounter + ", local: " + localCounter);
-        //Log.d(TAG, df.toString());
+        Log.d(TAG, df.toString());
         sendNewData(df);
         lastCounter = localCounter;
         if (mLoggingEnabled) {
