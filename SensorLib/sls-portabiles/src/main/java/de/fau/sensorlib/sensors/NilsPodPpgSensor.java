@@ -432,7 +432,7 @@ public class NilsPodPpgSensor extends GenericBleSensor {
                 SEPARATOR + "acc_x" + SEPARATOR + "acc_y" +
                 SEPARATOR + "acc_z" + SEPARATOR + "gyr_x" +
                 SEPARATOR + "gyr_y" + SEPARATOR + "gyr_z" +
-                SEPARATOR + "ppg_1" + SEPARATOR + "ppg_2" +
+                SEPARATOR + "baro" + SEPARATOR + "ppg_1" + SEPARATOR + "ppg_2" +
                 DELIMITER;
         private String mFilename;
         /**
