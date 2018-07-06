@@ -7,31 +7,20 @@
  */
 package de.fau.sensorlib.sensors;
 
-import android.Manifest;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.os.Environment;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import android.widget.Toast;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Date;
-import java.util.Locale;
 import java.util.UUID;
 
 import de.fau.sensorlib.BleGattAttributes;
+import de.fau.sensorlib.SensorDataLogger;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.AccelDataFrame;
-import de.fau.sensorlib.dataframe.BarometerDataFrame;
+import de.fau.sensorlib.dataframe.BarometricPressureDataFrame;
 import de.fau.sensorlib.dataframe.GyroDataFrame;
 import de.fau.sensorlib.dataframe.PpgDataFrame;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
@@ -104,7 +93,7 @@ public class NilsPodPpgSensor extends GenericBleSensor {
     /**
      * Data logger
      */
-    private NilsPodPpgDataLogger mDataLogger;
+    private SensorDataLogger mDataLogger;
 
     /**
      * Keep a local reference to the Streaming Service
@@ -127,7 +116,7 @@ public class NilsPodPpgSensor extends GenericBleSensor {
         if (send(NilsPodSensorCommands.START_STREAMING)) {
             super.startStreaming();
             if (mLoggingEnabled) {
-                mDataLogger = new NilsPodPpgDataLogger(mContext);
+                mDataLogger = new SensorDataLogger(this, mContext);
             }
         } else {
             Log.e(TAG, "startStreaming failed!");
@@ -297,7 +286,7 @@ public class NilsPodPpgSensor extends GenericBleSensor {
     /**
      * Data frame to store data received from the NilsPod Sensor
      */
-    public static class NilsPodPpgDataFrame extends SensorDataFrame implements AccelDataFrame, GyroDataFrame, BarometerDataFrame, PpgDataFrame {
+    public static class NilsPodPpgDataFrame extends SensorDataFrame implements AccelDataFrame, GyroDataFrame, BarometricPressureDataFrame, PpgDataFrame {
 
         private double[] accel;
         private double[] gyro;
@@ -381,12 +370,12 @@ public class NilsPodPpgSensor extends GenericBleSensor {
         }
 
         @Override
-        public double getBarometerPressure() {
+        public double getBarometricPressure() {
             return baro;
         }
 
         @Override
-        public double getPpg() {
+        public double getPpgRedSample() {
             if (ppg.length > 0) {
                 return ppg[0];
             } else {
@@ -395,7 +384,7 @@ public class NilsPodPpgSensor extends GenericBleSensor {
         }
 
         @Override
-        public double getPpgSecondary() {
+        public double getPpgIrSample() {
             if (ppg.length > 1) {
                 return ppg[1];
             }
@@ -409,198 +398,4 @@ public class NilsPodPpgSensor extends GenericBleSensor {
 
     }
 
-
-    /**
-     * Data logger for sensor data. If possible, data is logged onto the device's SD card. If not,
-     * data is logged to the device's external storage.
-     */
-    public class NilsPodPpgDataLogger {
-
-        /**
-         * Value separator
-         */
-        private static final String SEPARATOR = ",";
-        /**
-         * Line delimiter
-         */
-        private static final String DELIMITER = "\r\n";
-        /**
-         * File header
-         */
-        private String mHeader = "samplingrate" +
-                SEPARATOR + ((int) getSamplingRate()) + DELIMITER + "timestamp" +
-                SEPARATOR + "acc_x" + SEPARATOR + "acc_y" +
-                SEPARATOR + "acc_z" + SEPARATOR + "gyr_x" +
-                SEPARATOR + "gyr_y" + SEPARATOR + "gyr_z" +
-                SEPARATOR + "baro" + SEPARATOR + "ppg_1" + SEPARATOR + "ppg_2" +
-                DELIMITER;
-        private String mFilename;
-        /**
-         * Directory name where data will be stored on the external storage
-         */
-        private String dirName = "BloodPressureSensorRecordings";
-        private BufferedWriter mBufferedWriter;
-        private File mFileHandler;
-        private boolean mStorageWritable;
-        private boolean mFileCreated;
-        private Context mContext;
-
-
-        /**
-         * Creates a new data logger instance
-         */
-        public NilsPodPpgDataLogger(Context context) {
-            mContext = context;
-            String currTime = new SimpleDateFormat("yyyyMMdd_HHmm", Locale.getDefault()).format(new Date());
-            // Filename consists of sensor device name and start time of data logging
-            mFilename = NilsPodPpgSensor.this.getDeviceName() + "_" + currTime + ".csv";
-
-            if (checkPermissions()) {
-                createFile();
-                prepareWriter();
-            } else {
-                Toast.makeText(mContext, "Permissions to write external storage needed!", Toast.LENGTH_SHORT).show();
-            }
-        }
-
-        /**
-         * Checks if permissions to read and write external storage have been granted by the user
-         *
-         * @return true if permissions have been granted, false otherwise
-         */
-        private boolean checkPermissions() {
-            // TODO: Add request permissions!
-            return ContextCompat.checkSelfPermission(mContext, Manifest.permission.READ_EXTERNAL_STORAGE)
-                    == PackageManager.PERMISSION_GRANTED &&
-                    ContextCompat.checkSelfPermission(mContext, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                            == PackageManager.PERMISSION_GRANTED;
-        }
-
-        private void createFile() {
-            String state;
-            File root = null;
-            File path;
-
-            // try to write on SD card
-            state = Environment.getExternalStorageState();
-            switch (state) {
-                case Environment.MEDIA_MOUNTED:
-                    // media readable and writable
-                    root = Environment.getExternalStorageDirectory();
-                    mStorageWritable = true;
-                    break;
-                case Environment.MEDIA_MOUNTED_READ_ONLY:
-                    // media only readable
-                    mStorageWritable = false;
-                    Log.e(TAG, "SD card only readable!");
-                    break;
-                default:
-                    // not readable or writable
-                    mStorageWritable = false;
-                    Log.e(TAG, "SD card not readable and writable!");
-                    break;
-            }
-
-            if (!mStorageWritable) {
-                // try to write on external storage
-                root = Environment.getDataDirectory();
-                if (root.canWrite()) {
-                    mStorageWritable = true;
-                } else {
-                    Log.e(TAG, "External storage not readable and writable!");
-                    Toast.makeText(mContext, "External storage not readable and writable!", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            if (mStorageWritable) {
-                try {
-                    // create directory
-                    path = new File(root, dirName);
-                    mFileCreated = path.mkdir();
-                    if (!mFileCreated) {
-                        mFileCreated = path.exists();
-                        if (!mFileCreated) {
-                            Log.e(TAG, "File could not be created!");
-                            return;
-                        } else {
-                            Log.i(TAG, "Working directory is " + path.getAbsolutePath());
-                        }
-                    }
-                    // create files
-                    mFileHandler = new File(path + "/" + mFilename);
-                    mFileCreated = mFileHandler.createNewFile();
-                    if (!mFileCreated) {
-                        mFileCreated = mFileHandler.exists();
-                        if (!mFileCreated) {
-                            Log.e(TAG, "File could not be created!");
-                        }
-                    }
-                } catch (Exception e) {
-                    Log.e(TAG, "Exception on dir and file create!", e);
-                    mFileCreated = false;
-                }
-            }
-        }
-
-        private void prepareWriter() {
-            FileWriter fw;
-            if (mStorageWritable && mFileCreated) {
-                try {
-                    // open buffered writer and write header line
-                    fw = new FileWriter(mFileHandler);
-                    mBufferedWriter = new BufferedWriter(fw);
-                    mBufferedWriter.write(mHeader);
-                } catch (Exception e) {
-                    Log.e(TAG, "Exception on dir and file create!", e);
-                    mFileCreated = false;
-                }
-            }
-        }
-
-        /**
-         * Writes next line of sensor data
-         *
-         * @param data data frame from Hoop Sensor
-         */
-        public void writeData(NilsPodPpgDataFrame data) {
-            if (isWritable()) {
-                try {
-                    String line = (data.getTimestamp() + SEPARATOR) +
-                            (data.getAccelX() + SEPARATOR + data.getAccelY() + SEPARATOR + data.getAccelZ() + SEPARATOR) +
-                            (data.getGyroX() + SEPARATOR + data.getGyroY() + SEPARATOR + data.getGyroZ() + SEPARATOR) +
-                            (data.getBarometerPressure() + SEPARATOR) +
-                            (data.getPpg() + SEPARATOR + data.getPpgSecondary()) + DELIMITER;
-                    mBufferedWriter.write(line);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        /**
-         * Closes file after data logging has been completed
-         */
-        private void completeLogger() {
-            if (isWritable()) {
-                try {
-                    // flush and close writer
-                    mBufferedWriter.flush();
-                    mBufferedWriter.close();
-                    mBufferedWriter = null;
-                } catch (Exception e) {
-                    Log.e(TAG, "Error on completing writer!");
-                }
-            }
-        }
-
-        /**
-         * Checks if data can be written to the device
-         *
-         * @return true if data can be written, false otherwise
-         */
-        private boolean isWritable() {
-            return (mStorageWritable && mFileCreated && (mBufferedWriter != null));
-        }
-
-    }
 }
