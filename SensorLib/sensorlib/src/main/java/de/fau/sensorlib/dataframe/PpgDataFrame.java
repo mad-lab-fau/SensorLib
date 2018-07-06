@@ -9,6 +9,7 @@ package de.fau.sensorlib.dataframe;
 
 /**
 <<<<<<< HEAD
+<<<<<<< HEAD
  * Photoplethysmography (PPG) data frame
  */
 public interface PpgDataFrame {

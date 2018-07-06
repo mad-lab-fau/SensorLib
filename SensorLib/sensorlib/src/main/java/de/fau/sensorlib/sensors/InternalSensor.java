@@ -190,11 +190,7 @@ public class InternalSensor extends AbstractSensor implements SensorEventListene
         }
 
         @Override
-<<<<<<< HEAD
         public double getBarometricPressure() {
-=======
-        public double getBarometerPressure() {
->>>>>>> - added BarometerDataFrame
             return p;
         }
 

@@ -10,10 +10,21 @@ package de.fau.sensorlib.dataframe;
 /**
  * Ambient data frame.
  */
+<<<<<<< HEAD
 public interface AmbientDataFrame extends BarometricPressureDataFrame, HumidityDataFrame, LightDataFrame, NoiseDataFrame, TemperatureDataFrame {
 
     @Override
     double getBarometricPressure();
+=======
+public interface AmbientDataFrame extends BarometerDataFrame {
+
+    double getLight();
+
+    @Override
+    double getBarometerPressure();
+
+    double getTemperature();
+>>>>>>> 854906a15bd4bd1223c77dd988df0aa21f8de1c4
 
     @Override
     double getHumidity();
