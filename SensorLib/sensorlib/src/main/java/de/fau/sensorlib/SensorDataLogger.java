@@ -43,7 +43,7 @@ public class SensorDataLogger {
     /**
      * Directory name where data will be stored on the external storage
      */
-    String mDirName = "SensorLibRecordings";
+    private String mDirName = "SensorLibRecordings";
     /**
      * File header
      */
@@ -215,14 +215,20 @@ public class SensorDataLogger {
                 try {
                     Object val = mMethodList.get(i).invoke(data);
                     sb.append(val);
-                    if (i != mMethodList.size() - 1) {
+
+                } catch (Exception ignore) {
+                    // method call failed, which means that the current data frame is
+                    // supported by the sensor, but not streamed at the moment
+                    // => skip column in finally block
+                } finally {
+                    if (i < mMethodList.size() - 1) {
                         sb.append(SEPARATOR);
                     }
-                } catch (Exception ignored) {
                 }
             }
             sb.append(DELIMITER);
             try {
+                Log.d(TAG, sb.toString());
                 mBufferedWriter.write(sb.toString());
             } catch (IOException e) {
                 e.printStackTrace();
