@@ -132,7 +132,9 @@ public enum KnownSensor {
                     HardwareSensor.ACCELEROMETER,
                     HardwareSensor.GYROSCOPE
             ), true),
-    NILSPOD_PPG("NilsPod_PPG", new String[]{"NRF52"}, EnumSet.of(HardwareSensor.ACCELEROMETER, HardwareSensor.PPG), true);
+    NILSPOD_PPG("NilsPod_PPG", new String[]{"NRF52"}, EnumSet.of(HardwareSensor.ACCELEROMETER,
+            HardwareSensor.GYROSCOPE, HardwareSensor.BAROMETER, HardwareSensor.PPG), true);
+
     // =============================================================================================
 
     /**

@@ -12,6 +12,8 @@ package de.fau.sensorlib.dataframe;
  */
 public interface AccelDataFrame {
 
+    String[] COLUMNS = new String[]{"acc_x", "acc_y", "acc_z"};
+
     /**
      * Returns the acceleration x value.
      *

@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2016 Digital Sports Group, Friedrich-Alexander University Erlangen-Nuremberg (FAU).
+/*
+ * Copyright (C) 2018 Machine Learning and Data Analytics Lab, Friedrich-Alexander-Universität Erlangen-Nürnberg (FAU).
  * <p>
  * This file is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. If you reuse
@@ -8,9 +8,15 @@
 package de.fau.sensorlib.dataframe;
 
 /**
- * Gesture Data Frame.
+ * Gesture data frame.
  */
 public interface GestureDataFrame {
+
+    String[] COLUMNS = new String[]{"gesture"};
+
+    /**
+     * Enumeration listing possible gestures from the MYO armband.
+     */
     enum Gesture {
         UNKNOWN,
         REST,
@@ -21,5 +27,10 @@ public interface GestureDataFrame {
         FINGERS_SPREAD
     }
 
+    /**
+     * Returns the current gesture.
+     *
+     * @return current gesture
+     */
     Gesture getGesture();
 }

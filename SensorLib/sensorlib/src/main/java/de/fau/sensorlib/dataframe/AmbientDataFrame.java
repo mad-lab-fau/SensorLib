@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2016 Digital Sports Group, Friedrich-Alexander University Erlangen-Nuremberg (FAU).
+/*
+ * Copyright (C) 2018 Machine Learning and Data Analytics Lab, Friedrich-Alexander-Universität Erlangen-Nürnberg (FAU).
  * <p>
  * This file is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. If you reuse
@@ -8,16 +8,23 @@
 package de.fau.sensorlib.dataframe;
 
 /**
- * Created by Peter on 20.10.2015.
+ * Ambient data frame.
  */
-public interface AmbientDataFrame {
-    double getLight();
+public interface AmbientDataFrame extends BarometricPressureDataFrame, HumidityDataFrame, LightDataFrame, NoiseDataFrame, TemperatureDataFrame {
 
-    double getPressure();
+    @Override
+    double getBarometricPressure();
 
-    double getTemperature();
-
+    @Override
     double getHumidity();
 
+    @Override
+    double getLight();
+
+    @Override
     double getNoise();
+
+    @Override
+    double getTemperature();
+
 }

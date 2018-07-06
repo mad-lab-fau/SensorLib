@@ -8,16 +8,23 @@
 package de.fau.sensorlib.dataframe;
 
 /**
- * Electrodermal activity (EDA) data frame.
+ * Photoplethysmography (PPG) data frame
  */
-public interface EdaDataFrame {
+public interface PpgDataFrame {
 
-    String[] COLUMNS = new String[]{"eda"};
+    String[] COLUMNS = new String[]{"ppg_red", "ppg_ir"};
 
     /**
-     * Returns the EDA value.
+     * Returns the red channel of the PPG signal.
      *
-     * @return EDA value
+     * @return Red channel of PPG signal
      */
-    double getElectrodermalActivity();
+    double getPpgRedSample();
+
+    /**
+     * Returns the infra-red channel of the PPG signal.
+     *
+     * @return IR channel of PPG signal
+     */
+    double getPpgIrSample();
 }

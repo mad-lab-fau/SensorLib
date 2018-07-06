@@ -5,19 +5,20 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. If you reuse
  * this code you have to keep or cite this comment.
  */
+
 package de.fau.sensorlib.dataframe;
 
 /**
- * Electrodermal activity (EDA) data frame.
+ * Humidity data frame
  */
-public interface EdaDataFrame {
+public interface HumidityDataFrame {
 
-    String[] COLUMNS = new String[]{"eda"};
+    String[] COLUMNS = new String[]{"humidity"};
 
     /**
-     * Returns the EDA value.
+     * Returns the humidity value.
      *
-     * @return EDA value
+     * @return humidity value
      */
-    double getElectrodermalActivity();
+    double getHumidity();
 }

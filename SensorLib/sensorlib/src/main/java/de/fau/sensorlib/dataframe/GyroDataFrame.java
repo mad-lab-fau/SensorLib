@@ -12,6 +12,8 @@ package de.fau.sensorlib.dataframe;
  */
 public interface GyroDataFrame {
 
+    String[] COLUMNS = new String[]{"gyro_x", "gyro_y", "gyro_z"};
+
     /**
      * Returns the gyroscope x value.
      *

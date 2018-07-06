@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2016 Digital Sports Group, Friedrich-Alexander University Erlangen-Nuremberg (FAU).
+/*
+ * Copyright (C) 2018 Machine Learning and Data Analytics Lab, Friedrich-Alexander-Universität Erlangen-Nürnberg (FAU).
  * <p>
  * This file is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. If you reuse
@@ -12,10 +12,19 @@ package de.fau.sensorlib.dataframe;
  */
 public interface RespirationDataFrame {
 
-    String EXTRA_RESP_RATE = "RespRate";
-    String EXTRA_RESP_SAMPLE = "RespSample";
+    String[] COLUMNS = new String[]{"resp_sample", "resp_rate"};
 
+    /**
+     * Returns the current respiration sample.
+     *
+     * @return current respiration sample
+     */
     double getRespirationSample();
 
+    /**
+     * Returns the current respiration rate.
+     *
+     * @return current respiration rate
+     */
     double getRespirationRate();
 }

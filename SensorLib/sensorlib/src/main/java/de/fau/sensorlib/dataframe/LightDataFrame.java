@@ -5,19 +5,20 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. If you reuse
  * this code you have to keep or cite this comment.
  */
+
 package de.fau.sensorlib.dataframe;
 
 /**
- * Electrodermal activity (EDA) data frame.
+ * Light data frame
  */
-public interface EdaDataFrame {
+public interface LightDataFrame {
 
-    String[] COLUMNS = new String[]{"eda"};
+    String[] COLUMNS = new String[]{"light"};
 
     /**
-     * Returns the EDA value.
+     * Returns the current light value in lux.
      *
-     * @return EDA value
+     * @return light value
      */
-    double getElectrodermalActivity();
+    double getLight();
 }

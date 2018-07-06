@@ -8,16 +8,16 @@
 package de.fau.sensorlib.dataframe;
 
 /**
- * Electrodermal activity (EDA) data frame.
+ * Barometric pressure data frame.
  */
-public interface EdaDataFrame {
+public interface BarometricPressureDataFrame {
 
-    String[] COLUMNS = new String[]{"eda"};
+    String[] COLUMNS = new String[]{"baro"};
 
     /**
-     * Returns the EDA value.
+     * Returns the barometric pressure value.
      *
-     * @return EDA value
+     * @return Barometric pressure value
      */
-    double getElectrodermalActivity();
+    double getBarometricPressure();
 }

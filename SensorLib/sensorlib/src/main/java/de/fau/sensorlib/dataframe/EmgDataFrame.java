@@ -8,8 +8,16 @@
 package de.fau.sensorlib.dataframe;
 
 /**
- * Electromyography data frame.
+ * Electromyography (EMG) data frame.
  */
 public interface EmgDataFrame {
+
+    String[] COLUMNS = new String[]{"emg"};
+
+    /**
+     * Returns the EMG value.
+     *
+     * @return EMG value
+     */
     double getEmgSample();
 }

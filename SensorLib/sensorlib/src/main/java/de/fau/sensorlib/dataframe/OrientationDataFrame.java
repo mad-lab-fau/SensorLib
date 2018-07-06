@@ -12,6 +12,9 @@ package de.fau.sensorlib.dataframe;
  */
 public interface OrientationDataFrame {
 
+    String[] COLUMNS = new String[]{"roll", "pitch", "yaw"};
+
+
     double getRoll();
 
     double getPitch();

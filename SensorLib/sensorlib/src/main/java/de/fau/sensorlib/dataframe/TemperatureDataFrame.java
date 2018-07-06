@@ -8,16 +8,16 @@
 package de.fau.sensorlib.dataframe;
 
 /**
- * Electrodermal activity (EDA) data frame.
+ * Temperature data frame.
  */
-public interface EdaDataFrame {
+public interface TemperatureDataFrame {
 
-    String[] COLUMNS = new String[]{"eda"};
+    String[] COLUMNS = new String[]{"temp"};
 
     /**
-     * Returns the EDA value.
+     * Returns the temperature value.
      *
-     * @return EDA value
+     * @return temperature value
      */
-    double getElectrodermalActivity();
+    double getTemperature();
 }

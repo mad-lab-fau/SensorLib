@@ -1,5 +1,5 @@
-/**
- * Copyright (C) 2016 Digital Sports Group, Friedrich-Alexander University Erlangen-Nuremberg (FAU).
+/*
+ * Copyright (C) 2018 Machine Learning and Data Analytics Lab, Friedrich-Alexander-Universität Erlangen-Nürnberg (FAU).
  * <p>
  * This file is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. If you reuse
@@ -12,15 +12,19 @@ package de.fau.sensorlib.dataframe;
  */
 public interface HeartRateDataFrame {
 
-    String EXTRA_HEART_RATE = "hr";
+    String[] COLUMNS = new String[]{"hr", "ibi"};
 
     /**
-     * @return the heart rate in beats per minute.
+     * Returns the current current heart rate in bpm (beats per minute).
+     *
+     * @return current heart rate
      */
     double getHeartRate();
 
     /**
-     * @return the RR interval in seconds.
+     * Returns the interbeat interval (RR interval) in milliseconds.
+     *
+     * @return RR interval in milliseconds
      */
     double getInterbeatInterval();
 }

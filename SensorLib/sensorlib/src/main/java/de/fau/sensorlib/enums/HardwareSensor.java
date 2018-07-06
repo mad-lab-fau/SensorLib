@@ -7,42 +7,74 @@
  */
 package de.fau.sensorlib.enums;
 
+import de.fau.sensorlib.dataframe.AccelDataFrame;
+import de.fau.sensorlib.dataframe.BarometricPressureDataFrame;
+import de.fau.sensorlib.dataframe.BloodPressureDataFrame;
+import de.fau.sensorlib.dataframe.BloodVolumePulseDataFrame;
+import de.fau.sensorlib.dataframe.EcgDataFrame;
+import de.fau.sensorlib.dataframe.EdaDataFrame;
+import de.fau.sensorlib.dataframe.EmgDataFrame;
+import de.fau.sensorlib.dataframe.GestureDataFrame;
+import de.fau.sensorlib.dataframe.GyroDataFrame;
+import de.fau.sensorlib.dataframe.HeartRateDataFrame;
+import de.fau.sensorlib.dataframe.HumidityDataFrame;
+import de.fau.sensorlib.dataframe.LightDataFrame;
+import de.fau.sensorlib.dataframe.MagDataFrame;
+import de.fau.sensorlib.dataframe.NoiseDataFrame;
+import de.fau.sensorlib.dataframe.OrientationDataFrame;
+import de.fau.sensorlib.dataframe.PpgDataFrame;
+import de.fau.sensorlib.dataframe.PressureDataFrame;
+import de.fau.sensorlib.dataframe.QuaternionDataFrame;
+import de.fau.sensorlib.dataframe.RespirationDataFrame;
+import de.fau.sensorlib.dataframe.TemperatureDataFrame;
+
 /**
  * Possible supported hardware sensors.
  */
 public enum HardwareSensor {
 
-    ACCELEROMETER("ACC"),
-    GYROSCOPE("GYR"),
-    MAGNETOMETER("MAG"),
-    LIGHT("LUX"),
-    PRESSURE("PRES"),
-    FSR("FSR"),
-    TEMPERATURE("TEMP"),
-    ECG("ECG"),
-    EMG("EMG"),
+    ACCELEROMETER("ACC", AccelDataFrame.class),
+    GYROSCOPE("GYR", GyroDataFrame.class),
+    MAGNETOMETER("MAG", MagDataFrame.class),
+    LIGHT("LUX", LightDataFrame.class),
+    PRESSURE("PRES", PressureDataFrame.class),
+    BAROMETER("BARO", BarometricPressureDataFrame.class),
+    FSR("FSR", PressureDataFrame.class),
+    TEMPERATURE("TEMP", TemperatureDataFrame.class),
+    ECG("ECG", EcgDataFrame.class),
+    EMG("EMG", EmgDataFrame.class),
     EEG_RAW("EEG"),
     EEG_FREQ_BANDS("EEG"),
-    HEART_RATE("HR"),
-    RESPIRATION("RESP"),
-    BLOOD_PRESSURE("BP"),
-    BLOOD_VOLUME_PRESSURE("BVP"),
-    PPG("PPG"),
-    GALVANIC_SKIN_RESPONSE("GSR"),
-    ORIENTATION("ORI"),
-    QUATERNION("QUA"),
-    GESTURE("GES"),
-    NOISE("NOIS"),
-    HUMIDITY("HUM");
+    HEART_RATE("HR", HeartRateDataFrame.class),
+    RESPIRATION("RESP", RespirationDataFrame.class),
+    BLOOD_PRESSURE("BP", BloodPressureDataFrame.class),
+    BLOOD_VOLUME_PRESSURE("BVP", BloodVolumePulseDataFrame.class),
+    PPG("PPG", PpgDataFrame.class),
+    GALVANIC_SKIN_RESPONSE("GSR", EdaDataFrame.class),
+    ORIENTATION("ORI", OrientationDataFrame.class),
+    QUATERNION("QUA", QuaternionDataFrame.class),
+    GESTURE("GES", GestureDataFrame.class),
+    NOISE("NOIS", NoiseDataFrame.class),
+    HUMIDITY("HUM", HumidityDataFrame.class);
 
     private String mShortDescription;
+    private Class<?> mDf;
+
+    HardwareSensor(String shortDescription, Class<?> df) {
+        mShortDescription = shortDescription;
+        mDf = df;
+    }
 
     HardwareSensor(String shortDescription) {
-        mShortDescription = shortDescription;
+        this(shortDescription, null);
     }
 
     public String getShortDescription() {
         return mShortDescription;
+    }
+
+    public Class<?> getDataFrameClass() {
+        return mDf;
     }
 
     public static boolean isInertial(HardwareSensor s) {

@@ -12,6 +12,8 @@ package de.fau.sensorlib.dataframe;
  */
 public interface MagDataFrame {
 
+    String[] COLUMNS = new String[]{"mag_x", "mag_y", "mag_z"};
+
     /**
      * Returns the magnetometer x value.
      *
