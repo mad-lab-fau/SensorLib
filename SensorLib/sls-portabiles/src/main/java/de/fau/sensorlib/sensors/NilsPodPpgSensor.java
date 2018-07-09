@@ -62,15 +62,19 @@ public class NilsPodPpgSensor extends GenericBleSensor {
         /**
          * Start Streaming Command
          */
-        START_STREAMING((byte) 0xC2),
+        START_STREAMING(new byte[]{(byte) 0xC2}),
         /**
          * Stop Streaming Command
          */
-        STOP_STREAMING((byte) 0xC1);
+        STOP_STREAMING(new byte[]{(byte) 0xC1}),
+        /**
+         * Reset Command
+         */
+        RESET(new byte[]{(byte) 0xCF, (byte) 0xFF});
 
-        private byte cmd;
+        private byte[] cmd;
 
-        NilsPodSensorCommands(byte cmd) {
+        NilsPodSensorCommands(byte[] cmd) {
             this.cmd = cmd;
         }
     }
@@ -247,7 +251,7 @@ public class NilsPodPpgSensor extends GenericBleSensor {
      */
     private boolean send(NilsPodSensorCommands cmd) {
         Log.d(TAG, "Sending " + cmd + " command to " + getName());
-        return send(new byte[]{cmd.cmd});
+        return send(cmd.cmd);
     }
 
 
@@ -265,6 +269,14 @@ public class NilsPodPpgSensor extends GenericBleSensor {
         characteristic.setValue(data);
         characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
         return mGatt.writeCharacteristic(characteristic);
+    }
+
+    public boolean reset() {
+        if (!send(NilsPodSensorCommands.RESET)) {
+            Log.e(TAG, "resetting failed!");
+            return false;
+        }
+        return true;
     }
 
 
