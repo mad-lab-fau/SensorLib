@@ -30,18 +30,22 @@ import com.choosemuse.libmuse.MuseVersion;
 
 import java.util.List;
 
-import de.fau.sensorlib.DsSensor;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.AccelDataFrame;
 import de.fau.sensorlib.dataframe.EegDataFrame;
 import de.fau.sensorlib.dataframe.GyroDataFrame;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
+import de.fau.sensorlib.enums.HardwareSensor;
 
 /**
  * Implementation for the Muse Headband.
  */
-public class MuseSensor extends DsSensor {
+public class MuseSensor extends AbstractSensor {
+
+    static {
+        System.loadLibrary("muse_android");
+    }
 
     private static final String TAG = MuseSensor.class.getSimpleName();
 
@@ -100,7 +104,7 @@ public class MuseSensor extends DsSensor {
          * @param fromSensor the sensor from which this data frame originated.
          * @param timestamp  the timestamp in milliseconds when this data frame was generated on the sensor.
          */
-        public MuseEegDataFrame(DsSensor fromSensor, double timestamp) {
+        public MuseEegDataFrame(AbstractSensor fromSensor, double timestamp) {
             super(fromSensor, timestamp);
         }
 
@@ -153,7 +157,7 @@ public class MuseSensor extends DsSensor {
          * @param fromSensor the sensor from which this data frame originated.
          * @param timestamp  the timestamp in milliseconds when this data frame was generated on the sensor.
          */
-        public MuseAccelDataFrame(DsSensor fromSensor, double timestamp) {
+        public MuseAccelDataFrame(AbstractSensor fromSensor, double timestamp) {
             super(fromSensor, timestamp);
         }
 
@@ -183,7 +187,7 @@ public class MuseSensor extends DsSensor {
          * @param fromSensor the sensor from which this data frame originated.
          * @param timestamp  the timestamp in milliseconds when this data frame was generated on the sensor.
          */
-        public MuseGyroDataFrame(DsSensor fromSensor, double timestamp) {
+        public MuseGyroDataFrame(AbstractSensor fromSensor, double timestamp) {
             super(fromSensor, timestamp);
         }
 
@@ -215,7 +219,7 @@ public class MuseSensor extends DsSensor {
          * @param fromSensor the sensor from which this data frame originated.
          * @param timestamp  the timestamp in milliseconds when this data frame was generated on the sensor.
          */
-        public MuseArtifactDataFrame(DsSensor fromSensor, double timestamp) {
+        public MuseArtifactDataFrame(AbstractSensor fromSensor, double timestamp) {
             super(fromSensor, timestamp);
         }
 
