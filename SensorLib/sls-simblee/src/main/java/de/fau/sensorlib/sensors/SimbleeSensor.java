@@ -18,6 +18,7 @@ import java.util.UUID;
 import de.fau.sensorlib.BleGattAttributes;
 import de.fau.sensorlib.SensorDataLogger;
 import de.fau.sensorlib.SensorDataProcessor;
+import de.fau.sensorlib.SensorException;
 import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.AccelDataFrame;
 import de.fau.sensorlib.dataframe.EcgDataFrame;
@@ -148,7 +149,11 @@ public class SimbleeSensor extends GenericBleSensor {
         if (send(SimbleeSensorCommands.START_STREAMING)) {
             super.startStreaming();
             if (mLoggingEnabled) {
-                mDataLogger = new SensorDataLogger(this, mContext);
+                try {
+                    mDataLogger = new SensorDataLogger(this, mContext);
+                } catch (SensorException e) {
+                    Log.e(TAG, e.getMessage());
+                }
             }
         } else {
             Log.e(TAG, "startStreaming failed!");

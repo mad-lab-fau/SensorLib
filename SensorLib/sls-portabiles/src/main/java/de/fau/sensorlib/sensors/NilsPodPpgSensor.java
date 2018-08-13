@@ -11,6 +11,7 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.Arrays;
 import java.util.UUID;
@@ -18,6 +19,7 @@ import java.util.UUID;
 import de.fau.sensorlib.BleGattAttributes;
 import de.fau.sensorlib.SensorDataLogger;
 import de.fau.sensorlib.SensorDataProcessor;
+import de.fau.sensorlib.SensorException;
 import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.AccelDataFrame;
 import de.fau.sensorlib.dataframe.BarometricPressureDataFrame;
@@ -119,8 +121,16 @@ public class NilsPodPpgSensor extends GenericBleSensor {
     public void startStreaming() {
         if (send(NilsPodSensorCommands.START_STREAMING)) {
             super.startStreaming();
-            if (mLoggingEnabled) {
-                mDataLogger = new SensorDataLogger(this, mContext);
+            try {
+                if (mLoggingEnabled) {
+                    mDataLogger = new SensorDataLogger(this, mContext);
+                }
+            } catch (SensorException e) {
+                switch (e.getExceptionType()) {
+                    case permissionsMissing:
+                        Toast.makeText(mContext, "Permissions to write external storage needed!", Toast.LENGTH_SHORT).show();
+                        break;
+                }
             }
         } else {
             Log.e(TAG, "startStreaming failed!");

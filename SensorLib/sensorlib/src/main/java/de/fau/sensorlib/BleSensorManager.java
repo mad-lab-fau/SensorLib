@@ -44,6 +44,7 @@ public class BleSensorManager {
 
     public static final int REQUEST_ENABLE_BT = 0xBAAD;
     public static final int REQUEST_BT_PERMISSIONS = 0xF00D;
+    public static final int REQUEST_STORAGE = 0x14FA;
 
     public static final int BT_ENABLED = 0;
 

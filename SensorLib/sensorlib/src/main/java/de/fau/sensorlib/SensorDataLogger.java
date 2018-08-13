@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.Toast;
@@ -61,7 +62,7 @@ public class SensorDataLogger {
     /**
      * Creates a new data logger instance
      */
-    public SensorDataLogger(AbstractSensor sensor, Context context) {
+    public SensorDataLogger(AbstractSensor sensor, Context context) throws SensorException {
         mContext = context;
         String currTime = new SimpleDateFormat("yyyyMMdd_HHmm", Locale.getDefault()).format(new Date());
         // Filename consists of sensor device name and start time of data logging
@@ -100,8 +101,7 @@ public class SensorDataLogger {
             createFile();
             prepareWriter();
         } else {
-            // TODO request permissions
-            Toast.makeText(mContext, "Permissions to write external storage needed!", Toast.LENGTH_SHORT).show();
+            throw new SensorException(SensorException.SensorExceptionType.permissionsMissing);
         }
 
     }

@@ -12,6 +12,8 @@ package de.fau.sensorlib;
  */
 public class SensorException extends Exception {
 
+    private SensorExceptionType mType;
+
     public enum SensorExceptionType {
         permissionsMissing("The app does not have sufficient Android permissions to list available BLE devices."),
         bleScannerError("BLE scanner unavailable."),
@@ -34,6 +36,11 @@ public class SensorException extends Exception {
 
     public SensorException(SensorExceptionType type) {
         super(type.getMessage());
+        mType = type;
+    }
+
+    public SensorExceptionType getExceptionType() {
+        return mType;
     }
 
 
