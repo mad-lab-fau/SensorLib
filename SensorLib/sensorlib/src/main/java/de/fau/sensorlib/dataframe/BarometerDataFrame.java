@@ -8,24 +8,15 @@
 package de.fau.sensorlib.dataframe;
 
 /**
- * Ambient data frame.
+ * Barometer data frame
  */
+public interface BarometerDataFrame {
 
-public interface AmbientDataFrame extends BarometricPressureDataFrame, HumidityDataFrame, LightDataFrame, NoiseDataFrame, TemperatureDataFrame {
-
-    @Override
-    double getBarometricPressure();
-
-    @Override
-    double getHumidity();
-
-    @Override
-    double getLight();
-
-    @Override
-    double getNoise();
-
-    @Override
-    double getTemperature();
+    /**
+     * Returns the atmospheric barometer pressure.
+     *
+     * @return Atmospheric pressure value
+     */
+    double getBarometerPressure();
 
 }

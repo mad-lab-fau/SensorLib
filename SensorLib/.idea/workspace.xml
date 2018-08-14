@@ -6,89 +6,11 @@
     </shared>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9c8ca608-48e3-4220-91de-793a796f5c01" name="Default" comment="">
-      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/sls-portabiles/.gitignore" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/sls-portabiles/build.gradle" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/sls-portabiles/proguard-rules.pro" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/sls-portabiles/src/main/AndroidManifest.xml" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/sls-portabiles/src/main/java/de/fau/sensorlib/sensors/HoopSensor.java" />
-      <change beforePath="" afterPath="$PROJECT_DIR$/sls-portabiles/src/main/res/values/strings.xml" />
-      <change beforePath="$PROJECT_DIR$/.idea/.name" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" afterPath="$PROJECT_DIR$/.idea/compiler.xml" />
-      <change beforePath="$PROJECT_DIR$/.idea/copyright/profiles_settings.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" afterPath="$PROJECT_DIR$/.idea/gradle.xml" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/AndroidBluetoothLibrary.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/ShiftList.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/androidplot_core_release_.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/animated_vector_drawable_24_2_0.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/appcompat_v7_24_2_0.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/bitalino_java_sdk_1_1_0.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/commons_math3_3_5.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/empalink_2_0_.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/guava_16_0_1.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/guava_19_0_rc2.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/hamcrest_core_1_3.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/junit_4_12.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/myosdk_0_10_0_.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/play_services_base_9_4_0.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/play_services_basement_9_4_0.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/play_services_tasks_9_4_0.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/play_services_wearable_9_4_0.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/support_annotations_24_2_0.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/support_compat_24_2_0.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/support_core_ui_24_2_0.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/support_core_utils_24_2_0.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/support_fragment_24_2_0.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/support_media_compat_24_2_0.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/support_v4_24_2_0.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/support_vector_drawable_24_2_0.xml" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/vecmath_1_3_1.xml" afterPath="" />
+    <list default="true" id="9c8ca608-48e3-4220-91de-793a796f5c01" name="Default" comment="- added experimental NilsPodPpgSensor">
+      <change beforePath="" afterPath="$PROJECT_DIR$/sensorlib/src/main/java/de/fau/sensorlib/dataframe/PpgDataFrame.java" />
+      <change beforePath="" afterPath="$PROJECT_DIR$/sls-portabiles/src/main/java/de/fau/sensorlib/sensors/NilsPodPpgSensor.java" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" afterPath="$PROJECT_DIR$/.idea/modules.xml" />
-      <change beforePath="$PROJECT_DIR$/SensorLib.iml" afterPath="$PROJECT_DIR$/SensorLib.iml" />
-      <change beforePath="$PROJECT_DIR$/app/app.iml" afterPath="$PROJECT_DIR$/app/app.iml" />
-      <change beforePath="$PROJECT_DIR$/app/build.gradle" afterPath="$PROJECT_DIR$/app/build.gradle" />
-      <change beforePath="$PROJECT_DIR$/build.gradle" afterPath="$PROJECT_DIR$/build.gradle" />
-      <change beforePath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" afterPath="$PROJECT_DIR$/gradle/wrapper/gradle-wrapper.properties" />
-      <change beforePath="$PROJECT_DIR$/sensorlib/build.gradle" afterPath="$PROJECT_DIR$/sensorlib/build.gradle" />
-      <change beforePath="$PROJECT_DIR$/sensorlib/src/main/res/values/dimens.xml" afterPath="$PROJECT_DIR$/sensorlib/src/main/res/values/dimens.xml" />
-      <change beforePath="$PROJECT_DIR$/sensorlibutils/build.gradle" afterPath="$PROJECT_DIR$/sensorlibutils/build.gradle" />
-      <change beforePath="$PROJECT_DIR$/sensorlibutils/sensorlibutils.iml" afterPath="$PROJECT_DIR$/sensorlibutils/sensorlibutils.iml" />
-      <change beforePath="$PROJECT_DIR$/sensorlibutils/src/test/java/de/fau/sensorlibutils/ExampleUnitTest.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/settings.gradle" afterPath="$PROJECT_DIR$/settings.gradle" />
-      <change beforePath="$PROJECT_DIR$/sls-empatica/build.gradle" afterPath="$PROJECT_DIR$/sls-empatica/build.gradle" />
-      <change beforePath="$PROJECT_DIR$/sls-empatica/sls-empatica.iml" afterPath="$PROJECT_DIR$/sls-empatica/sls-empatica.iml" />
-      <change beforePath="$PROJECT_DIR$/sls-empatica/src/main/AndroidManifest.xml" afterPath="$PROJECT_DIR$/sls-empatica/src/main/AndroidManifest.xml" />
-      <change beforePath="$PROJECT_DIR$/sls-empatica/src/main/java/de/fau/sensorlib/sensors/EmpaticaSensor.java" afterPath="$PROJECT_DIR$/sls-empatica/src/main/java/de/fau/sensorlib/sensors/EmpaticaSensor.java" />
-      <change beforePath="$PROJECT_DIR$/sls-empatica/src/test/java/de/fau/sensorlib/sensors/ExampleUnitTest.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/sls-fitnessshirt/build.gradle" afterPath="$PROJECT_DIR$/sls-fitnessshirt/build.gradle" />
-      <change beforePath="$PROJECT_DIR$/sls-fitnessshirt/sls-fitnessshirt.iml" afterPath="$PROJECT_DIR$/sls-fitnessshirt/sls-fitnessshirt.iml" />
-      <change beforePath="$PROJECT_DIR$/sls-fitnessshirt/src/main/java/de/fau/sensorlib/sensors/FitnessShirt.java" afterPath="$PROJECT_DIR$/sls-fitnessshirt/src/main/java/de/fau/sensorlib/sensors/FitnessShirt.java" />
-      <change beforePath="$PROJECT_DIR$/sls-fitnessshirt/src/test/java/de/fau/sensorlib/sensors/ExampleUnitTest.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/sls-muse/build.gradle" afterPath="$PROJECT_DIR$/sls-muse/build.gradle" />
-      <change beforePath="$PROJECT_DIR$/sls-muse/src/test/java/de/fau/sensorlib/sensors/ExampleUnitTest.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/sls-myo/build.gradle" afterPath="$PROJECT_DIR$/sls-myo/build.gradle" />
-      <change beforePath="$PROJECT_DIR$/sls-myo/sls-myo.iml" afterPath="$PROJECT_DIR$/sls-myo/sls-myo.iml" />
-      <change beforePath="$PROJECT_DIR$/sls-myo/src/main/AndroidManifest.xml" afterPath="$PROJECT_DIR$/sls-myo/src/main/AndroidManifest.xml" />
-      <change beforePath="$PROJECT_DIR$/sls-myo/src/main/java/de/fau/sensorlib/sensors/MyoRawSensor.java" afterPath="$PROJECT_DIR$/sls-myo/src/main/java/de/fau/sensorlib/sensors/MyoRawSensor.java" />
-      <change beforePath="$PROJECT_DIR$/sls-myo/src/main/java/de/fau/sensorlib/sensors/MyoSensor.java" afterPath="$PROJECT_DIR$/sls-myo/src/main/java/de/fau/sensorlib/sensors/MyoSensor.java" />
-      <change beforePath="$PROJECT_DIR$/sls-myo/src/test/java/de/fau/sensorlib/sensors/ExampleUnitTest.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/sls-shimmer/build.gradle" afterPath="$PROJECT_DIR$/sls-shimmer/build.gradle" />
-      <change beforePath="$PROJECT_DIR$/sls-shimmer/sls-shimmer.iml" afterPath="$PROJECT_DIR$/sls-shimmer/sls-shimmer.iml" />
-      <change beforePath="$PROJECT_DIR$/sls-shimmer/src/main/java/de/fau/sensorlib/sensors/ShimmerSensor.java" afterPath="$PROJECT_DIR$/sls-shimmer/src/main/java/de/fau/sensorlib/sensors/ShimmerSensor.java" />
-      <change beforePath="$PROJECT_DIR$/sls-shimmer/src/test/java/de/fau/sensorlib/sensors/ExampleUnitTest.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/sls-simblee/build.gradle" afterPath="$PROJECT_DIR$/sls-simblee/build.gradle" />
-      <change beforePath="$PROJECT_DIR$/sls-smartband2/build.gradle" afterPath="$PROJECT_DIR$/sls-smartband2/build.gradle" />
-      <change beforePath="$PROJECT_DIR$/sls-smartwatch/build.gradle" afterPath="$PROJECT_DIR$/sls-smartwatch/build.gradle" />
-      <change beforePath="$PROJECT_DIR$/sls-smartwatch/sls-smartwatch.iml" afterPath="$PROJECT_DIR$/sls-smartwatch/sls-smartwatch.iml" />
-      <change beforePath="$PROJECT_DIR$/sls-smartwatch/src/main/java/de/fau/sensorlib/sensors/SmartWatch.java" afterPath="$PROJECT_DIR$/sls-smartwatch/src/main/java/de/fau/sensorlib/sensors/SmartWatch.java" />
-      <change beforePath="$PROJECT_DIR$/sls-smartwatch/src/test/java/de/fau/sensorlib/sensors/ExampleUnitTest.java" afterPath="" />
-      <change beforePath="$PROJECT_DIR$/sls-tek/build.gradle" afterPath="$PROJECT_DIR$/sls-tek/build.gradle" />
-      <change beforePath="$PROJECT_DIR$/sls-tek/sls-tek.iml" afterPath="$PROJECT_DIR$/sls-tek/sls-tek.iml" />
-      <change beforePath="$PROJECT_DIR$/sls-tek/src/main/java/de/fau/sensorlib/sensors/TekSensor.java" afterPath="$PROJECT_DIR$/sls-tek/src/main/java/de/fau/sensorlib/sensors/TekSensor.java" />
-      <change beforePath="$PROJECT_DIR$/sls-tek/src/test/java/de/fau/sensorlib/sensors/ExampleUnitTest.java" afterPath="" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -111,14 +33,46 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="widget_streaming_footer.xml" pinned="false" current-in-tab="true">
+      <file leaf-file-name="HoopSensor.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/sls-portabiles/src/main/java/de/fau/sensorlib/sensors/HoopSensor.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="135">
+              <caret line="42" column="13" lean-forward="false" selection-start-line="42" selection-start-column="13" selection-end-line="42" selection-end-column="13" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="NilsPodPpgSensor.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/sls-portabiles/src/main/java/de/fau/sensorlib/sensors/NilsPodPpgSensor.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="412">
+              <caret line="196" column="5" lean-forward="true" selection-start-line="196" selection-start-column="5" selection-end-line="196" selection-end-column="5" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="AccelDataFrame.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/sensorlib/src/main/java/de/fau/sensorlib/dataframe/AccelDataFrame.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="0">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="6" selection-end-column="3" />
+              <folding>
+                <element signature="e#0#827#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="widget_streaming_footer.xml" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/sensorlib/src/main/res/layout/widget_streaming_footer.xml">
           <provider editor-type-id="android-designer2">
             <state />
           </provider>
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="188">
-              <caret line="31" column="15" lean-forward="false" selection-start-line="31" selection-start-column="15" selection-end-line="31" selection-end-column="15" />
+            <state relative-caret-position="278">
+              <caret line="37" column="19" lean-forward="false" selection-start-line="37" selection-start-column="19" selection-end-line="37" selection-end-column="19" />
               <folding />
             </state>
           </provider>
@@ -136,6 +90,13 @@
       </file>
     </leaf>
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Interface" />
+      </list>
+    </option>
+  </component>
   <component name="FindInProjectRecents">
     <findStrings>
       <find>fabS</find>
@@ -143,6 +104,11 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$/.." value="master" />
+      </map>
+    </option>
   </component>
   <component name="GradleLocalSettings">
     <option name="myGradleHomes">
@@ -12104,6 +12070,9 @@
         <option value="$PROJECT_DIR$/sensorlib/src/main/res/values/dimens.xml" />
         <option value="$PROJECT_DIR$/sensorlib/build/intermediates/packaged_res/debug/layout/widget_streaming_footer.xml" />
         <option value="$PROJECT_DIR$/sensorlib/src/main/res/layout/widget_streaming_footer.xml" />
+        <option value="$PROJECT_DIR$/sensorlib/src/main/java/de/fau/sensorlib/dataframe/AccelDataFrame.java" />
+        <option value="$PROJECT_DIR$/sensorlib/src/main/java/de/fau/sensorlib/dataframe/PpgDataFrame.java" />
+        <option value="$PROJECT_DIR$/sls-portabiles/src/main/java/de/fau/sensorlib/sensors/NilsPodPpgSensor.java" />
       </list>
     </option>
   </component>
@@ -12134,6 +12103,86 @@
             <path>
               <item name="SensorLib" type="b2602c69:ProjectViewProjectNode" />
               <item name="SensorLib" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+            </path>
+            <path>
+              <item name="SensorLib" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SensorLib" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="sensorlib" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+            </path>
+            <path>
+              <item name="SensorLib" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SensorLib" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="sensorlib" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SensorLib" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SensorLib" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="sensorlib" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SensorLib" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SensorLib" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="sensorlib" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SensorLib" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SensorLib" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="sensorlib" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="sensorlib" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SensorLib" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SensorLib" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="sensorlib" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="sensorlib" type="462c0819:PsiDirectoryNode" />
+              <item name="dataframe" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SensorLib" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SensorLib" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="sls-portabiles" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+            </path>
+            <path>
+              <item name="SensorLib" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SensorLib" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="sls-portabiles" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SensorLib" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SensorLib" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="sls-portabiles" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SensorLib" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SensorLib" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="sls-portabiles" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SensorLib" type="b2602c69:ProjectViewProjectNode" />
+              <item name="SensorLib" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="sls-portabiles" type="8a07ba80:GradleTreeStructureProvider$GradleModuleDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="sensors" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -12171,6 +12220,11 @@
     <property name="android.sdk.path" value="$USER_HOME$/Library/Android/sdk" />
     <property name="android.project.structure.last.selected" value="sls-bitalino" />
     <property name="android.project.structure.proportion" value="0.15" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="de.fau.sensorlib.sensors" />
+    </key>
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -12360,35 +12414,43 @@
       <option name="project" value="LOCAL" />
       <updated>1528369248222</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="- updated all modules to latest versions of Google Play Service libraries&#10;- updated to current sensor lib structure">
+      <created>1528369315265</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1528369315265</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1440" height="817" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info id="Android Profiler" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Palette&#9;" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Image Layers" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Build Variants" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Logcat" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Captures" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24964234" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Captures" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24964234" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Build" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3304721" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Gradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Device File Explorer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="true" content_ui="tabs" />
-      <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Gradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24964234" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Device File Explorer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="true" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -12403,7 +12465,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="changed .gitignore" />
-    <option name="LAST_COMMIT_MESSAGE" value="changed .gitignore" />
+    <MESSAGE value="- updated all modules to latest versions of Google Play Service libraries&#10;- updated to current sensor lib structure" />
+    <option name="LAST_COMMIT_MESSAGE" value="- updated all modules to latest versions of Google Play Service libraries&#10;- updated to current sensor lib structure" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
@@ -12563,16 +12626,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/sls-portabiles/src/main/java/de/fau/sensorlib/sensors/HoopSensor.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="15">
-          <caret line="7" column="33" lean-forward="true" selection-start-line="7" selection-start-column="33" selection-end-line="7" selection-end-column="33" />
-          <folding>
-            <element signature="imports" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/sls-portabiles/build.gradle">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="91">
@@ -12595,6 +12648,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="240">
           <caret line="22" column="0" lean-forward="false" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -12653,8 +12707,44 @@
         <state />
       </provider>
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="188">
-          <caret line="31" column="15" lean-forward="false" selection-start-line="31" selection-start-column="15" selection-end-line="31" selection-end-column="15" />
+        <state relative-caret-position="278">
+          <caret line="37" column="19" lean-forward="false" selection-start-line="37" selection-start-column="19" selection-end-line="37" selection-end-column="19" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sls-portabiles/src/main/java/de/fau/sensorlib/sensors/HoopSensor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="135">
+          <caret line="42" column="13" lean-forward="false" selection-start-line="42" selection-start-column="13" selection-end-line="42" selection-end-column="13" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sensorlib/src/main/java/de/fau/sensorlib/dataframe/PpgDataFrame.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="360">
+          <caret line="24" column="58" lean-forward="false" selection-start-line="24" selection-start-column="58" selection-end-line="24" selection-end-column="58" />
+          <folding>
+            <element signature="e#0#827#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sensorlib/src/main/java/de/fau/sensorlib/dataframe/AccelDataFrame.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="6" selection-end-column="3" />
+          <folding>
+            <element signature="e#0#827#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/sls-portabiles/src/main/java/de/fau/sensorlib/sensors/NilsPodPpgSensor.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="412">
+          <caret line="196" column="5" lean-forward="true" selection-start-line="196" selection-start-column="5" selection-end-line="196" selection-end-column="5" />
           <folding />
         </state>
       </provider>
