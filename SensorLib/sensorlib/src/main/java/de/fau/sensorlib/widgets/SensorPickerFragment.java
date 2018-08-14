@@ -68,7 +68,8 @@ public class SensorPickerFragment extends DialogFragment implements View.OnClick
     private SensorFoundCallback mSensorFoundCallback;
     private BluetoothAdapter mBluetoothAdapter;
 
-    private EnumSet<HardwareSensor> mSensorFilter = EnumSet.noneOf(HardwareSensor.class);
+    private EnumSet<HardwareSensor> mHwSensorFilter = EnumSet.noneOf(HardwareSensor.class);
+    private EnumSet<KnownSensor> mSensorFilter = EnumSet.noneOf(KnownSensor.class);
     private ArrayList<Bundle> mFoundSensors = new ArrayList<>();
     private ArrayList<Bundle> mSelectedSensors = new ArrayList<>(2);
 
@@ -371,20 +372,38 @@ public class SensorPickerFragment extends DialogFragment implements View.OnClick
         mSensorFoundCallback = callback;
     }
 
-    public void setSensorFilter(EnumSet<HardwareSensor> filter) {
-        mSensorFilter.addAll(filter);
+    public void setHardwareSensorFilter(EnumSet<HardwareSensor> filter) {
+        mHwSensorFilter.addAll(filter);
     }
 
-    public void setSensorFilter(HardwareSensor filter) {
-        setSensorFilter(EnumSet.of(filter));
+    public void setHardwareSensorFilter(HardwareSensor filter) {
+        setHardwareSensorFilter(EnumSet.of(filter));
     }
+
+    public void setSensorFilter(KnownSensor sensor) {
+        setSensorFilter(EnumSet.of(sensor));
+    }
+
+    public void setSensorFilter(EnumSet<KnownSensor> sensors) {
+        mSensorFilter.addAll(sensors);
+    }
+
+
+    public void clearHardwareSensorFilter() {
+        mHwSensorFilter = null;
+    }
+
+    public void clearSensorFilter() {
+        mSensorFilter = null;
+    }
+
 
     /**
      * Starts scanning for available sensors.
      */
     private void startSensorScan() {
         try {
-            if (mSensorFilter == null || KnownSensor.INTERNAL.getAvailableSensors().containsAll(mSensorFilter)) {
+            if ((mHwSensorFilter == null && mSensorFilter == null) || (KnownSensor.INTERNAL.getAvailableSensors().containsAll(mHwSensorFilter) && mSensorFilter.contains(KnownSensor.INTERNAL))) {
                 // Add internal sensor (can always be selected)
                 Bundle internalSensor = new Bundle();
                 internalSensor.putString(KEY_SENSOR_ADDRESS, InternalSensor.ANDROID_DEVICE_SENSORS.getDeviceAddress());
@@ -406,8 +425,11 @@ public class SensorPickerFragment extends DialogFragment implements View.OnClick
 
                         @Override
                         public boolean onKnownSensorFound(SensorInfo sensor, int rssi) {
-                            if (mSensorFilter == null || sensor.getDeviceClass().getAvailableSensors().containsAll(mSensorFilter)) {
+                            if ((mHwSensorFilter == null && mSensorFilter == null) ||
+                                    (sensor.getDeviceClass().getAvailableSensors().containsAll(mHwSensorFilter)
+                                            && mSensorFilter.contains(sensor.getDeviceClass()))) {
                                 Bundle bundle = new Bundle();
+                                Log.e(TAG, "ADD: " + sensor);
                                 bundle.putString(KEY_SENSOR_ADDRESS, sensor.getDeviceAddress());
                                 bundle.putString(KEY_SENSOR_NAME, sensor.getName());
                                 bundle.putSerializable(KEY_KNOWN_SENSOR, sensor.getDeviceClass());
