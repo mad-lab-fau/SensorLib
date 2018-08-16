@@ -8,6 +8,7 @@
 package de.fau.sensorlib;
 
 import android.util.Log;
+import android.util.SparseArray;
 
 import de.fau.sensorlib.enums.KnownSensor;
 import de.fau.sensorlib.enums.SensorState;
@@ -39,6 +40,10 @@ public class SensorInfo {
      */
     protected KnownSensor mDeviceClass = null;
 
+
+    protected SparseArray<byte[]> mManufacturerData = null;
+
+
     /**
      * @return the device name.
      */
@@ -60,6 +65,9 @@ public class SensorInfo {
         return mDeviceClass;
     }
 
+    public SparseArray<byte[]> getManufacturerData() {
+        return mManufacturerData;
+    }
 
     /**
      * Changes the sensor state.
@@ -107,7 +115,17 @@ public class SensorInfo {
      * @param deviceAddress address of the device.
      */
     public SensorInfo(String deviceName, String deviceAddress) {
-        this(deviceName, deviceAddress, KnownSensor.inferSensorClass(deviceName));
+        this(deviceName, deviceAddress, KnownSensor.inferSensorClass(deviceName), null);
+    }
+
+    /**
+     * Default constructor. The sensor class is inferred from the name or device address.
+     *
+     * @param deviceName    name of the device.
+     * @param deviceAddress address of the device.
+     */
+    public SensorInfo(String deviceName, String deviceAddress, SparseArray<byte[]> manufacturerData) {
+        this(deviceName, deviceAddress, KnownSensor.inferSensorClass(deviceName), manufacturerData);
     }
 
     /**
@@ -118,9 +136,14 @@ public class SensorInfo {
      * @param deviceClass   class of the device.
      */
     public SensorInfo(String deviceName, String deviceAddress, KnownSensor deviceClass) {
+        this(deviceName, deviceAddress, deviceClass, null);
+    }
+
+    public SensorInfo(String deviceName, String deviceAddress, KnownSensor deviceClass, SparseArray<byte[]> manufacturerData) {
         mName = deviceName;
         mDeviceAddress = deviceAddress;
         mDeviceClass = deviceClass;
+        mManufacturerData = manufacturerData;
     }
 
     @Override

@@ -11,9 +11,12 @@ import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
 import android.support.annotation.CallSuper;
 import android.util.Log;
+import android.util.SparseArray;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Callback implementation for the BLE scan callback.
@@ -43,8 +46,15 @@ public class BleScanCallback extends ScanCallback {
         }
         mScannedAddresses.add(result.getDevice().getAddress());
 
-        Log.d(TAG, "New BLE device: " + result.getDevice().getName() + "@" + result.getRssi());
-        SensorInfo s = new SensorInfo(result.getDevice().getName(), result.getDevice().getAddress());
+        SparseArray<byte[]> manuData = null;
+        try {
+            Log.d(TAG, "New BLE device: " + result.getDevice().getName() + "@" + result.getRssi());
+            manuData = Objects.requireNonNull(result.getScanRecord()).getManufacturerSpecificData();
+        } catch (Exception ignore) {
+
+        }
+        SensorInfo s = new SensorInfo(result.getDevice().getName(), result.getDevice().getAddress(), manuData);
+        Log.d(TAG, "Manufacturer Data: " + s.getDeviceClass() + ", " + Arrays.toString(s.getManufacturerData().valueAt(0)));
 
         boolean ret;
         if (s.getDeviceClass() != null) {
