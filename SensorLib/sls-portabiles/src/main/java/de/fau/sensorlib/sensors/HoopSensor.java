@@ -52,7 +52,7 @@ public class HoopSensor extends GenericBleSensor {
     static {
         BleGattAttributes.addService(HOOP_STREAMING_SERVICE, "Hoop Sensor Streaming");
         BleGattAttributes.addCharacteristic(HOOP_CONFIG, "Hoop Sensor Configuration");
-        BleGattAttributes.addCharacteristic(HOOP_STREAMING, "Hoop Stream IMU Data");
+        BleGattAttributes.addCharacteristic(HOOP_STREAMING, "Hoop Data Stream");
     }
 
     /**
@@ -283,9 +283,9 @@ public class HoopSensor extends GenericBleSensor {
      */
     public static class HoopDataFrame extends SensorDataFrame implements AccelDataFrame, GyroDataFrame {
 
+        private long timestamp;
         private double[] accel;
         private double[] gyro;
-        private long timestamp;
 
         /**
          * Creates a new data frame for sensor data
@@ -300,9 +300,9 @@ public class HoopSensor extends GenericBleSensor {
             if (accel.length != 3 || gyro.length != 3) {
                 throw new IllegalArgumentException("Illegal array size for " + ((accel.length != 3) ? "acceleration" : "gyroscope") + " values! ");
             }
+            this.timestamp = timestamp;
             this.accel = accel;
             this.gyro = gyro;
-            this.timestamp = timestamp;
         }
 
         @Override

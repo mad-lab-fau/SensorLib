@@ -310,19 +310,19 @@ public class NilsPodPpgSensor extends GenericBleSensor {
      */
     public static class NilsPodPpgDataFrame extends SensorDataFrame implements AccelDataFrame, GyroDataFrame, BarometricPressureDataFrame, PpgDataFrame {
 
+        private long timestamp;
         private double[] accel;
         private double[] gyro;
         private double baro;
         private double[] ppg;
-        private long timestamp;
 
         /**
          * Creates a new data frame for sensor data
          *
          * @param sensor    Originating sensor
          * @param timestamp Incremental counter for each data frame
-         * @param accel     array storing acceleration values
-         * @param gyro      array storing gyroscope values
+         * @param accel     Array storing acceleration values
+         * @param gyro      Array storing gyroscope values
          */
         public NilsPodPpgDataFrame(GenericBleSensor sensor, long timestamp, double[] accel, double[] gyro) {
             this(sensor, timestamp, accel, gyro, 0.0, new double[0]);
@@ -333,8 +333,9 @@ public class NilsPodPpgSensor extends GenericBleSensor {
          *
          * @param sensor    Originating sensor
          * @param timestamp Incremental counter for each data frame
-         * @param accel     array storing acceleration values
-         * @param gyro      array storing gyroscope values
+         * @param accel     Array storing acceleration values
+         * @param gyro      Array storing gyroscope values
+         * @param baro      Atmospheric pressure from barometer
          */
         public NilsPodPpgDataFrame(GenericBleSensor sensor, long timestamp, double[] accel, double[] gyro, double baro) {
             this(sensor, timestamp, accel, gyro, baro, new double[0]);
@@ -401,7 +402,7 @@ public class NilsPodPpgSensor extends GenericBleSensor {
             if (ppg.length > 0) {
                 return ppg[0];
             } else {
-                return -1;
+                return 0.0;
             }
         }
 
@@ -410,7 +411,7 @@ public class NilsPodPpgSensor extends GenericBleSensor {
             if (ppg.length > 1) {
                 return ppg[1];
             }
-            return -1;
+            return 0.0;
         }
 
         @Override
