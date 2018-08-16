@@ -8,15 +8,11 @@
 package de.fau.sensorlib.dataframe;
 
 /**
- * Barometer data frame
+ * Insole pressure data frame.
  */
-public interface BarometerDataFrame {
+public interface InsolePressureDataFrame {
 
-    /**
-     * Returns the atmospheric barometer pressure.
-     *
-     * @return Atmospheric pressure value
-     */
-    double getBarometerPressure();
+    String[] COLUMNS = new String[] {"pressure_1", "pressure_2", "pressure_3"};
 
+    double[] getPressureArray();
 }
