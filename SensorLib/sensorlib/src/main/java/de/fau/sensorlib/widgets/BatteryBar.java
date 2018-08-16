@@ -110,7 +110,7 @@ public class BatteryBar extends RecyclerView implements SensorEventListener {
         @NonNull
         @Override
         public BatteryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View layout = LayoutInflater.from(mContext).inflate(R.layout.item_battery_bar, parent);
+            View layout = LayoutInflater.from(mContext).inflate(R.layout.item_battery_bar, parent, false);
             return new BatteryViewHolder(mContext, layout);
         }
 

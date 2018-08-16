@@ -390,11 +390,11 @@ public class SensorPickerFragment extends DialogFragment implements View.OnClick
 
 
     public void clearHardwareSensorFilter() {
-        mHwSensorFilter = null;
+        mHwSensorFilter.clear();
     }
 
     public void clearSensorFilter() {
-        mSensorFilter = null;
+        mSensorFilter.clear();
     }
 
 
@@ -403,7 +403,7 @@ public class SensorPickerFragment extends DialogFragment implements View.OnClick
      */
     private void startSensorScan() {
         try {
-            if ((mHwSensorFilter == null && mSensorFilter == null) || (KnownSensor.INTERNAL.getAvailableSensors().containsAll(mHwSensorFilter) && mSensorFilter.contains(KnownSensor.INTERNAL))) {
+            if ((mHwSensorFilter.isEmpty() && mSensorFilter.isEmpty()) || (KnownSensor.INTERNAL.getAvailableSensors().containsAll(mHwSensorFilter) && mSensorFilter.contains(KnownSensor.INTERNAL))) {
                 // Add internal sensor (can always be selected)
                 Bundle internalSensor = new Bundle();
                 internalSensor.putString(KEY_SENSOR_ADDRESS, InternalSensor.ANDROID_DEVICE_SENSORS.getDeviceAddress());
@@ -425,11 +425,10 @@ public class SensorPickerFragment extends DialogFragment implements View.OnClick
 
                         @Override
                         public boolean onKnownSensorFound(SensorInfo sensor, int rssi) {
-                            if ((mHwSensorFilter == null && mSensorFilter == null) ||
+                            if ((mHwSensorFilter.isEmpty() && mSensorFilter.isEmpty()) ||
                                     (sensor.getDeviceClass().getAvailableSensors().containsAll(mHwSensorFilter)
                                             && mSensorFilter.contains(sensor.getDeviceClass()))) {
                                 Bundle bundle = new Bundle();
-                                Log.e(TAG, "ADD: " + sensor);
                                 bundle.putString(KEY_SENSOR_ADDRESS, sensor.getDeviceAddress());
                                 bundle.putString(KEY_SENSOR_NAME, sensor.getName());
                                 bundle.putSerializable(KEY_KNOWN_SENSOR, sensor.getDeviceClass());
