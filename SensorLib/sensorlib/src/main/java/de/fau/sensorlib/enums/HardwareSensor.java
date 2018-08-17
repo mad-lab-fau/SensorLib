@@ -18,6 +18,7 @@ import de.fau.sensorlib.dataframe.GestureDataFrame;
 import de.fau.sensorlib.dataframe.GyroDataFrame;
 import de.fau.sensorlib.dataframe.HeartRateDataFrame;
 import de.fau.sensorlib.dataframe.HumidityDataFrame;
+import de.fau.sensorlib.dataframe.InsolePressureDataFrame;
 import de.fau.sensorlib.dataframe.LightDataFrame;
 import de.fau.sensorlib.dataframe.MagDataFrame;
 import de.fau.sensorlib.dataframe.NoiseDataFrame;
@@ -39,7 +40,7 @@ public enum HardwareSensor {
     LIGHT("LUX", LightDataFrame.class),
     PRESSURE("PRES", PressureDataFrame.class),
     BAROMETER("BARO", BarometricPressureDataFrame.class),
-    FSR("FSR", PressureDataFrame.class),
+    FSR("FSR", InsolePressureDataFrame.class),
     TEMPERATURE("TEMP", TemperatureDataFrame.class),
     ECG("ECG", EcgDataFrame.class),
     EMG("EMG", EmgDataFrame.class),
