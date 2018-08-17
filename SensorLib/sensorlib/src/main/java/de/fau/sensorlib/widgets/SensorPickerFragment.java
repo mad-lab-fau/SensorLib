@@ -102,12 +102,10 @@ public class SensorPickerFragment extends DialogFragment implements View.OnClick
             Bundle bundle = mFoundSensors.get(position);
             if (mSelectedSensors.contains(bundle)) {
                 viewHolder.mCheckBox.setChecked(false);
-                Log.d(TAG, "remove");
                 mSelectedSensors.remove(bundle);
             } else {
                 viewHolder.mCheckBox.setChecked(true);
                 mSelectedSensors.add(bundle);
-                Log.d(TAG, "add");
             }
 
             //mSensorFoundCallback.onKnownSensorFound(new SensorInfo(name, address, sensor));
@@ -141,16 +139,17 @@ public class SensorPickerFragment extends DialogFragment implements View.OnClick
                 holder.mBatteryImageView.setImageResource(R.drawable.ic_battery_available);
                 holder.mBatteryImageView.setColorFilter(ContextCompat.getColor(mContext, R.color.sensor_available));
             }
-            // wait until Adapter has filled the GridView
-            new Handler().postDelayed(new Runnable() {
+
+            holder.mSensorGridView.post(new Runnable() {
                 @Override
                 public void run() {
                     for (final HardwareSensor hw : sensor.getAvailableSensors()) {
                         ((TextView) holder.mSensorGridView.getChildAt(hw.ordinal())).setTextColor(ContextCompat.getColor(mContext, R.color.sensor_available));
                     }
                 }
-            }, 500);
+            });
         }
+
 
         @Override
         public int getItemCount() {
@@ -388,7 +387,6 @@ public class SensorPickerFragment extends DialogFragment implements View.OnClick
         mSensorFilter.addAll(sensors);
     }
 
-
     public void clearHardwareSensorFilter() {
         mHwSensorFilter.clear();
     }
@@ -439,18 +437,6 @@ public class SensorPickerFragment extends DialogFragment implements View.OnClick
                             return true;
                         }
                     });
-
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            // ...stop BLE Scan
-                            BleSensorManager.cancelRunningScans();
-                            if (isAdded()) {
-                                mProgressBar.setVisibility(View.GONE);
-                                mProgressTextView.setText(getString(R.string.string_scan_results));
-                            }
-                        }
-                    }, 10000);
                 }
 
             }
@@ -460,16 +446,37 @@ public class SensorPickerFragment extends DialogFragment implements View.OnClick
         // TODO Do Bluetooth Classic Discovery
     }
 
+    private void stopSensorScan() {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                // ...stop BLE Scan
+                if (BleSensorManager.isScanning()) {
+                    BleSensorManager.cancelRunningScans();
+                }
+                if (isAdded()) {
+                    mProgressBar.setVisibility(View.GONE);
+                    mProgressTextView.setText(getString(R.string.string_scan_results));
+                    mRecyclerView.getAdapter().notifyDataSetChanged();
+
+                }
+            }
+        }, BleSensorManager.SCAN_PERIOD);
+    }
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        BleSensorManager.cancelRunningScans();
+        if (BleSensorManager.isScanning()) {
+            BleSensorManager.cancelRunningScans();
+        }
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         startSensorScan();
+        stopSensorScan();
     }
 
     public void show(Activity activity) {
