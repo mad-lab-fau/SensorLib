@@ -51,6 +51,11 @@ public class BleSensorManager {
     public static final int PERMISSIONS_GRANTED = 0;
     public static final int PERMISSIONS_MISSING = -1;
 
+    private static Handler sBleScanHandler = new Handler();
+    public static final long SCAN_PERIOD = 10000;
+    private static BluetoothLeScanner sBleScanner;
+    private static BleScanCallback sScanCallback;
+
     private static final String[] PERMISSIONS_BT_LE =
             new String[]{
                     Manifest.permission.BLUETOOTH,
@@ -58,6 +63,12 @@ public class BleSensorManager {
                     Manifest.permission.ACCESS_COARSE_LOCATION,
                     Manifest.permission.ACCESS_FINE_LOCATION
             };
+
+    private static boolean sIsScanning = false;
+
+    public static boolean isScanning() {
+        return sIsScanning;
+    }
 
     /**
      * method to list all available and connectable sensor within this framework.
@@ -265,12 +276,6 @@ public class BleSensorManager {
         return PERMISSIONS_GRANTED;
     }
 
-
-    private static Handler sBleScanHandler = new Handler();
-    private static final long SCAN_PERIOD = 10000;
-    private static BluetoothLeScanner sBleScanner;
-    private static BleScanCallback sScanCallback;
-
     /**
      * Cancels all running BLE discovery scans.
      */
@@ -286,27 +291,65 @@ public class BleSensorManager {
      *
      * @param callback a callback implementation that receives notifications for found sensors.
      */
-    public static void searchBleDevices(final SensorFoundCallback callback) throws Exception {
+    public static void searchBleDevices(final SensorFoundCallback callback) throws SensorException {
+        searchBleDevices(callback, new ArrayList<ScanFilter>());
+    }
 
-        sBleScanner = BluetoothAdapter.getDefaultAdapter().getBluetoothLeScanner();
-        if (sBleScanner == null) {
-            throw new SensorException(SensorExceptionType.bleScannerError);
+    public static void searchBleDeviceByNames(final SensorFoundCallback callback, String[] deviceNames) throws SensorException {
+        List<ScanFilter> filterList = new ArrayList<>();
+        if (deviceNames != null) {
+            for (String name : deviceNames) {
+                filterList.add(new ScanFilter.Builder().setDeviceName(name).build());
+            }
+        }
+
+        searchBleDevices(callback, filterList);
+    }
+
+
+    public static void searchBleDeviceByUUIDs(SensorFoundCallback callback, UUID[] uuids) throws SensorException {
+        List<ScanFilter> filterList = new ArrayList<>();
+        if (uuids != null) {
+            for (UUID uuid : uuids) {
+                filterList.add(new ScanFilter.Builder().setServiceUuid(new ParcelUuid(uuid)).build());
+            }
+        }
+
+        searchBleDevices(callback, filterList);
+    }
+
+    /**
+     * Search for BLE devices.
+     *
+     * @param callback   a callback implementation that receives notifications for found sensors.
+     * @param filterList list to filter scanned devices
+     */
+    private static void searchBleDevices(final SensorFoundCallback callback, List<ScanFilter> filterList) throws SensorException {
+        //searchBleDeviceByNames(callback, null);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            sBleScanner = BluetoothAdapter.getDefaultAdapter().getBluetoothLeScanner();
+            if (sBleScanner == null) {
+                throw new SensorException(SensorExceptionType.bleScannerError);
+            }
         }
 
         // set scan settings and filters
         ScanSettings settings = new ScanSettings.Builder()
                 .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
                 .build();
-        List<ScanFilter> filters = new ArrayList<>();
 
         // is an old scan still running? cancel it.
-        cancelRunningScans();
+        if (sIsScanning) {
+            cancelRunningScans();
+        }
+
         // create new scan callback
         sScanCallback = new BleScanCallback(callback);
 
         // start the BLE scan
         Log.d(TAG, "Starting BLE scan for " + SCAN_PERIOD / 1000 + " s ...");
-        sBleScanner.startScan(filters, settings, sScanCallback);
+        sIsScanning = true;
+        sBleScanner.startScan(filterList, settings, sScanCallback);
 
         // post a delayed runnable to stop the BLE scan after SCAN_PERIOD.
         sBleScanHandler.postDelayed(new Runnable() {
@@ -314,51 +357,10 @@ public class BleSensorManager {
             public void run() {
                 Log.d(TAG, "...Stopping BLE scan.");
                 if (sScanCallback != null) {
+                    sIsScanning = false;
                     sBleScanner.stopScan(sScanCallback);
                 }
             }
         }, SCAN_PERIOD);
-    }
-
-    public static void searchBleDeviceByNames(final SensorFoundCallback callback, String[] deviceNames) {
-        List<ScanFilter> filterList = new ArrayList<>();
-        for (String name : deviceNames) {
-            filterList.add(new ScanFilter.Builder().setDeviceName(name).build());
-        }
-
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            if (sBleScanner == null) {
-                sBleScanner = BluetoothAdapter.getDefaultAdapter().getBluetoothLeScanner();
-            }
-            if (sScanCallback == null) {
-                sScanCallback = new BleScanCallback(callback);
-            }
-
-            if (sBleScanner != null) {
-                sBleScanner.startScan(filterList, new ScanSettings.Builder().build(), sScanCallback);
-            }
-        }
-    }
-
-    public static void searchBleDeviceByUUIDs(SensorFoundCallback callback, UUID[] uuids) {
-        //Log.e(TAG, "Searching for BLE device...");
-
-        List<ScanFilter> filterList = new ArrayList<>();
-        for (UUID uuid : uuids) {
-            filterList.add(new ScanFilter.Builder().setServiceUuid(new ParcelUuid(uuid)).build());
-        }
-
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            if (sBleScanner == null) {
-                sBleScanner = BluetoothAdapter.getDefaultAdapter().getBluetoothLeScanner();
-            }
-            if (sScanCallback == null) {
-                sScanCallback = new BleScanCallback(callback);
-            }
-
-            if (sBleScanner != null) {
-                sBleScanner.startScan(filterList, new ScanSettings.Builder().build(), sScanCallback);
-            }
-        }
     }
 }
