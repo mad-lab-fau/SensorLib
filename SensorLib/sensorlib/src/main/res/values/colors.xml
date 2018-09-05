@@ -25,4 +25,26 @@
     <color name="button_stop_color">#D32F2F</color>
     <color name="button_stop_color_pressed">#B71C1C</color>
 
+
+    <!-- Plot colors -->
+    <color name="accel_x">#FF5722</color>
+    <color name="accel_y">#2196F3</color>
+    <color name="accel_z">#4CAF50</color>
+
+    <color name="gyro_x">#9C27B0</color>
+    <color name="gyro_y">#00BCD4</color>
+    <color name="gyro_z">#FFC107</color>
+
+    <color name="ecg_1">#F44336</color>
+    <color name="ecg_2">#B71C1C</color>
+
+    <color name="ppg_1">#E91E63</color>
+    <color name="ppg_2">#880E4F</color>
+
+    <color name="baro">#3F51B5</color>
+
+    <color name="press_1">#9E9E9E</color>
+    <color name="press_2">#607D8B</color>
+    <color name="press_3">#455A64</color>
+
 </resources>
