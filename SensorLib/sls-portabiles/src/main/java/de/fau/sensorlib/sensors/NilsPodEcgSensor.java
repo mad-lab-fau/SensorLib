@@ -22,74 +22,63 @@ import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorException;
 import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.AccelDataFrame;
-import de.fau.sensorlib.dataframe.BarometricPressureDataFrame;
-import de.fau.sensorlib.dataframe.GyroDataFrame;
-import de.fau.sensorlib.dataframe.InsolePressureDataFrame;
+import de.fau.sensorlib.dataframe.EcgDataFrame;
+import de.fau.sensorlib.dataframe.LabelDataFrame;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
-import de.fau.sensorlib.enums.HardwareSensor;
 
 
 /**
- * Represents a Sensor Insole.
+ * Represents a NilsPod Sensor device for ECG measurement.
  */
-public class InsoleSensor extends GenericBleSensor {
+public class NilsPodEcgSensor extends GenericBleSensor {
 
     /**
-     * UUID for Data Streaming Service of Insole
+     * UUID for Data Streaming Service of Hoop sensor
      */
-    private static final UUID INSOLE_STREAMING_SERVICE = UUID.fromString("6e400001-b5a3-f393-e0a9-e50e24dcca9e");
+    private static final UUID NILSPOD_STREAMING_SERVICE = UUID.fromString("6e400001-b5a3-f393-e0a9-e50e24dcca9e");
     /**
-     * UUID for Config Characteristic (write) of Insole
+     * UUID for Config Characteristic (write) of Hoop Sensor
      */
-    private static final UUID INSOLE_CONFIG = UUID.fromString("6e400002-b5a3-f393-e0a9-e50e24dcca9e");
+    private static final UUID NILSPOD_CONFIG = UUID.fromString("6e400002-b5a3-f393-e0a9-e50e24dcca9e");
     /**
-     * UUID for Streaming Characteristic (read) of Insole
+     * UUID for Streaming Characteristic (read) of Hoop Sensor
      */
-    private static final UUID INSOLE_STREAMING = UUID.fromString("6e400003-b5a3-f393-e0a9-e50e24dcca9e");
+    private static final UUID NILSPOD_STREAMING = UUID.fromString("6e400003-b5a3-f393-e0a9-e50e24dcca9e");
 
-    private static final int PACKET_SIZE = 20;
+    private static final int PACKET_SIZE = 4 + 7 + 6;
 
 
-    // Adding custom Insole BLE UUIDs to known UUID pool
+    // Adding custom NilsPod BLE UUIDs to known UUID pool
     static {
-        BleGattAttributes.addService(INSOLE_STREAMING_SERVICE, "Insole Streaming");
-        BleGattAttributes.addCharacteristic(INSOLE_CONFIG, "Insole Configuration");
-        BleGattAttributes.addCharacteristic(INSOLE_STREAMING, "Insole Data Stream");
+        BleGattAttributes.addService(NILSPOD_STREAMING_SERVICE, "NilsPod Sensor Streaming");
+        BleGattAttributes.addCharacteristic(NILSPOD_CONFIG, "NilsPod Sensor Configuration");
+        BleGattAttributes.addCharacteristic(NILSPOD_STREAMING, "NilsPod Data Stream");
     }
 
     /**
      * Sensor commands for communication with NilsPod Sensor. Used with the Sensor Config Characteristic
      */
-    private enum InsoleSensorCommands {
+    private enum NilsPodEcgSensorCommands {
         /**
          * Start Streaming Command
          */
-        START_STREAMING(new byte[]{(byte) 0xC2}),
+        START_STREAMING((byte) 0xC2),
         /**
          * Stop Streaming Command
          */
-        STOP_STREAMING(new byte[]{(byte) 0xC1}),
-        /**
-         * Reset Command
-         */
-        RESET(new byte[]{(byte) 0xCF, (byte) 0xFF});
+        STOP_STREAMING((byte) 0xC1);
 
-        private byte[] cmd;
+        private byte cmd;
 
-        InsoleSensorCommands(byte[] cmd) {
+        NilsPodEcgSensorCommands(byte cmd) {
             this.cmd = cmd;
         }
     }
 
     /**
-     * Global counter for incoming packages (local counter only has 15 bit)
-     */
-    private int globalCounter = 0;
-
-    /**
      * Local counter for incoming packages
      */
-    private int lastCounter = 0;
+    private long lastCounter = 0;
 
     /**
      * Flag indicating whether data should be logged
@@ -108,18 +97,18 @@ public class InsoleSensor extends GenericBleSensor {
 
 
     /**
-     * Create a new instance of one Insole
+     * Create a new instance of one NilsPod ECG Sensor
      *
      * @param context     Application context
      * @param knownSensor The Sensor reference retrieved from the BLE scan
      */
-    public InsoleSensor(Context context, SensorInfo knownSensor, SensorDataProcessor dataHandler) {
+    public NilsPodEcgSensor(Context context, SensorInfo knownSensor, SensorDataProcessor dataHandler) {
         super(context, knownSensor.getName(), knownSensor.getDeviceAddress(), dataHandler, 200);
     }
 
     @Override
     public void startStreaming() {
-        if (send(InsoleSensorCommands.START_STREAMING)) {
+        if (send(NilsPodEcgSensorCommands.START_STREAMING)) {
             super.startStreaming();
             if (mLoggingEnabled) {
                 try {
@@ -139,7 +128,7 @@ public class InsoleSensor extends GenericBleSensor {
 
     @Override
     public void stopStreaming() {
-        if (send(InsoleSensorCommands.STOP_STREAMING)) {
+        if (send(NilsPodEcgSensorCommands.STOP_STREAMING)) {
             super.stopStreaming();
             if (mDataLogger != null) {
                 mDataLogger.completeLogger();
@@ -154,7 +143,7 @@ public class InsoleSensor extends GenericBleSensor {
         if (super.onNewCharacteristicValue(characteristic, isChange)) {
             return true;
         } else {
-            if (INSOLE_STREAMING.equals(characteristic.getUuid())) {
+            if (NILSPOD_STREAMING.equals(characteristic.getUuid())) {
                 extractSensorData(characteristic);
                 return true;
             }
@@ -170,6 +159,7 @@ public class InsoleSensor extends GenericBleSensor {
      */
     private void extractSensorData(BluetoothGattCharacteristic characteristic) {
         byte[] values = characteristic.getValue();
+        //Log.d(TAG, "data: " + Arrays.toString(values) + ", LENGTH: " + values.length);
 
         // one data packet always has size PACKET_SIZE
         if (values.length % PACKET_SIZE != 0) {
@@ -177,53 +167,50 @@ public class InsoleSensor extends GenericBleSensor {
             return;
         }
 
+
         // iterate over data packets
         for (int i = 0; i < values.length; i += PACKET_SIZE) {
             int offset = i;
-            double[] gyro = new double[3];
             double[] accel = new double[3];
-            double baro;
-            double[] pressure = new double[3];
-            int localCounter;
+            double[] ecg = new double[2];
+            char label;
+            long localCounter;
 
-            // extract gyroscope data
-            for (int j = 0; j < 3; j++) {
-                gyro[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
-                offset += 2;
+            // extract ECG data
+            for (int j = 0; j < 2; j++) {
+                int tmp = ((values[offset] & 0xFF) | ((values[offset + 1] & 0xFF) << 8) | ((values[offset + 2] & 0xFF) << 16));
+                tmp = tmp << 8;
+                // shift to fill 32 bit integer with sign bit
+                ecg[j] = tmp >> 8;
+                offset += 3;
             }
+
+            label = (char) values[offset];
+            offset++;
+
             // extract accelerometer data
             for (int j = 0; j < 3; j++) {
                 accel[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
                 offset += 2;
             }
 
-            baro = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
-            baro = (baro + 101325.0) / 100.0;
-            offset += 2;
-
-            for (int j = 0; j < 3; j++) {
-                pressure[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset);
-                offset++;
-            }
-
-            // extract packet counter (only 15 bit, therefore getIntValue() method not applicable)
-            localCounter = (values[PACKET_SIZE - 1] & 0xFF) | ((values[PACKET_SIZE - 2] & 0x7F) << 8);
+            // extract packet counter
+            localCounter = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, offset);
 
             // check if packets have been lost
-            if (((localCounter - lastCounter) % (2 << 14)) > 1) {
+            if (((localCounter - lastCounter) % ((long) 2 << 31)) > 1) {
                 Log.w(TAG, this + ": BLE Packet Loss!");
-                Log.e(TAG, characteristic.getUuid().toString());
-            }
-            // increment global counter if local counter overflows
-            if (localCounter < lastCounter) {
-                globalCounter++;
             }
 
-            InsoleDataFrame df = new InsoleDataFrame(this, globalCounter * (2 << 14) + localCounter, accel, gyro, baro, pressure);
-            //Log.d(TAG, df.toString());
+            NilsPodEcgDataFrame df = new NilsPodEcgDataFrame(this, localCounter, accel, ecg, label);
             // send new data to the SensorDataProcessor
-            sendNewData(df);
+            Log.d(TAG, df.toString());
             lastCounter = localCounter;
+            // TODO fix strange bug of corrupted sample
+            if (label == 1) {
+                return;
+            }
+            sendNewData(df);
             if (mLoggingEnabled) {
                 mDataLogger.writeData(df);
             }
@@ -234,7 +221,7 @@ public class InsoleSensor extends GenericBleSensor {
     protected boolean shouldEnableNotification(BluetoothGattCharacteristic c) {
         if (super.shouldEnableNotification(c)) {
             return true;
-        } else if (INSOLE_STREAMING.equals(c.getUuid())) {
+        } else if (NILSPOD_STREAMING.equals(c.getUuid())) {
             return true;
         }
 
@@ -245,9 +232,7 @@ public class InsoleSensor extends GenericBleSensor {
     @Override
     protected void onDiscoveredService(BluetoothGattService service) {
         super.onDiscoveredService(service);
-        if (INSOLE_STREAMING_SERVICE.equals(service.getUuid())) {
-            mAvailableSensors.add(HardwareSensor.ACCELEROMETER);
-            mAvailableSensors.add(HardwareSensor.GYROSCOPE);
+        if (NILSPOD_STREAMING_SERVICE.equals(service.getUuid())) {
             mStreamingService = service;
         }
     }
@@ -259,9 +244,9 @@ public class InsoleSensor extends GenericBleSensor {
      * @param cmd Sensor Command
      * @return true if data has been successfully sent, false otherwise
      */
-    private boolean send(InsoleSensorCommands cmd) {
+    private boolean send(NilsPodEcgSensorCommands cmd) {
         Log.d(TAG, "Sending " + cmd + " command to " + getName());
-        return send(cmd.cmd);
+        return send(new byte[]{cmd.cmd});
     }
 
 
@@ -270,7 +255,7 @@ public class InsoleSensor extends GenericBleSensor {
             Log.w(TAG, "Service not found");
             return false;
         }
-        BluetoothGattCharacteristic characteristic = mStreamingService.getCharacteristic(INSOLE_CONFIG);
+        BluetoothGattCharacteristic characteristic = mStreamingService.getCharacteristic(NILSPOD_CONFIG);
         if (characteristic == null) {
             Log.w(TAG, "Send characteristic not found");
             return false;
@@ -298,26 +283,25 @@ public class InsoleSensor extends GenericBleSensor {
 
 
     /**
-     * Data frame to store data received from the Insole
+     * Data frame to store data received from the Hoop Sensor
      */
-    public static class InsoleDataFrame extends SensorDataFrame implements AccelDataFrame, GyroDataFrame, BarometricPressureDataFrame, InsolePressureDataFrame {
+    public static class NilsPodEcgDataFrame extends SensorDataFrame implements AccelDataFrame, EcgDataFrame, LabelDataFrame {
 
         private long timestamp;
         private double[] accel;
-        private double[] gyro;
-        private double[] pressure;
-        private double baro;
+        private double[] ecg;
+        private char label;
 
         /**
          * Creates a new data frame for sensor data
          *
          * @param sensor    Originating sensor
          * @param timestamp Incremental counter for each data frame
-         * @param accel     Array storing acceleration values
-         * @param gyro      Array storing gyroscope values
+         * @param accel     array storing acceleration values
+         * @param ecg       array storing ECG values
          */
-        public InsoleDataFrame(GenericBleSensor sensor, long timestamp, double[] accel, double[] gyro) {
-            this(sensor, timestamp, accel, gyro, 0.0, null);
+        public NilsPodEcgDataFrame(GenericBleSensor sensor, long timestamp, double[] accel, double[] ecg) {
+            this(sensor, timestamp, accel, ecg, (char) 0);
         }
 
         /**
@@ -325,36 +309,18 @@ public class InsoleSensor extends GenericBleSensor {
          *
          * @param sensor    Originating sensor
          * @param timestamp Incremental counter for each data frame
-         * @param accel     Array storing acceleration values
-         * @param gyro      Array storing gyroscope values
-         * @param baro      Atmospheric pressure from barometer
-         * @param pressure  Array storing FSR pressure values
+         * @param accel     array storing acceleration values
+         * @param ecg       array storing ECG values
          */
-        public InsoleDataFrame(GenericBleSensor sensor, long timestamp, double[] accel, double[] gyro, double baro, double[] pressure) {
+        public NilsPodEcgDataFrame(GenericBleSensor sensor, long timestamp, double[] accel, double[] ecg, char label) {
             super(sensor, timestamp);
-            if (accel.length != 3 || gyro.length != 3) {
-                throw new IllegalArgumentException("Illegal array size for " + ((accel.length != 3) ? "acceleration" : "gyroscope") + " values! ");
+            if (accel.length != 3) {
+                throw new IllegalArgumentException("Illegal array size for acceleration values! ");
             }
             this.timestamp = timestamp;
             this.accel = accel;
-            this.gyro = gyro;
-            this.baro = baro;
-            this.pressure = pressure;
-        }
-
-        @Override
-        public double getGyroX() {
-            return gyro[0];
-        }
-
-        @Override
-        public double getGyroY() {
-            return gyro[1];
-        }
-
-        @Override
-        public double getGyroZ() {
-            return gyro[2];
+            this.ecg = ecg;
+            this.label = label;
         }
 
         @Override
@@ -373,40 +339,23 @@ public class InsoleSensor extends GenericBleSensor {
         }
 
         @Override
-        public double getBarometricPressure() {
-            return baro;
+        public double getEcgSample() {
+            return ecg[0];
         }
 
         @Override
-        public double getFirstPressureSample() {
-            if (pressure.length > 0) {
-                return pressure[0];
-            } else {
-                return 0.0;
-            }
+        public double getSecondaryEcgSample() {
+            return ecg[1];
         }
 
         @Override
-        public double getSecondPressureSample() {
-            if (pressure.length > 1) {
-                return pressure[1];
-            } else {
-                return 0.0;
-            }
-        }
-
-        @Override
-        public double getThirdPressureSample() {
-            if (pressure.length > 2) {
-                return pressure[2];
-            } else {
-                return 0.0;
-            }
+        public char getLabel() {
+            return label;
         }
 
         @Override
         public String toString() {
-            return "<" + originatingSensor.getDeviceName() + ">\tctr=" + timestamp + ", accel: " + Arrays.toString(accel) + ", gyro: " + Arrays.toString(gyro);
+            return "<" + originatingSensor.getDeviceName() + ">\tctr=" + timestamp + ", accel: " + Arrays.toString(accel) + ", ecg: " + Arrays.toString(ecg) + ", label: " + (int) label;
         }
     }
 }
