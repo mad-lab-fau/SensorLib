@@ -7,16 +7,13 @@
  */
 package de.fau.sensorlib.dataframe;
 
+
 /**
- * Insole pressure data frame.
+ * Label data frame.
  */
-public interface InsolePressureDataFrame {
+public interface LabelDataFrame {
 
-    String[] COLUMNS = new String[] {"pres_1", "pres_2", "pres_3"};
+    String[] COLUMNS = new String[]{"label"};
 
-    double getFirstPressureSample();
-
-    double getSecondPressureSample();
-
-    double getThirdPressureSample();
+    char getLabel();
 }
