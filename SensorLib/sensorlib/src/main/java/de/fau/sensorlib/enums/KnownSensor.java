@@ -7,6 +7,8 @@
  */
 package de.fau.sensorlib.enums;
 
+import android.util.Log;
+
 import java.util.EnumSet;
 
 /**
@@ -148,6 +150,11 @@ public enum KnownSensor {
                     HardwareSensor.GYROSCOPE,
                     HardwareSensor.BAROMETER,
                     HardwareSensor.PPG
+            ), true),
+    NILSPOD_ECG("NilsPod_ECG", new String[]{"NilsPod_ECG"},
+            EnumSet.of(
+                    HardwareSensor.ACCELEROMETER,
+                    HardwareSensor.ECG
             ), true);
 
     // =============================================================================================

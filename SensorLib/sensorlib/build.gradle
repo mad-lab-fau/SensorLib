@@ -24,6 +24,7 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support:recyclerview-v7:27.1.1'
     implementation 'com.android.support:cardview-v7:27.1.1'
+    implementation 'com.github.hannesa2:MPAndroidChart:3.0.5'
 }
 
 tasks.create(name: 'copyApk', type: Copy) {
