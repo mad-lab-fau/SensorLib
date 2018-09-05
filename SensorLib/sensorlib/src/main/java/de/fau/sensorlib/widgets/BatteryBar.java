@@ -47,8 +47,7 @@ public class BatteryBar extends RecyclerView implements SensorEventListener {
 
     public BatteryBar(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        GridLayoutManager layoutManager = new GridLayoutManager(getContext(), 2);
-        setLayoutManager(layoutManager);
+        setLayoutManager(new GridLayoutManager(getContext(), 2));
         addItemDecoration(new ItemSpacing(getContext()));
         mAdapter = new BatteryGridAdapter(context);
         setAdapter(mAdapter);

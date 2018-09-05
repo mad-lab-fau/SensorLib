@@ -20,7 +20,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -119,7 +118,7 @@ public class SensorPickerFragment extends DialogFragment implements View.OnClick
 
         @Override
         public SensorPickerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new SensorPickerViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_recyclerview, parent, false), this);
+            return new SensorPickerViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_sensor_picker, parent, false), this);
         }
 
         @Override
