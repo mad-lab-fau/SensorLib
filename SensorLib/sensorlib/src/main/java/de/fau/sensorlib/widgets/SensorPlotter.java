@@ -1,6 +1,7 @@
 package de.fau.sensorlib.widgets;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -81,7 +82,6 @@ public class SensorPlotter extends CardView implements SensorEventListener {
     private ArrayList<Method[]> mMethodLists = new ArrayList<>();
 
 
-    //TODO: add as XML property
     private boolean mScrollEnabled = true;
 
 
@@ -96,6 +96,18 @@ public class SensorPlotter extends CardView implements SensorEventListener {
     public SensorPlotter(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         inflate(context, R.layout.widget_sensor_plotter, this);
+
+        TypedArray attributes = context.obtainStyledAttributes(attrs, R.styleable.SensorPlotter);
+        if (attributes != null) {
+            try {
+                mScrollEnabled = attributes.getBoolean(R.styleable.SensorPlotter_scrollable, true);
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                attributes.recycle();
+            }
+        }
+
 
         mContext = context;
         mAdapter = new SensorPlotterRecyclerAdapter();

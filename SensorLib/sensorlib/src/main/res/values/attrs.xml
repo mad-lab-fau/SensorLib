@@ -16,4 +16,8 @@
         <attr name="sensor_name" format="string" />
     </declare-styleable>
 
+    <declare-styleable name="SensorPlotter">
+        <attr name="scrollable" format="boolean" />
+    </declare-styleable>
+
 </resources>
