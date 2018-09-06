@@ -11,35 +11,32 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.content.Context;
 import android.util.Log;
 
-import java.util.Arrays;
-
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorInfo;
-import de.fau.sensorlib.dataframe.InsolePressureDataFrame;
+import de.fau.sensorlib.dataframe.BarometricPressureDataFrame;
 
 
 /**
- * Represents a Sensor Insole.
+ * Represents a NilsPod Sensor device.
  */
-public class InsoleSensor extends NilsPodSensor {
+public class NilsPodSensor extends AbstractNilsPodSensor {
 
-    //
-    static {
-        // add 3 Byte for FSR pressure values
-        PACKET_SIZE += 3;
-        // add 1 Byte for battery
-        PACKET_SIZE += 1;
-    }
 
     /**
      * Global counter for incoming packages (local counter only has 15 bit)
      */
     private int globalCounter = 0;
 
-    public InsoleSensor(Context context, SensorInfo info, SensorDataProcessor dataHandler) {
-        super(context, info, dataHandler);
+    // Override default packet size
+    static {
+        // add 2 Byte for barometer
+        PACKET_SIZE += 2;
     }
 
+
+    public NilsPodSensor(Context context, SensorInfo info, SensorDataProcessor dataHandler) {
+        super(context, info, dataHandler);
+    }
 
     /**
      * Extracts sensor data into data frames from the given characteristic.
@@ -52,7 +49,7 @@ public class InsoleSensor extends NilsPodSensor {
 
         // one data packet always has size PACKET_SIZE
         if (values.length % PACKET_SIZE != 0) {
-            Log.e(TAG, "Wrong BLE Packet Size!" + values.length + ", " + PACKET_SIZE);
+            Log.e(TAG, "Wrong BLE Packet Size!");
             return;
         }
 
@@ -62,7 +59,6 @@ public class InsoleSensor extends NilsPodSensor {
             double[] gyro = new double[3];
             double[] accel = new double[3];
             double baro;
-            double[] pressure = new double[3];
             int localCounter;
 
             // extract gyroscope data
@@ -80,28 +76,19 @@ public class InsoleSensor extends NilsPodSensor {
             baro = (baro + 101325.0) / 100.0;
             offset += 2;
 
-            Log.e(TAG, "baro" + baro);
-
-            for (int j = 0; j < 3; j++) {
-                pressure[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset);
-                offset++;
-            }
-
             // extract packet counter (only 15 bit, therefore getIntValue() method not applicable)
-            localCounter = (values[PACKET_SIZE - 1] & 0xFF) | ((values[PACKET_SIZE - 2] & 0x7F) << 8);
+            localCounter = (values[offset + 1] & 0xFF) | ((values[offset] & 0x7F) << 8);
 
             // check if packets have been lost
             if (((localCounter - lastCounter) % (2 << 14)) > 1) {
                 Log.w(TAG, this + ": BLE Packet Loss!");
-                Log.e(TAG, characteristic.getUuid().toString());
             }
             // increment global counter if local counter overflows
             if (localCounter < lastCounter) {
                 globalCounter++;
             }
 
-            InsoleDataFrame df = new InsoleDataFrame(this, globalCounter * (2 << 14) + localCounter, accel, gyro, baro, pressure);
-            Log.d(TAG, df.toString());
+            NilsPodDataFrame df = new NilsPodDataFrame(this, globalCounter * (2 << 14) + localCounter, accel, gyro, baro);
             // send new data to the SensorDataProcessor
             sendNewData(df);
             lastCounter = localCounter;
@@ -111,47 +98,44 @@ public class InsoleSensor extends NilsPodSensor {
         }
     }
 
-    /**
-     * Data frame to store data received from the Insole
-     */
-    public static class InsoleDataFrame extends NilsPodDataFrame implements InsolePressureDataFrame {
+    public static class NilsPodDataFrame extends GenericNilsPodDataFrame implements BarometricPressureDataFrame {
 
-        protected double[] pressure;
+        protected double baro;
 
         /**
          * Creates a new data frame for sensor data
          *
          * @param sensor    Originating sensor
          * @param timestamp Incremental counter for each data frame
-         * @param accel     Array storing acceleration values
-         * @param gyro      Array storing gyroscope values
-         * @param baro      Atmospheric pressure from barometer
-         * @param pressure  Array storing FSR pressure values
+         * @param accel     array storing acceleration values
+         * @param gyro      array storing gyroscope values
          */
-        public InsoleDataFrame(GenericBleSensor sensor, long timestamp, double[] accel, double[] gyro, double baro, double[] pressure) {
-            super(sensor, timestamp, accel, gyro, baro);
-            this.pressure = pressure;
+        public NilsPodDataFrame(GenericBleSensor sensor, long timestamp, double[] accel, double[] gyro) {
+            this(sensor, timestamp, accel, gyro, 0);
+        }
+
+
+        /**
+         * Creates a new data frame for sensor data
+         *
+         * @param sensor    Originating sensor
+         * @param timestamp Incremental counter for each data frame
+         * @param accel     array storing acceleration values
+         * @param gyro      array storing gyroscope values
+         */
+        public NilsPodDataFrame(GenericBleSensor sensor, long timestamp, double[] accel, double[] gyro, double baro) {
+            super(sensor, timestamp, accel, gyro);
+            this.baro = baro;
         }
 
         @Override
-        public double getFirstPressureSample() {
-            return pressure[0];
-
-        }
-
-        @Override
-        public double getSecondPressureSample() {
-            return pressure[1];
-        }
-
-        @Override
-        public double getThirdPressureSample() {
-            return pressure[2];
+        public double getBarometricPressure() {
+            return baro;
         }
 
         @Override
         public String toString() {
-            return super.toString() + ", pressure: " + Arrays.toString(pressure);
+            return super.toString() + ", baro: " + baro;
         }
     }
 }
