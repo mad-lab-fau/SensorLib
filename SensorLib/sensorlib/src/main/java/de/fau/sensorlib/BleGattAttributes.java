@@ -66,7 +66,7 @@ public final class BleGattAttributes {
      * <li>{@link BleGattAttributes#PERIPHERAL_PREFERRED_CONNECTION_PARAMETERS}</li>
      * </ul>
      */
-    public static final UUID GENERIC_ACCESS = new UUID((0x1800L << 32) | 0x1000, leastSigBits);
+    public static final UUID GENERIC_ACCESS_SERVICE = new UUID((0x1800L << 32) | 0x1000, leastSigBits);
 
     /**
      * <b>Alert Notification Service</b> <i>(org.bluetooth.service.alert_notification)</i>
@@ -100,7 +100,7 @@ public final class BleGattAttributes {
      * <li>{@link BleGattAttributes#AGGREGATE}</li>
      * </ul>
      */
-    public static final UUID AUTOMATION_IO = new UUID((0x1815L << 32) | 0x1000, leastSigBits);
+    public static final UUID AUTOMATION_IO_SERVICE = new UUID((0x1815L << 32) | 0x1000, leastSigBits);
 
     /**
      * <b>Battery Service</b> <i>(org.bluetooth.service.battery_service)</i>
@@ -130,7 +130,7 @@ public final class BleGattAttributes {
      * <li>{@link BleGattAttributes#BLOOD_PRESSURE_FEATURE}</li>
      * </ul>
      */
-    public static final UUID BLOOD_PRESSURE = new UUID((0x1810L << 32) | 0x1000, leastSigBits);
+    public static final UUID BLOOD_PRESSURE_SERVICE = new UUID((0x1810L << 32) | 0x1000, leastSigBits);
 
     /**
      * <b>Body Composition Service</b> <i>(org.bluetooth.service.body_composition)</i>
@@ -145,7 +145,7 @@ public final class BleGattAttributes {
      * <li>{@link BleGattAttributes#BODY_COMPOSITION_MEASUREMENT}</li>
      * </ul>
      */
-    public static final UUID BODY_COMPOSITION = new UUID((0x181BL << 32) | 0x1000, leastSigBits);
+    public static final UUID BODY_COMPOSITION_SERVICE = new UUID((0x181BL << 32) | 0x1000, leastSigBits);
 
     /**
      * <b>Bond Management Service</b> <i>(org.bluetooth.service.bond_management)</i>
@@ -160,7 +160,7 @@ public final class BleGattAttributes {
      * <li>{@link BleGattAttributes#BOND_MANAGEMENT_FEATURES}</li>
      * </ul>
      */
-    public static final UUID BOND_MANAGEMENT_SERVICE = new UUID((0x181EL << 32) | 0x1000, leastSigBits);
+    public static final UUID BOND_MANAGEMENT_SERVICE_SERVICE = new UUID((0x181EL << 32) | 0x1000, leastSigBits);
 
     /**
      * <b>Continuous Glucose Monitoring Service</b> <i>(org.bluetooth.service.continuous_glucose_monitoring)</i>
@@ -180,7 +180,7 @@ public final class BleGattAttributes {
      * <li>{@link BleGattAttributes#CGM_SPECIFIC_OPS_CONTROL_POINT}</li>
      * </ul>
      */
-    public static final UUID CONTINUOUS_GLUCOSE_MONITORING = new UUID((0x181FL << 32) | 0x1000, leastSigBits);
+    public static final UUID CONTINUOUS_GLUCOSE_MONITORING_SERVICE = new UUID((0x181FL << 32) | 0x1000, leastSigBits);
 
     /**
      * <b>Current Time Service</b> <i>(org.bluetooth.service.current_time)</i>
@@ -196,7 +196,7 @@ public final class BleGattAttributes {
      * <li>{@link BleGattAttributes#REFERENCE_TIME_INFORMATION}</li>
      * </ul>
      */
-    public static final UUID CURRENT_TIME_SERVICE = new UUID((0x1805L << 32) | 0x1000, leastSigBits);
+    public static final UUID CURRENT_TIME_SERVICE_SERVICE = new UUID((0x1805L << 32) | 0x1000, leastSigBits);
 
     /**
      * <b>Cycling Power Service</b> <i>(org.bluetooth.service.cycling_power)</i>
@@ -214,7 +214,7 @@ public final class BleGattAttributes {
      * <li>{@link BleGattAttributes#CYCLING_POWER_CONTROL_POINT}</li>
      * </ul>
      */
-    public static final UUID CYCLING_POWER = new UUID((0x1818L << 32) | 0x1000, leastSigBits);
+    public static final UUID CYCLING_POWER_SERVICE = new UUID((0x1818L << 32) | 0x1000, leastSigBits);
 
     /**
      * <b>Cycling Speed and Cadence Service</b> <i>(org.bluetooth.service.cycling_speed_and_cadence)</i>
@@ -231,7 +231,7 @@ public final class BleGattAttributes {
      * <li>{@link BleGattAttributes#SC_CONTROL_POINT}</li>
      * </ul>
      */
-    public static final UUID CYCLING_SPEED_AND_CADENCE = new UUID((0x1816L << 32) | 0x1000, leastSigBits);
+    public static final UUID CYCLING_SPEED_AND_CADENCE_SERVICE = new UUID((0x1816L << 32) | 0x1000, leastSigBits);
 
     /**
      * <b>Device Information Service</b> <i>(org.bluetooth.service.device_information)</i>
@@ -253,7 +253,7 @@ public final class BleGattAttributes {
      * <li>{@link BleGattAttributes#PNP_ID}</li>
      * </ul>
      */
-    public static final UUID DEVICE_INFORMATION = new UUID((0x180AL << 32) | 0x1000, leastSigBits);
+    public static final UUID DEVICE_INFORMATION_SERVICE = new UUID((0x180AL << 32) | 0x1000, leastSigBits);
 
     /**
      * <b>Environmental Sensing Service</b> <i>(org.bluetooth.service.environmental_sensing)</i>
@@ -287,7 +287,7 @@ public final class BleGattAttributes {
      * <li>{@link BleGattAttributes#MAGNETIC_FLUX_DENSITY_3D}</li>
      * </ul>
      */
-    public static final UUID ENVIRONMENTAL_SENSING = new UUID((0x181AL << 32) | 0x1000, leastSigBits);
+    public static final UUID ENVIRONMENTAL_SENSING_SERVICE = new UUID((0x181AL << 32) | 0x1000, leastSigBits);
 
     /**
      * <b>Fitness Machine Service</b> <i>(org.bluetooth.service.fitness_machine)</i>
@@ -315,7 +315,7 @@ public final class BleGattAttributes {
      * <li>{@link BleGattAttributes#FITNESS_MACHINE_STATUS}</li>
      * </ul>
      */
-    public static final UUID FITNESS_MACHINE = new UUID((0x1826L << 32) | 0x1000, leastSigBits);
+    public static final UUID FITNESS_MACHINE_SERVICE = new UUID((0x1826L << 32) | 0x1000, leastSigBits);
 
     /**
      * <b>Generic Attribute Service</b> <i>(org.bluetooth.service.generic_attribute)</i>
@@ -327,7 +327,7 @@ public final class BleGattAttributes {
      * <li>{@link BleGattAttributes#SERVICE_CHANGED}</li>
      * </ul>
      */
-    public static final UUID GENERIC_ATTRIBUTE = new UUID((0x1801L << 32) | 0x1000, leastSigBits);
+    public static final UUID GENERIC_ATTRIBUTE_SERVICE = new UUID((0x1801L << 32) | 0x1000, leastSigBits);
 
     /**
      * <b>Glucose Service</b> <i>(org.bluetooth.service.glucose)</i>
@@ -344,7 +344,7 @@ public final class BleGattAttributes {
      * <li>{@link BleGattAttributes#RECORD_ACCESS_CONTROL_POINT}</li>
      * </ul>
      */
-    public static final UUID GLUCOSE = new UUID((0x1808L << 32) | 0x1000, leastSigBits);
+    public static final UUID GLUCOSE_SERVICE = new UUID((0x1808L << 32) | 0x1000, leastSigBits);
 
     /**
      * <b>Health Thermometer Service</b> <i>(org.bluetooth.service.health_thermometer)</i>
@@ -361,7 +361,7 @@ public final class BleGattAttributes {
      * <li>{@link BleGattAttributes#MEASUREMENT_INTERVAL}</li>
      * </ul>
      */
-    public static final UUID HEALTH_THERMOMETER = new UUID((0x1809L << 32) | 0x1000, leastSigBits);
+    public static final UUID HEALTH_THERMOMETER_SERVICE = new UUID((0x1809L << 32) | 0x1000, leastSigBits);
 
     /**
      * <b>Heart Rate Service</b> <i>(org.bluetooth.service.heart_rate)</i>
@@ -377,7 +377,7 @@ public final class BleGattAttributes {
      * <li>{@link BleGattAttributes#HEART_RATE_CONTROL_POINT}</li>
      * </ul>
      */
-    public static final UUID HEART_RATE = new UUID((0x180DL << 32) | 0x1000, leastSigBits);
+    public static final UUID HEART_RATE_SERVICE = new UUID((0x180DL << 32) | 0x1000, leastSigBits);
 
     /**
      * <b>HTTP Proxy Service</b> <i>(org.bluetooth.service.http_proxy)</i>
@@ -396,7 +396,7 @@ public final class BleGattAttributes {
      * <li>{@link BleGattAttributes#HTTPS_SECURITY}</li>
      * </ul>
      */
-    public static final UUID HTTP_PROXY = new UUID((0x1823L << 32) | 0x1000, leastSigBits);
+    public static final UUID HTTP_PROXY_SERVICE = new UUID((0x1823L << 32) | 0x1000, leastSigBits);
 
     /**
      * <b>Human Interface Device Service</b> <i>(org.bluetooth.service.human_interface_device)</i>
@@ -417,7 +417,7 @@ public final class BleGattAttributes {
      * <li>{@link BleGattAttributes#HID_CONTROL_POINT}</li>
      * </ul>
      */
-    public static final UUID HUMAN_INTERFACE_DEVICE = new UUID((0x1812L << 32) | 0x1000, leastSigBits);
+    public static final UUID HUMAN_INTERFACE_DEVICE_SERVICE = new UUID((0x1812L << 32) | 0x1000, leastSigBits);
 
     /**
      * <b>Immediate Alert Service</b> <i>(org.bluetooth.service.immediate_alert)</i>
@@ -431,7 +431,7 @@ public final class BleGattAttributes {
      * <li>{@link BleGattAttributes#ALERT_LEVEL}</li>
      * </ul>
      */
-    public static final UUID IMMEDIATE_ALERT = new UUID((0x1802L << 32) | 0x1000, leastSigBits);
+    public static final UUID IMMEDIATE_ALERT_SERVICE = new UUID((0x1802L << 32) | 0x1000, leastSigBits);
 
     /**
      * <b>Indoor Positioning Service</b> <i>(org.bluetooth.service.indoor_positioning)</i>
@@ -453,7 +453,7 @@ public final class BleGattAttributes {
      * <li>{@link BleGattAttributes#LOCATION_NAME}</li>
      * </ul>
      */
-    public static final UUID INDOOR_POSITIONING = new UUID((0x1821L << 32) | 0x1000, leastSigBits);
+    public static final UUID INDOOR_POSITIONING_SERVICE = new UUID((0x1821L << 32) | 0x1000, leastSigBits);
 
     /**
      * <b>Internet Protocol Support Service</b> <i>(org.bluetooth.service.internet_protocol_support)</i>
@@ -476,7 +476,7 @@ public final class BleGattAttributes {
      * <li>{@link BleGattAttributes#ALERT_LEVEL}</li>
      * </ul>
      */
-    public static final UUID LINK_LOSS = new UUID((0x1803L << 32) | 0x1000, leastSigBits);
+    public static final UUID LINK_LOSS_SERVICE = new UUID((0x1803L << 32) | 0x1000, leastSigBits);
 
     /**
      * <b>Link Loss Service</b> <i>(org.bluetooth.service.location_and_navigation)</i>
@@ -493,7 +493,7 @@ public final class BleGattAttributes {
      * <li>{@link BleGattAttributes#NAVIGATION}</li>
      * </ul>
      */
-    public static final UUID LOCATION_AND_NAVIGATION = new UUID((0x1819L << 32) | 0x1000, leastSigBits);
+    public static final UUID LOCATION_AND_NAVIGATION_SERVICE = new UUID((0x1819L << 32) | 0x1000, leastSigBits);
 
     /**
      * <b>Mesh Provisioning Service</b> <i>(org.bluetooth.service.mesh_provisioning)</i>
@@ -599,7 +599,7 @@ public final class BleGattAttributes {
      * <li>{@link BleGattAttributes#RECONNECTION_CONFIGURATION_CONTROL_POINT}</li>
      * </ul>
      */
-    public static final UUID RECONNECTION_CONFIGURATION = new UUID((0x1829L << 32) | 0x1000, leastSigBits);
+    public static final UUID RECONNECTION_CONFIGURATION_SERVICE = new UUID((0x1829L << 32) | 0x1000, leastSigBits);
 
     /**
      * <b>Reference Time Update Service</b> <i>(org.bluetooth.service.reference_time_update)</i>
@@ -631,7 +631,7 @@ public final class BleGattAttributes {
      * <li>{@link BleGattAttributes#SC_CONTROL_POINT}</li>
      * </ul>
      */
-    public static final UUID RUNNING_SPEED_AND_CADENCE = new UUID((0x1814L << 32) | 0x1000, leastSigBits);
+    public static final UUID RUNNING_SPEED_AND_CADENCE_SERVICE = new UUID((0x1814L << 32) | 0x1000, leastSigBits);
 
     /**
      * <b>Scan Parameter Service</b> <i>(org.bluetooth.service.scan_parameters)</i>
@@ -646,7 +646,7 @@ public final class BleGattAttributes {
      * <li>{@link BleGattAttributes#SCAN_REFRESH}</li>
      * </ul>
      */
-    public static final UUID SCAN_PARAMETERS = new UUID((0x1813L << 32) | 0x1000, leastSigBits);
+    public static final UUID SCAN_PARAMETER_SERVICE = new UUID((0x1813L << 32) | 0x1000, leastSigBits);
 
     /**
      * <b>Transport Discovery Service</b> <i>(org.bluetooth.service.transport_discovery)</i>
@@ -660,7 +660,7 @@ public final class BleGattAttributes {
      * <li>{@link BleGattAttributes#TDS_CONTROL_POINT}</li>
      * </ul>
      */
-    public static final UUID TRANSPORT_DISCOVERY = new UUID((0x1824L << 32) | 0x1000, leastSigBits);
+    public static final UUID TRANSPORT_DISCOVERY_SERVICE = new UUID((0x1824L << 32) | 0x1000, leastSigBits);
 
     /**
      * <b>Tx Power Service</b> <i>(org.bluetooth.service.tx_power)</i>
@@ -674,7 +674,7 @@ public final class BleGattAttributes {
      * <li>{@link BleGattAttributes#TX_POWER_LEVEL}</li>
      * </ul>
      */
-    public static final UUID TX_POWER = new UUID((0x1804L << 32) | 0x1000, leastSigBits);
+    public static final UUID TX_POWER_SERVICE = new UUID((0x1804L << 32) | 0x1000, leastSigBits);
 
     /**
      * <b>User Data Service</b> <i>(org.bluetooth.service.user_data)</i>
@@ -718,7 +718,7 @@ public final class BleGattAttributes {
      * <li>{@link BleGattAttributes#LANGUAGE}</li>
      * </ul>
      */
-    public static final UUID USER_DATA = new UUID((0x181CL << 32) | 0x1000, leastSigBits);
+    public static final UUID USER_DATA_SERVICE = new UUID((0x181CL << 32) | 0x1000, leastSigBits);
 
     /**
      * <b>Weight Scale Service</b> <i>(org.bluetooth.service.weight_scale)</i>
@@ -733,7 +733,7 @@ public final class BleGattAttributes {
      * <li>{@link BleGattAttributes#WEIGHT_MEASUREMENT}</li>
      * </ul>
      */
-    public static final UUID WEIGHT_SCALE = new UUID((0x181DL << 32) | 0x1000, leastSigBits);
+    public static final UUID WEIGHT_SCALE_SERVICE = new UUID((0x181DL << 32) | 0x1000, leastSigBits);
 
 
     //////////////////////////////////////////////////////
@@ -2816,45 +2816,45 @@ public final class BleGattAttributes {
     protected static HashMap<UUID, String> descriptors = new HashMap<>();
 
     static {
-        services.put(GENERIC_ACCESS, "Generic Access");
+        services.put(GENERIC_ACCESS_SERVICE, "Generic Access Service");
         services.put(ALERT_NOTIFICATION_SERVICE, "Alert Notification Service");
-        services.put(AUTOMATION_IO, "Automation IO");
+        services.put(AUTOMATION_IO_SERVICE, "Automation IO Service");
         services.put(BATTERY_SERVICE, "Battery Service");
-        services.put(BLOOD_PRESSURE, "Blood Pressure");
-        services.put(BODY_COMPOSITION, "Body Composition");
-        services.put(BOND_MANAGEMENT_SERVICE, "Bond Management Service");
-        services.put(CONTINUOUS_GLUCOSE_MONITORING, "Continuous Glucose Monitoring");
-        services.put(CURRENT_TIME_SERVICE, "Current Time Service");
-        services.put(CYCLING_POWER, "Cycling Power");
-        services.put(CYCLING_SPEED_AND_CADENCE, "Cycling Speed and Cadence");
-        services.put(DEVICE_INFORMATION, "Device Information");
-        services.put(ENVIRONMENTAL_SENSING, "Environmental Sensing");
-        services.put(FITNESS_MACHINE, "Fitness Machine");
-        services.put(GENERIC_ATTRIBUTE, "Generic Attribute");
-        services.put(GLUCOSE, "Glucose");
-        services.put(HEALTH_THERMOMETER, "Health Thermometer");
-        services.put(HEART_RATE, "Heart Rate");
-        services.put(HTTP_PROXY, "HTTP Proxy");
-        services.put(HUMAN_INTERFACE_DEVICE, "Human Interface Device");
-        services.put(IMMEDIATE_ALERT, "Immediate Alert");
-        services.put(INDOOR_POSITIONING, "Indoor Positioning");
+        services.put(BLOOD_PRESSURE_SERVICE, "Blood Pressure Service");
+        services.put(BODY_COMPOSITION_SERVICE, "Body Composition Service");
+        services.put(BOND_MANAGEMENT_SERVICE_SERVICE, "Bond Management Service");
+        services.put(CONTINUOUS_GLUCOSE_MONITORING_SERVICE, "Continuous Glucose Monitoring Service");
+        services.put(CURRENT_TIME_SERVICE_SERVICE, "Current Time Service");
+        services.put(CYCLING_POWER_SERVICE, "Cycling Power Service");
+        services.put(CYCLING_SPEED_AND_CADENCE_SERVICE, "Cycling Speed and Cadence Service");
+        services.put(DEVICE_INFORMATION_SERVICE, "Device Information Service");
+        services.put(ENVIRONMENTAL_SENSING_SERVICE, "Environmental Sensing Service");
+        services.put(FITNESS_MACHINE_SERVICE, "Fitness Machine Service");
+        services.put(GENERIC_ATTRIBUTE_SERVICE, "Generic Attribute Service");
+        services.put(GLUCOSE_SERVICE, "Glucose Service");
+        services.put(HEALTH_THERMOMETER_SERVICE, "Health Thermometer Service");
+        services.put(HEART_RATE_SERVICE, "Heart Rate Service");
+        services.put(HTTP_PROXY_SERVICE, "HTTP Proxy Service");
+        services.put(HUMAN_INTERFACE_DEVICE_SERVICE, "Human Interface Device Service");
+        services.put(IMMEDIATE_ALERT_SERVICE, "Immediate Alert Service");
+        services.put(INDOOR_POSITIONING_SERVICE, "Indoor Positioning Service");
         services.put(INTERNET_PROTOCOL_SUPPORT_SERVICE, "Internet Protocol Support Service");
-        services.put(LINK_LOSS, "Link Loss");
-        services.put(LOCATION_AND_NAVIGATION, "Location and Navigation");
+        services.put(LINK_LOSS_SERVICE, "Link Loss Service");
+        services.put(LOCATION_AND_NAVIGATION_SERVICE, "Location and Navigation Service");
         services.put(MESH_PROVISIONING_SERVICE, "Mesh Provisioning Service");
         services.put(MESH_PROXY_SERVICE, "Mesh Proxy Service");
         services.put(NEXT_DST_CHANGE_SERVICE, "Next DST Change Service");
         services.put(OBJECT_TRANSFER_SERVICE, "Object Transfer Service");
         services.put(PHONE_ALERT_STATUS_SERVICE, "Phone Alert Status Service");
         services.put(PULSE_OXIMETER_SERVICE, "Pulse Oximeter Service");
-        services.put(RECONNECTION_CONFIGURATION, "Reconnection Configuration");
+        services.put(RECONNECTION_CONFIGURATION_SERVICE, "Reconnection Configuration Service");
         services.put(REFERENCE_TIME_UPDATE_SERVICE, "Reference Time Update Service");
-        services.put(RUNNING_SPEED_AND_CADENCE, "Running Speed and Cadence");
-        services.put(SCAN_PARAMETERS, "Scan Parameters");
-        services.put(TRANSPORT_DISCOVERY, "Transport Discovery");
-        services.put(TX_POWER, "Tx Power");
-        services.put(USER_DATA, "User Data");
-        services.put(WEIGHT_SCALE, "Weight Scale");
+        services.put(RUNNING_SPEED_AND_CADENCE_SERVICE, "Running Speed and Cadence Service");
+        services.put(SCAN_PARAMETER_SERVICE, "Scan Parameter Service");
+        services.put(TRANSPORT_DISCOVERY_SERVICE, "Transport Discovery Service");
+        services.put(TX_POWER_SERVICE, "Tx Power Service");
+        services.put(USER_DATA_SERVICE, "User Data Service");
+        services.put(WEIGHT_SCALE_SERVICE, "Weight Scale Service");
 
         characteristics.put(AEROBIC_HEART_RATE_LOWER_LIMIT, "Aerobic Heart Rate Lower Limit");
         characteristics.put(AEROBIC_HEART_RATE_UPPER_LIMIT, "Aerobic Heart Rate Upper Limit");
