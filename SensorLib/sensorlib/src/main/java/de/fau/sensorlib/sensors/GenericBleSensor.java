@@ -158,6 +158,8 @@ public class GenericBleSensor extends AbstractSensor {
      */
     private ArrayList<BluetoothGattService> mServiceList = new ArrayList<>();
 
+    private boolean mWasDiscovered = false;
+
     /**
      * GATT callback instance.
      */
@@ -305,51 +307,6 @@ public class GenericBleSensor extends AbstractSensor {
         super(context, deviceName, deviceAddress, dataHandler, desiredSamplingRate);
     }
 
-    /**
-     * Called whenever a  characteristic has changed.
-     *
-     * @param characteristic the new GATT characteristic instance.
-     * @param isChange       true if the value changed or false if it was read for the first/a single time.
-     * @return true if the value was processed, false otherwise.
-     */
-    protected boolean onNewCharacteristicValue(BluetoothGattCharacteristic characteristic, boolean isChange) {
-        // First we check conditions that are regularly encountered (whenever values change)
-        if (BleGattAttributes.BATTERY_LEVEL.equals(characteristic.getUuid())) {
-            mBatteryLevel = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0);
-            // Once battery level was read it means that battery measurement is available
-            mHasBatteryMeasurement = true;
-            sendNotification(SensorMessage.BATTERY_LEVEL_CHANGED);
-            Log.d(TAG, "Battery level: " + mBatteryLevel);
-        }
-
-        // the following are more or less one-time reads
-        else if (BleGattAttributes.DEVICE_NAME.equals(characteristic.getUuid())) {
-            mName = characteristic.getStringValue(0);
-            Log.d(TAG, "Name: " + mName);
-        } else if (BleGattAttributes.SERIAL_NUMBER_STRING.equals(characteristic.getUuid())) {
-            mSerialNumber = characteristic.getStringValue(0);
-            Log.d(TAG, "Serial number: " + mSerialNumber);
-        } else if (BleGattAttributes.FIRMWARE_REVISION_STRING.equals(characteristic.getUuid())) {
-            mFirmwareRevision = characteristic.getStringValue(0);
-            Log.d(TAG, "Firmware revision: " + mFirmwareRevision);
-        } else if (BleGattAttributes.SOFTWARE_REVISION_STRING.equals(characteristic.getUuid())) {
-            mSoftwareRevision = characteristic.getStringValue(0);
-            Log.d(TAG, "Software revision: " + mSoftwareRevision);
-        } else if (BleGattAttributes.MANUFACTURER_NAME_STRING.equals(characteristic.getUuid())) {
-            mManufacturer = characteristic.getStringValue(0);
-            Log.d(TAG, "Manufacturer: " + mManufacturer);
-        } else if (BleGattAttributes.SYSTEM_ID.equals(characteristic.getUuid())) {
-            mSensorSystemID = BleGattAttributes.valueToInt64(characteristic);
-            Log.d(TAG, "Sensor System ID: " + mSensorSystemID);
-        } else if (BleGattAttributes.BODY_SENSOR_LOCATION.equals(characteristic.getUuid())) {
-            mBodyLocation = BleGattAttributes.BodySenorLocation.inferBodySensorLocation(characteristic.getValue()[0]);
-            Log.d(TAG, "Body location: " + BleGattAttributes.BodySenorLocation.getLocation(mBodyLocation));
-        } else {
-            return false;
-        }
-        return true;
-    }
-
     @Override
     public boolean connect() throws Exception {
         if (!super.connect()) {
@@ -408,6 +365,48 @@ public class GenericBleSensor extends AbstractSensor {
         sendStopStreaming();
     }
 
+
+    /**
+     * Called whenever the sensor is connected and not yet discovered previously.
+     */
+    private void discoverSensor() {
+        if (mWasDiscovered) {
+            return;
+        }
+
+        mWasDiscovered = true;
+        mCharacteristicsReadRequests = new ConcurrentLinkedQueue<>();
+        mDescriptorWriteRequests = new ConcurrentLinkedQueue<>();
+        mNotificationsList = new ConcurrentLinkedQueue<>();
+        mServiceList = new ArrayList<>();
+
+        for (BluetoothGattService gattService : mGatt.getServices()) {
+            // report the discovered service, maybe a child class want to implement its own check.
+            onDiscoveredService(gattService);
+
+            // Loops through available Characteristics.
+            for (BluetoothGattCharacteristic gattCharacteristic : gattService.getCharacteristics()) {
+                onDiscoveredCharacteristic(gattService, gattCharacteristic);
+            }
+        }
+    }
+
+    /**
+     * Checks whether the given characteristic should be enabled for notifications. Can be overriden by extended classes.
+     *
+     * @param c the characteristic which should be checked.
+     * @return true if notifications should be enabled for this Characteristic.
+     */
+    protected boolean shouldEnableNotification(BluetoothGattCharacteristic c) {
+        /*if (shouldUseHardwareSensor(HardwareSensor.HEART_RATE_SERVICE) && BleGattAttributes.HEART_RATE_MEASUREMENT.equals(c.getUuid())) {
+            return true;
+        } else if (shouldUseHardwareSensor(HardwareSensor.BLOOD_PRESSURE_SERVICE) && BleGattAttributes.BLOOD_PRESSURE_SERVICE.equals(c.getUuid())) {
+            return true;
+        } else*/
+
+        return BleGattAttributes.BATTERY_LEVEL.equals(c.getUuid());
+    }
+
     /**
      * Enables on-change notifications for the given characteristic.
      *
@@ -458,10 +457,10 @@ public class GenericBleSensor extends AbstractSensor {
 
         mServiceList.add(service);
 
-        /*if (BleGattAttributes.HEART_RATE.equals(service.getUuid()) && shouldUseHardwareSensor(HardwareSensor.HEART_RATE)) {
-            mAvailableSensors.add(HardwareSensor.HEART_RATE);
-        } else if (BleGattAttributes.BLOOD_PRESSURE.equals(service.getUuid()) && shouldUseHardwareSensor(HardwareSensor.BLOOD_PRESSURE)) {
-            mAvailableSensors.add(HardwareSensor.BLOOD_PRESSURE);
+        /*if (BleGattAttributes.HEART_RATE_SERVICE.equals(service.getUuid()) && shouldUseHardwareSensor(HardwareSensor.HEART_RATE_SERVICE)) {
+            mAvailableSensors.add(HardwareSensor.HEART_RATE_SERVICE);
+        } else if (BleGattAttributes.BLOOD_PRESSURE_SERVICE.equals(service.getUuid()) && shouldUseHardwareSensor(HardwareSensor.BLOOD_PRESSURE_SERVICE)) {
+            mAvailableSensors.add(HardwareSensor.BLOOD_PRESSURE_SERVICE);
         }*/
     }
 
@@ -488,46 +487,49 @@ public class GenericBleSensor extends AbstractSensor {
     }
 
     /**
-     * Checks whether the given characteristic should be enabled for notifications. Can be overriden by extended classes.
+     * Called whenever a  characteristic has changed.
      *
-     * @param c the characteristic which should be checked.
-     * @return true if notifications should be enabled for this Characteristic.
+     * @param characteristic the new GATT characteristic instance.
+     * @param isChange       true if the value changed or false if it was read for the first/a single time.
+     * @return true if the value was processed, false otherwise.
      */
-    protected boolean shouldEnableNotification(BluetoothGattCharacteristic c) {
-        /*if (shouldUseHardwareSensor(HardwareSensor.HEART_RATE) && BleGattAttributes.HEART_RATE_MEASUREMENT.equals(c.getUuid())) {
-            return true;
-        } else if (shouldUseHardwareSensor(HardwareSensor.BLOOD_PRESSURE) && BleGattAttributes.BLOOD_PRESSURE.equals(c.getUuid())) {
-            return true;
-        } else*/
+    protected boolean onNewCharacteristicValue(BluetoothGattCharacteristic characteristic, boolean isChange) {
 
-        return BleGattAttributes.BATTERY_LEVEL.equals(c.getUuid());
-    }
-
-    private boolean mWasDiscovered = false;
-
-    /**
-     * Called whenever the sensor is connected and not yet discovered previously.
-     */
-    private void discoverSensor() {
-        if (mWasDiscovered) {
-            return;
+        // First we check conditions that are regularly encountered (whenever values change)
+        if (BleGattAttributes.BATTERY_LEVEL.equals(characteristic.getUuid())) {
+            mBatteryLevel = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0);
+            // Once battery level was read it means that battery measurement is available
+            mHasBatteryMeasurement = true;
+            sendNotification(SensorMessage.BATTERY_LEVEL_CHANGED);
+            Log.d(TAG, "Battery level: " + mBatteryLevel);
         }
 
-        mWasDiscovered = true;
-        mCharacteristicsReadRequests = new ConcurrentLinkedQueue<>();
-        mDescriptorWriteRequests = new ConcurrentLinkedQueue<>();
-        mNotificationsList = new ConcurrentLinkedQueue<>();
-        mServiceList = new ArrayList<>();
-
-        for (BluetoothGattService gattService : mGatt.getServices()) {
-            // report the discovered service, maybe a child class want to implement its own check.
-            onDiscoveredService(gattService);
-
-            // Loops through available Characteristics.
-            for (BluetoothGattCharacteristic gattCharacteristic : gattService.getCharacteristics()) {
-                onDiscoveredCharacteristic(gattService, gattCharacteristic);
-            }
+        // the following are more or less one-time reads
+        else if (BleGattAttributes.DEVICE_NAME.equals(characteristic.getUuid())) {
+            mName = characteristic.getStringValue(0);
+            Log.d(TAG, "Name: " + mName);
+        } else if (BleGattAttributes.SERIAL_NUMBER_STRING.equals(characteristic.getUuid())) {
+            mSerialNumber = characteristic.getStringValue(0);
+            Log.d(TAG, "Serial number: " + mSerialNumber);
+        } else if (BleGattAttributes.FIRMWARE_REVISION_STRING.equals(characteristic.getUuid())) {
+            mFirmwareRevision = characteristic.getStringValue(0);
+            Log.d(TAG, "Firmware revision: " + mFirmwareRevision);
+        } else if (BleGattAttributes.SOFTWARE_REVISION_STRING.equals(characteristic.getUuid())) {
+            mSoftwareRevision = characteristic.getStringValue(0);
+            Log.d(TAG, "Software revision: " + mSoftwareRevision);
+        } else if (BleGattAttributes.MANUFACTURER_NAME_STRING.equals(characteristic.getUuid())) {
+            mManufacturer = characteristic.getStringValue(0);
+            Log.d(TAG, "Manufacturer: " + mManufacturer);
+        } else if (BleGattAttributes.SYSTEM_ID.equals(characteristic.getUuid())) {
+            mSensorSystemID = BleGattAttributes.valueToInt64(characteristic);
+            Log.d(TAG, "Sensor System ID: " + mSensorSystemID);
+        } else if (BleGattAttributes.BODY_SENSOR_LOCATION.equals(characteristic.getUuid())) {
+            mBodyLocation = BleGattAttributes.BodySenorLocation.inferBodySensorLocation(characteristic.getValue()[0]);
+            Log.d(TAG, "Body location: " + BleGattAttributes.BodySenorLocation.getLocation(mBodyLocation));
+        } else {
+            return false;
         }
+        return true;
     }
 
     @Override
