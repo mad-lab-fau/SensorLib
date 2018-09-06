@@ -99,7 +99,6 @@ public class SensorPlotter extends CardView implements SensorEventListener {
 
         mContext = context;
         mAdapter = new SensorPlotterRecyclerAdapter();
-
         mRecyclerView = findViewById(R.id.recycler_view);
         SensorPlotterLayoutManager manager = new SensorPlotterLayoutManager(mContext);
         manager.setScrollEnabled(mScrollEnabled);
@@ -126,10 +125,10 @@ public class SensorPlotter extends CardView implements SensorEventListener {
     }
 
     public void clear() {
-        mSelectedSensors = new ArrayList<>();
-        mHwSensors = new ArrayList<>();
-        mLineData = new ArrayList<>();
-        mMethodLists = new ArrayList<>();
+        mSelectedSensors = new ArrayList<>(5);
+        mHwSensors = new ArrayList<>(5);
+        mLineData = new ArrayList<>(5);
+        mMethodLists = new ArrayList<>(5);
         mAdapter.notifyDataSetChanged();
         mRecyclerView.invalidate();
     }
