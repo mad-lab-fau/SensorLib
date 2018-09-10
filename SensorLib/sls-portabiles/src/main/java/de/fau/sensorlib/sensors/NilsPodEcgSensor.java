@@ -93,10 +93,6 @@ public class NilsPodEcgSensor extends AbstractNilsPodSensor {
             // send new data to the SensorDataProcessor
             Log.d(TAG, df.toString());
             lastCounter = localCounter;
-            // TODO fix strange bug of corrupted sample
-            if (label == 1) {
-                return;
-            }
             sendNewData(df);
             if (mLoggingEnabled) {
                 mDataLogger.writeData(df);
@@ -163,7 +159,8 @@ public class NilsPodEcgSensor extends AbstractNilsPodSensor {
 
         @Override
         public double getEcgSample() {
-            return ecg[0];
+            // TODO dynamically change based on ECG sensor configuration
+            return ecg[1];
         }
 
         @Override

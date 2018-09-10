@@ -24,15 +24,43 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor {
     /**
      * UUID for Data Streaming Service of NilsPod sensor
      */
-    protected static final UUID NILS_POD_STREAMING_SERVICE = UUID.fromString("6e400001-b5a3-f393-e0a9-e50e24dcca9e");
+    private static final UUID NILS_POD_STREAMING_SERVICE = UUID.fromString("6e400001-b5a3-f393-e0a9-e50e24dcca9e");
+    /**
+     * UUID for Configuration Service of NilsPod Sensor
+     */
+    protected static final UUID NILS_POD_CONFIGURATION_SERVICE = UUID.fromString("98ff0000-770d-4a83-9e9b-ce6bbd75e472");
     /**
      * UUID for Config Characteristic (write) of NilsPod Sensor
      */
-    protected static final UUID NILS_POD_CONFIG = UUID.fromString("6e400002-b5a3-f393-e0a9-e50e24dcca9e");
+    private static final UUID NILS_POD_COMMANDS = UUID.fromString("6e400002-b5a3-f393-e0a9-e50e24dcca9e");
     /**
-     * UUID for Streaming Characteristic (read) of NilsPod Sensor
+     * UUID for Streaming Characteristic (notification) of NilsPod Sensor
      */
-    protected static final UUID NILS_POD_STREAMING = UUID.fromString("6e400003-b5a3-f393-e0a9-e50e24dcca9e");
+    private static final UUID NILS_POD_STREAMING = UUID.fromString("6e400003-b5a3-f393-e0a9-e50e24dcca9e");
+    /**
+     * UUID for System State Characteristic (read) of NilsPod Sensor
+     */
+    protected static final UUID NILS_POD_SYSTEM_STATE = UUID.fromString("98ff0a0a-770d-4a83-9e9b-ce6bbd75e472");
+    /**
+     * UUID for Timer Sampling Config Characteristic (read/write) of NilsPod Sensor
+     */
+    private static final UUID NILS_POD_TS_CONFIG = UUID.fromString("98ff0101-770d-4a83-9e9b-ce6bbd75e472");
+    /**
+     * UUID for Sensor Config Characteristic (read/write) of NilsPod Sensor
+     */
+    private static final UUID NILS_POD_SENSOR_CONFIG = UUID.fromString("98ff0202-770d-4a83-9e9b-ce6bbd75e472");
+    /**
+     * UUID for Metadata Characteristic (read/write) of NilsPod Sensor
+     */
+    private static final UUID NILS_POD_METADATA_CONFIG = UUID.fromString("98ff0303-770d-4a83-9e9b-ce6bbd75e472");
+    /**
+     * UUID for Date Time Characteristic (write) of NilsPod Sensor
+     */
+    private static final UUID NILS_POD_DATE_TIME_CONFIG = UUID.fromString("98ff0404-770d-4a83-9e9b-ce6bbd75e472");
+    /**
+     * UUID for Firmware Version Characteristic (read) of NilsPod Sensor
+     */
+    private static final UUID NILS_POD_FIRMWARE_VERSION = UUID.fromString("98ff0f0f-770d-4a83-9e9b-ce6bbd75e472");
 
 
     /**
@@ -61,19 +89,57 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor {
      */
     private BluetoothGattService mStreamingService;
 
+    private NilsPodSensorPosition mSensorPosition;
+
 
     /**
      * Sensor commands for communication with NilsPod Sensor. Used with the Sensor Config Characteristic
      */
     protected enum NilsPodSensorCommand {
+        // CONTROL COMMANDS
+        /**
+         * Clear all events
+         */
+        CLEAR_ALL_EVENTS(new byte[]{(byte) 0xC0}),
+        /**
+         * Stop Streaming Command
+         */
+        STOP_STREAMING(new byte[]{(byte) 0xC1}),
         /**
          * Start Streaming Command
          */
         START_STREAMING(new byte[]{(byte) 0xC2}),
         /**
-         * Stop Streaming Command
+         * Stop Logging Command
          */
-        STOP_STREAMING(new byte[]{(byte) 0xC1}),
+        STOP_LOGGING(new byte[]{(byte) 0xC3}),
+        /**
+         * Start Logging Command
+         */
+        START_LOGGING(new byte[]{(byte) 0xC4}),
+        // FLASH COMMANDS
+        /**
+         * Flash Full Erase Command
+         */
+        FLASH_FULL_ERASE(new byte[]{(byte) 0xF0}),
+        /**
+         * Flash Read Config Command
+         */
+        FLASH_READ_CONFIG(new byte[]{(byte) 0xF2}),
+        /**
+         * Flash Transmit Session Command
+         */
+        FLASH_TRANSMIT_SESSION(new byte[]{(byte) 0xF3}),
+        /**
+         * Flash Transmit Pages Command
+         */
+        FLASH_TRANSMIT_PAGES(new byte[]{(byte) 0xF4}),
+        // CONFIG SET COMMANDS
+        /**
+         * Set Default Config Command
+         */
+        SET_DEFAULT_CONFIG(new byte[]{(byte) 0xA0}),
+        // RESET SENSOR COMMAND
         /**
          * Reset Command
          */
@@ -87,11 +153,48 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor {
     }
 
 
+    /**
+     * Enum describing the operation state of the NilsPod sensor
+     */
+    protected enum NilsPodOperationState {
+        OPERATION_STATE_IDLE,
+        OPERATION_STATE_STREAMING,
+        OPERATION_STATE_LOGGING,
+        OPERATION_STATE_FLASH_TRANSMISSION
+    }
+
+
+    /**
+     * Enum describing the synchronization role of the NilsPod sensor
+     */
+    protected enum NilsPodSyncRole {
+        SYNC_ROLE_DISABLED,
+        SYNC_ROLE_SLAVE,
+        SYNC_ROLE_MASTER
+    }
+
+    /**
+     * Enum describing the sensor position
+     */
+    protected enum NilsPodSensorPosition {
+        NO_POSITION_DEFINED,
+        LEFT_FOOT,
+        RIGHT_FOOT
+    }
+
+
     // Add custom NilsPod UUIDs to known UUID pool
     static {
-        BleGattAttributes.addService(NILS_POD_STREAMING_SERVICE, "NilsPod Sensor Streaming");
-        BleGattAttributes.addCharacteristic(NILS_POD_CONFIG, "NilsPod Sensor Configuration");
-        BleGattAttributes.addCharacteristic(NILS_POD_STREAMING, "NilsPod Data Stream");
+        BleGattAttributes.addService(NILS_POD_STREAMING_SERVICE, "NilsPod Streaming Service");
+        BleGattAttributes.addService(NILS_POD_CONFIGURATION_SERVICE, "NilsPod Configuration Service");
+        BleGattAttributes.addCharacteristic(NILS_POD_COMMANDS, "NilsPod Sensor Commands");
+        BleGattAttributes.addCharacteristic(NILS_POD_STREAMING, "NilsPod Streaming");
+        BleGattAttributes.addCharacteristic(NILS_POD_SYSTEM_STATE, "NilsPod System State");
+        BleGattAttributes.addCharacteristic(NILS_POD_TS_CONFIG, "NilsPod Timer Sampling Configuration");
+        BleGattAttributes.addCharacteristic(NILS_POD_SENSOR_CONFIG, "NilsPod Sensor Configuration");
+        BleGattAttributes.addCharacteristic(NILS_POD_METADATA_CONFIG, "NilsPod Metadata Configuration");
+        BleGattAttributes.addCharacteristic(NILS_POD_DATE_TIME_CONFIG, "NilsPod Date Time Configuration");
+        BleGattAttributes.addCharacteristic(NILS_POD_FIRMWARE_VERSION, "NilsPod Firmware Version");
     }
 
 
@@ -105,6 +208,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor {
             super.startStreaming();
             try {
                 if (mLoggingEnabled) {
+                    Log.e(TAG, "create logger");
                     mDataLogger = new SensorDataLogger(this, mContext);
                 }
             } catch (SensorException e) {
@@ -131,20 +235,6 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor {
         }
     }
 
-    @Override
-    protected boolean onNewCharacteristicValue(BluetoothGattCharacteristic characteristic, boolean isChange) {
-        if (super.onNewCharacteristicValue(characteristic, isChange)) {
-            return true;
-        } else {
-            if (NILS_POD_STREAMING.equals(characteristic.getUuid())) {
-                extractSensorData(characteristic);
-                return true;
-            }
-            return false;
-        }
-    }
-
-
     /**
      * Send command to sensor via Config Characteristic
      *
@@ -161,7 +251,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor {
             Log.w(TAG, "Service not found");
             return false;
         }
-        BluetoothGattCharacteristic characteristic = mStreamingService.getCharacteristic(NILS_POD_CONFIG);
+        BluetoothGattCharacteristic characteristic = mStreamingService.getCharacteristic(NILS_POD_COMMANDS);
         if (characteristic == null) {
             Log.w(TAG, "Send characteristic not found");
             return false;
@@ -170,6 +260,29 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor {
         characteristic.setValue(data);
         characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
         return mGatt.writeCharacteristic(characteristic);
+    }
+
+    /**
+     * Enables data logging for this sensor
+     */
+    public void enableDataLogger() {
+        mLoggingEnabled = true;
+    }
+
+    /**
+     * Disables data logging for this sensor
+     */
+    public void disableDataLogger() {
+        mLoggingEnabled = false;
+    }
+
+
+    public boolean reset() {
+        if (!send(NilsPodSensorCommand.RESET)) {
+            Log.e(TAG, "resetting failed!");
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -192,6 +305,26 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor {
         }
     }
 
+    @Override
+    protected boolean onNewCharacteristicValue(BluetoothGattCharacteristic characteristic, boolean isChange) {
+        if (super.onNewCharacteristicValue(characteristic, isChange)) {
+            return true;
+        } else {
+            if (NILS_POD_STREAMING.equals(characteristic.getUuid())) {
+                extractSensorData(characteristic);
+                return true;
+            } else if (NILS_POD_SYSTEM_STATE.equals(characteristic.getUuid())) {
+                readSystemState(characteristic);
+            } else if (NILS_POD_TS_CONFIG.equals(characteristic.getUuid())) {
+                readTsConfig(characteristic);
+            } else if (NILS_POD_SENSOR_CONFIG.equals(characteristic.getUuid())) {
+                readSensorConfig(characteristic);
+            } else if (NILS_POD_METADATA_CONFIG.equals(characteristic.getUuid())) {
+                readSensorPosition(characteristic);
+            }
+            return false;
+        }
+    }
 
     /**
      * Extracts sensor data into data frames from the given characteristic.
@@ -201,28 +334,76 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor {
     protected abstract void extractSensorData(BluetoothGattCharacteristic characteristic);
 
 
-    public boolean reset() {
-        if (!send(NilsPodSensorCommand.RESET)) {
-            Log.e(TAG, "resetting failed!");
-            return false;
+    protected void readSystemState(BluetoothGattCharacteristic characteristic) {
+        int offset = 0;
+        byte[] values = characteristic.getValue();
+        boolean connectionState = values[offset++] == 1;
+        int operationState = values[offset++];
+        boolean wirelessPowerState = values[offset++] == 0;
+        boolean chargingState = values[offset] == 0;
+        // TODO determine error states of sensors
+        Log.d(TAG, ">>>> System State:");
+        Log.d(TAG, "\tConnection State: " + connectionState);
+        Log.d(TAG, "\tOperation State: " + NilsPodOperationState.values()[operationState]);
+        Log.d(TAG, "\tWireless Power State: " + wirelessPowerState);
+        Log.d(TAG, "\tCharging State: " + chargingState);
+    }
+
+    protected void readTsConfig(BluetoothGattCharacteristic characteristic) {
+        int offset = 0;
+        byte[] values = characteristic.getValue();
+        mSamplingRate = convertSamplingRate(values[offset++]);
+        NilsPodSyncRole syncRole = NilsPodSyncRole.values()[values[offset++]];
+        int syncDistance = values[offset++] * 100;
+        int rfGroup = values[offset];
+
+        Log.d(TAG, ">>>> Timer Sampling State:");
+        Log.d(TAG, "\tSampling Rate: " + mSamplingRate);
+        Log.d(TAG, "\tSync Role: " + syncRole);
+        Log.d(TAG, "\tSync Distance: " + syncDistance);
+        Log.d(TAG, "\tRF Group: " + rfGroup);
+    }
+
+    protected void readSensorConfig(BluetoothGattCharacteristic characteristic) {
+        int offset = 0;
+        byte[] values = characteristic.getValue();
+        int sensors = values[offset++];
+        int sampleSize = values[offset];
+        Log.d(TAG, ">>>> Sensor Config:");
+        Log.d(TAG, "\tSensors: " + sensors);
+        Log.d(TAG, "\tSample Size: " + sampleSize);
+        PACKET_SIZE = sampleSize;
+    }
+
+    protected void readSensorPosition(BluetoothGattCharacteristic characteristic) {
+        mSensorPosition = NilsPodSensorPosition.values()[characteristic.getValue()[0]];
+        Log.d(TAG, ">>>> Meta Data:");
+        Log.d(TAG, "\tSensor Position: " + mSensorPosition);
+    }
+
+    private double convertSamplingRate(byte value) {
+        switch (value) {
+            case 20:
+                return 61.0;
+            case 10:
+                return 100.0;
+            case 5:
+                return 200.0;
+            case 4:
+                return 250.0;
+            case 3:
+                return 333.3;
+            case 2:
+                return 500.0;
+            case 1:
+                return 1000.0;
         }
-        return true;
+        return 0.0;
     }
 
-    /**
-     * Enables data logging for this sensor
-     */
-    public void enableDataLogger() {
-        mLoggingEnabled = true;
+    public NilsPodSensorPosition getSensorPosition() {
+        return mSensorPosition;
     }
-
-    /**
-     * Disables data logging for this sensor
-     */
-    public void disableDataLogger() {
-        mLoggingEnabled = false;
-    }
-
 
     /**
      * Data frame to store data received from the Hoop Sensor

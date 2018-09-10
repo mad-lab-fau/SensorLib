@@ -48,6 +48,7 @@ public class InsoleSensor extends NilsPodSensor {
      */
     @Override
     protected void extractSensorData(BluetoothGattCharacteristic characteristic) {
+
         byte[] values = characteristic.getValue();
 
         // one data packet always has size PACKET_SIZE
@@ -80,8 +81,6 @@ public class InsoleSensor extends NilsPodSensor {
             baro = (baro + 101325.0) / 100.0;
             offset += 2;
 
-            Log.e(TAG, "baro" + baro);
-
             for (int j = 0; j < 3; j++) {
                 pressure[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset);
                 offset++;
@@ -93,7 +92,6 @@ public class InsoleSensor extends NilsPodSensor {
             // check if packets have been lost
             if (((localCounter - lastCounter) % (2 << 14)) > 1) {
                 Log.w(TAG, this + ": BLE Packet Loss!");
-                Log.e(TAG, characteristic.getUuid().toString());
             }
             // increment global counter if local counter overflows
             if (localCounter < lastCounter) {
@@ -101,7 +99,7 @@ public class InsoleSensor extends NilsPodSensor {
             }
 
             InsoleDataFrame df = new InsoleDataFrame(this, globalCounter * (2 << 14) + localCounter, accel, gyro, baro, pressure);
-            Log.d(TAG, df.toString());
+            //Log.d(TAG, df.toString());
             // send new data to the SensorDataProcessor
             sendNewData(df);
             lastCounter = localCounter;
