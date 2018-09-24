@@ -46,23 +46,14 @@ import de.fau.sensorlib.sensors.AbstractSensor;
 public class SensorPlotter extends CardView implements SensorEventListener {
 
     private static final String TAG = SensorPlotter.class.getSimpleName();
-
-    /**
-     * Sampling rate of sensor in Hz.
-     */
-    private static final int SAMPLING_RATE = 200;
-    /**
-     * Time between two samples in milliseconds
-     */
-    private final int SAMPLE_DISTANCE = 1000 / SAMPLING_RATE;
     /**
      * Range of displayed data in seconds.
      */
-    private static final int WINDOW_SIZE = 10;
+    private int mWindowSize;
     /**
      * Plot refresh rate in Hz.
      */
-    private static final int REFRESH_RATE = 25;
+    private int mRefreshRate;
     private long lastTimestamp = System.currentTimeMillis();
 
     private long offset = 0;
@@ -75,11 +66,11 @@ public class SensorPlotter extends CardView implements SensorEventListener {
     private RecyclerView mRecyclerView;
     private SensorPlotterRecyclerAdapter mAdapter;
 
-    private ArrayList<SensorInfo> mSelectedSensors = new ArrayList<>();
-    private ArrayList<SensorBundle> mHwSensors = new ArrayList<>();
+    private ArrayList<SensorBundle> mSensorBundles = new ArrayList<>();
 
     private ArrayList<LineData> mLineData = new ArrayList<>();
     private ArrayList<Method[]> mMethodLists = new ArrayList<>();
+    private ArrayList<Class<?>> mInterfaceList = new ArrayList<>();
 
 
     private boolean mScrollEnabled = true;
@@ -96,11 +87,14 @@ public class SensorPlotter extends CardView implements SensorEventListener {
     public SensorPlotter(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         inflate(context, R.layout.widget_sensor_plotter, this);
+        mContext = context;
 
-        TypedArray attributes = context.obtainStyledAttributes(attrs, R.styleable.SensorPlotter);
+        TypedArray attributes = mContext.obtainStyledAttributes(attrs, R.styleable.SensorPlotter);
         if (attributes != null) {
             try {
                 mScrollEnabled = attributes.getBoolean(R.styleable.SensorPlotter_scrollable, true);
+                mWindowSize = attributes.getInteger(R.styleable.SensorPlotter_windowSize, 10);
+                mRefreshRate = attributes.getInteger(R.styleable.SensorPlotter_refreshRate, 25);
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
@@ -108,39 +102,41 @@ public class SensorPlotter extends CardView implements SensorEventListener {
             }
         }
 
-
-        mContext = context;
-        mAdapter = new SensorPlotterRecyclerAdapter();
         mRecyclerView = findViewById(R.id.recycler_view);
+        mRecyclerView.setDrawingCacheEnabled(true);
+        mRecyclerView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_HIGH);
+
         SensorPlotterLayoutManager manager = new SensorPlotterLayoutManager(mContext);
         manager.setScrollEnabled(mScrollEnabled);
         mRecyclerView.setLayoutManager(manager);
+
+        mAdapter = new SensorPlotterRecyclerAdapter();
         mRecyclerView.setAdapter(mAdapter);
     }
 
 
-    public void addSensors(ArrayList<SensorInfo> sensorList) {
-        mSelectedSensors = sensorList;
-
+    public void addSensors(ArrayList<AbstractSensor> sensorList) {
         for (HardwareSensor hwSensor : HardwareSensor.values()) {
+            // TODO: change to combine some HardwareSensors to one single plot
             SensorBundle sensorBundle = new SensorBundle(hwSensor);
-            for (SensorInfo sensor : mSelectedSensors) {
-                if (sensor.getDeviceClass().getAvailableSensors().contains(hwSensor)) {
+            for (AbstractSensor sensor : sensorList) {
+                if (sensor.getSelectedSensors().contains(hwSensor)) {
                     sensorBundle.addSensor(sensor);
+                    sensorBundle.setSamplingRate(sensor.getSamplingRate());
                 }
             }
             if (sensorBundle.getSensorList().isEmpty()) {
                 continue;
             }
             mAdapter.add(sensorBundle);
+            //mAdapter.notifyDataSetChanged();
         }
     }
 
     public void clear() {
-        mSelectedSensors = new ArrayList<>(5);
-        mHwSensors = new ArrayList<>(5);
-        mLineData = new ArrayList<>(5);
-        mMethodLists = new ArrayList<>(5);
+        mSensorBundles = new ArrayList<>(10);
+        mLineData = new ArrayList<>(10);
+        mMethodLists = new ArrayList<>(10);
         mAdapter.notifyDataSetChanged();
         mRecyclerView.invalidate();
     }
@@ -148,37 +144,37 @@ public class SensorPlotter extends CardView implements SensorEventListener {
 
     public void onNewData(SensorDataFrame dataFrame) {
         String sensorId = dataFrame.getOriginatingSensor().getName() + "@" + dataFrame.getOriginatingSensor().getDeviceAddress();
-        long timestamp = (System.currentTimeMillis() - (offset + pauseOffset)) / SAMPLE_DISTANCE;
-        if (timestamp < 0) {
-            Log.e(TAG, "NEGATIVE | offset: " + offset + ", pauseOffset: " + pauseOffset + ", timestamp: " + timestamp);
-        }
-        for (int i = 0; i < mHwSensors.size(); i++) {
-            ArrayList<String> sensorList = mHwSensors.get(i).getSensorIds();
+
+        for (int i = 0; i < mSensorBundles.size(); i++) {
+            //long timestamp = (long) ((time - (offset + pauseOffset)) / mSensorBundles.get(i).getSampleDistance());
+            ArrayList<String> sensorList = mSensorBundles.get(i).getSensorIds();
             if (sensorList == null) {
                 return;
             }
             int sensorIdx = sensorList.indexOf(sensorId);
-            if (sensorIdx != -1) {
+
+            if (sensorIdx != -1 && mInterfaceList.get(i).isAssignableFrom(dataFrame.getClass())) {
                 Method[] methods = mMethodLists.get(i);
                 double[] data = new double[methods.length];
+                float x = (float) ((dataFrame.getTimestamp()) * (1000 / dataFrame.getOriginatingSensor().getSamplingRate()));
                 for (int j = 0; j < data.length; j++) {
                     try {
                         data[j] = (double) methods[j].invoke(dataFrame);
+                        mLineData.get(i).addEntry(new Entry(x, (float) data[j]), sensorIdx * methods.length + j);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        //e.printStackTrace();
                     }
-                    mLineData.get(i).addEntry(new Entry(timestamp, (float) data[j]), sensorIdx * methods.length + j);
                 }
+                //mLineData.get(i).notifyDataChanged();
             }
-            mLineData.get(i).notifyDataChanged();
         }
-        if ((System.currentTimeMillis() - lastTimestamp) > 1000 / REFRESH_RATE) {
+        if ((System.currentTimeMillis() - lastTimestamp) > 1000 / mRefreshRate) {
             lastTimestamp = System.currentTimeMillis();
             refreshChart();
         }
     }
 
-    private void configureChart(LineChart chart) {
+    private void configureChart(LineChart chart, final SensorBundle bundle) {
         chart.setTouchEnabled(false);
         chart.setDragEnabled(true);
         chart.setHighlightPerTapEnabled(false);
@@ -193,15 +189,16 @@ public class SensorPlotter extends CardView implements SensorEventListener {
         chart.getLegend().setWordWrapEnabled(true);
         chart.getXAxis().setDrawAxisLine(false);
         chart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
-        chart.getXAxis().setGranularity(SAMPLING_RATE);
-        chart.getXAxis().setLabelCount(WINDOW_SIZE);
+        // 1 second
+        chart.getXAxis().setGranularity(1000);
+        chart.getXAxis().setLabelCount((int) (mWindowSize * bundle.getSampleDistance()));
         chart.getXAxis().setValueFormatter(new IAxisValueFormatter() {
             @Override
             public String getFormattedValue(float value, AxisBase axis) {
                 return String.format(Locale.getDefault(), "%02d:%02d",
-                        TimeUnit.MILLISECONDS.toMinutes((int) (value * SAMPLE_DISTANCE)),
-                        TimeUnit.MILLISECONDS.toSeconds((int) (value * SAMPLE_DISTANCE)) -
-                                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((int) value * 5))
+                        TimeUnit.MILLISECONDS.toMinutes((int) value),
+                        TimeUnit.MILLISECONDS.toSeconds((int) value) -
+                                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((int) value))
                 );
             }
         });
@@ -222,13 +219,12 @@ public class SensorPlotter extends CardView implements SensorEventListener {
     }
 
     private void refreshChart() {
-        for (int i = 0; i < mHwSensors.size(); i++) {
+        for (int i = 0; i < mSensorBundles.size(); i++) {
             mAdapter.update(i);
         }
     }
 
     private int getColor(int color, int i) {
-        // TODO Color Palette API from Android?
         float[] hsl = new float[3];
         ColorUtils.colorToHSL(color, hsl);
         hsl[2] += (hsl[2] * 0.25 * i * Math.pow(-1, i));
@@ -249,7 +245,7 @@ public class SensorPlotter extends CardView implements SensorEventListener {
                         }
                         pauseOffset = (System.currentTimeMillis() - pauseOffset) + oldPauseOffset;
                     }
-                    for (int i = 0; i < mHwSensors.size(); i++) {
+                    for (int i = 0; i < mSensorBundles.size(); i++) {
                         mAdapter.setTouchEnabled(i, true);
                     }
 
@@ -291,7 +287,7 @@ public class SensorPlotter extends CardView implements SensorEventListener {
     private class SensorPlotterRecyclerAdapter extends RecyclerView.Adapter<SensorPlotterViewHolder> {
 
         private SensorPlotterRecyclerAdapter() {
-            mHwSensors = new ArrayList<>(0);
+            mSensorBundles = new ArrayList<>(0);
         }
 
         @NonNull
@@ -300,7 +296,7 @@ public class SensorPlotter extends CardView implements SensorEventListener {
             View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_sensor_plotter, parent, false);
             if (!mScrollEnabled) {
                 mRecyclerView.setHasFixedSize(true);
-                int itemHeight = (int) (0.9 * (parent.getHeight() / mHwSensors.size()));
+                int itemHeight = (int) (0.9 * (parent.getHeight() / mSensorBundles.size()));
                 ViewGroup.LayoutParams layoutParams = itemView.getLayoutParams();
                 layoutParams.height = itemHeight;
                 itemView.setLayoutParams(layoutParams);
@@ -311,7 +307,8 @@ public class SensorPlotter extends CardView implements SensorEventListener {
 
         @Override
         public void onBindViewHolder(@NonNull SensorPlotterViewHolder holder, int position) {
-            final SensorBundle bundle = mHwSensors.get(position);
+
+            final SensorBundle bundle = mSensorBundles.get(position);
             ArrayList<String> sensorIds = bundle.getSensorIds();
             try {
                 final String[] columns = (String[]) bundle.getHwSensor().getDataFrameClass().getDeclaredField("COLUMNS").get("null");
@@ -319,16 +316,21 @@ public class SensorPlotter extends CardView implements SensorEventListener {
                 // chart
                 final LineChart lineChart = holder.mLineChart;
                 lineChart.getDescription().setText(bundle.getHwSensor().getShortDescription());
-                configureChart(lineChart);
+                configureChart(lineChart, bundle);
 
                 // data
                 LineData lineData = new LineData();
-                mLineData.add(position, lineData);
+                if (position < mLineData.size()) {
+                    mLineData.set(position, lineData);
+                } else {
+                    mLineData.add(position, lineData);
+                }
                 lineChart.setData(lineData);
 
                 // data set
                 final LineDataSet[] dataSets = new LineDataSet[sensorIds.size() * columns.length];
-                final int pos = holder.getAdapterPosition();
+                final int pos = holder.getLayoutPosition();
+
                 lineChart.post(new Runnable() {
                     @Override
                     public void run() {
@@ -342,7 +344,7 @@ public class SensorPlotter extends CardView implements SensorEventListener {
 
         @Override
         public int getItemCount() {
-            return mHwSensors.size();
+            return mSensorBundles.size();
         }
 
         /**
@@ -353,11 +355,14 @@ public class SensorPlotter extends CardView implements SensorEventListener {
          * @param element  Sensor element as {@link Bundle}
          */
         private void addAt(int position, SensorBundle element) {
-            if (!mHwSensors.contains(element)) {
-                mHwSensors.add(position, element);
+            if (!mSensorBundles.contains(element)) {
+                mSensorBundles.add(position, element);
                 mMethodLists.add(element.getHwSensor().getDataFrameClass().getDeclaredMethods());
+                mInterfaceList.add(element.getHwSensor().getDataFrameClass());
+                mAdapter.bindViewHolder(mAdapter.createViewHolder(mRecyclerView, 10), position);
                 notifyItemInserted(position);
-                notifyItemRangeChanged(position, mHwSensors.size() - position - 1);
+                notifyItemRangeChanged(position, mSensorBundles.size() - position - 1);
+                notifyDataSetChanged();
             }
         }
 
@@ -368,7 +373,7 @@ public class SensorPlotter extends CardView implements SensorEventListener {
          * @param element Sensor element as {@link Bundle}
          */
         private void add(SensorBundle element) {
-            addAt(mHwSensors.size(), element);
+            addAt(mAdapter.getItemCount(), element);
         }
 
 
@@ -379,9 +384,9 @@ public class SensorPlotter extends CardView implements SensorEventListener {
          * @param position Position to remove
          */
         private void removeAt(int position) {
-            mHwSensors.remove(position);
+            mSensorBundles.remove(position);
             notifyItemRemoved(position);
-            notifyItemRangeChanged(position, mHwSensors.size() - position);
+            notifyItemRangeChanged(position, mSensorBundles.size() - position);
         }
 
         /**
@@ -389,16 +394,17 @@ public class SensorPlotter extends CardView implements SensorEventListener {
          * notifies the {@link SensorPickerFragment.SensorPickerRecyclerAdapter} that the underlying list has changed.
          */
         private void remove() {
-            removeAt(mHwSensors.size() - 1);
+            removeAt(mSensorBundles.size() - 1);
         }
 
         private void update(int position) {
             SensorPlotterViewHolder viewHolder = (SensorPlotterViewHolder) mRecyclerView.findViewHolderForAdapterPosition(position);
-            if (viewHolder != null) {
-                viewHolder.mLineChart.getData().notifyDataChanged();
+            if (viewHolder != null && viewHolder.mLineChart.getData().getEntryCount() != 0) {
+                //viewHolder.mLineChart.getData().notifyDataChanged();
                 viewHolder.mLineChart.notifyDataSetChanged();
-                viewHolder.mLineChart.setVisibleXRange(SAMPLING_RATE * WINDOW_SIZE, SAMPLING_RATE * WINDOW_SIZE);
-                viewHolder.mLineChart.moveViewToX(viewHolder.mLineChart.getData().getEntryCount());
+                viewHolder.mLineChart.setAutoScaleMinMaxEnabled(true);
+                viewHolder.mLineChart.setVisibleXRange((float) (mSensorBundles.get(position).getSamplingRate() * mSensorBundles.get(position).getSampleDistance() * mWindowSize), (float) (mSensorBundles.get(position).getSamplingRate() * mSensorBundles.get(position).getSampleDistance() * mWindowSize));
+                viewHolder.mLineChart.moveViewToX(viewHolder.mLineChart.getData().getXMax());
             }
         }
 
@@ -419,6 +425,11 @@ public class SensorPlotter extends CardView implements SensorEventListener {
             super(context);
         }
 
+        @Override
+        public boolean isAutoMeasureEnabled() {
+            return true;
+        }
+
         private void setScrollEnabled(boolean scrollEnabled) {
             this.scrollEnabled = scrollEnabled;
         }
@@ -435,12 +446,34 @@ public class SensorPlotter extends CardView implements SensorEventListener {
         private HardwareSensor mHwSensor;
         private ArrayList<SensorInfo> mSensorList = new ArrayList<>();
 
+        /**
+         * Sampling rate of sensor in Hz.
+         */
+        private double mSamplingRate = -1;
+        /**
+         * Time between two samples in milliseconds
+         */
+        private double mSampleDistance = 1000 / mSamplingRate;
+
         private SensorBundle(HardwareSensor hwSensor) {
             mHwSensor = hwSensor;
         }
 
         private void addSensor(SensorInfo sensor) {
             mSensorList.add(sensor);
+        }
+
+        private void setSamplingRate(double samplingRate) {
+            mSamplingRate = samplingRate;
+            mSampleDistance = 1000 / mSamplingRate;
+        }
+
+        private double getSamplingRate() {
+            return mSamplingRate;
+        }
+
+        private double getSampleDistance() {
+            return mSampleDistance;
         }
 
         public HardwareSensor getHwSensor() {
