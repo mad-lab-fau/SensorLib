@@ -15,146 +15,225 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.BatteryManager;
+import android.util.Log;
+import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import de.fau.sensorlib.SensorDataLogger;
 import de.fau.sensorlib.SensorDataProcessor;
+import de.fau.sensorlib.SensorException;
 import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.AccelDataFrame;
 import de.fau.sensorlib.dataframe.AmbientDataFrame;
+import de.fau.sensorlib.dataframe.BarometricPressureDataFrame;
 import de.fau.sensorlib.dataframe.GyroDataFrame;
+import de.fau.sensorlib.dataframe.HumidityDataFrame;
+import de.fau.sensorlib.dataframe.LightDataFrame;
 import de.fau.sensorlib.dataframe.MagDataFrame;
 import de.fau.sensorlib.dataframe.OrientationDataFrame;
+import de.fau.sensorlib.dataframe.RealTimeTimestampDataFrame;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
+import de.fau.sensorlib.dataframe.TemperatureDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
 import de.fau.sensorlib.enums.KnownSensor;
+import de.fau.sensorlib.enums.SensorMessage;
 
 /**
  * Implementation of the internal/hardware sensors of the Android device.
  */
-public class InternalSensor extends AbstractSensor implements SensorEventListener {
+public class InternalSensor extends AbstractSensor implements SensorEventListener, Loggable {
 
-    public static final SensorInfo ANDROID_DEVICE_SENSORS = new SensorInfo("<Internal Sensor>", "n/a", KnownSensor.INTERNAL);
+    public static final SensorInfo ANDROID_DEVICE_SENSORS = new SensorInfo("Internal", "n/a", KnownSensor.INTERNAL);
 
     private SensorManager mSensorManager;
 
     /**
-     * Combine all possible single data frames into one sensor specific data frame
+     * Flag indicating whether data should be logged
      */
-    public static class InternalAccelDataFrame extends SensorDataFrame implements AccelDataFrame {
+    protected boolean mLoggingEnabled;
 
-        double ax, ay, az;
+    /**
+     * Data logger
+     */
+    protected SensorDataLogger mDataLogger;
 
-        public InternalAccelDataFrame(AbstractSensor fromSensor, double timestamp) {
-            super(fromSensor, timestamp);
+    private ArrayList<Sensor> mSelectedSensors = new ArrayList<>();
+    private ArrayList<Integer> mSensorCounter = new ArrayList<>();
+
+    /**
+     * Sampling period in microseconds
+     */
+    private int mSamplingPeriodUs;
+
+
+    /**
+     * Data frame to store accelerometer data received from the Internal Sensor
+     */
+    public static class InternalAccelDataFrame extends SensorDataFrame implements AccelDataFrame, RealTimeTimestampDataFrame {
+
+        private double[] accel;
+        private double realTimeTimestamp;
+
+        public InternalAccelDataFrame(AbstractSensor sensor, double timestamp) {
+            this(sensor, timestamp, new double[3]);
         }
 
-        public InternalAccelDataFrame(AbstractSensor fromSensor, double timestamp, double x, double y, double z) {
-            super(fromSensor, timestamp);
-            ax = x;
-            ay = y;
-            az = z;
+        public InternalAccelDataFrame(AbstractSensor sensor, double timestamp, double[] accel) {
+            this(sensor, timestamp, 0, accel);
+        }
+
+        public InternalAccelDataFrame(AbstractSensor sensor, double timestamp, double realtimeTimestamp, double[] accel) {
+            super(sensor, timestamp);
+            this.accel = accel;
+            this.realTimeTimestamp = realtimeTimestamp;
         }
 
         @Override
         public double getAccelX() {
-            return ax;
+            return accel[0];
         }
 
         @Override
         public double getAccelY() {
-            return ay;
+            return accel[1];
         }
 
         @Override
         public double getAccelZ() {
-            return az;
+            return accel[2];
+        }
+
+        @Override
+        public double getRealTimeTimestamp() {
+            return realTimeTimestamp;
+        }
+
+        @Override
+        public String toString() {
+            return "<" + originatingSensor.getDeviceName() + ">\tctr=" + ((long) getTimestamp()) + ", accel: " + Arrays.toString(accel);
         }
     }
 
     /**
-     * Combine all possible single data frames into one sensor specific data frame
+     * Data frame to store gyroscope data received from the Internal Sensor
      */
-    public static class InternalGyroDataFrame extends SensorDataFrame implements GyroDataFrame {
+    public static class InternalGyroDataFrame extends SensorDataFrame implements GyroDataFrame, RealTimeTimestampDataFrame {
 
-        public double gx, gy, gz;
+        private double[] gyro;
+        private double realTimeTimestamp;
 
-        public InternalGyroDataFrame(AbstractSensor fromSensor, double timestamp) {
-            super(fromSensor, timestamp);
+        public InternalGyroDataFrame(AbstractSensor sensor, double timestamp) {
+            this(sensor, timestamp, new double[3]);
         }
 
-        public InternalGyroDataFrame(AbstractSensor fromSensor, double timestamp, double x, double y, double z) {
-            super(fromSensor, timestamp);
-            gx = x;
-            gy = y;
-            gz = z;
+        public InternalGyroDataFrame(AbstractSensor sensor, double timestamp, double[] gyro) {
+            this(sensor, timestamp, 0, gyro);
         }
 
+        public InternalGyroDataFrame(AbstractSensor sensor, double timestamp, double realTimeTimestamp, double[] gyro) {
+            super(sensor, timestamp);
+            this.gyro = gyro;
+            this.realTimeTimestamp = realTimeTimestamp;
+        }
 
         @Override
         public double getGyroX() {
-            return gx;
+            return gyro[0];
         }
 
         @Override
         public double getGyroY() {
-            return gy;
+            return gyro[1];
         }
 
         @Override
         public double getGyroZ() {
-            return gz;
+            return gyro[2];
+        }
+
+        @Override
+        public double getRealTimeTimestamp() {
+            return realTimeTimestamp;
+        }
+
+        @Override
+        public String toString() {
+            return "<" + originatingSensor.getDeviceName() + ">\tctr=" + ((long) getTimestamp()) + ", gyro: " + Arrays.toString(gyro);
         }
     }
 
     /**
-     * Combine all possible single data frames into one sensor specific data frame
+     * Data frame to store magnetometer data received from the Internal Sensor
      */
-    public static class InternalMagDataFrame extends SensorDataFrame implements MagDataFrame {
+    public static class InternalMagDataFrame extends SensorDataFrame implements MagDataFrame, RealTimeTimestampDataFrame {
 
-        double mx, my, mz;
+        private double[] mag;
+        private double realTimeTimestamp;
 
-        public InternalMagDataFrame(AbstractSensor fromSensor, double timestamp) {
-            super(fromSensor, timestamp);
+        public InternalMagDataFrame(AbstractSensor sensor, double timestamp) {
+            this(sensor, timestamp, new double[3]);
         }
 
-        public InternalMagDataFrame(AbstractSensor fromSensor, double timestamp, double x, double y, double z) {
-            super(fromSensor, timestamp);
-            mx = x;
-            my = y;
-            mz = z;
+        public InternalMagDataFrame(AbstractSensor sensor, double timestamp, double[] mag) {
+            this(sensor, timestamp, 0, mag);
+        }
+
+        public InternalMagDataFrame(AbstractSensor sensor, double timestamp, double realTimeTimestamp, double[] mag) {
+            super(sensor, timestamp);
+            this.mag = mag;
+            this.realTimeTimestamp = realTimeTimestamp;
         }
 
         @Override
         public double getMagX() {
-            return mx;
+            return mag[0];
         }
 
         @Override
         public double getMagY() {
-            return my;
+            return mag[1];
         }
 
         @Override
         public double getMagZ() {
-            return mz;
+            return mag[2];
+        }
+
+        @Override
+        public double getRealTimeTimestamp() {
+            return realTimeTimestamp;
+        }
+
+        @Override
+        public String toString() {
+            return "<" + originatingSensor.getDeviceName() + ">\tctr=" + ((long) getTimestamp()) + ", mag: " + Arrays.toString(mag);
         }
     }
 
     /**
-     * Combine all possible single data frames into one sensor specific data frame
+     * Data frame to store orientation data received from the Internal Sensor
      */
-    public static class InternalOrientationDataFrame extends SensorDataFrame implements OrientationDataFrame {
+    public static class InternalOrientationDataFrame extends SensorDataFrame implements OrientationDataFrame, RealTimeTimestampDataFrame {
 
-        double roll, pitch, yaw;
+        private double roll, pitch, yaw;
+        private double realTimeTimestamp;
 
-        public InternalOrientationDataFrame(AbstractSensor fromSensor, double timestamp) {
-            super(fromSensor, timestamp);
+        public InternalOrientationDataFrame(AbstractSensor sensor, double timestamp) {
+            this(sensor, timestamp, 0, 0, 0);
         }
 
-        public InternalOrientationDataFrame(AbstractSensor fromSensor, double timestamp, double roll, double pitch, double yaw) {
-            super(fromSensor, timestamp);
+        public InternalOrientationDataFrame(AbstractSensor sensor, double timestamp, double roll, double pitch, double yaw) {
+            this(sensor, timestamp, 0, roll, pitch, yaw);
+        }
+
+        public InternalOrientationDataFrame(AbstractSensor sensor, double timestamp, double realTimeTimestamp, double roll, double pitch, double yaw) {
+            super(sensor, timestamp);
             this.roll = roll;
             this.pitch = pitch;
             this.yaw = yaw;
+            this.realTimeTimestamp = realTimeTimestamp;
         }
 
         @Override
@@ -171,42 +250,303 @@ public class InternalSensor extends AbstractSensor implements SensorEventListene
         public double getYaw() {
             return yaw;
         }
+
+        @Override
+        public double getRealTimeTimestamp() {
+            return realTimeTimestamp;
+        }
+
+        @Override
+        public String toString() {
+            return "<" + originatingSensor.getDeviceName() + ">\tctr=" + ((long) getTimestamp()) + ", roll: " + roll + ", pitch: " + pitch + ", yaw: " + yaw;
+        }
     }
 
     /**
-     * Combine all possible single data frames into one sensor specific data frame
+     * Data frame to store combined ambient data received from the Internal Sensor
      */
     public static class InternalAmbientDataFrame extends SensorDataFrame implements AmbientDataFrame {
 
-        double l, p, t;
+        private double light;
+        private double baro;
+        private double temp;
+        private double humidity;
 
         public InternalAmbientDataFrame(AbstractSensor fromSensor, double timestamp) {
+            this(fromSensor, timestamp, 0, 0, 0, 0);
+        }
+
+        public InternalAmbientDataFrame(AbstractSensor fromSensor, double timestamp, double light, double baro, double temp, double humidity) {
             super(fromSensor, timestamp);
+            this.light = light;
+            this.baro = baro;
+            this.temp = temp;
+            this.humidity = humidity;
         }
 
         @Override
         public double getLight() {
-            return l;
+            return light;
         }
 
         @Override
         public double getBarometricPressure() {
-            return p;
+            return baro;
         }
 
         @Override
         public double getTemperature() {
-            return t;
+            return temp;
         }
 
         @Override
         public double getHumidity() {
-            return 0;
+            return humidity;
         }
 
         @Override
         public double getNoise() {
             return 0;
+        }
+    }
+
+    /**
+     * Data frame to store light data received from the Internal Sensor
+     */
+    public static class InternalLightDataFrame extends SensorDataFrame implements LightDataFrame, RealTimeTimestampDataFrame {
+
+        private double light;
+        private double realTimeTimestamp;
+
+        /**
+         * Creates a sensor data frame.
+         *
+         * @param fromSensor the sensor from which this data frame originated.
+         * @param timestamp  the timestamp in milliseconds when this data frame was generated on the sensor.
+         */
+        public InternalLightDataFrame(AbstractSensor fromSensor, double timestamp) {
+            this(fromSensor, timestamp, 0);
+        }
+
+        /**
+         * Creates a sensor data frame.
+         *
+         * @param fromSensor the sensor from which this data frame originated.
+         * @param timestamp  the timestamp in milliseconds when this data frame was generated on the sensor.
+         * @param light      light value
+         */
+        public InternalLightDataFrame(AbstractSensor fromSensor, double timestamp, double light) {
+            this(fromSensor, timestamp, 0, light);
+        }
+
+        /**
+         * Creates a sensor data frame.
+         *
+         * @param fromSensor the sensor from which this data frame originated.
+         * @param timestamp  the timestamp in milliseconds when this data frame was generated on the sensor.
+         * @param light      light value
+         */
+        public InternalLightDataFrame(AbstractSensor fromSensor, double timestamp, double realTimeTimestamp, double light) {
+            super(fromSensor, timestamp);
+            this.light = light;
+            this.realTimeTimestamp = realTimeTimestamp;
+        }
+
+        @Override
+        public double getLight() {
+            return light;
+        }
+
+        @Override
+        public double getRealTimeTimestamp() {
+            return realTimeTimestamp;
+        }
+
+        @Override
+        public String toString() {
+            return "<" + originatingSensor.getDeviceName() + ">\tctr=" + ((long) getTimestamp()) + ", light: " + light;
+        }
+
+    }
+
+    /**
+     * Data frame to store barometer data received from the Internal Sensor
+     */
+    public static class InternalBarometricPressureDataFrame extends SensorDataFrame implements BarometricPressureDataFrame, RealTimeTimestampDataFrame {
+
+        private double baro;
+        private double realTimeTimestamp;
+
+        /**
+         * Creates a sensor data frame.
+         *
+         * @param fromSensor the sensor from which this data frame originated.
+         * @param timestamp  the timestamp in milliseconds when this data frame was generated on the sensor.
+         */
+        public InternalBarometricPressureDataFrame(AbstractSensor fromSensor, double timestamp) {
+            this(fromSensor, timestamp, 0);
+        }
+
+        /**
+         * Creates a sensor data frame.
+         *
+         * @param fromSensor the sensor from which this data frame originated.
+         * @param timestamp  the timestamp in milliseconds when this data frame was generated on the sensor.
+         * @param baro       barometric pressure value
+         */
+        public InternalBarometricPressureDataFrame(AbstractSensor fromSensor, double timestamp, double baro) {
+            this(fromSensor, timestamp, 0, baro);
+        }
+
+
+        /**
+         * Creates a sensor data frame.
+         *
+         * @param fromSensor the sensor from which this data frame originated.
+         * @param timestamp  the timestamp in milliseconds when this data frame was generated on the sensor.
+         * @param baro       barometric pressure value
+         */
+        public InternalBarometricPressureDataFrame(AbstractSensor fromSensor, double timestamp, double realTimeTimestamp, double baro) {
+            super(fromSensor, timestamp);
+            this.baro = baro;
+            this.realTimeTimestamp = realTimeTimestamp;
+        }
+
+        @Override
+        public double getBarometricPressure() {
+            return baro;
+        }
+
+        @Override
+        public double getRealTimeTimestamp() {
+            return realTimeTimestamp;
+        }
+
+        @Override
+        public String toString() {
+            return "<" + originatingSensor.getDeviceName() + ">\tctr=" + ((long) getTimestamp()) + ", baro: " + baro;
+        }
+    }
+
+
+    /**
+     * Data frame to store ambient temperature data received from the Internal Sensor
+     */
+    public static class InternalTemperatureDataFrame extends SensorDataFrame implements TemperatureDataFrame, RealTimeTimestampDataFrame {
+
+        private double temp;
+        private double realTimeTimestamp;
+
+
+        /**
+         * Creates a sensor data frame.
+         *
+         * @param fromSensor the sensor from which this data frame originated.
+         * @param timestamp  the timestamp in milliseconds when this data frame was generated on the sensor.
+         */
+        public InternalTemperatureDataFrame(AbstractSensor fromSensor, double timestamp) {
+            this(fromSensor, timestamp, 0);
+        }
+
+        /**
+         * Creates a sensor data frame.
+         *
+         * @param fromSensor the sensor from which this data frame originated.
+         * @param timestamp  the timestamp in milliseconds when this data frame was generated on the sensor.
+         * @param temp       ambient temperature value
+         */
+        public InternalTemperatureDataFrame(AbstractSensor fromSensor, double timestamp, double temp) {
+            this(fromSensor, timestamp, 0, temp);
+        }
+
+        /**
+         * Creates a sensor data frame.
+         *
+         * @param fromSensor the sensor from which this data frame originated.
+         * @param timestamp  the timestamp in milliseconds when this data frame was generated on the sensor.
+         * @param temp       ambient temperature value
+         */
+        public InternalTemperatureDataFrame(AbstractSensor fromSensor, double timestamp, double realTimeTimestamp, double temp) {
+            super(fromSensor, timestamp);
+            this.temp = temp;
+            this.realTimeTimestamp = temp;
+        }
+
+
+        @Override
+        public double getTemperature() {
+            return temp;
+        }
+
+        @Override
+        public double getRealTimeTimestamp() {
+            return realTimeTimestamp;
+        }
+
+        @Override
+        public String toString() {
+            return "<" + originatingSensor.getDeviceName() + ">\tctr=" + ((long) getTimestamp()) + ", temp: " + temp;
+        }
+
+    }
+
+
+    /**
+     * Data frame to store relative humidity data received from the Internal Sensor
+     */
+    public static class InternalHumidityDataFrame extends SensorDataFrame implements HumidityDataFrame, RealTimeTimestampDataFrame {
+
+        private double humidity;
+        private double realTimeTimestamp;
+
+        /**
+         * Creates a sensor data frame.
+         *
+         * @param fromSensor the sensor from which this data frame originated.
+         * @param timestamp  the timestamp in milliseconds when this data frame was generated on the sensor.
+         */
+        public InternalHumidityDataFrame(AbstractSensor fromSensor, double timestamp) {
+            this(fromSensor, timestamp, 0);
+        }
+
+        /**
+         * Creates a sensor data frame.
+         *
+         * @param fromSensor the sensor from which this data frame originated.
+         * @param timestamp  the timestamp in milliseconds when this data frame was generated on the sensor.
+         * @param humidity   relative humidity value
+         */
+        public InternalHumidityDataFrame(AbstractSensor fromSensor, double timestamp, double humidity) {
+            this(fromSensor, timestamp, 0, humidity);
+        }
+
+        /**
+         * Creates a sensor data frame.
+         *
+         * @param fromSensor the sensor from which this data frame originated.
+         * @param timestamp  the timestamp in milliseconds when this data frame was generated on the sensor.
+         * @param humidity   relative humidity value
+         */
+        public InternalHumidityDataFrame(AbstractSensor fromSensor, double timestamp, double realTimeTimestamp, double humidity) {
+            super(fromSensor, timestamp);
+            this.humidity = humidity;
+            this.realTimeTimestamp = realTimeTimestamp;
+        }
+
+
+        @Override
+        public double getHumidity() {
+            return humidity;
+        }
+
+        @Override
+        public double getRealTimeTimestamp() {
+            return realTimeTimestamp;
+        }
+
+        @Override
+        public String toString() {
+            return "<" + originatingSensor.getDeviceName() + ">\tctr=" + ((long) getTimestamp()) + ", humidity: " + humidity;
         }
     }
 
@@ -217,7 +557,7 @@ public class InternalSensor extends AbstractSensor implements SensorEventListene
      * @param dataHandler method to provide unified data handling
      */
     public InternalSensor(Context context, SensorDataProcessor dataHandler) {
-        super(context, "<Internal>", "n/a", dataHandler);
+        super(context, ANDROID_DEVICE_SENSORS.getName(), ANDROID_DEVICE_SENSORS.getDeviceAddress(), dataHandler, 10);
     }
 
     @Override
@@ -232,52 +572,69 @@ public class InternalSensor extends AbstractSensor implements SensorEventListene
     }
 
     @Override
-    public boolean connect() {
-        try {
-            super.connect();
-        } catch (Exception e) {
-            e.printStackTrace();
+    public boolean connect() throws Exception {
+        if (!super.connect()) {
             return false;
         }
 
-        // use default sampling rate if none is given
-        double samplingRateDouble = getSamplingRate();
-        if (samplingRateDouble == 0) {
-            samplingRateDouble = 100;
+        // use default sampling rate (100 Hz) if none is given
+        if (getSamplingRate() <= 0) {
+            setSamplingRate(100);
         }
 
-        int samplingRate = 1000000 / (int) samplingRateDouble;
-
+        mSamplingPeriodUs = 1000000 / (int) getSamplingRate();
         mSensorManager = (SensorManager) super.mContext.getSystemService(Context.SENSOR_SERVICE);
-        if (mSelectedHwSensors.contains(HardwareSensor.ACCELEROMETER)) {
-            Sensor sensorAcc = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-            mSensorManager.registerListener(this, sensorAcc, samplingRate);
+
+        if (mSensorManager == null) {
+            throw new SensorException(SensorException.SensorExceptionType.sensorNotResponding);
         }
-        if (mSelectedHwSensors.contains(HardwareSensor.ORIENTATION)) {
-            Sensor sensorGrav = mSensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY);
-            Sensor sensorMag = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-            mSensorManager.registerListener(this, sensorGrav, samplingRate);
-            mSensorManager.registerListener(this, sensorMag, samplingRate);
+
+        for (HardwareSensor hwSensor : mSelectedHwSensors) {
+            int sensorType = -1;
+
+            switch (hwSensor) {
+                case ACCELEROMETER:
+                    sensorType = Sensor.TYPE_ACCELEROMETER;
+                    break;
+                case ORIENTATION:
+                    sensorType = Sensor.TYPE_GRAVITY;
+                    Sensor sensorMag = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+                    // add magnetometer here (not after switch-case-statement),
+                    // because for orientation we need input from two sensors
+                    mSelectedSensors.add(sensorMag);
+                    break;
+                case GYROSCOPE:
+                    sensorType = Sensor.TYPE_GYROSCOPE;
+                    break;
+                case MAGNETOMETER:
+                    sensorType = Sensor.TYPE_MAGNETIC_FIELD;
+                    break;
+                case LIGHT:
+                    sensorType = Sensor.TYPE_LIGHT;
+                    break;
+                case BAROMETER:
+                    sensorType = Sensor.TYPE_PRESSURE;
+                    break;
+                case TEMPERATURE:
+                    sensorType = Sensor.TYPE_AMBIENT_TEMPERATURE;
+                    break;
+                case HUMIDITY:
+                    sensorType = Sensor.TYPE_RELATIVE_HUMIDITY;
+                    break;
+            }
+
+            if (sensorType != -1) {
+                Sensor sensor = mSensorManager.getDefaultSensor(sensorType);
+                if (sensor == null) {
+                    mSelectedHwSensors.remove(hwSensor);
+                } else {
+                    mSelectedSensors.add(sensor);
+                }
+            }
         }
-        if (mSelectedHwSensors.contains(HardwareSensor.GYROSCOPE)) {
-            Sensor sensorGyro = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-            mSensorManager.registerListener(this, sensorGyro, samplingRate);
-        }
-        if (mSelectedHwSensors.contains(HardwareSensor.MAGNETOMETER)) {
-            Sensor sensorMag = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-            mSensorManager.registerListener(this, sensorMag, samplingRate);
-        }
-        if (mSelectedHwSensors.contains(HardwareSensor.LIGHT)) {
-            Sensor sensorLight = mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
-            mSensorManager.registerListener(this, sensorLight, samplingRate);
-        }
-        if (mSelectedHwSensors.contains(HardwareSensor.PRESSURE)) {
-            Sensor sensorPress = mSensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE);
-            mSensorManager.registerListener(this, sensorPress, samplingRate);
-        }
-        if (mSelectedHwSensors.contains(HardwareSensor.TEMPERATURE)) {
-            Sensor sensorTemp = mSensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE);
-            mSensorManager.registerListener(this, sensorTemp, samplingRate);
+        mSensorCounter = new ArrayList<>();
+        for (int i = 0; i < mSelectedSensors.size(); i++) {
+            mSensorCounter.add(0);
         }
 
         sendConnected();
@@ -288,17 +645,38 @@ public class InternalSensor extends AbstractSensor implements SensorEventListene
     @Override
     public void disconnect() {
         super.disconnect();
-        mSensorManager.unregisterListener(this);
+        mSensorManager = null;
         sendDisconnected();
     }
 
     @Override
     public void startStreaming() {
+        try {
+            if (mLoggingEnabled) {
+                Log.e(TAG, "create logger");
+                mDataLogger = new SensorDataLogger(this, mContext);
+            }
+        } catch (SensorException e) {
+            switch (e.getExceptionType()) {
+                case permissionsMissing:
+                    Toast.makeText(mContext, "Permissions to write external storage needed!", Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        }
+        //Log.e(TAG, mSelectedSensors.toString());
+        for (Sensor sensor : mSelectedSensors) {
+            mSensorManager.registerListener(this, sensor, mSamplingPeriodUs);
+        }
+
         sendStartStreaming();
     }
 
     @Override
     public void stopStreaming() {
+        mSensorManager.unregisterListener(this);
+        if (mDataLogger != null) {
+            mDataLogger.completeLogger();
+        }
         sendStopStreaming();
     }
 
@@ -306,53 +684,69 @@ public class InternalSensor extends AbstractSensor implements SensorEventListene
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        SensorDataFrame frame = null;
-        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            frame = new InternalAccelDataFrame(this, event.timestamp, event.values[0], event.values[1], event.values[2]);
-            //Log.i("Internal Accelerometer", Double.toString(frame.ax) + "   " + Double.toString(frame.ay) + "   " + Double.toString(frame.az));
-        }
-        if (event.sensor.getType() == Sensor.TYPE_GRAVITY) {
-            float[] I = new float[9];
-            float[] R = new float[9];
-            SensorManager.getRotationMatrix(R, I, event.values, valuesMagnetic);
-            float[] orientation = new float[3];
-            SensorManager.getOrientation(R, orientation);
-            frame = new InternalOrientationDataFrame(this, event.timestamp, Math.toDegrees(orientation[0]), Math.toDegrees(orientation[1]), Math.toDegrees(orientation[2]));
-        }
-        if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
-            frame = new InternalGyroDataFrame(this, event.timestamp, event.values[0], event.values[1], event.values[2]);
-            //Log.i("Internal Gyroscope", Double.toString(frame.gx) + "   " + Double.toString(frame.gy) + "   " + Double.toString(frame.gz));
-        }
-        if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
-            valuesMagnetic[0] = event.values[0];
-            valuesMagnetic[1] = event.values[1];
-            valuesMagnetic[2] = event.values[2];
-            frame = new InternalMagDataFrame(this, event.timestamp, event.values[0], event.values[1], event.values[2]);
-            //Log.i("Internal Magnetometer", Double.toString(frame.mx) + "   " + Double.toString(frame.my) + "   " + Double.toString(frame.mz));
-        }
-        if (event.sensor.getType() == Sensor.TYPE_LIGHT) {
-            frame = new InternalAmbientDataFrame(this, event.timestamp);
-            ((InternalAmbientDataFrame) frame).l = event.values[0];
-            //Log.i("Internal Lightsensor", Double.toString(frame.l));
-        }
-        if (event.sensor.getType() == Sensor.TYPE_PRESSURE) {
-            frame = new InternalAmbientDataFrame(this, event.timestamp);
-            ((InternalAmbientDataFrame) frame).p = event.values[0];
-            //Log.i("Internal Pressuresensor", Double.toString(frame.p));
-        }
-        if (event.sensor.getType() == Sensor.TYPE_AMBIENT_TEMPERATURE) {
-            frame = new InternalAmbientDataFrame(this, event.timestamp);
-            ((InternalAmbientDataFrame) frame).t = event.values[0];
-            //Log.i("Internal Tempsensor", Double.toString(frame.t));
+        SensorDataFrame df = null;
+        int localCounter = mSensorCounter.get(mSelectedSensors.indexOf(event.sensor));
+        switch (event.sensor.getType()) {
+            case Sensor.TYPE_ACCELEROMETER:
+                df = new InternalAccelDataFrame(this, localCounter, event.timestamp, new double[]{event.values[0], event.values[1], event.values[2]});
+                break;
+            case Sensor.TYPE_GYROSCOPE:
+                df = new InternalGyroDataFrame(this, localCounter, event.timestamp, new double[]{event.values[0], event.values[1], event.values[2]});
+                break;
+            case Sensor.TYPE_GRAVITY:
+                float[] I = new float[9];
+                float[] R = new float[9];
+                SensorManager.getRotationMatrix(R, I, event.values, valuesMagnetic);
+                float[] orientation = new float[3];
+                SensorManager.getOrientation(R, orientation);
+                df = new InternalOrientationDataFrame(this, localCounter, event.timestamp, Math.toDegrees(orientation[0]), Math.toDegrees(orientation[1]), Math.toDegrees(orientation[2]));
+                break;
+            case Sensor.TYPE_MAGNETIC_FIELD:
+                valuesMagnetic[0] = event.values[0];
+                valuesMagnetic[1] = event.values[1];
+                valuesMagnetic[2] = event.values[2];
+                df = new InternalMagDataFrame(this, localCounter, event.timestamp, new double[]{event.values[0], event.values[1], event.values[2]});
+                break;
+            case Sensor.TYPE_LIGHT:
+                df = new InternalLightDataFrame(this, localCounter, event.timestamp, event.values[0]);
+                break;
+            case Sensor.TYPE_PRESSURE:
+                df = new InternalBarometricPressureDataFrame(this, localCounter, event.timestamp, event.values[0]);
+                break;
+            case Sensor.TYPE_AMBIENT_TEMPERATURE:
+                df = new InternalTemperatureDataFrame(this, localCounter, event.timestamp, event.values[0]);
+                break;
         }
 
-        sendNewData(frame);
+        if (df == null) {
+            return;
+        }
+        Log.d(TAG, df.toString());
+        //Log.d(TAG, "sensor: " + event.sensor.getStringType() + ", timestamp: " + ((long) ((RealTimeTimestampDataFrame) df).getRealTimeTimestamp()));
+
+        sendNewData(df);
+        if (mLoggingEnabled) {
+            mDataLogger.writeData(df);
+        }
+        mSensorCounter.set(mSelectedSensors.indexOf(event.sensor), ++localCounter);
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        sendNotification(SensorMessage.ACCURACY_CHANGED);
         /*Bundle bundle = new Bundle();
         bundle.putInt("accuracy", accuracy);
         sendNotification(bundle);*/
+    }
+
+
+    @Override
+    public void enableDataLogger() {
+        mLoggingEnabled = true;
+    }
+
+    @Override
+    public void disableDataLogger() {
+        mLoggingEnabled = false;
     }
 }
