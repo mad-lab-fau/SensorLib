@@ -40,6 +40,8 @@ public class SensorInfo {
      */
     protected KnownSensor mDeviceClass = null;
 
+    protected double mSamplingRate = -1;
+
 
     protected SparseArray<byte[]> mManufacturerData = null;
 
@@ -86,6 +88,13 @@ public class SensorInfo {
         return mSensorState;
     }
 
+    /**
+     * @return the sampling rate for the current sensor connection in Hz.
+     */
+    public double getSamplingRate() {
+        return mSamplingRate;
+    }
+
 
     /**
      * @return true if the sensor is connected, false otherwise.
@@ -115,7 +124,19 @@ public class SensorInfo {
      * @param deviceAddress address of the device.
      */
     public SensorInfo(String deviceName, String deviceAddress) {
-        this(deviceName, deviceAddress, KnownSensor.inferSensorClass(deviceName), null);
+        this(deviceName, deviceAddress, KnownSensor.inferSensorClass(deviceName), -1, null);
+    }
+
+
+    /**
+     * Default constructor. The sensor class is inferred from the name or device address.
+     *
+     * @param deviceName    name of the device.
+     * @param deviceAddress address of the device.
+     * @param samplingRate  sampling rate of the sensor
+     */
+    public SensorInfo(String deviceName, String deviceAddress, double samplingRate) {
+        this(deviceName, deviceAddress, KnownSensor.inferSensorClass(deviceName), samplingRate, null);
     }
 
     /**
@@ -125,7 +146,7 @@ public class SensorInfo {
      * @param deviceAddress address of the device.
      */
     public SensorInfo(String deviceName, String deviceAddress, SparseArray<byte[]> manufacturerData) {
-        this(deviceName, deviceAddress, KnownSensor.inferSensorClass(deviceName), manufacturerData);
+        this(deviceName, deviceAddress, KnownSensor.inferSensorClass(deviceName), -1, manufacturerData);
     }
 
     /**
@@ -136,14 +157,15 @@ public class SensorInfo {
      * @param deviceClass   class of the device.
      */
     public SensorInfo(String deviceName, String deviceAddress, KnownSensor deviceClass) {
-        this(deviceName, deviceAddress, deviceClass, null);
+        this(deviceName, deviceAddress, deviceClass, -1, null);
     }
 
-    public SensorInfo(String deviceName, String deviceAddress, KnownSensor deviceClass, SparseArray<byte[]> manufacturerData) {
+    public SensorInfo(String deviceName, String deviceAddress, KnownSensor deviceClass, double samplingRate, SparseArray<byte[]> manufacturerData) {
         mName = deviceName;
         mDeviceAddress = deviceAddress;
         mDeviceClass = deviceClass;
         mManufacturerData = manufacturerData;
+        mSamplingRate = samplingRate;
     }
 
     @Override

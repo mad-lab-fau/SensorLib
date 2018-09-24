@@ -42,11 +42,6 @@ public abstract class AbstractSensor extends SensorInfo {
     protected static final int MESSAGE_SAMPLING_RATE_CHANGED = 1019;
 
     /**
-     * The sampling rate in Hz that is used to acquire data samples from the sensor.
-     */
-    protected double mSamplingRate;
-
-    /**
      * Context this sensor is used in.
      */
     protected Context mContext;
@@ -169,11 +164,10 @@ public abstract class AbstractSensor extends SensorInfo {
      * @param desiredSamplingRate the desired sampling rate for this sensor. See {@link #requestSamplingRateChange(double)} for further information.
      */
     public AbstractSensor(Context context, String deviceName, String deviceAddress, SensorDataProcessor dataHandler, double desiredSamplingRate) {
-        super(deviceName, deviceAddress);
+        super(deviceName, deviceAddress, desiredSamplingRate);
         mName = deviceName;
         mDeviceAddress = deviceAddress;
         mContext = context;
-        mSamplingRate = desiredSamplingRate;
         mInternalHandler = new InternalHandler(this);
         addDataHandler(dataHandler);
         sendSensorCreated();
@@ -252,13 +246,6 @@ public abstract class AbstractSensor extends SensorInfo {
 
     public Context getContext() {
         return mContext;
-    }
-
-    /**
-     * @return the sampling rate for the current sensor connection in Hz.
-     */
-    public double getSamplingRate() {
-        return mSamplingRate;
     }
 
     /**
@@ -369,6 +356,10 @@ public abstract class AbstractSensor extends SensorInfo {
      */
     protected EnumSet<HardwareSensor> providedSensors() {
         return mDeviceClass.getAvailableSensors();
+    }
+
+    public EnumSet<HardwareSensor> getSelectedSensors() {
+        return mSelectedHwSensors;
     }
 
     public boolean hasBatteryMeasurement() {
