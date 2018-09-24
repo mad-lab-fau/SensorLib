@@ -23,14 +23,6 @@ import de.fau.sensorlib.dataframe.InsolePressureDataFrame;
  */
 public class InsoleSensor extends NilsPodSensor {
 
-    //
-    static {
-        // add 3 Byte for FSR pressure values
-        PACKET_SIZE += 3;
-        // add 1 Byte for battery
-        PACKET_SIZE += 1;
-    }
-
     /**
      * Global counter for incoming packages (local counter only has 15 bit)
      */
@@ -51,14 +43,14 @@ public class InsoleSensor extends NilsPodSensor {
 
         byte[] values = characteristic.getValue();
 
-        // one data packet always has size PACKET_SIZE
-        if (values.length % PACKET_SIZE != 0) {
-            Log.e(TAG, "Wrong BLE Packet Size!" + values.length + ", " + PACKET_SIZE);
+        // one data packet always has size mPacketSize
+        if (values.length % mPacketSize != 0) {
+            Log.e(TAG, "Wrong BLE Packet Size! " + values.length + ", " + mPacketSize);
             return;
         }
 
         // iterate over data packets
-        for (int i = 0; i < values.length; i += PACKET_SIZE) {
+        for (int i = 0; i < values.length; i += mPacketSize) {
             int offset = i;
             double[] gyro = new double[3];
             double[] accel = new double[3];
@@ -87,7 +79,7 @@ public class InsoleSensor extends NilsPodSensor {
             }
 
             // extract packet counter (only 15 bit, therefore getIntValue() method not applicable)
-            localCounter = (values[PACKET_SIZE - 1] & 0xFF) | ((values[PACKET_SIZE - 2] & 0x7F) << 8);
+            localCounter = (values[mPacketSize - 1] & 0xFF) | ((values[mPacketSize - 2] & 0x7F) << 8);
 
             // check if packets have been lost
             if (((localCounter - lastCounter) % (2 << 14)) > 1) {
@@ -99,6 +91,7 @@ public class InsoleSensor extends NilsPodSensor {
             }
 
             InsoleDataFrame df = new InsoleDataFrame(this, globalCounter * (2 << 14) + localCounter, accel, gyro, baro, pressure);
+
             //Log.d(TAG, df.toString());
             // send new data to the SensorDataProcessor
             sendNewData(df);

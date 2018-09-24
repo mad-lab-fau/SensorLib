@@ -26,12 +26,6 @@ import de.fau.sensorlib.dataframe.SensorDataFrame;
  */
 public class NilsPodEcgSensor extends AbstractNilsPodSensor {
 
-    // Override default counter
-    static {
-        // 7 Byte ECG + 6 Byte accelerometer + 4 Byte counter
-        PACKET_SIZE = 7 + 6 + 4;
-    }
-
 
     public NilsPodEcgSensor(Context context, SensorInfo info, SensorDataProcessor dataHandler) {
         super(context, info, dataHandler);
@@ -48,15 +42,15 @@ public class NilsPodEcgSensor extends AbstractNilsPodSensor {
         byte[] values = characteristic.getValue();
         //Log.d(TAG, "data: " + Arrays.toString(values) + ", LENGTH: " + values.length);
 
-        // one data packet always has size PACKET_SIZE
-        if (values.length % PACKET_SIZE != 0) {
+        // one data packet always has size mPacketSize
+        if (values.length % mPacketSize != 0) {
             Log.e(TAG, "Wrong BLE Packet Size!");
             return;
         }
 
 
         // iterate over data packets
-        for (int i = 0; i < values.length; i += PACKET_SIZE) {
+        for (int i = 0; i < values.length; i += mPacketSize) {
             int offset = i;
             double[] accel = new double[3];
             double[] ecg = new double[2];
@@ -102,11 +96,10 @@ public class NilsPodEcgSensor extends AbstractNilsPodSensor {
 
 
     /**
-     * Data frame to store data received from the Hoop Sensor
+     * Data frame to store data received from the NilsPod Sensor
      */
     public static class NilsPodEcgDataFrame extends SensorDataFrame implements AccelDataFrame, EcgDataFrame, LabelDataFrame {
 
-        private long timestamp;
         private double[] accel;
         private double[] ecg;
         private char label;
@@ -136,7 +129,6 @@ public class NilsPodEcgSensor extends AbstractNilsPodSensor {
             if (accel.length != 3) {
                 throw new IllegalArgumentException("Illegal array size for acceleration values! ");
             }
-            this.timestamp = timestamp;
             this.accel = accel;
             this.ecg = ecg;
             this.label = label;
@@ -175,7 +167,7 @@ public class NilsPodEcgSensor extends AbstractNilsPodSensor {
 
         @Override
         public String toString() {
-            return "<" + originatingSensor.getDeviceName() + ">\tctr=" + timestamp + ", accel: " + Arrays.toString(accel) + ", ecg: " + Arrays.toString(ecg) + ", label: " + (int) label;
+            return "<" + originatingSensor.getDeviceName() + ">\tctr=" + ((long) getTimestamp()) + ", accel: " + Arrays.toString(accel) + ", ecg: " + Arrays.toString(ecg) + ", label: " + (int) label;
         }
     }
 }

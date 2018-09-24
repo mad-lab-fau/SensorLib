@@ -27,12 +27,6 @@ public class NilsPodSensor extends AbstractNilsPodSensor {
      */
     private int globalCounter = 0;
 
-    // Override default packet size
-    static {
-        // add 2 Byte for barometer
-        PACKET_SIZE += 2;
-    }
-
 
     public NilsPodSensor(Context context, SensorInfo info, SensorDataProcessor dataHandler) {
         super(context, info, dataHandler);
@@ -47,14 +41,14 @@ public class NilsPodSensor extends AbstractNilsPodSensor {
     protected void extractSensorData(BluetoothGattCharacteristic characteristic) {
         byte[] values = characteristic.getValue();
 
-        // one data packet always has size PACKET_SIZE
-        if (values.length % PACKET_SIZE != 0) {
+        // one data packet always has size mPacketSize
+        if (values.length % mPacketSize != 0) {
             Log.e(TAG, "Wrong BLE Packet Size!");
             return;
         }
 
         // iterate over data packets
-        for (int i = 0; i < values.length; i += PACKET_SIZE) {
+        for (int i = 0; i < values.length; i += mPacketSize) {
             int offset = i;
             double[] gyro = new double[3];
             double[] accel = new double[3];

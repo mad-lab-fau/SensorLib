@@ -18,7 +18,7 @@ import de.fau.sensorlib.dataframe.AccelDataFrame;
 import de.fau.sensorlib.dataframe.GyroDataFrame;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
 
-public abstract class AbstractNilsPodSensor extends GenericBleSensor {
+public abstract class AbstractNilsPodSensor extends GenericBleSensor implements Loggable {
 
 
     /**
@@ -66,7 +66,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor {
     /**
      * Default packet size: 12 Byte IMU + 2 Byte Counter
      */
-    protected static int PACKET_SIZE = 14;
+    protected int mPacketSize = 14;
 
 
     /**
@@ -90,7 +90,6 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor {
     private BluetoothGattService mStreamingService;
 
     private NilsPodSensorPosition mSensorPosition;
-
 
     /**
      * Sensor commands for communication with NilsPod Sensor. Used with the Sensor Config Characteristic
@@ -160,7 +159,10 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor {
         OPERATION_STATE_IDLE,
         OPERATION_STATE_STREAMING,
         OPERATION_STATE_LOGGING,
-        OPERATION_STATE_FLASH_TRANSMISSION
+        OPERATION_STATE_SIGNAL_PROCESSING,
+        OPERATION_STATE_FLASH_TRANSMISSION,
+        OPERATION_STATE_FLASH_SESSION_LIST,
+        OPERATION_STATE_SENSOR_FUSION
     }
 
 
@@ -199,7 +201,8 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor {
 
 
     public AbstractNilsPodSensor(Context context, SensorInfo info, SensorDataProcessor dataHandler) {
-        super(context, info, dataHandler);
+        // set sampling rate to default value
+        super(context, info.getName(), info.getDeviceAddress(), dataHandler, 200);
     }
 
     @Override
@@ -262,16 +265,12 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor {
         return mGatt.writeCharacteristic(characteristic);
     }
 
-    /**
-     * Enables data logging for this sensor
-     */
+    @Override
     public void enableDataLogger() {
         mLoggingEnabled = true;
     }
 
-    /**
-     * Disables data logging for this sensor
-     */
+    @Override
     public void disableDataLogger() {
         mLoggingEnabled = false;
     }
@@ -337,22 +336,30 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor {
     protected void readSystemState(BluetoothGattCharacteristic characteristic) {
         int offset = 0;
         byte[] values = characteristic.getValue();
+        Log.e(TAG, "state: " + Arrays.toString(values));
         boolean connectionState = values[offset++] == 1;
         int operationState = values[offset++];
-        boolean wirelessPowerState = values[offset++] == 0;
-        boolean chargingState = values[offset] == 0;
+        boolean wirelessPowerState = (values[offset] & 0x0F) != 0;
+        boolean chargingState = (values[offset] & 0xF0) != 0;
+        offset++;
         // TODO determine error states of sensors
+        int errorFlags = values[offset++];
+        int batteryLevel = values[offset++];
+        int activityLabel = values[offset];
         Log.d(TAG, ">>>> System State:");
         Log.d(TAG, "\tConnection State: " + connectionState);
         Log.d(TAG, "\tOperation State: " + NilsPodOperationState.values()[operationState]);
         Log.d(TAG, "\tWireless Power State: " + wirelessPowerState);
         Log.d(TAG, "\tCharging State: " + chargingState);
+        Log.d(TAG, "\tError Flags: " + Integer.toBinaryString(errorFlags));
+        Log.d(TAG, "\tBattery Level: " + batteryLevel);
+        Log.d(TAG, "\tActivity Label: " + activityLabel);
     }
 
     protected void readTsConfig(BluetoothGattCharacteristic characteristic) {
         int offset = 0;
         byte[] values = characteristic.getValue();
-        mSamplingRate = convertSamplingRate(values[offset++]);
+        setSamplingRate(convertSamplingRate(values[offset++]));
         NilsPodSyncRole syncRole = NilsPodSyncRole.values()[values[offset++]];
         int syncDistance = values[offset++] * 100;
         int rfGroup = values[offset];
@@ -372,7 +379,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor {
         Log.d(TAG, ">>>> Sensor Config:");
         Log.d(TAG, "\tSensors: " + sensors);
         Log.d(TAG, "\tSample Size: " + sampleSize);
-        PACKET_SIZE = sampleSize;
+        mPacketSize = sampleSize;
     }
 
     protected void readSensorPosition(BluetoothGattCharacteristic characteristic) {
@@ -410,7 +417,6 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor {
      */
     public static class GenericNilsPodDataFrame extends SensorDataFrame implements AccelDataFrame, GyroDataFrame {
 
-        protected long timestamp;
         protected double[] accel;
         protected double[] gyro;
 
@@ -427,7 +433,6 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor {
             if (accel.length != 3 || gyro.length != 3) {
                 throw new IllegalArgumentException("Illegal array size for " + ((accel.length != 3) ? "acceleration" : "gyroscope") + " values! ");
             }
-            this.timestamp = timestamp;
             this.accel = accel;
             this.gyro = gyro;
         }
@@ -464,7 +469,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor {
 
         @Override
         public String toString() {
-            return "<" + originatingSensor.getDeviceName() + ">\tctr=" + timestamp + ", accel: " + Arrays.toString(accel) + ", gyro: " + Arrays.toString(gyro);
+            return "<" + originatingSensor.getDeviceName() + ">\tctr=" + ((long) getTimestamp()) + ", accel: " + Arrays.toString(accel) + ", gyro: " + Arrays.toString(gyro);
         }
     }
 }

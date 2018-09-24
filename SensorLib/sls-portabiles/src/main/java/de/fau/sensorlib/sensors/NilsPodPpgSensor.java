@@ -16,25 +16,12 @@ import java.util.Arrays;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.PpgDataFrame;
-import de.fau.sensorlib.sensors.NilsPodSensor.NilsPodDataFrame;
 
 
 /**
  * Represents a NilsPod Sensor device for PPG measurement.
  */
 public class NilsPodPpgSensor extends NilsPodSensor {
-
-
-    /**
-     * Global counter for incoming packages (local counter only has 15 bit)
-     */
-    private int globalCounter = 0;
-
-    // Override default packet size
-    static {
-        // add 4 Byte for PPG
-        PACKET_SIZE += 4;
-    }
 
     public NilsPodPpgSensor(Context context, SensorInfo info, SensorDataProcessor dataHandler) {
         super(context, info, dataHandler);
@@ -49,20 +36,20 @@ public class NilsPodPpgSensor extends NilsPodSensor {
     protected void extractSensorData(BluetoothGattCharacteristic characteristic) {
         byte[] values = characteristic.getValue();
 
-        // one data packet always has size PACKET_SIZE
-        if (values.length == 0 || values.length % PACKET_SIZE != 0) {
+        // one data packet always has size mPacketSize
+        if (values.length == 0 || values.length % mPacketSize != 0) {
             Log.e(TAG, "Wrong BLE Packet Size!");
             return;
         }
 
         // iterate over data packets
-        for (int i = 0; i < values.length; i += PACKET_SIZE) {
+        for (int i = 0; i < values.length; i += mPacketSize) {
             int offset = i;
             double[] gyro = new double[3];
             double[] accel = new double[3];
             double baro;
             double[] ppg = new double[2];
-            int localCounter;
+            long localCounter;
 
             // extract gyroscope data
             for (int j = 0; j < 3; j++) {
@@ -84,20 +71,15 @@ public class NilsPodPpgSensor extends NilsPodSensor {
                 offset += 2;
             }
 
-            // extract packet counter (always the last 2 bytes in the packet.
-            // counter only has 15 bit, therefore getIntValue() method not applicable)
-            localCounter = (values[PACKET_SIZE - 1] & 0xFF) | ((values[PACKET_SIZE - 2] & 0x7F) << 8);
+            localCounter = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, offset);
 
             // check if packets have been lost
-            if (((localCounter - lastCounter) % (2 << 14)) > 1) {
+            if ((localCounter - lastCounter) > 1) {
                 Log.w(TAG, this + ": BLE Packet Loss!");
             }
-            // increment global counter if local counter overflows
-            if (localCounter < lastCounter) {
-                globalCounter++;
-            }
+            
+            NilsPodPpgDataFrame df = new NilsPodPpgDataFrame(this, localCounter, accel, gyro, baro, ppg);
 
-            NilsPodPpgDataFrame df = new NilsPodPpgDataFrame(this, globalCounter * (2 << 14) + localCounter, accel, gyro, baro, ppg);
             Log.d(TAG, df.toString());
             // send new data to the SensorDataProcessor
             sendNewData(df);
@@ -144,13 +126,13 @@ public class NilsPodPpgSensor extends NilsPodSensor {
         }
 
         @Override
-        public double getPpgRedSample() {
+        public double getPpgIrSample() {
             return ppg[0];
 
         }
 
         @Override
-        public double getPpgIrSample() {
+        public double getPpgRedSample() {
             return ppg[1];
         }
 
