@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Environment;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.Toast;
@@ -69,6 +68,7 @@ public class SensorDataLogger {
         mFilename = sensor.getDeviceName() + "_" + currTime + ".csv";
 
         StringBuilder headerBuilder = new StringBuilder();
+        // TODO add further sensor information (-> make adding custom header possible)
         headerBuilder.append("samplingrate" + SEPARATOR).append(sensor.getSamplingRate()).append(DELIMITER);
 
         headerBuilder.append("timestamp").append(SEPARATOR);
@@ -103,6 +103,8 @@ public class SensorDataLogger {
         } else {
             throw new SensorException(SensorException.SensorExceptionType.permissionsMissing);
         }
+
+        Log.d(TAG, "Logger successfully created!");
 
     }
 
@@ -182,6 +184,8 @@ public class SensorDataLogger {
                 mFileCreated = false;
             }
         }
+
+        Log.d(TAG, "File successfully created!");
     }
 
     private void prepareWriter() {
@@ -237,19 +241,6 @@ public class SensorDataLogger {
             Log.e(TAG, "Storage not writable!");
         }
     }
-        /*public void writeData(HoopDataFrame data) {
-            if (isWritable()) {
-                try {
-                    String line = (data.getTimestamp() + SEPARATOR) +
-                            (data.getAccelX() + SEPARATOR + data.getAccelY() + SEPARATOR + data.getAccelZ() + SEPARATOR) +
-                            (data.getGyroX() + SEPARATOR + data.getGyroY() + SEPARATOR + data.getGyroZ()) + DELIMITER;
-                    //Log.d(TAG, line);
-                    mBufferedWriter.write(line);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }*/
 
     /**
      * Closes file after data logging has been completed
