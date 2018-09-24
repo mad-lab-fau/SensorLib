@@ -20,6 +20,7 @@ public class SensorException extends Exception {
         btNotSupported("Bluetooth not supported on this device."),
         bleNotSupported("Bluetooth LE not supported on this device."),
         btNotActivated("Bluetooth disabled."),
+        sensorNotResponding("Sensor not responding."),
         noSensorsSelected("No hardware sensors selected."),
         unknown("");
 
