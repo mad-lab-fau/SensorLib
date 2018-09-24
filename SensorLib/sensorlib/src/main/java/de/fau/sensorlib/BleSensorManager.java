@@ -259,21 +259,22 @@ public class BleSensorManager {
      * 0 if the permission does not need to be requested, or PERMISSIONS_MISSING if the permission should not be requested, but is missing.
      */
     public static int checkPermissions(Activity activity, String[] permissions, boolean requestPermissions, int requestCode) {
+        boolean granted = true;
         for (String permission : permissions) {
-            boolean granted = (ContextCompat.checkSelfPermission(activity, permission)
-                    == PackageManager.PERMISSION_GRANTED);
+            granted &= (ContextCompat.checkSelfPermission(activity, permission) == PackageManager.PERMISSION_GRANTED);
             Log.d(TAG, permission + ": " + granted);
-
-            if (!granted) {
-                if (requestPermissions) {
-                    ActivityCompat.requestPermissions(activity, new String[]{permission}, requestCode);
-                    return requestCode;
-                } else {
-                    return PERMISSIONS_MISSING;
-                }
-            }
         }
-        return PERMISSIONS_GRANTED;
+
+        if (!granted) {
+            if (requestPermissions) {
+                ActivityCompat.requestPermissions(activity, permissions, requestCode);
+                return requestCode;
+            } else {
+                return PERMISSIONS_MISSING;
+            }
+        } else {
+            return PERMISSIONS_GRANTED;
+        }
     }
 
     /**
