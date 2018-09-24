@@ -410,7 +410,7 @@ public class GenericBleSensor extends AbstractSensor {
     /**
      * Enables on-change notifications for the given characteristic.
      *
-     * @param characteristic the characteristic for which to enalbe notifications.
+     * @param characteristic the characteristic for which to enable notifications.
      */
     private boolean enableGattNotifications(BluetoothGattCharacteristic characteristic) {
         mGatt.setCharacteristicNotification(characteristic, true);
