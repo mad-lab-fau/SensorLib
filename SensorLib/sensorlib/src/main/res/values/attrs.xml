@@ -18,6 +18,8 @@
 
     <declare-styleable name="SensorPlotter">
         <attr name="scrollable" format="boolean" />
+        <attr name="windowSize" format="integer" />
+        <attr name="refreshRate" format="integer" />
     </declare-styleable>
 
 </resources>

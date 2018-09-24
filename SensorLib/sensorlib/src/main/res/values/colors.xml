@@ -35,6 +35,10 @@
     <color name="gyro_y">#00BCD4</color>
     <color name="gyro_z">#FFC107</color>
 
+    <color name="mag_x">#009688</color>
+    <color name="mag_y">#CDDC39</color>
+    <color name="mag_z">#FF9800</color>
+
     <color name="ecg_1">#F44336</color>
     <color name="ecg_2">#B71C1C</color>
 
@@ -42,6 +46,13 @@
     <color name="ppg_2">#880E4F</color>
 
     <color name="baro">#3F51B5</color>
+    <color name="light">#FFEB3B</color>
+    <color name="temp">#E91E63</color>
+    <color name="humidity">#009688</color>
+
+    <color name="roll">#00BCD4</color>
+    <color name="pitch">#8BC34A</color>
+    <color name="yaw">#FFC107</color>
 
     <color name="press_1">#9E9E9E</color>
     <color name="press_2">#607D8B</color>
