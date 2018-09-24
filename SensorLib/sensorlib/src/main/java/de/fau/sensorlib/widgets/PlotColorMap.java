@@ -16,10 +16,15 @@ public class PlotColorMap {
     static {
         sColorMap.put(HardwareSensor.ACCELEROMETER, new int[]{R.color.accel_x, R.color.accel_y, R.color.accel_z});
         sColorMap.put(HardwareSensor.GYROSCOPE, new int[]{R.color.gyro_x, R.color.gyro_y, R.color.gyro_z});
+        sColorMap.put(HardwareSensor.MAGNETOMETER, new int[]{R.color.mag_x, R.color.mag_y, R.color.mag_z});
+        sColorMap.put(HardwareSensor.ORIENTATION, new int[]{R.color.roll, R.color.pitch, R.color.yaw});
         sColorMap.put(HardwareSensor.ECG, new int[]{R.color.ecg_1, R.color.ecg_2});
         sColorMap.put(HardwareSensor.PPG, new int[]{R.color.ppg_1, R.color.ppg_2});
         sColorMap.put(HardwareSensor.FSR, new int[]{R.color.press_1, R.color.press_2, R.color.press_3});
         sColorMap.put(HardwareSensor.BAROMETER, new int[]{R.color.baro});
+        sColorMap.put(HardwareSensor.LIGHT, new int[]{R.color.light});
+        sColorMap.put(HardwareSensor.HUMIDITY, new int[]{R.color.humidity});
+        sColorMap.put(HardwareSensor.TEMPERATURE, new int[]{R.color.temp});
     }
 
 
