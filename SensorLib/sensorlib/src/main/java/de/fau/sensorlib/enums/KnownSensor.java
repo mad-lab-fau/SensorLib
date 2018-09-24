@@ -20,15 +20,16 @@ public enum KnownSensor {
     // =============================================================================================
     // = List of all implemented sensors in the sensor lib
     // =============================================================================================
-    INTERNAL("<Internal>", new String[]{"Internal"},
+    INTERNAL("<Internal Sensor>", new String[]{"Internal"},
             EnumSet.of(
                     HardwareSensor.ACCELEROMETER,
                     HardwareSensor.GYROSCOPE,
                     HardwareSensor.MAGNETOMETER,
                     HardwareSensor.ORIENTATION,
                     HardwareSensor.LIGHT,
-                    HardwareSensor.PRESSURE,
-                    HardwareSensor.TEMPERATURE
+                    HardwareSensor.BAROMETER,
+                    HardwareSensor.TEMPERATURE,
+                    HardwareSensor.HUMIDITY
             ), true),
 
     GENERIC_BLE("Generic BLE Sensor", new String[]{"BLE", "Polar", "miCoach"},
@@ -144,7 +145,7 @@ public enum KnownSensor {
                     HardwareSensor.FSR
             ), true),
 
-    NILSPOD_PPG("NilsPod_PPG", new String[]{"NRF52"},
+    NILSPOD_PPG("NilsPod_PPG", new String[]{"NilsPod_PPG"},
             EnumSet.of(
                     HardwareSensor.ACCELEROMETER,
                     HardwareSensor.GYROSCOPE,
