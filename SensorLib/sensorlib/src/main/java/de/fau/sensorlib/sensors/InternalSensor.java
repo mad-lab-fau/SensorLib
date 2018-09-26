@@ -57,7 +57,7 @@ public class InternalSensor extends AbstractSensor implements SensorEventListene
     /**
      * Data logger
      */
-    protected SensorDataLogger mDataLogger;
+    protected ArrayList<SensorDataLogger> mDataLogger = new ArrayList<>();
 
     private ArrayList<Sensor> mSelectedSensors = new ArrayList<>();
     private ArrayList<Integer> mSensorCounter = new ArrayList<>();
@@ -582,6 +582,7 @@ public class InternalSensor extends AbstractSensor implements SensorEventListene
             setSamplingRate(100);
         }
 
+        mDataLogger = new ArrayList<>();
         mSamplingPeriodUs = 1000000 / (int) getSamplingRate();
         mSensorManager = (SensorManager) super.mContext.getSystemService(Context.SENSOR_SERVICE);
 
@@ -589,7 +590,7 @@ public class InternalSensor extends AbstractSensor implements SensorEventListene
             throw new SensorException(SensorException.SensorExceptionType.sensorNotResponding);
         }
 
-        for (HardwareSensor hwSensor : mSelectedHwSensors) {
+        for (HardwareSensor hwSensor : getSelectedSensors()) {
             int sensorType = -1;
 
             switch (hwSensor) {
@@ -597,11 +598,13 @@ public class InternalSensor extends AbstractSensor implements SensorEventListene
                     sensorType = Sensor.TYPE_ACCELEROMETER;
                     break;
                 case ORIENTATION:
-                    sensorType = Sensor.TYPE_GRAVITY;
-                    Sensor sensorMag = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+                    sensorType = Sensor.TYPE_ROTATION_VECTOR;
+                    //Sensor sensorMag = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
                     // add magnetometer here (not after switch-case-statement),
                     // because for orientation we need input from two sensors
-                    mSelectedSensors.add(sensorMag);
+                    /*if (!mSelectedSensors.contains(sensorMag)) {
+                        mSelectedSensors.add(sensorMag);
+                    }*/
                     break;
                 case GYROSCOPE:
                     sensorType = Sensor.TYPE_GYROSCOPE;
@@ -632,6 +635,10 @@ public class InternalSensor extends AbstractSensor implements SensorEventListene
                 }
             }
         }
+
+        Log.e(TAG, mSelectedHwSensors.toString());
+        Log.e(TAG, mSelectedSensors.toString());
+
         mSensorCounter = new ArrayList<>();
         for (int i = 0; i < mSelectedSensors.size(); i++) {
             mSensorCounter.add(0);
@@ -653,8 +660,9 @@ public class InternalSensor extends AbstractSensor implements SensorEventListene
     public void startStreaming() {
         try {
             if (mLoggingEnabled) {
-                Log.e(TAG, "create logger");
-                mDataLogger = new SensorDataLogger(this, mContext);
+                for (HardwareSensor hwSensor : getSelectedSensors()) {
+                    mDataLogger.add(new SensorDataLogger(this, hwSensor, mContext));
+                }
             }
         } catch (SensorException e) {
             switch (e.getExceptionType()) {
@@ -674,13 +682,11 @@ public class InternalSensor extends AbstractSensor implements SensorEventListene
     @Override
     public void stopStreaming() {
         mSensorManager.unregisterListener(this);
-        if (mDataLogger != null) {
-            mDataLogger.completeLogger();
+        for (SensorDataLogger logger : mDataLogger) {
+            logger.completeLogger();
         }
         sendStopStreaming();
     }
-
-    private float[] valuesMagnetic = new float[3];
 
     @Override
     public void onSensorChanged(SensorEvent event) {
@@ -693,19 +699,15 @@ public class InternalSensor extends AbstractSensor implements SensorEventListene
             case Sensor.TYPE_GYROSCOPE:
                 df = new InternalGyroDataFrame(this, localCounter, event.timestamp, new double[]{event.values[0], event.values[1], event.values[2]});
                 break;
-            case Sensor.TYPE_GRAVITY:
-                float[] I = new float[9];
+            case Sensor.TYPE_MAGNETIC_FIELD:
+                df = new InternalMagDataFrame(this, localCounter, event.timestamp, new double[]{event.values[0], event.values[1], event.values[2]});
+                break;
+            case Sensor.TYPE_ROTATION_VECTOR:
                 float[] R = new float[9];
-                SensorManager.getRotationMatrix(R, I, event.values, valuesMagnetic);
+                SensorManager.getRotationMatrixFromVector(R, event.values);
                 float[] orientation = new float[3];
                 SensorManager.getOrientation(R, orientation);
                 df = new InternalOrientationDataFrame(this, localCounter, event.timestamp, Math.toDegrees(orientation[0]), Math.toDegrees(orientation[1]), Math.toDegrees(orientation[2]));
-                break;
-            case Sensor.TYPE_MAGNETIC_FIELD:
-                valuesMagnetic[0] = event.values[0];
-                valuesMagnetic[1] = event.values[1];
-                valuesMagnetic[2] = event.values[2];
-                df = new InternalMagDataFrame(this, localCounter, event.timestamp, new double[]{event.values[0], event.values[1], event.values[2]});
                 break;
             case Sensor.TYPE_LIGHT:
                 df = new InternalLightDataFrame(this, localCounter, event.timestamp, event.values[0]);
@@ -726,7 +728,7 @@ public class InternalSensor extends AbstractSensor implements SensorEventListene
 
         sendNewData(df);
         if (mLoggingEnabled) {
-            mDataLogger.writeData(df);
+            mDataLogger.get(mSelectedSensors.indexOf(event.sensor)).writeData(df);
         }
         mSensorCounter.set(mSelectedSensors.indexOf(event.sensor), ++localCounter);
     }
