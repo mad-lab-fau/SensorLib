@@ -20,6 +20,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import de.fau.sensorlib.dataframe.RealTimeTimestampDataFrame;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
 import de.fau.sensorlib.sensors.AbstractSensor;
@@ -105,7 +106,52 @@ public class SensorDataLogger {
         }
 
         Log.d(TAG, "Logger successfully created!");
+    }
 
+
+    /**
+     * Creates a new data logger instance
+     */
+    public SensorDataLogger(AbstractSensor sensor, HardwareSensor hwSensor, Context context) throws SensorException {
+        mContext = context;
+        String currTime = new SimpleDateFormat("yyyyMMdd_HHmm", Locale.getDefault()).format(new Date());
+        // Filename consists of sensor device name and start time of data logging
+        mFilename = sensor.getDeviceName() + "_" + hwSensor.getShortDescription() + "_" + currTime + ".csv";
+
+        StringBuilder headerBuilder = new StringBuilder();
+        headerBuilder.append("samplingrate" + SEPARATOR).append(sensor.getSamplingRate()).append(DELIMITER);
+
+        headerBuilder.append("timestamp").append(SEPARATOR);
+
+        List<String> mColumnList = new ArrayList<>();
+        mMethodList = new ArrayList<>();
+
+        try {
+            String[] cols = (String[]) hwSensor.getDataFrameClass().getDeclaredField("COLUMNS").get("null");
+            mColumnList.addAll(Arrays.asList(cols));
+            mMethodList.addAll(Arrays.asList(hwSensor.getDataFrameClass().getDeclaredMethods()));
+        } catch (Exception ignored) {
+        }
+
+        for (int i = 0; i < mColumnList.size(); i++) {
+            headerBuilder.append(mColumnList.get(i));
+            if (i != mColumnList.size() - 1) {
+                headerBuilder.append(SEPARATOR);
+            }
+        }
+        headerBuilder.append(DELIMITER);
+
+        mHeader = headerBuilder.toString();
+        Log.d(TAG, mHeader);
+
+        if (checkPermissions()) {
+            createFile();
+            prepareWriter();
+        } else {
+            throw new SensorException(SensorException.SensorExceptionType.permissionsMissing);
+        }
+
+        Log.d(TAG, "Logger successfully created!");
     }
 
     /**
@@ -213,7 +259,11 @@ public class SensorDataLogger {
         StringBuilder sb = new StringBuilder();
         if (isWritable()) {
             // write timestamp
-            sb.append(data.getTimestamp()).append(SEPARATOR);
+            if (data instanceof RealTimeTimestampDataFrame) {
+                sb.append(((RealTimeTimestampDataFrame) data).getRealTimeTimestamp()).append(SEPARATOR);
+            } else {
+                sb.append(data.getTimestamp()).append(SEPARATOR);
+            }
             // write sensor data
             for (int i = 0; i < mMethodList.size(); i++) {
                 try {
