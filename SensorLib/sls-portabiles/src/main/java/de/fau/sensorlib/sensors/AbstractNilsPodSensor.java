@@ -18,8 +18,7 @@ import de.fau.sensorlib.dataframe.AccelDataFrame;
 import de.fau.sensorlib.dataframe.GyroDataFrame;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
 
-public abstract class AbstractNilsPodSensor extends GenericBleSensor implements Loggable {
-
+public abstract class AbstractNilsPodSensor extends GenericBleSensor implements Loggable, Resettable {
 
     /**
      * UUID for Data Streaming Service of NilsPod sensor
@@ -275,7 +274,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         mLoggingEnabled = false;
     }
 
-
+    @Override
     public boolean reset() {
         if (!send(NilsPodSensorCommand.RESET)) {
             Log.e(TAG, "resetting failed!");
