@@ -61,6 +61,8 @@ public class BatteryBar extends RecyclerView implements SensorEventListener {
                     mAdapter.addSensor(sensor);
                 }
                 break;
+            case CONNECTION_LOST:
+                // fall through
             case DISCONNECTED:
                 // TODO clear or grey?
                 mAdapter.clear();
