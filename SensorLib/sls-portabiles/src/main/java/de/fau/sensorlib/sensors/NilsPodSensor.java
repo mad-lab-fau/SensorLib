@@ -71,7 +71,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor {
             offset += 2;
 
             // extract packet counter (only 15 bit, therefore getIntValue() method not applicable)
-            localCounter = (values[offset + 1] & 0xFF) | ((values[offset] & 0x7F) << 8);
+            localCounter = (values[mPacketSize - 1] & 0xFF) | ((values[mPacketSize - 2] & 0x7F) << 8);
 
             // check if packets have been lost
             if (((localCounter - lastCounter) % (2 << 14)) > 1) {

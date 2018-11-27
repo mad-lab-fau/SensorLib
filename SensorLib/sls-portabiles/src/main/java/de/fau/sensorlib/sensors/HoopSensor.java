@@ -11,6 +11,8 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.content.Context;
 import android.util.Log;
 
+import java.util.Arrays;
+
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorInfo;
 
@@ -40,6 +42,8 @@ public class HoopSensor extends AbstractNilsPodSensor {
     protected void extractSensorData(BluetoothGattCharacteristic characteristic) {
         byte[] values = characteristic.getValue();
 
+        Log.d(TAG, Arrays.toString(values));
+
         // one data packet always has size mPacketSize
         if (values.length % mPacketSize != 0) {
             Log.e(TAG, "Wrong BLE Packet Size!");
@@ -65,7 +69,7 @@ public class HoopSensor extends AbstractNilsPodSensor {
             }
 
             // extract packet counter (only 15 bit, therefore getIntValue() method not applicable)
-            localCounter = (values[offset + 1] & 0xFF) | ((values[offset] & 0x7F) << 8);
+            localCounter = (values[mPacketSize - 1] & 0xFF) | ((values[mPacketSize - 2] & 0x7F) << 8);
 
             // check if packets have been lost
             if (((localCounter - lastCounter) % (2 << 14)) > 1) {
@@ -78,6 +82,7 @@ public class HoopSensor extends AbstractNilsPodSensor {
 
             HoopDataFrame df = new HoopDataFrame(this, globalCounter * (2 << 14) + localCounter, accel, gyro);
             // send new data to the SensorDataProcessor
+            Log.d(TAG, df.toString());
             sendNewData(df);
             lastCounter = localCounter;
             if (mLoggingEnabled) {
