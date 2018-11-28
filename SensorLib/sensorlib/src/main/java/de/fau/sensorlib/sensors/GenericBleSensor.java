@@ -144,12 +144,18 @@ public class GenericBleSensor extends AbstractSensor {
     /**
      * Since BLE characteristics should be read sequentially, this thread-safe queue stores all the characteristic-read-requests.
      */
-    private ConcurrentLinkedQueue<BluetoothGattCharacteristic> mCharacteristicsReadRequests;
+    protected ConcurrentLinkedQueue<BluetoothGattCharacteristic> mCharacteristicsReadRequests;
 
     /**
      * Since BLE descriptors should be written sequentially, this thread-safe queue stores all the descriptor-write-requests.
      */
     private ConcurrentLinkedQueue<BluetoothGattDescriptor> mDescriptorWriteRequests;
+
+    /**
+     * Since BLE characteristics should be written sequentially, this thread-safe queue stores all the characteristic-write-requests.
+     */
+    private ConcurrentLinkedQueue<BluetoothGattCharacteristic> mCharacteristicsWriteRequests;
+
 
     private ConcurrentLinkedQueue<BluetoothGattCharacteristic> mNotificationsList;
 
@@ -214,7 +220,7 @@ public class GenericBleSensor extends AbstractSensor {
             onNewCharacteristicValue(characteristic, false);
 
             // send connected message as soon as all read requests have been completed
-            if (mCharacteristicsReadRequests.isEmpty()) {
+            if (!isConnected() && mCharacteristicsReadRequests.isEmpty()) {
                 sendConnected();
                 return;
             }
@@ -231,7 +237,7 @@ public class GenericBleSensor extends AbstractSensor {
                 }
                 // send connected message if queue is empty and there is no more characteristic to be read
                 // otherwise send connected message when last characteristic has been read
-                if (mCharacteristicsReadRequests.isEmpty() && !read) {
+                if (!isConnected() && mCharacteristicsReadRequests.isEmpty() && !read) {
                     sendConnected();
                     break;
                 }
@@ -243,7 +249,26 @@ public class GenericBleSensor extends AbstractSensor {
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             super.onCharacteristicWrite(gatt, characteristic, status);
-            Log.d(TAG, "onCharacteristicWrite: " + BleGattAttributes.lookupCharacteristic(characteristic.getUuid()) + " :: " + Arrays.toString(characteristic.getValue()) + " - success: " + (status == BluetoothGatt.GATT_SUCCESS));
+            // Peek at the request queue and check if this was our request (which it always should be), then remove it from the queue.
+            BluetoothGattCharacteristic qc = mCharacteristicsWriteRequests.peek();
+            if (qc != null && qc.equals(characteristic)) {
+                mCharacteristicsWriteRequests.poll();
+            }
+
+            onNewCharacteristicWrite(characteristic, status);
+
+            // Poll the request queue until it is empty or we find the next writable characteristic. Unwriteable characteristics are removed and ignored.
+            boolean ret = false;
+            while (!ret) {
+                boolean write = false;
+                qc = mCharacteristicsWriteRequests.poll();
+
+                if (qc != null) {
+                    write = mGatt.writeCharacteristic(qc);
+                }
+
+                ret = (qc == null) || write;
+            }
         }
 
         @Override
@@ -376,6 +401,7 @@ public class GenericBleSensor extends AbstractSensor {
 
         mWasDiscovered = true;
         mCharacteristicsReadRequests = new ConcurrentLinkedQueue<>();
+        mCharacteristicsWriteRequests = new ConcurrentLinkedQueue<>();
         mDescriptorWriteRequests = new ConcurrentLinkedQueue<>();
         mNotificationsList = new ConcurrentLinkedQueue<>();
         mServiceList = new ArrayList<>();
@@ -474,16 +500,32 @@ public class GenericBleSensor extends AbstractSensor {
         String name = BleGattAttributes.lookupCharacteristic(characteristic.getUuid());
 
         // add characteristic to read-requests
-        mCharacteristicsReadRequests.add(characteristic);
-        if (mCharacteristicsReadRequests.size() == 1) {
-            mGatt.readCharacteristic(characteristic);
-        }
+        readCharacteristic(characteristic);
 
         if (shouldEnableNotification(characteristic)) {
             mNotificationsList.add(characteristic);
         }
 
         Log.d(TAG, mBtDevice.getName() + ">>>>> Characteristic discovered: " + name + " [ " + Arrays.toString(characteristic.getValue()) + " ]");
+    }
+
+
+    protected void readCharacteristic(BluetoothGattCharacteristic c) {
+        mCharacteristicsReadRequests.add(c);
+        if (mCharacteristicsReadRequests.size() == 1) {
+            mGatt.readCharacteristic(c);
+        }
+    }
+
+    protected boolean writeCharacteristic(BluetoothGattCharacteristic c, byte[] value) {
+        c.setValue(value);
+        c.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
+        mCharacteristicsWriteRequests.add(c);
+        if (mCharacteristicsWriteRequests.size() == 1) {
+            return mGatt.writeCharacteristic(c);
+        }
+
+        return true;
     }
 
     /**
@@ -494,7 +536,6 @@ public class GenericBleSensor extends AbstractSensor {
      * @return true if the value was processed, false otherwise.
      */
     protected boolean onNewCharacteristicValue(BluetoothGattCharacteristic characteristic, boolean isChange) {
-
         // First we check conditions that are regularly encountered (whenever values change)
         if (BleGattAttributes.BATTERY_LEVEL.equals(characteristic.getUuid())) {
             mBatteryLevel = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0);
@@ -530,6 +571,10 @@ public class GenericBleSensor extends AbstractSensor {
             return false;
         }
         return true;
+    }
+
+    protected void onNewCharacteristicWrite(BluetoothGattCharacteristic characteristic, int status) {
+        Log.d(TAG, "onCharacteristicWrite: " + BleGattAttributes.lookupCharacteristic(characteristic.getUuid()) + " :: " + Arrays.toString(characteristic.getValue()) + " - success: " + (status == BluetoothGatt.GATT_SUCCESS));
     }
 
     @Override
