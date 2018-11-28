@@ -16,6 +16,7 @@ import java.util.Arrays;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.InsolePressureDataFrame;
+import de.fau.sensorlib.enums.HardwareSensor;
 
 
 /**
@@ -54,28 +55,36 @@ public class InsoleSensor extends NilsPodSensor {
             int offset = i;
             double[] gyro = new double[3];
             double[] accel = new double[3];
-            double baro;
+            double baro = 0;
             double[] pressure = new double[3];
             int localCounter;
 
-            // extract gyroscope data
-            for (int j = 0; j < 3; j++) {
-                gyro[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
-                offset += 2;
+            if (isSensorEnabled(HardwareSensor.GYROSCOPE)) {
+                // extract gyroscope data
+                for (int j = 0; j < 3; j++) {
+                    gyro[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
+                    offset += 2;
+                }
             }
             // extract accelerometer data
-            for (int j = 0; j < 3; j++) {
-                accel[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
+            if (isSensorEnabled(HardwareSensor.ACCELEROMETER)) {
+                for (int j = 0; j < 3; j++) {
+                    accel[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
+                    offset += 2;
+                }
+            }
+
+            if (isSensorEnabled(HardwareSensor.BAROMETER)) {
+                baro = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
+                baro = (baro + 101325.0) / 100.0;
                 offset += 2;
             }
 
-            baro = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
-            baro = (baro + 101325.0) / 100.0;
-            offset += 2;
-
-            for (int j = 0; j < 3; j++) {
-                pressure[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset);
-                offset++;
+            if (isSensorEnabled(HardwareSensor.FSR)) {
+                for (int j = 0; j < 3; j++) {
+                    pressure[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset);
+                    offset++;
+                }
             }
 
             // extract packet counter (only 15 bit, therefore getIntValue() method not applicable)

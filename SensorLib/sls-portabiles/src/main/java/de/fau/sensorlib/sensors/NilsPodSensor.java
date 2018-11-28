@@ -14,6 +14,7 @@ import android.util.Log;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.BarometricPressureDataFrame;
+import de.fau.sensorlib.enums.HardwareSensor;
 
 
 /**
@@ -52,23 +53,28 @@ public class NilsPodSensor extends AbstractNilsPodSensor {
             int offset = i;
             double[] gyro = new double[3];
             double[] accel = new double[3];
-            double baro;
+            double baro = 0;
             int localCounter;
 
             // extract gyroscope data
-            for (int j = 0; j < 3; j++) {
-                gyro[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
-                offset += 2;
+            if (isSensorEnabled(HardwareSensor.GYROSCOPE)) {
+                for (int j = 0; j < 3; j++) {
+                    gyro[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
+                    offset += 2;
+                }
             }
             // extract accelerometer data
-            for (int j = 0; j < 3; j++) {
-                accel[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
-                offset += 2;
+            if (isSensorEnabled(HardwareSensor.ACCELEROMETER)) {
+                for (int j = 0; j < 3; j++) {
+                    accel[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
+                    offset += 2;
+                }
             }
 
-            baro = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
-            baro = (baro + 101325.0) / 100.0;
-            offset += 2;
+            if (isSensorEnabled(HardwareSensor.BAROMETER)) {
+                baro = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
+                baro = (baro + 101325.0) / 100.0;
+            }
 
             // extract packet counter (only 15 bit, therefore getIntValue() method not applicable)
             localCounter = (values[mPacketSize - 1] & 0xFF) | ((values[mPacketSize - 2] & 0x7F) << 8);

@@ -7,6 +7,8 @@ import android.util.Log;
 import android.widget.Toast;
 
 import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.UUID;
 
 import de.fau.sensorlib.BleGattAttributes;
@@ -17,8 +19,11 @@ import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.AccelDataFrame;
 import de.fau.sensorlib.dataframe.GyroDataFrame;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
+import de.fau.sensorlib.enums.HardwareSensor;
 
 public abstract class AbstractNilsPodSensor extends GenericBleSensor implements Loggable, Resettable {
+
+    public static final String TAG = AbstractNilsPodSensor.class.getSimpleName();
 
     /**
      * UUID for Data Streaming Service of NilsPod sensor
@@ -67,6 +72,11 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
      */
     protected int mPacketSize = 14;
 
+    /**
+     * Byte containing sensor enabled flags
+     */
+    protected int mEnabledSensors = 0;
+
 
     /**
      * Local counter for incoming packages
@@ -89,6 +99,8 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     private BluetoothGattService mStreamingService;
 
     private NilsPodSensorPosition mSensorPosition;
+
+    private HashMap<HardwareSensor, Boolean> mEnabledSensorsMap = new HashMap<>();
 
     /**
      * Sensor commands for communication with NilsPod Sensor. Used with the Sensor Config Characteristic
@@ -259,9 +271,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
             return false;
         }
 
-        characteristic.setValue(data);
-        characteristic.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
-        return mGatt.writeCharacteristic(characteristic);
+        return writeCharacteristic(characteristic, data);
     }
 
     @Override
@@ -324,6 +334,15 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         }
     }
 
+    @Override
+    protected void onNewCharacteristicWrite(BluetoothGattCharacteristic characteristic, int status) {
+        super.onNewCharacteristicWrite(characteristic, status);
+        if (NILS_POD_SENSOR_CONFIG.equals(characteristic.getUuid())) {
+            // sensor config was changed from app side => read characteristic to update
+            readCharacteristic(mGatt.getService(NILS_POD_CONFIGURATION_SERVICE).getCharacteristic(NILS_POD_SENSOR_CONFIG));
+        }
+    }
+
     /**
      * Extracts sensor data into data frames from the given characteristic.
      *
@@ -335,7 +354,6 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     protected void readSystemState(BluetoothGattCharacteristic characteristic) {
         int offset = 0;
         byte[] values = characteristic.getValue();
-        Log.e(TAG, "state: " + Arrays.toString(values));
         boolean connectionState = values[offset++] == 1;
         int operationState = values[offset++];
         boolean wirelessPowerState = (values[offset] & 0x0F) != 0;
@@ -376,8 +394,14 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         int sensors = values[offset++];
         int sampleSize = values[offset];
         Log.d(TAG, ">>>> Sensor Config:");
-        Log.d(TAG, "\tSensors: " + sensors);
+        mEnabledSensorsMap.put(HardwareSensor.ACCELEROMETER, ((sensors & 0x01) != 0));
+        mEnabledSensorsMap.put(HardwareSensor.GYROSCOPE, ((sensors & 0x01) != 0));
+        mEnabledSensorsMap.put(HardwareSensor.FSR, ((sensors & 0x02) != 0));
+        mEnabledSensorsMap.put(HardwareSensor.BAROMETER, ((sensors & 0x04) != 0));
+
+        Log.d(TAG, "\tSensors: IMU: " + isSensorEnabled(HardwareSensor.ACCELEROMETER) + ", Pressure: " + isSensorEnabled(HardwareSensor.FSR) + ", Barometer: " + isSensorEnabled(HardwareSensor.BAROMETER));
         Log.d(TAG, "\tSample Size: " + sampleSize);
+        mEnabledSensors = sensors;
         mPacketSize = sampleSize;
     }
 
@@ -385,6 +409,41 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         mSensorPosition = NilsPodSensorPosition.values()[characteristic.getValue()[0]];
         Log.d(TAG, ">>>> Meta Data:");
         Log.d(TAG, "\tSensor Position: " + mSensorPosition);
+    }
+
+    public boolean isSensorEnabled(HardwareSensor sensor) {
+        return (mEnabledSensorsMap.get(sensor) != null) && mEnabledSensorsMap.get(sensor);
+    }
+
+
+    public boolean setSensorsEnabled(EnumSet<HardwareSensor> sensors, boolean enable) {
+        byte value = (byte) mEnabledSensors;
+
+        for (HardwareSensor sensor : sensors) {
+            int offset = 0;
+            switch (sensor) {
+                case FSR:
+                    offset = 1;
+                    break;
+                case BAROMETER:
+                    offset = 2;
+            }
+
+            if (enable) {
+                value = (byte) (value | (1 << offset));
+            } else {
+                value = (byte) (value & ~(1 << offset));
+            }
+        }
+
+
+        BluetoothGattCharacteristic configChara = mGatt.getService(NILS_POD_CONFIGURATION_SERVICE).getCharacteristic(NILS_POD_SENSOR_CONFIG);
+        return writeCharacteristic(configChara, new byte[]{value});
+    }
+
+    public void readSensorsEnabled() {
+        BluetoothGattCharacteristic configChara = mGatt.getService(NILS_POD_CONFIGURATION_SERVICE).getCharacteristic(NILS_POD_SENSOR_CONFIG);
+        readCharacteristic(configChara);
     }
 
     private double convertSamplingRate(byte value) {
