@@ -339,7 +339,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         super.onNewCharacteristicWrite(characteristic, status);
         if (NILS_POD_SENSOR_CONFIG.equals(characteristic.getUuid())) {
             // sensor config was changed from app side => read characteristic to update
-            readCharacteristic(mGatt.getService(NILS_POD_CONFIGURATION_SERVICE).getCharacteristic(NILS_POD_SENSOR_CONFIG));
+            readSensorsEnabled();
         }
     }
 
@@ -403,6 +403,10 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         Log.d(TAG, "\tSample Size: " + sampleSize);
         mEnabledSensors = sensors;
         mPacketSize = sampleSize;
+
+       /* if (!isSensorEnabled(HardwareSensor.BAROMETER)) {
+            setSensorsEnabled(EnumSet.of(HardwareSensor.BAROMETER), true);
+        }*/
     }
 
     protected void readSensorPosition(BluetoothGattCharacteristic characteristic) {

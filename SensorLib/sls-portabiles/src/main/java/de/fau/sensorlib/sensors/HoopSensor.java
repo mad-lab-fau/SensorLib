@@ -42,8 +42,6 @@ public class HoopSensor extends AbstractNilsPodSensor {
     protected void extractSensorData(BluetoothGattCharacteristic characteristic) {
         byte[] values = characteristic.getValue();
 
-        Log.d(TAG, Arrays.toString(values));
-
         // one data packet always has size mPacketSize
         if (values.length % mPacketSize != 0) {
             Log.e(TAG, "Wrong BLE Packet Size!");
@@ -82,7 +80,7 @@ public class HoopSensor extends AbstractNilsPodSensor {
 
             HoopDataFrame df = new HoopDataFrame(this, globalCounter * (2 << 14) + localCounter, accel, gyro);
             // send new data to the SensorDataProcessor
-            Log.d(TAG, df.toString());
+            //Log.d(TAG, df.toString());
             sendNewData(df);
             lastCounter = localCounter;
             if (mLoggingEnabled) {
