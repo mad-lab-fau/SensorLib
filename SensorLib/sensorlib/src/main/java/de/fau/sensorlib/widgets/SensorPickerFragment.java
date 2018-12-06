@@ -20,6 +20,8 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.RecyclerView.Adapter;
+import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -90,27 +92,7 @@ public class SensorPickerFragment extends DialogFragment implements View.OnClick
     }
 
 
-    private class SensorPickerRecyclerAdapter extends RecyclerView.Adapter<SensorPickerViewHolder> implements SensorPickerViewHolder.ItemClickListener {
-
-        @Override
-        public void onItemClick(View view, int position) {
-
-            SensorPickerViewHolder viewHolder = (SensorPickerViewHolder) mRecyclerView.findViewHolderForAdapterPosition(position);
-            viewHolder.mCheckBox.setChecked(!viewHolder.mCheckBox.isChecked());
-
-            Bundle bundle = mFoundSensors.get(position);
-            if (mSelectedSensors.contains(bundle)) {
-                viewHolder.mCheckBox.setChecked(false);
-                mSelectedSensors.remove(bundle);
-            } else {
-                viewHolder.mCheckBox.setChecked(true);
-                mSelectedSensors.add(bundle);
-            }
-
-            //mSensorFoundCallback.onKnownSensorFound(new SensorInfo(name, address, sensor));
-            //createSelectSensorDialog(sensor);
-            //SensorPickerFragment.this.dismiss();
-        }
+    private class SensorPickerRecyclerAdapter extends Adapter<SensorPickerViewHolder> implements SensorPickerViewHolder.ItemClickListener {
 
         SensorPickerRecyclerAdapter() {
             mFoundSensors = new ArrayList<>(0);
@@ -118,7 +100,8 @@ public class SensorPickerFragment extends DialogFragment implements View.OnClick
 
         @Override
         public SensorPickerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new SensorPickerViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_sensor_picker, parent, false), this);
+            View layout = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_sensor_picker, parent, false);
+            return new SensorPickerViewHolder(layout, this);
         }
 
         @Override
@@ -147,6 +130,26 @@ public class SensorPickerFragment extends DialogFragment implements View.OnClick
                     }
                 }
             });
+        }
+
+        @Override
+        public void onItemClick(View view, int position) {
+
+            SensorPickerViewHolder viewHolder = (SensorPickerViewHolder) mRecyclerView.findViewHolderForAdapterPosition(position);
+            viewHolder.mCheckBox.setChecked(!viewHolder.mCheckBox.isChecked());
+
+            Bundle bundle = mFoundSensors.get(position);
+            if (mSelectedSensors.contains(bundle)) {
+                viewHolder.mCheckBox.setChecked(false);
+                mSelectedSensors.remove(bundle);
+            } else {
+                viewHolder.mCheckBox.setChecked(true);
+                mSelectedSensors.add(bundle);
+            }
+
+            //mSensorFoundCallback.onKnownSensorFound(new SensorInfo(name, address, sensor));
+            //createSelectSensorDialog(sensor);
+            //SensorPickerFragment.this.dismiss();
         }
 
 
@@ -253,7 +256,7 @@ public class SensorPickerFragment extends DialogFragment implements View.OnClick
 //        builder.show();
 //    }
 
-    private static class SensorPickerViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    private static class SensorPickerViewHolder extends ViewHolder implements View.OnClickListener {
 
         private TextView mSensorNameTextView;
         private TextView mSensorInformationTextView;
