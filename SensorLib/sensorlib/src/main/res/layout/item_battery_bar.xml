@@ -18,6 +18,8 @@
             android:id="@+id/tv_sensor_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_toStartOf="@id/tv_battery_level"
             android:layout_centerVertical="true"
             android:textSize="12sp" />
 

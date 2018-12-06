@@ -10,6 +10,7 @@ package de.fau.sensorlib.widgets;
 import android.content.Context;
 import android.graphics.Rect;
 import android.support.annotation.NonNull;
+import android.support.v4.widget.TextViewCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
@@ -64,7 +65,6 @@ public class BatteryBar extends RecyclerView implements SensorEventListener {
             case CONNECTION_LOST:
                 // fall through
             case DISCONNECTED:
-                // TODO clear or grey?
                 mAdapter.clear();
                 break;
         }
@@ -142,6 +142,7 @@ public class BatteryBar extends RecyclerView implements SensorEventListener {
 
         public void setSensorName(String sensorName) {
             mSensorNameTextView.setText(sensorName);
+            TextViewCompat.setAutoSizeTextTypeWithDefaults(mSensorNameTextView, TextViewCompat.AUTO_SIZE_TEXT_TYPE_UNIFORM);
         }
 
         public void updateBatteryLevel(int batteryLevel) {
