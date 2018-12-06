@@ -24,6 +24,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -31,6 +33,7 @@ import java.util.UUID;
 
 import de.fau.sensorlib.SensorException.SensorExceptionType;
 import de.fau.sensorlib.enums.KnownSensor;
+import de.fau.sensorlib.sensors.AbstractSensor;
 import de.fau.sensorlib.sensors.InternalSensor;
 
 
@@ -80,7 +83,7 @@ public class BleSensorManager {
         ArrayList<SensorInfo> sensorList = new ArrayList<>();
 
         // Add internal sensor
-        sensorList.add(InternalSensor.ANDROID_DEVICE_SENSORS);
+        sensorList.add(new SensorInfo(InternalSensor.INTERNAL_SENSOR_NAME, InternalSensor.INTERNAL_SENSOR_ADDRESS));
 
         // Search for Bluetooth sensors
         BluetoothAdapter bta = BluetoothAdapter.getDefaultAdapter();

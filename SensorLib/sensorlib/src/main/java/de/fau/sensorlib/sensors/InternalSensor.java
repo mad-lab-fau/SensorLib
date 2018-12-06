@@ -37,7 +37,6 @@ import de.fau.sensorlib.dataframe.RealTimeTimestampDataFrame;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
 import de.fau.sensorlib.dataframe.TemperatureDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
-import de.fau.sensorlib.enums.KnownSensor;
 import de.fau.sensorlib.enums.SensorMessage;
 
 /**
@@ -45,7 +44,8 @@ import de.fau.sensorlib.enums.SensorMessage;
  */
 public class InternalSensor extends AbstractSensor implements SensorEventListener, Loggable {
 
-    public static final SensorInfo ANDROID_DEVICE_SENSORS = new SensorInfo("Internal", "n/a", KnownSensor.INTERNAL);
+    public static final String INTERNAL_SENSOR_NAME = "Internal";
+    public static final String INTERNAL_SENSOR_ADDRESS = "n/a";
 
     private SensorManager mSensorManager;
 
@@ -556,8 +556,8 @@ public class InternalSensor extends AbstractSensor implements SensorEventListene
      *
      * @param dataHandler method to provide unified data handling
      */
-    public InternalSensor(Context context, SensorDataProcessor dataHandler) {
-        super(context, ANDROID_DEVICE_SENSORS.getName(), ANDROID_DEVICE_SENSORS.getDeviceAddress(), dataHandler, 10);
+    public InternalSensor(Context context, SensorInfo info, SensorDataProcessor dataHandler) {
+        super(context, info.getName(), info.getDeviceAddress(), dataHandler, 10);
     }
 
     @Override
@@ -635,9 +635,6 @@ public class InternalSensor extends AbstractSensor implements SensorEventListene
                 }
             }
         }
-
-        Log.e(TAG, mSelectedHwSensors.toString());
-        Log.e(TAG, mSelectedSensors.toString());
 
         mSensorCounter = new ArrayList<>();
         for (int i = 0; i < mSelectedSensors.size(); i++) {

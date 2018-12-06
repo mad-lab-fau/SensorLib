@@ -403,9 +403,9 @@ public class SensorPickerFragment extends DialogFragment implements View.OnClick
             if ((mHwSensorFilter.isEmpty() && mSensorFilter.isEmpty()) || (KnownSensor.INTERNAL.getAvailableSensors().containsAll(mHwSensorFilter) && mSensorFilter.contains(KnownSensor.INTERNAL))) {
                 // Add internal sensor (can always be selected)
                 Bundle internalSensor = new Bundle();
-                internalSensor.putString(KEY_SENSOR_ADDRESS, InternalSensor.ANDROID_DEVICE_SENSORS.getDeviceAddress());
-                internalSensor.putString(KEY_SENSOR_NAME, InternalSensor.ANDROID_DEVICE_SENSORS.getName());
-                internalSensor.putSerializable(KEY_KNOWN_SENSOR, InternalSensor.ANDROID_DEVICE_SENSORS.getDeviceClass());
+                internalSensor.putString(KEY_SENSOR_NAME, InternalSensor.INTERNAL_SENSOR_NAME);
+                internalSensor.putString(KEY_SENSOR_ADDRESS, InternalSensor.INTERNAL_SENSOR_ADDRESS);
+                internalSensor.putSerializable(KEY_KNOWN_SENSOR, KnownSensor.INTERNAL);
                 internalSensor.putInt(KEY_SENSOR_RSSI, 0);
                 mAdapter.add(internalSensor);
             }
