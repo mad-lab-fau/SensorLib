@@ -18,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -80,7 +81,7 @@ public class BatteryBar extends RecyclerView implements SensorEventListener {
     }
 
 
-    private static class BatteryGridAdapter extends Adapter<BatteryViewHolder> {
+    private class BatteryGridAdapter extends Adapter<BatteryViewHolder> implements BatteryViewHolder.ItemClickListener {
 
         private Context mContext;
         private ArrayList<AbstractSensor> mAttachedSensors;
@@ -112,7 +113,7 @@ public class BatteryBar extends RecyclerView implements SensorEventListener {
         @Override
         public BatteryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View layout = LayoutInflater.from(mContext).inflate(R.layout.item_battery_bar, parent, false);
-            return new BatteryViewHolder(mContext, layout);
+            return new BatteryViewHolder(mContext, layout, this);
         }
 
         @Override
@@ -121,23 +122,33 @@ public class BatteryBar extends RecyclerView implements SensorEventListener {
             holder.updateBatteryLevel(mAttachedSensors.get(position).getBatteryLevel());
         }
 
+
+        @Override
+        public void onItemClick(View view, int position) {
+            BatteryViewHolder viewHolder = (BatteryViewHolder) findViewHolderForAdapterPosition(position);
+        }
+
         @Override
         public int getItemCount() {
             return mAttachedSensors.size();
         }
+
     }
 
-    private static class BatteryViewHolder extends ViewHolder {
+    private static class BatteryViewHolder extends ViewHolder implements View.OnClickListener {
 
         private Context mContext;
         private TextView mSensorNameTextView;
         private TextView mBatteryLevelTextView;
+        private ItemClickListener mItemClickListener;
 
-        private BatteryViewHolder(Context context, View itemView) {
+        private BatteryViewHolder(Context context, View itemView, ItemClickListener listener) {
             super(itemView);
             mContext = context;
             mSensorNameTextView = itemView.findViewById(R.id.tv_sensor_name);
             mBatteryLevelTextView = itemView.findViewById(R.id.tv_battery_level);
+            mItemClickListener = listener;
+            itemView.setOnClickListener(this);
         }
 
         public void setSensorName(String sensorName) {
@@ -147,6 +158,15 @@ public class BatteryBar extends RecyclerView implements SensorEventListener {
 
         public void updateBatteryLevel(int batteryLevel) {
             mBatteryLevelTextView.setText(mContext.getString(R.string.placeholder_battery_level, batteryLevel));
+        }
+
+        @Override
+        public void onClick(View v) {
+            mItemClickListener.onItemClick(v, getAdapterPosition());
+        }
+
+        interface ItemClickListener {
+            void onItemClick(View view, int position);
         }
     }
 
