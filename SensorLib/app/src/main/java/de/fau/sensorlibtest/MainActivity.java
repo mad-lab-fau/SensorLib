@@ -20,17 +20,17 @@ import com.androidplot.xy.XYPlot;
 
 import java.util.List;
 
-import de.fau.sensorlib.DsBleSensor;
-import de.fau.sensorlib.DsSensor;
-import de.fau.sensorlib.DsSensorManager;
-import de.fau.sensorlib.KnownSensor;
+import de.fau.sensorlib.BleSensorManager;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorFoundCallback;
 import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.AccelDataFrame;
 import de.fau.sensorlib.dataframe.AmbientDataFrame;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
-import de.fau.sensorlib.sensors.TEK;
+import de.fau.sensorlib.enums.HardwareSensor;
+import de.fau.sensorlib.enums.KnownSensor;
+import de.fau.sensorlib.sensors.GenericBleSensor;
+import de.fau.sensorlib.sensors.TekSensor;
 
 /**
  * A simple example application to demonstrate the use of the SensorLib.
@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "SensorLib::TestApp";
 
-    DsBleSensor mSensor;
+    GenericBleSensor mSensor;
 
     XYPlot mPlot;
     SimpleXYSeries mPlotData;
@@ -49,7 +49,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        DsSensorManager.checkBtLePermissions(this, true);
+        try
+        {
+            BleSensorManager.checkBtLePermissions(this, true);
+        } catch (Exception e)
+        {
+            // TODO Really handle exception
+            e.printStackTrace();
+        }
 
         mPlot = (XYPlot) findViewById(R.id.plotViewA);
         mPlotData = new SimpleXYSeries("Sensor Values");
@@ -75,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
                 mPlotData.addLast(null, adf.getLight());
             }
 
-            TEK.TekDataFrame df = (TEK.TekDataFrame) data;
+            TekSensor.TekDataFrame df = (TekSensor.TekDataFrame) data;
             Log.d(TAG, "DataFrame (" + df.getCounter() + "): " + df.toString());
 
             // redraw the Plots:
@@ -92,9 +99,9 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
 
         /*String tekMac = "52:4D:4B:5F:01:55";
-        mSensor = new TEK(this, tekMac, mDataHandler);
-        mSensor.useHardwareSensor(DsSensor.HardwareSensor.ACCELEROMETER);
-        mSensor.useHardwareSensor(DsSensor.HardwareSensor.LIGHT);
+        mSensor = new TekSensor(this, tekMac, mDataHandler);
+        mSensor.useHardwareSensor(HardwareSensor.ACCELEROMETER);
+        mSensor.useHardwareSensor(HardwareSensor.LIGHT);
         try {
             mSensor.connect();
             mSensor.startStreaming();
@@ -103,13 +110,13 @@ public class MainActivity extends AppCompatActivity {
         }*/
 
 
-        List<SensorInfo> list = DsSensorManager.getConnectableSensors();
+        List<SensorInfo> list = BleSensorManager.getConnectableSensors();
         for (SensorInfo s : list) {
             Log.d(TAG, "Sensor found: " + s.getName());
         }
 
         try {
-            DsSensorManager.searchBleDevices(this, new SensorFoundCallback() {
+            BleSensorManager.searchBleDevices(new SensorFoundCallback() {
                 public boolean onKnownSensorFound(SensorInfo sensor) {
                     Log.d(TAG, "BLE Sensor found: " + sensor.getName());
 
@@ -120,9 +127,9 @@ public class MainActivity extends AppCompatActivity {
 
                     } else if (sensor.getDeviceClass() == KnownSensor.TEK) {
                         // this is a TEK sensor, create and connect it.
-                        mSensor = new TEK(getThis(), sensor, mDataHandler);
-                        mSensor.useHardwareSensor(DsSensor.HardwareSensor.ACCELEROMETER);
-                        mSensor.useHardwareSensor(DsSensor.HardwareSensor.LIGHT);
+                        mSensor = new TekSensor(getThis(), sensor, mDataHandler);
+                        mSensor.useHardwareSensor(HardwareSensor.ACCELEROMETER);
+                        mSensor.useHardwareSensor(HardwareSensor.LIGHT);
                         try {
                             mSensor.connect();
                             mSensor.startStreaming();
