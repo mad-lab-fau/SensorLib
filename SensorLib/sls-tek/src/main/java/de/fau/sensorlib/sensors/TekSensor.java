@@ -206,7 +206,7 @@ public class TekSensor extends GenericBleSensor {
         }
 
         @Override
-        public double getPressure() {
+        public double getBarometricPressure() {
             return mPressure;
         }
 
