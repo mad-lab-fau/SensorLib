@@ -740,12 +740,12 @@ public class InternalSensor extends AbstractSensor implements SensorEventListene
 
 
     @Override
-    public void enableDataLogger() {
+    public void setLoggerEnabled() {
         mLoggingEnabled = true;
     }
 
     @Override
-    public void disableDataLogger() {
+    public void setLoggerDisabled() {
         mLoggingEnabled = false;
     }
 }

@@ -257,8 +257,12 @@ public class GenericBleSensor extends AbstractSensor {
 
             onNewCharacteristicWrite(characteristic, status);
 
+            if (mCharacteristicsWriteRequests.isEmpty()) {
+                return;
+            }
+
             // Poll the request queue until it is empty or we find the next writable characteristic. Unwriteable characteristics are removed and ignored.
-            boolean ret = false;
+            /*boolean ret = false;
             while (!ret) {
                 boolean write = false;
                 qc = mCharacteristicsWriteRequests.poll();
@@ -268,6 +272,18 @@ public class GenericBleSensor extends AbstractSensor {
                 }
 
                 ret = (qc == null) || write;
+            }*/
+
+            boolean ret = false;
+            while (!ret) {
+                qc = mCharacteristicsWriteRequests.peek();
+
+                if (qc == null) {
+                    mCharacteristicsWriteRequests.poll();
+                    ret = false;
+                } else {
+                    ret = mGatt.writeCharacteristic(qc);
+                }
             }
         }
 
@@ -295,11 +311,28 @@ public class GenericBleSensor extends AbstractSensor {
 
             Log.d(TAG, "onDescriptorWrite: " + BleGattAttributes.lookupDescriptor(descriptor.getUuid()) + " :: " + Arrays.toString(descriptor.getValue()));
 
-            // Poll the request queue until it is empty or we find the next writable descriptor. Unwritable descriptors are removed and ignored.
+            // All descriptors were written and removed from the queue
+            if (mDescriptorWriteRequests.isEmpty()) {
+                onAllDescriptorsWritten();
+                return;
+            }
+
+            /*boolean ret = false;
+            while (!ret) {
+                qd = mDescriptorWriteRequests.peek();
+                ret = qd == null || mGatt.writeDescriptor(qd);
+            }*/
+
+            // Peek at the request queue until it is empty or we find the next writable descriptor. Unwritable descriptors are removed and ignored.
             boolean ret = false;
             while (!ret) {
-                qd = mDescriptorWriteRequests.poll();
-                ret = qd == null || mGatt.writeDescriptor(qd);
+                qd = mDescriptorWriteRequests.peek();
+                if (qd == null) {
+                    mDescriptorWriteRequests.poll();
+                    ret = false;
+                } else {
+                    ret = mGatt.writeDescriptor(qd);
+                }
             }
         }
 
@@ -377,6 +410,7 @@ public class GenericBleSensor extends AbstractSensor {
         }
 
         for (BluetoothGattCharacteristic charac : mNotificationsList) {
+            Log.d(TAG, "list: " + mNotificationsList);
             enableGattNotifications(charac);
         }
         sendStartStreaming();
@@ -445,9 +479,10 @@ public class GenericBleSensor extends AbstractSensor {
         if (desc != null) {
             desc.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
             mDescriptorWriteRequests.add(desc);
-            if (mDescriptorWriteRequests.size() == 1) {
+            return mGatt.writeDescriptor(mDescriptorWriteRequests.peek());
+            /*if (mDescriptorWriteRequests.size() == 1) {
                 return mGatt.writeDescriptor(desc);
-            }
+            }*/
         }
         return false;
     }
@@ -464,9 +499,10 @@ public class GenericBleSensor extends AbstractSensor {
         if (desc != null) {
             desc.setValue(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
             mDescriptorWriteRequests.add(desc);
-            if (mDescriptorWriteRequests.size() == 1) {
+            return mGatt.writeDescriptor(mDescriptorWriteRequests.peek());
+            /*if (mDescriptorWriteRequests.size() == 1) {
                 return mGatt.writeDescriptor(desc);
-            }
+            }*/
         }
         return false;
     }
@@ -575,6 +611,10 @@ public class GenericBleSensor extends AbstractSensor {
 
     protected void onNewCharacteristicWrite(BluetoothGattCharacteristic characteristic, int status) {
         Log.d(TAG, "onCharacteristicWrite: " + BleGattAttributes.lookupCharacteristic(characteristic.getUuid()) + " :: " + Arrays.toString(characteristic.getValue()) + " - success: " + (status == BluetoothGatt.GATT_SUCCESS));
+    }
+
+    protected void onAllDescriptorsWritten() {
+        Log.d(TAG, "onnAllDescriptorsWritten");
     }
 
     @Override
