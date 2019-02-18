@@ -5,10 +5,10 @@ public interface Loggable {
     /**
      * Enables data logging for this sensor
      */
-    void enableDataLogger();
+    void setLoggerEnabled();
 
     /**
      * Disables data logging for this sensor
      */
-    void disableDataLogger();
+    void setLoggerDisabled();
 }
