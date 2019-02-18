@@ -6,6 +6,7 @@ import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -20,6 +21,7 @@ import de.fau.sensorlib.dataframe.AccelDataFrame;
 import de.fau.sensorlib.dataframe.GyroDataFrame;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
+import de.fau.sensorlib.sensors.configs.BaseConfigItem;
 
 public abstract class AbstractNilsPodSensor extends GenericBleSensor implements Loggable, Resettable {
 
@@ -101,6 +103,11 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     private NilsPodSensorPosition mSensorPosition;
 
     private HashMap<HardwareSensor, Boolean> mEnabledSensorsMap = new HashMap<>();
+
+    private HashMap<String, BaseConfigItem> mConfigMap = new HashMap<>();
+
+    public static final String KEY_SENSOR_ENABLE = "sensors_enable";
+
 
     /**
      * Sensor commands for communication with NilsPod Sensor. Used with the Sensor Config Characteristic
@@ -218,23 +225,20 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
     @Override
     public void startStreaming() {
+        // enable notifications to subscribe to characteristics (i.e. write descriptors)
+        // START_STREAMING command is sent to sensor as soon as all descriptors are written (in onAllDescriptorsWritten)
+        super.startStreaming();
+    }
+
+    @Override
+    protected void onAllDescriptorsWritten() {
+        super.onAllDescriptorsWritten();
         if (send(NilsPodSensorCommand.START_STREAMING)) {
-            super.startStreaming();
-            try {
-                if (mLoggingEnabled) {
-                    Log.e(TAG, "create logger");
-                    mDataLogger = new SensorDataLogger(this, mContext);
-                }
-            } catch (SensorException e) {
-                switch (e.getExceptionType()) {
-                    case permissionsMissing:
-                        Toast.makeText(mContext, "Permissions to write external storage needed!", Toast.LENGTH_SHORT).show();
-                        break;
-                }
-            }
+            enableLogger();
         } else {
             Log.e(TAG, "startStreaming failed!");
         }
+
     }
 
     @Override
@@ -275,12 +279,12 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     }
 
     @Override
-    public void enableDataLogger() {
+    public void setLoggerEnabled() {
         mLoggingEnabled = true;
     }
 
     @Override
-    public void disableDataLogger() {
+    public void setLoggerDisabled() {
         mLoggingEnabled = false;
     }
 
@@ -343,6 +347,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         }
     }
 
+
     /**
      * Extracts sensor data into data frames from the given characteristic.
      *
@@ -376,6 +381,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     protected void readTsConfig(BluetoothGattCharacteristic characteristic) {
         int offset = 0;
         byte[] values = characteristic.getValue();
+        Log.e(TAG, Arrays.toString(values));
         setSamplingRate(convertSamplingRate(values[offset++]));
         NilsPodSyncRole syncRole = NilsPodSyncRole.values()[values[offset++]];
         int syncDistance = values[offset++] * 100;
@@ -404,9 +410,13 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         mEnabledSensors = sensors;
         mPacketSize = sampleSize;
 
-       /* if (!isSensorEnabled(HardwareSensor.BAROMETER)) {
+        ArrayList<String> sensorList = (ArrayList<String>) Arrays.asList("ACC", "GYRO", "BARO");
+        BaseConfigItem item = new BaseConfigItem("Sensor Config");
+        mConfigMap.put(KEY_SENSOR_ENABLE, item);
+
+        if (!isSensorEnabled(HardwareSensor.BAROMETER)) {
             setSensorsEnabled(EnumSet.of(HardwareSensor.BAROMETER), true);
-        }*/
+        }
     }
 
     protected void readSensorPosition(BluetoothGattCharacteristic characteristic) {
@@ -468,6 +478,20 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
                 return 1000.0;
         }
         return 0.0;
+    }
+
+    private void enableLogger() {
+        try {
+            if (mLoggingEnabled) {
+                mDataLogger = new SensorDataLogger(this, mContext);
+            }
+        } catch (SensorException e) {
+            switch (e.getExceptionType()) {
+                case permissionsMissing:
+                    Toast.makeText(mContext, "Permissions to write external storage needed!", Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        }
     }
 
     public NilsPodSensorPosition getSensorPosition() {
