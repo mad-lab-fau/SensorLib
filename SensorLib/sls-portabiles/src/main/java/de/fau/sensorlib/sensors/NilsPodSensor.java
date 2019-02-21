@@ -33,6 +33,13 @@ public class NilsPodSensor extends AbstractNilsPodSensor {
         super(context, info, dataHandler);
     }
 
+    @Override
+    public void startStreaming() {
+        super.startStreaming();
+        lastCounter = 0;
+        globalCounter = 0;
+    }
+
     /**
      * Extracts sensor data into data frames from the given characteristic.
      *
@@ -76,11 +83,11 @@ public class NilsPodSensor extends AbstractNilsPodSensor {
                 baro = (baro + 101325.0) / 100.0;
             }
 
-            // extract packet counter (only 15 bit, therefore getIntValue() method not applicable)
-            localCounter = (values[mPacketSize - 1] & 0xFF) | ((values[mPacketSize - 2] & 0x7F) << 8);
+            // extract packet counter (16 bit)
+            localCounter = (values[i + mPacketSize - 1] & 0xFF) | ((values[i + mPacketSize - 2] & 0xFF) << 8);
 
             // check if packets have been lost
-            if (((localCounter - lastCounter) % (2 << 14)) > 1) {
+            if (((localCounter - lastCounter) % (2 << 15)) > 1) {
                 Log.w(TAG, this + ": BLE Packet Loss!");
             }
             // increment global counter if local counter overflows
@@ -88,8 +95,11 @@ public class NilsPodSensor extends AbstractNilsPodSensor {
                 globalCounter++;
             }
 
-            NilsPodDataFrame df = new NilsPodDataFrame(this, globalCounter * (2 << 14) + localCounter, accel, gyro, baro);
+            NilsPodDataFrame df = new NilsPodDataFrame(this, globalCounter * (2 << 15) + localCounter, accel, gyro, baro);
             // send new data to the SensorDataProcessor
+            Log.d(TAG, "localCounter: [" + values[i + mPacketSize - 2] + "," + values[i + mPacketSize - 1] + "] -> " + localCounter + "  " + ((int) df.getTimestamp()));
+
+
             sendNewData(df);
             lastCounter = localCounter;
             if (mLoggingEnabled) {

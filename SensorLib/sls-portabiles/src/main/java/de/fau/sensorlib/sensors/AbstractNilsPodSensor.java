@@ -174,13 +174,22 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
      * Enum describing the operation state of the NilsPod sensor
      */
     protected enum NilsPodOperationState {
-        OPERATION_STATE_IDLE,
-        OPERATION_STATE_STREAMING,
-        OPERATION_STATE_LOGGING,
-        OPERATION_STATE_SIGNAL_PROCESSING,
-        OPERATION_STATE_FLASH_TRANSMISSION,
-        OPERATION_STATE_FLASH_SESSION_LIST,
-        OPERATION_STATE_SENSOR_FUSION
+        IDLE,
+        STREAMING,
+        LOGGING,
+        FLASH_PAGE_TRANSMISSION,
+        FLASH_SESSION_LIST_TRANSMISSION,
+        NAND_FLASH_ERASE
+    }
+
+    /**
+     * Enum describing the power states of the NilsPod sensor
+     */
+    protected enum NilsPodPowerState {
+        NO_POWER,
+        WP_CHR_COMPLETE,
+        CHR_ACTIVE,
+        WP_CHR_ACTIVE
     }
 
 
@@ -200,6 +209,26 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         NO_POSITION_DEFINED,
         LEFT_FOOT,
         RIGHT_FOOT
+    }
+
+    /**
+     * Enum describing the sensor error codes read in the NILS_POD_SYSTEM_STATE characteristic.
+     */
+    protected enum NilsPodSensorError {
+        ERROR_BMI_160(0x01),
+        ERROR_BMP_280(0x02),
+        ERROR_NAND_FLASH(0x04),
+        ERROR_RTC(0x08);
+
+        private int errorCode;
+
+        NilsPodSensorError(int errorCode) {
+            this.errorCode = errorCode;
+        }
+
+        public int getErrorCode() {
+            return errorCode;
+        }
     }
 
 
@@ -226,25 +255,28 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     @Override
     public void startStreaming() {
         // enable notifications to subscribe to characteristics (i.e. write descriptors)
-        // START_STREAMING command is sent to sensor as soon as all descriptors are written (in onAllDescriptorsWritten)
+        // START_STREAMING command is sent to sensor as soon as all descriptors are written
+        // (in onAllGattNotificationsEnabled)
         super.startStreaming();
     }
 
     @Override
-    protected void onAllDescriptorsWritten() {
-        super.onAllDescriptorsWritten();
+    protected void onAllGattNotificationsEnabled() {
+        super.onAllGattNotificationsEnabled();
         if (send(NilsPodSensorCommand.START_STREAMING)) {
             enableLogger();
         } else {
             Log.e(TAG, "startStreaming failed!");
         }
-
     }
 
     @Override
     public void stopStreaming() {
+        // send STOP_STREAMING command to sensor
+        // super.stopStreaming() (where characteristics are unsubscribed) is called in
+        // onNewCharacteristicWrite (callback indicating that STOP_STREAMING command was successfully
+        // sent to sensor)
         if (send(NilsPodSensorCommand.STOP_STREAMING)) {
-            super.stopStreaming();
             if (mDataLogger != null) {
                 mDataLogger.completeLogger();
             }
@@ -326,13 +358,29 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
                 extractSensorData(characteristic);
                 return true;
             } else if (NILS_POD_SYSTEM_STATE.equals(characteristic.getUuid())) {
-                readSystemState(characteristic);
+                try {
+                    readSystemState(characteristic);
+                } catch (SensorException e) {
+                    handleSensorException(e);
+                }
             } else if (NILS_POD_TS_CONFIG.equals(characteristic.getUuid())) {
-                readTsConfig(characteristic);
+                try {
+                    readTsConfig(characteristic);
+                } catch (SensorException e) {
+                    handleSensorException(e);
+                }
             } else if (NILS_POD_SENSOR_CONFIG.equals(characteristic.getUuid())) {
-                readSensorConfig(characteristic);
+                try {
+                    readSensorConfig(characteristic);
+                } catch (SensorException e) {
+                    handleSensorException(e);
+                }
             } else if (NILS_POD_METADATA_CONFIG.equals(characteristic.getUuid())) {
-                readSensorPosition(characteristic);
+                try {
+                    readSensorPosition(characteristic);
+                } catch (SensorException e) {
+                    handleSensorException(e);
+                }
             }
             return false;
         }
@@ -343,7 +391,14 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         super.onNewCharacteristicWrite(characteristic, status);
         if (NILS_POD_SENSOR_CONFIG.equals(characteristic.getUuid())) {
             // sensor config was changed from app side => read characteristic to update
-            readSensorsEnabled();
+            readEnabledSensors();
+        } else if (NILS_POD_COMMANDS.equals(characteristic.getUuid())) {
+            // check if the command sent to the sensor was STOP_STREAMING
+            byte[] values = characteristic.getValue();
+            if (values.length > 0 && (values[0] == NilsPodSensorCommand.STOP_STREAMING.cmd[0])) {
+                // call stopStreaming() to unsubscribe from characteristic notifications
+                super.stopStreaming();
+            }
         }
     }
 
@@ -356,60 +411,90 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     protected abstract void extractSensorData(BluetoothGattCharacteristic characteristic);
 
 
-    protected void readSystemState(BluetoothGattCharacteristic characteristic) {
+    protected void readSystemState(BluetoothGattCharacteristic characteristic) throws SensorException {
         int offset = 0;
         byte[] values = characteristic.getValue();
-        boolean connectionState = values[offset++] == 1;
-        int operationState = values[offset++];
-        boolean wirelessPowerState = (values[offset] & 0x0F) != 0;
-        boolean chargingState = (values[offset] & 0xF0) != 0;
-        offset++;
-        // TODO determine error states of sensors
-        int errorFlags = values[offset++];
-        int batteryLevel = values[offset++];
-        int activityLabel = values[offset];
+        boolean connectionState;
+        NilsPodOperationState operationState;
+        NilsPodPowerState powerState;
+        int errorFlags;
+        int batteryLevel;
+        // no longer in latest firmware version
+        //int activityLabel;
+
+        try {
+            connectionState = values[offset++] == 1;
+            operationState = NilsPodOperationState.values()[values[offset++]];
+            powerState = NilsPodPowerState.values()[values[offset++]];
+            errorFlags = values[offset++];
+            batteryLevel = values[offset];
+            //activityLabel = values[offset];
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new SensorException(SensorException.SensorExceptionType.readStateError);
+        }
+        if (errorFlags > 0) {
+            throw new SensorException(SensorException.SensorExceptionType.hardwareSensorError, errorFlags);
+        }
         Log.d(TAG, ">>>> System State:");
         Log.d(TAG, "\tConnection State: " + connectionState);
-        Log.d(TAG, "\tOperation State: " + NilsPodOperationState.values()[operationState]);
-        Log.d(TAG, "\tWireless Power State: " + wirelessPowerState);
-        Log.d(TAG, "\tCharging State: " + chargingState);
+        Log.d(TAG, "\tOperation State: " + operationState);
+        Log.d(TAG, "\tWireless Power State: " + powerState);
         Log.d(TAG, "\tError Flags: " + Integer.toBinaryString(errorFlags));
         Log.d(TAG, "\tBattery Level: " + batteryLevel);
-        Log.d(TAG, "\tActivity Label: " + activityLabel);
+        //Log.d(TAG, "\tActivity Label: " + activityLabel);
     }
 
-    protected void readTsConfig(BluetoothGattCharacteristic characteristic) {
+
+    protected void readTsConfig(BluetoothGattCharacteristic characteristic) throws SensorException {
         int offset = 0;
         byte[] values = characteristic.getValue();
-        Log.e(TAG, Arrays.toString(values));
-        setSamplingRate(convertSamplingRate(values[offset++]));
-        NilsPodSyncRole syncRole = NilsPodSyncRole.values()[values[offset++]];
-        int syncDistance = values[offset++] * 100;
-        int rfGroup = values[offset];
+        NilsPodSyncRole syncRole;
+        int syncDistance;
+        int syncGroup;
+
+        try {
+            setSamplingRate(convertSamplingRate(values[offset++]));
+            syncRole = NilsPodSyncRole.values()[values[offset++]];
+            syncDistance = values[offset++] * 100;
+            syncGroup = values[offset];
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new SensorException(SensorException.SensorExceptionType.readStateError);
+        }
 
         Log.d(TAG, ">>>> Timer Sampling State:");
         Log.d(TAG, "\tSampling Rate: " + mSamplingRate);
         Log.d(TAG, "\tSync Role: " + syncRole);
         Log.d(TAG, "\tSync Distance: " + syncDistance);
-        Log.d(TAG, "\tRF Group: " + rfGroup);
+        Log.d(TAG, "\tSync Group: " + syncGroup);
     }
 
-    protected void readSensorConfig(BluetoothGattCharacteristic characteristic) {
+    protected void readSensorConfig(BluetoothGattCharacteristic characteristic) throws SensorException {
         int offset = 0;
         byte[] values = characteristic.getValue();
-        int sensors = values[offset++];
-        int sampleSize = values[offset];
-        Log.d(TAG, ">>>> Sensor Config:");
-        mEnabledSensorsMap.put(HardwareSensor.ACCELEROMETER, ((sensors & 0x01) != 0));
-        mEnabledSensorsMap.put(HardwareSensor.GYROSCOPE, ((sensors & 0x01) != 0));
-        mEnabledSensorsMap.put(HardwareSensor.FSR, ((sensors & 0x02) != 0));
-        mEnabledSensorsMap.put(HardwareSensor.BAROMETER, ((sensors & 0x04) != 0));
+        int sensors;
+        int sampleSize;
 
+        try {
+            sensors = values[offset++];
+            mEnabledSensorsMap.put(HardwareSensor.ACCELEROMETER, ((sensors & 0x01) != 0));
+            mEnabledSensorsMap.put(HardwareSensor.GYROSCOPE, ((sensors & 0x01) != 0));
+            mEnabledSensorsMap.put(HardwareSensor.FSR, ((sensors & 0x02) != 0));
+            mEnabledSensorsMap.put(HardwareSensor.BAROMETER, ((sensors & 0x04) != 0));
+            sampleSize = values[offset];
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new SensorException(SensorException.SensorExceptionType.readStateError);
+        }
+
+        Log.d(TAG, ">>>> Sensor Config:");
         Log.d(TAG, "\tSensors: IMU: " + isSensorEnabled(HardwareSensor.ACCELEROMETER) + ", Pressure: " + isSensorEnabled(HardwareSensor.FSR) + ", Barometer: " + isSensorEnabled(HardwareSensor.BAROMETER));
         Log.d(TAG, "\tSample Size: " + sampleSize);
         mEnabledSensors = sensors;
         mPacketSize = sampleSize;
 
+        // TODO just for testing
         ArrayList<String> sensorList = (ArrayList<String>) Arrays.asList("ACC", "GYRO", "BARO");
         BaseConfigItem item = new BaseConfigItem("Sensor Config");
         mConfigMap.put(KEY_SENSOR_ENABLE, item);
@@ -419,11 +504,18 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         }
     }
 
-    protected void readSensorPosition(BluetoothGattCharacteristic characteristic) {
-        mSensorPosition = NilsPodSensorPosition.values()[characteristic.getValue()[0]];
+    protected void readSensorPosition(BluetoothGattCharacteristic characteristic) throws SensorException {
+        try {
+            mSensorPosition = NilsPodSensorPosition.values()[characteristic.getValue()[0]];
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new SensorException(SensorException.SensorExceptionType.readStateError);
+        }
+
         Log.d(TAG, ">>>> Meta Data:");
         Log.d(TAG, "\tSensor Position: " + mSensorPosition);
     }
+
 
     public boolean isSensorEnabled(HardwareSensor sensor) {
         return (mEnabledSensorsMap.get(sensor) != null) && mEnabledSensorsMap.get(sensor);
@@ -455,7 +547,10 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         return writeCharacteristic(configChara, new byte[]{value});
     }
 
-    public void readSensorsEnabled() {
+    /**
+     * Sends a read request to the sensor to check which HardwareSensors are currently enabled.
+     */
+    public void readEnabledSensors() {
         BluetoothGattCharacteristic configChara = mGatt.getService(NILS_POD_CONFIGURATION_SERVICE).getCharacteristic(NILS_POD_SENSOR_CONFIG);
         readCharacteristic(configChara);
     }
@@ -478,6 +573,32 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
                 return 1000.0;
         }
         return 0.0;
+    }
+
+
+    private void handleSensorException(SensorException e) {
+        String msg = e.getExceptionType().getMessage();
+        switch (e.getExceptionType()) {
+            case hardwareSensorError:
+                msg += "\n";
+                int errCode = e.getErrorCode();
+                if ((errCode & NilsPodSensorError.ERROR_BMI_160.errorCode) != 0) {
+                    msg += "BMI160 initialization failed.\n";
+                }
+                if ((errCode & NilsPodSensorError.ERROR_BMP_280.errorCode) != 0) {
+                    msg += "BMP280 initialization failed.\n";
+                }
+                if ((errCode & NilsPodSensorError.ERROR_NAND_FLASH.errorCode) != 0) {
+                    msg += "NAND Flash initialization failed.\n";
+                }
+                if ((errCode & NilsPodSensorError.ERROR_RTC.errorCode) != 0) {
+                    msg += "RTC initialization failed.\n";
+                }
+                e = new SensorException(SensorException.SensorExceptionType.hardwareSensorError, msg);
+                break;
+        }
+
+        sendNotification(e);
     }
 
     private void enableLogger() {

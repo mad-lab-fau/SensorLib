@@ -13,8 +13,11 @@ package de.fau.sensorlib;
 public class SensorException extends Exception {
 
     private SensorExceptionType mType;
+    private int mErrorCode = 0;
 
     public enum SensorExceptionType {
+        readStateError("Error reading sensor state."),
+        hardwareSensorError("Error during hardware sensor initialization."),
         permissionsMissing("The app does not have sufficient Android permissions to list available BLE devices."),
         bleScannerError("BLE scanner unavailable."),
         btNotSupported("Bluetooth not supported on this device."),
@@ -22,6 +25,7 @@ public class SensorException extends Exception {
         btNotActivated("Bluetooth disabled."),
         sensorNotResponding("Sensor not responding."),
         noSensorsSelected("No hardware sensors selected."),
+        configError("Error configuring the sensor."),
         unknown("");
 
         private String msg;
@@ -40,8 +44,23 @@ public class SensorException extends Exception {
         mType = type;
     }
 
+    public SensorException(SensorExceptionType type, int errorCode) {
+        super(type.getMessage());
+        mType = type;
+        mErrorCode = errorCode;
+    }
+
+    public SensorException(SensorExceptionType type, String message) {
+        super(message);
+        mType = type;
+    }
+
     public SensorExceptionType getExceptionType() {
         return mType;
+    }
+
+    public int getErrorCode() {
+        return mErrorCode;
     }
 
 

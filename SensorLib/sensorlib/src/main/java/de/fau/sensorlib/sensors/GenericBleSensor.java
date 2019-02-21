@@ -30,6 +30,8 @@ import de.fau.sensorlib.enums.HardwareSensor;
 import de.fau.sensorlib.enums.SensorMessage;
 import de.fau.sensorlib.enums.SensorState;
 
+import static android.bluetooth.BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE;
+
 /**
  * Implementation of a generic BLE sensor device.
  */
@@ -312,8 +314,13 @@ public class GenericBleSensor extends AbstractSensor {
             Log.d(TAG, "onDescriptorWrite: " + BleGattAttributes.lookupDescriptor(descriptor.getUuid()) + " :: " + Arrays.toString(descriptor.getValue()));
 
             // All descriptors were written and removed from the queue
-            if (mDescriptorWriteRequests.isEmpty()) {
-                onAllDescriptorsWritten();
+            if (mDescriptorWriteRequests.isEmpty() && descriptor.getValue().length > 0) {
+
+                if (Arrays.equals(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE, descriptor.getValue())) {
+                    onAllGattNotificationsEnabled();
+                } else if (Arrays.equals(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE, descriptor.getValue())) {
+                    onAllGattNotificationsDisabled();
+                }
                 return;
             }
 
@@ -410,10 +417,9 @@ public class GenericBleSensor extends AbstractSensor {
         }
 
         for (BluetoothGattCharacteristic charac : mNotificationsList) {
-            Log.d(TAG, "list: " + mNotificationsList);
             enableGattNotifications(charac);
         }
-        sendStartStreaming();
+        // sendStartStreaming() is called after successfully subscribing to all notifications
     }
 
     @Override
@@ -421,7 +427,7 @@ public class GenericBleSensor extends AbstractSensor {
         for (BluetoothGattCharacteristic charac : mNotificationsList) {
             disableGattNotifications(charac);
         }
-        sendStopStreaming();
+        // sendStopStreaming() is called after successfully unsubscribing from all notifications
     }
 
 
@@ -477,7 +483,7 @@ public class GenericBleSensor extends AbstractSensor {
         BluetoothGattDescriptor desc = characteristic.getDescriptor(BleGattAttributes.CLIENT_CHARACTERISTIC_CONFIGURATION);
 
         if (desc != null) {
-            desc.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+            desc.setValue(ENABLE_NOTIFICATION_VALUE);
             mDescriptorWriteRequests.add(desc);
             return mGatt.writeDescriptor(mDescriptorWriteRequests.peek());
             /*if (mDescriptorWriteRequests.size() == 1) {
@@ -613,8 +619,14 @@ public class GenericBleSensor extends AbstractSensor {
         Log.d(TAG, "onCharacteristicWrite: " + BleGattAttributes.lookupCharacteristic(characteristic.getUuid()) + " :: " + Arrays.toString(characteristic.getValue()) + " - success: " + (status == BluetoothGatt.GATT_SUCCESS));
     }
 
-    protected void onAllDescriptorsWritten() {
-        Log.d(TAG, "onnAllDescriptorsWritten");
+    protected void onAllGattNotificationsEnabled() {
+        Log.d(TAG, "onAllGattNotificationsEnabled");
+        sendStartStreaming();
+    }
+
+    protected void onAllGattNotificationsDisabled() {
+        Log.d(TAG, "onAllGattNotificationsDisabled");
+        sendStopStreaming();
     }
 
     @Override
