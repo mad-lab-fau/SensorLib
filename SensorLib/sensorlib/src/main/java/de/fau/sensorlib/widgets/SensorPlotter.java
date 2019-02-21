@@ -13,7 +13,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +24,7 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -133,7 +133,7 @@ public class SensorPlotter extends CardView implements SensorEventListener {
         }
     }
 
-    public void clear() {
+    public void resetCharts() {
         mSensorBundles = new ArrayList<>(10);
         mLineData = new ArrayList<>(10);
         mMethodLists = new ArrayList<>(10);
@@ -216,11 +216,18 @@ public class SensorPlotter extends CardView implements SensorEventListener {
             datasets[i].setLineWidth(2f);
             data.addDataSet(datasets[i]);
         }
+        data.setDrawValues(false);
     }
 
     private void refreshChart() {
         for (int i = 0; i < mSensorBundles.size(); i++) {
             mAdapter.update(i);
+        }
+    }
+
+    private void clearCharts() {
+        for (int i = 0; i < mSensorBundles.size(); i++) {
+            mAdapter.clear(i);
         }
     }
 
@@ -235,7 +242,7 @@ public class SensorPlotter extends CardView implements SensorEventListener {
     public void onSensorStateChange(AbstractSensor sensor, SensorState state) {
         switch (state) {
             case STREAMING:
-                if (sensor == null) {
+                /*if (sensor == null) {
                     if (offset == 0) {
                         offset = System.currentTimeMillis();
                     }
@@ -248,15 +255,15 @@ public class SensorPlotter extends CardView implements SensorEventListener {
                     for (int i = 0; i < mSensorBundles.size(); i++) {
                         mAdapter.setTouchEnabled(i, true);
                     }
-
-                }
+                }*/
                 break;
             case CONNECTED:
                 if (previousState == SensorState.STREAMING) {
                     oldPauseOffset = pauseOffset;
                     pauseOffset = System.currentTimeMillis();
-                } else {
-                    clear();
+                    clearCharts();
+                } else if (previousState == SensorState.CONNECTING) {
+                    resetCharts();
                 }
                 break;
             case DISCONNECTED:
@@ -405,6 +412,16 @@ public class SensorPlotter extends CardView implements SensorEventListener {
                 viewHolder.mLineChart.setAutoScaleMinMaxEnabled(true);
                 viewHolder.mLineChart.setVisibleXRange((float) (mSensorBundles.get(position).getSamplingRate() * mSensorBundles.get(position).getSampleDistance() * mWindowSize), (float) (mSensorBundles.get(position).getSamplingRate() * mSensorBundles.get(position).getSampleDistance() * mWindowSize));
                 viewHolder.mLineChart.moveViewToX(viewHolder.mLineChart.getData().getXMax());
+            }
+        }
+
+        private void clear(int position) {
+            SensorPlotterViewHolder viewHolder = (SensorPlotterViewHolder) mRecyclerView.findViewHolderForAdapterPosition(position);
+            if (viewHolder != null && viewHolder.mLineChart.getData().getEntryCount() != 0) {
+                //viewHolder.mLineChart.getData().notifyDataChanged();
+                for (ILineDataSet set : viewHolder.mLineChart.getLineData().getDataSets()) {
+                    set.clear();
+                }
             }
         }
 
