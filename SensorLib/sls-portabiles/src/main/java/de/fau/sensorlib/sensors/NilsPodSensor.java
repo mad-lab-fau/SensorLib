@@ -11,10 +11,14 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.content.Context;
 import android.util.Log;
 
+import java.util.Calendar;
+import java.util.Date;
+
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.BarometricPressureDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
+import de.fau.sensorlib.enums.SensorState;
 
 
 /**
@@ -107,6 +111,36 @@ public class NilsPodSensor extends AbstractNilsPodSensor {
             }
         }
     }
+
+
+    @Override
+    protected void onStateChange(SensorState oldState, SensorState newState) {
+        super.onStateChange(oldState, newState);
+        if (oldState == SensorState.CONNECTING && newState == SensorState.CONNECTED) {
+            setTimeDate();
+        }
+    }
+
+    /**
+     * Updates the current date time stamp of the external temperature compensated RTC module.
+     */
+    public void setTimeDate() {
+        Date currentTime = Calendar.getInstance().getTime();
+
+        Log.d(TAG, "Updating RTC time on " + getName() + " - new time: " + currentTime);
+
+        long unixTime = currentTime.getTime() / 1000; //convert from milliseconds to seconds
+        byte[] data = new byte[4];
+        data[0] = (byte) ((unixTime >> 24) & 0xFF);
+        data[1] = (byte) ((unixTime >> 16) & 0xFF);
+        data[2] = (byte) ((unixTime >> 8) & 0xFF);
+        data[3] = (byte) ((unixTime) & 0xFF);
+
+        BluetoothGattCharacteristic dateTimeCharacteristic = getConfigurationService().getCharacteristic(AbstractNilsPodSensor.NILS_POD_DATE_TIME_CONFIG);
+        writeCharacteristic(dateTimeCharacteristic, data);
+
+    }
+
 
     public static class NilsPodDataFrame extends GenericNilsPodDataFrame implements BarometricPressureDataFrame {
 

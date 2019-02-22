@@ -479,7 +479,8 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         int syncGroup;
 
         try {
-            setSamplingRate(convertSamplingRate(values[offset++]));
+
+            requestSamplingRateChange(convertSamplingRate(values[offset++]));
             syncRole = NilsPodSyncRole.values()[values[offset++]];
             syncDistance = values[offset++] * 100;
             syncGroup = values[offset];
