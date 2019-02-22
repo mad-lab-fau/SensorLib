@@ -30,7 +30,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     /**
      * UUID for Data Streaming Service of NilsPod sensor
      */
-    private static final UUID NILS_POD_STREAMING_SERVICE = UUID.fromString("6e400001-b5a3-f393-e0a9-e50e24dcca9e");
+    protected static final UUID NILS_POD_STREAMING_SERVICE = UUID.fromString("6e400001-b5a3-f393-e0a9-e50e24dcca9e");
     /**
      * UUID for Configuration Service of NilsPod Sensor
      */
@@ -38,11 +38,11 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     /**
      * UUID for Config Characteristic (write) of NilsPod Sensor
      */
-    private static final UUID NILS_POD_COMMANDS = UUID.fromString("6e400002-b5a3-f393-e0a9-e50e24dcca9e");
+    protected static final UUID NILS_POD_COMMANDS = UUID.fromString("6e400002-b5a3-f393-e0a9-e50e24dcca9e");
     /**
      * UUID for Streaming Characteristic (notification) of NilsPod Sensor
      */
-    private static final UUID NILS_POD_STREAMING = UUID.fromString("6e400003-b5a3-f393-e0a9-e50e24dcca9e");
+    protected static final UUID NILS_POD_STREAMING = UUID.fromString("6e400003-b5a3-f393-e0a9-e50e24dcca9e");
     /**
      * UUID for System State Characteristic (read) of NilsPod Sensor
      */
@@ -50,23 +50,23 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     /**
      * UUID for Timer Sampling Config Characteristic (read/write) of NilsPod Sensor
      */
-    private static final UUID NILS_POD_TS_CONFIG = UUID.fromString("98ff0101-770d-4a83-9e9b-ce6bbd75e472");
+    protected static final UUID NILS_POD_TS_CONFIG = UUID.fromString("98ff0101-770d-4a83-9e9b-ce6bbd75e472");
     /**
      * UUID for Sensor Config Characteristic (read/write) of NilsPod Sensor
      */
-    private static final UUID NILS_POD_SENSOR_CONFIG = UUID.fromString("98ff0202-770d-4a83-9e9b-ce6bbd75e472");
+    protected static final UUID NILS_POD_SENSOR_CONFIG = UUID.fromString("98ff0202-770d-4a83-9e9b-ce6bbd75e472");
     /**
      * UUID for Metadata Characteristic (read/write) of NilsPod Sensor
      */
-    private static final UUID NILS_POD_METADATA_CONFIG = UUID.fromString("98ff0303-770d-4a83-9e9b-ce6bbd75e472");
+    protected static final UUID NILS_POD_METADATA_CONFIG = UUID.fromString("98ff0303-770d-4a83-9e9b-ce6bbd75e472");
     /**
      * UUID for Date Time Characteristic (write) of NilsPod Sensor
      */
-    private static final UUID NILS_POD_DATE_TIME_CONFIG = UUID.fromString("98ff0404-770d-4a83-9e9b-ce6bbd75e472");
+    protected static final UUID NILS_POD_DATE_TIME_CONFIG = UUID.fromString("98ff0404-770d-4a83-9e9b-ce6bbd75e472");
     /**
      * UUID for Firmware Version Characteristic (read) of NilsPod Sensor
      */
-    private static final UUID NILS_POD_FIRMWARE_VERSION = UUID.fromString("98ff0f0f-770d-4a83-9e9b-ce6bbd75e472");
+    protected static final UUID NILS_POD_FIRMWARE_VERSION = UUID.fromString("98ff0f0f-770d-4a83-9e9b-ce6bbd75e472");
 
 
     /**
@@ -99,6 +99,11 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
      * Keep a local reference to the Streaming Service
      */
     private BluetoothGattService mStreamingService;
+
+    /**
+     * Keep a local reference to the Streaming Service
+     */
+    private BluetoothGattService mConfigurationService;
 
     private NilsPodSensorPosition mSensorPosition;
 
@@ -346,6 +351,8 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         super.onDiscoveredService(service);
         if (NILS_POD_STREAMING_SERVICE.equals(service.getUuid())) {
             mStreamingService = service;
+        } else if (NILS_POD_CONFIGURATION_SERVICE.equals(service.getUuid())) {
+            mConfigurationService = service;
         }
     }
 
@@ -409,6 +416,24 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
      * @param characteristic Received characteristic from the BLE API
      */
     protected abstract void extractSensorData(BluetoothGattCharacteristic characteristic);
+
+    /**
+     * Returns a reference to the BluetoothGattService of the NilsPodStreamingService.
+     *
+     * @return a reference to the NilsPodStreamingService
+     */
+    protected BluetoothGattService getStreamingService() {
+        return mStreamingService;
+    }
+
+    /**
+     * Returns a reference to the BluetoothGattService of the NilsPodConfigurationService.
+     *
+     * @return a reference to the NilsPodConfigurationService
+     */
+    protected BluetoothGattService getConfigurationService() {
+        return mConfigurationService;
+    }
 
 
     protected void readSystemState(BluetoothGattCharacteristic characteristic) throws SensorException {
