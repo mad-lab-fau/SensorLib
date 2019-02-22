@@ -26,6 +26,7 @@ public class SensorException extends Exception {
         sensorNotResponding("Sensor not responding."),
         noSensorsSelected("No hardware sensors selected."),
         configError("Error configuring the sensor."),
+        samplingRateError("Attempted to set negative or zero sampling rate."),
         unknown("");
 
         private String msg;

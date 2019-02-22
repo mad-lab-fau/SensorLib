@@ -253,7 +253,10 @@ public abstract class AbstractSensor extends SensorInfo {
      *
      * @param samplingRate the sampling rate to set.
      */
-    protected void setSamplingRate(double samplingRate) {
+    protected void setSamplingRate(double samplingRate) throws SensorException {
+        if (samplingRate <= 0.0) {
+            throw new SensorException(SensorException.SensorExceptionType.samplingRateError);
+        }
         if (samplingRate != this.mSamplingRate) {
             this.mSamplingRate = samplingRate;
             sendSamplingRateChanged();
@@ -267,7 +270,7 @@ public abstract class AbstractSensor extends SensorInfo {
      * @param toSamplingRate the sampling rate to which the sensor should switch.
      * @return true if the sampling rate can change, false if it is definitely not possible
      */
-    public boolean requestSamplingRateChange(double toSamplingRate) {
+    public boolean requestSamplingRateChange(double toSamplingRate) throws SensorException {
         setSamplingRate(toSamplingRate);
         return true;
     }
