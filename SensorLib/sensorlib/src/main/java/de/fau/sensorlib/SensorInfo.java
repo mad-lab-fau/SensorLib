@@ -77,7 +77,7 @@ public class SensorInfo {
      * @param newState the new state for the sensor.
      */
     protected void setState(SensorState newState) {
-        Log.d(TAG, "<" + mName + "> " + mSensorState + " --> " + newState);
+        onStateChange(mSensorState, newState);
         mSensorState = newState;
     }
 
@@ -86,6 +86,10 @@ public class SensorInfo {
      */
     public SensorState getState() {
         return mSensorState;
+    }
+
+    protected void onStateChange(SensorState oldState, SensorState newState) {
+        Log.d(TAG, "<" + mName + "> " + oldState + " --> " + newState);
     }
 
     /**
