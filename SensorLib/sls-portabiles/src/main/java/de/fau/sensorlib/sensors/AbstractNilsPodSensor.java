@@ -213,7 +213,9 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     protected enum NilsPodSensorPosition {
         NO_POSITION_DEFINED,
         LEFT_FOOT,
-        RIGHT_FOOT
+        RIGHT_FOOT,
+        UNUSED,
+        HIP,
     }
 
     /**
