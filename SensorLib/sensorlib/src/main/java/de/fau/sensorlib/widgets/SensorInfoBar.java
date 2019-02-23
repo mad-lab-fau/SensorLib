@@ -30,28 +30,28 @@ import de.fau.sensorlib.enums.SensorState;
 import de.fau.sensorlib.sensors.AbstractSensor;
 
 /**
- * Provides a grid layout that displays information about the sensors. This Widget implements the {@link SensorEventListener},
- * so can subscribe to the {@link SensorEventGenerator}.
+ * Provides a grid layout that displays sensor information. This Widget implements the
+ * {@link SensorEventListener}, so it can subscribe to the {@link SensorEventGenerator}.
  */
-public class BatteryBar extends RecyclerView implements SensorEventListener {
+public class SensorInfoBar extends RecyclerView implements SensorEventListener {
 
-    private static final String TAG = BatteryBar.class.getSimpleName();
+    private static final String TAG = SensorInfoBar.class.getSimpleName();
 
-    private BatteryGridAdapter mAdapter;
+    private SensorInfoGridAdapter mAdapter;
 
-    public BatteryBar(Context context) {
+    public SensorInfoBar(Context context) {
         this(context, null);
     }
 
-    public BatteryBar(Context context, AttributeSet attrs) {
+    public SensorInfoBar(Context context, AttributeSet attrs) {
         this(context, attrs, -1);
     }
 
-    public BatteryBar(Context context, AttributeSet attrs, int defStyleAttr) {
+    public SensorInfoBar(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         setLayoutManager(new GridLayoutManager(getContext(), 2));
         addItemDecoration(new ItemSpacing(getContext()));
-        mAdapter = new BatteryGridAdapter(context);
+        mAdapter = new SensorInfoGridAdapter(context);
         setAdapter(mAdapter);
     }
 
@@ -81,12 +81,12 @@ public class BatteryBar extends RecyclerView implements SensorEventListener {
     }
 
 
-    private class BatteryGridAdapter extends Adapter<BatteryViewHolder> implements BatteryViewHolder.ItemClickListener {
+    private class SensorInfoGridAdapter extends Adapter<SensorInfoViewHolder> implements SensorInfoViewHolder.ItemClickListener {
 
         private Context mContext;
         private ArrayList<AbstractSensor> mAttachedSensors;
 
-        private BatteryGridAdapter(Context context) {
+        private SensorInfoGridAdapter(Context context) {
             mContext = context;
             mAttachedSensors = new ArrayList<>();
         }
@@ -111,13 +111,13 @@ public class BatteryBar extends RecyclerView implements SensorEventListener {
 
         @NonNull
         @Override
-        public BatteryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View layout = LayoutInflater.from(mContext).inflate(R.layout.item_battery_bar, parent, false);
-            return new BatteryViewHolder(mContext, layout, this);
+        public SensorInfoViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View layout = LayoutInflater.from(mContext).inflate(R.layout.item_sensor_info_bar, parent, false);
+            return new SensorInfoViewHolder(mContext, layout, this);
         }
 
         @Override
-        public void onBindViewHolder(@NonNull BatteryViewHolder holder, int position) {
+        public void onBindViewHolder(@NonNull SensorInfoViewHolder holder, int position) {
             holder.setSensorName(mAttachedSensors.get(position).getDeviceName());
             holder.updateBatteryLevel(mAttachedSensors.get(position).getBatteryLevel());
         }
@@ -125,7 +125,14 @@ public class BatteryBar extends RecyclerView implements SensorEventListener {
 
         @Override
         public void onItemClick(View view, int position) {
-            BatteryViewHolder viewHolder = (BatteryViewHolder) findViewHolderForAdapterPosition(position);
+            SensorInfoViewHolder viewHolder = (SensorInfoViewHolder) findViewHolderForAdapterPosition(position);
+            Toast.makeText(getContext(), "On Item click! " + position, Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onLongItemClick(View view, int position) {
+            SensorInfoViewHolder viewHolder = (SensorInfoViewHolder) findViewHolderForAdapterPosition(position);
+            Toast.makeText(getContext(), "On Long Item click! " + position, Toast.LENGTH_SHORT).show();
         }
 
         @Override
@@ -135,20 +142,21 @@ public class BatteryBar extends RecyclerView implements SensorEventListener {
 
     }
 
-    private static class BatteryViewHolder extends ViewHolder implements View.OnClickListener {
+    private static class SensorInfoViewHolder extends ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 
         private Context mContext;
         private TextView mSensorNameTextView;
         private TextView mBatteryLevelTextView;
         private ItemClickListener mItemClickListener;
 
-        private BatteryViewHolder(Context context, View itemView, ItemClickListener listener) {
+        private SensorInfoViewHolder(Context context, View itemView, ItemClickListener listener) {
             super(itemView);
             mContext = context;
             mSensorNameTextView = itemView.findViewById(R.id.tv_sensor_name);
             mBatteryLevelTextView = itemView.findViewById(R.id.tv_battery_level);
             mItemClickListener = listener;
             itemView.setOnClickListener(this);
+            itemView.setOnLongClickListener(this);
         }
 
         public void setSensorName(String sensorName) {
@@ -165,8 +173,16 @@ public class BatteryBar extends RecyclerView implements SensorEventListener {
             mItemClickListener.onItemClick(v, getAdapterPosition());
         }
 
+        @Override
+        public boolean onLongClick(View v) {
+            mItemClickListener.onLongItemClick(v, getAdapterPosition());
+            return true;
+        }
+
         interface ItemClickListener {
             void onItemClick(View view, int position);
+
+            void onLongItemClick(View view, int position);
         }
     }
 
