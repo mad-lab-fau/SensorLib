@@ -79,17 +79,9 @@ public class GenericBleSensor extends AbstractSensor {
      */
     protected BluetoothGatt mGatt;
 
-    private String mSerialNumber;
-    private String mManufacturer;
-    private String mFirmwareRevision;
-    private String mSoftwareRevision;
-    private long mSensorSystemID;
     private BleGattAttributes.BodySenorLocation mBodyLocation;
 
-    /**
-     * 0-100 (%).
-     */
-    private int mBatteryLevel;
+
     private boolean mHasBatteryMeasurement = false;
 
 
@@ -99,11 +91,6 @@ public class GenericBleSensor extends AbstractSensor {
         return mHasBatteryMeasurement;
     }
 
-    @Override
-    public int getBatteryLevel() {
-        return mBatteryLevel;
-    }
-
     /**
      * Returns the Body Sensor Location.
      *
@@ -111,26 +98,6 @@ public class GenericBleSensor extends AbstractSensor {
      */
     public String getBodyLocation() {
         return BleGattAttributes.BodySenorLocation.getLocation(mBodyLocation);
-    }
-
-    public String getSerialNumber() {
-        return mSerialNumber;
-    }
-
-    public String getManufacturer() {
-        return mManufacturer;
-    }
-
-    public String getFirmwareRevision() {
-        return mFirmwareRevision;
-    }
-
-    public String getSoftwareRevision() {
-        return mSoftwareRevision;
-    }
-
-    private long getSensorSystemID() {
-        return mSensorSystemID;
     }
 
     protected BluetoothGattService getService(UUID uuid) {

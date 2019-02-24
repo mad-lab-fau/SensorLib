@@ -16,6 +16,7 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.EnumSet;
 
+import de.fau.sensorlib.BleGattAttributes;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorException;
 import de.fau.sensorlib.SensorInfo;
@@ -60,6 +61,18 @@ public abstract class AbstractSensor extends SensorInfo {
      * A list of HardwareSensors that were selected by the calling application. Only these sensors report their data to the application.
      */
     protected EnumSet<HardwareSensor> mSelectedHwSensors = EnumSet.noneOf(HardwareSensor.class);
+
+
+    /**
+     * 0-100 (%).
+     */
+    protected int mBatteryLevel;
+
+    protected String mSerialNumber;
+    protected String mManufacturer;
+    protected String mFirmwareRevision;
+    protected String mSoftwareRevision;
+    protected long mSensorSystemID;
 
     /**
      * The default internal handler class used if no custom class is implemented.
@@ -370,7 +383,27 @@ public abstract class AbstractSensor extends SensorInfo {
     }
 
     public int getBatteryLevel() {
-        return 0;
+        return mBatteryLevel;
+    }
+
+    public String getSerialNumber() {
+        return mSerialNumber;
+    }
+
+    public String getManufacturer() {
+        return mManufacturer;
+    }
+
+    public String getFirmwareRevision() {
+        return mFirmwareRevision;
+    }
+
+    public String getSoftwareRevision() {
+        return mSoftwareRevision;
+    }
+
+    private long getSensorSystemID() {
+        return mSensorSystemID;
     }
 
     /**
