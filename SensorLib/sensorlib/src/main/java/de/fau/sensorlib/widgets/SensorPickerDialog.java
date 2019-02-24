@@ -49,9 +49,9 @@ import de.fau.sensorlib.sensors.InternalSensor;
 /**
  * {@link DialogFragment} that discovers and lists all currently available sensors.
  */
-public class SensorPickerFragment extends DialogFragment implements View.OnClickListener {
+public class SensorPickerDialog extends DialogFragment implements View.OnClickListener {
 
-    private static final String TAG = SensorPickerFragment.class.getSimpleName();
+    private static final String TAG = SensorPickerDialog.class.getSimpleName();
 
     // Keys for getting sensor information from Bundle
     private static final String KEY_SENSOR_RSSI = "SENSOR_RSSI";

@@ -356,7 +356,7 @@ public class SensorPlotter extends CardView implements SensorEventListener {
 
         /**
          * Adds element at the specified position and
-         * notifies the {@link SensorPickerFragment.SensorPickerRecyclerAdapter} that the underlying list has changed.
+         * notifies the {@link SensorPlotter.SensorPlotterRecyclerAdapter} that the underlying list has changed.
          *
          * @param position Insert position
          * @param element  Sensor element as {@link Bundle}
@@ -375,7 +375,7 @@ public class SensorPlotter extends CardView implements SensorEventListener {
 
         /**
          * Adds element to the end of the list and
-         * notifies the {@link SensorPickerFragment.SensorPickerRecyclerAdapter} that the underlying list has changed.
+         * notifies the {@link SensorPlotter.SensorPlotterRecyclerAdapter} that the underlying list has changed.
          *
          * @param element Sensor element as {@link Bundle}
          */
@@ -386,7 +386,7 @@ public class SensorPlotter extends CardView implements SensorEventListener {
 
         /**
          * Removes element at the specified position and
-         * notifies the {@link SensorPickerFragment.SensorPickerRecyclerAdapter} that the underlying list has changed.
+         * notifies the {@link SensorPlotter.SensorPlotterRecyclerAdapter} that the underlying list has changed.
          *
          * @param position Position to remove
          */
@@ -398,7 +398,7 @@ public class SensorPlotter extends CardView implements SensorEventListener {
 
         /**
          * Removes element of the end of the list and
-         * notifies the {@link SensorPickerFragment.SensorPickerRecyclerAdapter} that the underlying list has changed.
+         * notifies the {@link SensorPlotter.SensorPlotterRecyclerAdapter} that the underlying list has changed.
          */
         private void remove() {
             removeAt(mSensorBundles.size() - 1);

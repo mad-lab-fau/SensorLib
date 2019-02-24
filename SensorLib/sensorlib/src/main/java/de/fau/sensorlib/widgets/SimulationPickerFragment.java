@@ -35,7 +35,7 @@ import de.fau.sensorlib.enums.KnownSensor;
  */
 public class SimulationPickerFragment extends DialogFragment implements View.OnClickListener {
 
-    private static final String TAG = SensorPickerFragment.class.getSimpleName();
+    private static final String TAG = SensorPickerDialog.class.getSimpleName();
 
     private Context mContext;
 
