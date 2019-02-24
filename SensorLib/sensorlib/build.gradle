@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 
 group='com.github.gradlman.SensorLib'
-version = '1.0'
+version = '0.1'
 
 android {
     compileSdkVersion 27
@@ -10,8 +10,13 @@ android {
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 27
-        versionCode 1
-        versionName "1.0"
+
+        def versionMajor = 0
+        def versionMinor = 1
+        def versionPatch = 0
+
+        versionCode versionMajor * 10000 + versionMinor * 100 + versionPatch
+        versionName "${versionMajor}.${versionMinor}.${versionPatch}"
     }
     buildTypes {
         release {
@@ -28,7 +33,7 @@ dependencies {
     implementation 'com.android.support:recyclerview-v7:27.1.1'
     implementation 'com.android.support:cardview-v7:27.1.1'
     implementation 'com.android.support:design:27.1.1'
-    implementation 'com.github.hannesa2:MPAndroidChart:3.0.5'
+    implementation 'com.github.hannesa2:MPAndroidChart:3.0.6'
 }
 
 tasks.create(name: 'copyApk', type: Copy) {
