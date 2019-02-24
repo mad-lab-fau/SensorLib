@@ -39,6 +39,7 @@ import java.util.EnumSet;
 import java.util.Objects;
 
 import de.fau.sensorlib.BleSensorManager;
+import de.fau.sensorlib.Constants;
 import de.fau.sensorlib.R;
 import de.fau.sensorlib.SensorFoundCallback;
 import de.fau.sensorlib.SensorInfo;
@@ -52,12 +53,6 @@ import de.fau.sensorlib.sensors.InternalSensor;
 public class SensorPickerDialog extends DialogFragment implements View.OnClickListener {
 
     private static final String TAG = SensorPickerDialog.class.getSimpleName();
-
-    // Keys for getting sensor information from Bundle
-    private static final String KEY_SENSOR_RSSI = "SENSOR_RSSI";
-    private static final String KEY_SENSOR_ADDRESS = "SENSOR_ADDRESS";
-    private static final String KEY_SENSOR_NAME = "SENSOR_NAME";
-    private static final String KEY_KNOWN_SENSOR = "KNOWN_SENSOR";
 
     private Context mContext;
     private ProgressBar mProgressBar;
@@ -82,9 +77,9 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
             dismiss();
         } else if (i == R.id.button_ok) {
             for (Bundle item : mSelectedSensors) {
-                KnownSensor sensor = (KnownSensor) item.getSerializable(KEY_KNOWN_SENSOR);
-                String name = item.getString(KEY_SENSOR_NAME);
-                String address = item.getString(KEY_SENSOR_ADDRESS);
+                KnownSensor sensor = (KnownSensor) item.getSerializable(Constants.KEY_KNOWN_SENSOR);
+                String name = item.getString(Constants.KEY_SENSOR_NAME);
+                String address = item.getString(Constants.KEY_SENSOR_ADDRESS);
                 mSensorFoundCallback.onKnownSensorFound(new SensorInfo(name, address, sensor));
             }
             dismiss();
@@ -106,13 +101,13 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
 
         @Override
         public void onBindViewHolder(@NonNull final SensorPickerViewHolder holder, int position) {
-            final KnownSensor sensor = (KnownSensor) mFoundSensors.get(position).getSerializable(KEY_KNOWN_SENSOR);
+            final KnownSensor sensor = (KnownSensor) mFoundSensors.get(position).getSerializable(Constants.KEY_KNOWN_SENSOR);
             if (sensor == null) {
                 return;
             }
-            String name = mFoundSensors.get(position).getString(KEY_SENSOR_NAME);
-            String address = mFoundSensors.get(position).getString(KEY_SENSOR_ADDRESS);
-            int rssi = mFoundSensors.get(position).getInt(KEY_SENSOR_RSSI);
+            String name = mFoundSensors.get(position).getString(Constants.KEY_SENSOR_NAME);
+            String address = mFoundSensors.get(position).getString(Constants.KEY_SENSOR_ADDRESS);
+            int rssi = mFoundSensors.get(position).getInt(Constants.KEY_SENSOR_RSSI);
             holder.mSensorNameTextView.setText(name);
             holder.mSensorInformationTextView.setText(address);
             holder.mSensorRssi.setText(mContext.getString(R.string.placeholder_rssi, rssi));
@@ -406,10 +401,10 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
             if ((mHwSensorFilter.isEmpty() && mSensorFilter.isEmpty()) || (KnownSensor.INTERNAL.getAvailableSensors().containsAll(mHwSensorFilter) && mSensorFilter.contains(KnownSensor.INTERNAL))) {
                 // Add internal sensor (can always be selected)
                 Bundle internalSensor = new Bundle();
-                internalSensor.putString(KEY_SENSOR_NAME, InternalSensor.INTERNAL_SENSOR_NAME);
-                internalSensor.putString(KEY_SENSOR_ADDRESS, InternalSensor.INTERNAL_SENSOR_ADDRESS);
-                internalSensor.putSerializable(KEY_KNOWN_SENSOR, KnownSensor.INTERNAL);
-                internalSensor.putInt(KEY_SENSOR_RSSI, 0);
+                internalSensor.putString(Constants.KEY_SENSOR_NAME, InternalSensor.INTERNAL_SENSOR_NAME);
+                internalSensor.putString(Constants.KEY_SENSOR_ADDRESS, InternalSensor.INTERNAL_SENSOR_ADDRESS);
+                internalSensor.putSerializable(Constants.KEY_KNOWN_SENSOR, KnownSensor.INTERNAL);
+                internalSensor.putInt(Constants.KEY_SENSOR_RSSI, 0);
                 mAdapter.add(internalSensor);
             }
 
@@ -429,10 +424,10 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
                                     (sensor.getDeviceClass().getAvailableSensors().containsAll(mHwSensorFilter)
                                             && mSensorFilter.contains(sensor.getDeviceClass()))) {
                                 Bundle bundle = new Bundle();
-                                bundle.putString(KEY_SENSOR_ADDRESS, sensor.getDeviceAddress());
-                                bundle.putString(KEY_SENSOR_NAME, sensor.getName());
-                                bundle.putSerializable(KEY_KNOWN_SENSOR, sensor.getDeviceClass());
-                                bundle.putInt(KEY_SENSOR_RSSI, rssi);
+                                bundle.putString(Constants.KEY_SENSOR_ADDRESS, sensor.getDeviceAddress());
+                                bundle.putString(Constants.KEY_SENSOR_NAME, sensor.getName());
+                                bundle.putSerializable(Constants.KEY_KNOWN_SENSOR, sensor.getDeviceClass());
+                                bundle.putInt(Constants.KEY_SENSOR_RSSI, rssi);
                                 mAdapter.add(bundle);
                                 mAdapter.notifyDataSetChanged();
                             }

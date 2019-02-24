@@ -8,9 +8,13 @@
 package de.fau.sensorlib.widgets;
 
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.TextViewCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
@@ -18,10 +22,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 
+import de.fau.sensorlib.Constants;
 import de.fau.sensorlib.R;
 import de.fau.sensorlib.SensorEventGenerator;
 import de.fau.sensorlib.SensorEventListener;
@@ -53,6 +57,17 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
         addItemDecoration(new ItemSpacing(getContext()));
         mAdapter = new SensorInfoGridAdapter(context);
         setAdapter(mAdapter);
+    }
+
+    private AppCompatActivity getActivity() {
+        Context context = getContext();
+        while (context instanceof ContextWrapper) {
+            if (context instanceof AppCompatActivity) {
+                return (AppCompatActivity) context;
+            }
+            context = ((ContextWrapper) context).getBaseContext();
+        }
+        return null;
     }
 
     @Override
@@ -122,17 +137,30 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
             holder.updateBatteryLevel(mAttachedSensors.get(position).getBatteryLevel());
         }
 
-
         @Override
         public void onItemClick(View view, int position) {
             SensorInfoViewHolder viewHolder = (SensorInfoViewHolder) findViewHolderForAdapterPosition(position);
-            Toast.makeText(getContext(), "On Item click! " + position, Toast.LENGTH_SHORT).show();
         }
 
         @Override
         public void onLongItemClick(View view, int position) {
-            SensorInfoViewHolder viewHolder = (SensorInfoViewHolder) findViewHolderForAdapterPosition(position);
-            Toast.makeText(getContext(), "On Long Item click! " + position, Toast.LENGTH_SHORT).show();
+            AbstractSensor sensor = mAttachedSensors.get(position);
+
+            Bundle bundle = new Bundle();
+            bundle.putString(Constants.KEY_SENSOR_NAME, sensor.getName());
+            bundle.putString(Constants.KEY_SENSOR_ADDRESS, sensor.getDeviceAddress());
+            bundle.putString(Constants.KEY_MANUFACTURER, sensor.getManufacturer());
+            bundle.putString(Constants.KEY_FIRMWARE_REVISION, sensor.getFirmwareRevision());
+
+            SensorInfoDialog dialog = new SensorInfoDialog();
+            dialog.setArguments(bundle);
+            AppCompatActivity activity = getActivity();
+            if (activity != null) {
+                FragmentManager fm = activity.getSupportFragmentManager();
+                if (fm != null) {
+                    dialog.show(fm, "sensor_info");
+                }
+            }
         }
 
         @Override
