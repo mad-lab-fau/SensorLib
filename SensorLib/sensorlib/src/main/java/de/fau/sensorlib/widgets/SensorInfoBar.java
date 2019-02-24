@@ -22,6 +22,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -135,6 +136,19 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
         public void onBindViewHolder(@NonNull SensorInfoViewHolder holder, int position) {
             holder.setSensorName(mAttachedSensors.get(position).getDeviceName());
             holder.updateBatteryLevel(mAttachedSensors.get(position).getBatteryLevel());
+        }
+
+
+        @Override
+        public void onItemClick(View view, int position) {
+            SensorInfoViewHolder viewHolder = (SensorInfoViewHolder) findViewHolderForAdapterPosition(position);
+            Toast.makeText(getContext(), "On Item click! " + position, Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onLongItemClick(View view, int position) {
+            SensorInfoViewHolder viewHolder = (SensorInfoViewHolder) findViewHolderForAdapterPosition(position);
+            Toast.makeText(getContext(), "On Long Item click! " + position, Toast.LENGTH_SHORT).show();
         }
 
         @Override
