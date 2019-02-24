@@ -138,19 +138,6 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
             holder.updateBatteryLevel(mAttachedSensors.get(position).getBatteryLevel());
         }
 
-
-        @Override
-        public void onItemClick(View view, int position) {
-            SensorInfoViewHolder viewHolder = (SensorInfoViewHolder) findViewHolderForAdapterPosition(position);
-            Toast.makeText(getContext(), "On Item click! " + position, Toast.LENGTH_SHORT).show();
-        }
-
-        @Override
-        public void onLongItemClick(View view, int position) {
-            SensorInfoViewHolder viewHolder = (SensorInfoViewHolder) findViewHolderForAdapterPosition(position);
-            Toast.makeText(getContext(), "On Long Item click! " + position, Toast.LENGTH_SHORT).show();
-        }
-
         @Override
         public void onItemClick(View view, int position) {
             SensorInfoViewHolder viewHolder = (SensorInfoViewHolder) findViewHolderForAdapterPosition(position);
