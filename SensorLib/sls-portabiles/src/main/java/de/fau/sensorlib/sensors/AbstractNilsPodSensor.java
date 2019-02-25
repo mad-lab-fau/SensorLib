@@ -13,8 +13,8 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import de.fau.sensorlib.BleGattAttributes;
-import de.fau.sensorlib.SensorDataRecorder;
 import de.fau.sensorlib.SensorDataProcessor;
+import de.fau.sensorlib.SensorDataRecorder;
 import de.fau.sensorlib.SensorException;
 import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.AccelDataFrame;
@@ -191,10 +191,34 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
      * Enum describing the power states of the NilsPod sensor
      */
     protected enum NilsPodPowerState {
-        NO_POWER,
-        WP_CHR_COMPLETE,
-        CHR_ACTIVE,
-        WP_CHR_ACTIVE
+        NO_POWER(0x00),
+        WP_CHR_COMPLETE(0x01),
+        CHR_ACTIVE(0x10),
+        WP_CHR_ACTIVE(0x11);
+
+        private int powerState;
+
+        NilsPodPowerState(int powerState) {
+            this.powerState = powerState;
+        }
+
+        public static NilsPodPowerState inferPowerState(int powerState) {
+            if (powerState == NO_POWER.getPowerState()) {
+                return NO_POWER;
+            } else if (powerState == WP_CHR_COMPLETE.getPowerState()) {
+                return WP_CHR_COMPLETE;
+            } else if (powerState == CHR_ACTIVE.getPowerState()) {
+                return CHR_ACTIVE;
+            } else if (powerState == WP_CHR_ACTIVE.getPowerState()) {
+                return WP_CHR_ACTIVE;
+            } else {
+                return null;
+            }
+        }
+
+        public int getPowerState() {
+            return powerState;
+        }
     }
 
 
@@ -474,7 +498,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         try {
             connectionState = values[offset++] == 1;
             operationState = NilsPodOperationState.values()[values[offset++]];
-            powerState = NilsPodPowerState.values()[values[offset++]];
+            powerState = NilsPodPowerState.inferPowerState(values[offset++]);
             errorFlags = values[offset++];
             batteryLevel = values[offset];
             //activityLabel = values[offset];
