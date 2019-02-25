@@ -278,7 +278,7 @@ public class GenericBleSensor extends AbstractSensor {
                 mDescriptorWriteRequests.poll();
             }
 
-            Log.d(TAG, "onDescriptorWrite: " + BleGattAttributes.lookupDescriptor(descriptor.getUuid()) + " :: " + Arrays.toString(descriptor.getValue()));
+            Log.d(TAG, "onDescriptorWrite: " + BleGattAttributes.lookupCharacteristic(descriptor.getCharacteristic().getUuid()) + " -> " + BleGattAttributes.lookupDescriptor(descriptor.getUuid()) + " :: " + Arrays.toString(descriptor.getValue()));
 
             // All descriptors were written and removed from the queue
             if (mDescriptorWriteRequests.isEmpty() && descriptor.getValue().length > 0) {
