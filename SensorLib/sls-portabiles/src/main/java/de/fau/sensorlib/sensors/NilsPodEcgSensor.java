@@ -88,8 +88,8 @@ public class NilsPodEcgSensor extends AbstractNilsPodSensor {
             Log.d(TAG, df.toString());
             lastCounter = localCounter;
             sendNewData(df);
-            if (mLoggingEnabled) {
-                mDataLogger.writeData(df);
+            if (mRecordingEnabled) {
+                mDataRecorder.writeData(df);
             }
         }
     }

@@ -26,12 +26,12 @@ import de.fau.sensorlib.enums.HardwareSensor;
 import de.fau.sensorlib.sensors.AbstractSensor;
 
 /**
- * Dynamic data logger for sensor data. If possible, data is logged onto the device's SD card. If not,
- * data is logged to the device's external storage.
+ * Dynamic data recorder for sensor data. If possible, data is stored onto the device's SD card. If not,
+ * data is stores to the device's external storage.
  */
-public class SensorDataLogger {
+public class SensorDataRecorder {
 
-    private static final String TAG = SensorDataLogger.class.getSimpleName();
+    private static final String TAG = SensorDataRecorder.class.getSimpleName();
 
     /**
      * Value separator
@@ -60,12 +60,12 @@ public class SensorDataLogger {
 
 
     /**
-     * Creates a new data logger instance
+     * Creates a new data recorder instance
      */
-    public SensorDataLogger(AbstractSensor sensor, Context context) throws SensorException {
+    public SensorDataRecorder(AbstractSensor sensor, Context context) throws SensorException {
         mContext = context;
         String currTime = new SimpleDateFormat("yyyyMMdd_HHmm", Locale.getDefault()).format(new Date());
-        // Filename consists of sensor device name and start time of data logging
+        // Filename consists of sensor device name and start time of data recording
         mFilename = sensor.getDeviceName() + "_" + currTime + ".csv";
 
         StringBuilder headerBuilder = new StringBuilder();
@@ -105,17 +105,16 @@ public class SensorDataLogger {
             throw new SensorException(SensorException.SensorExceptionType.permissionsMissing);
         }
 
-        Log.d(TAG, "Logger successfully created!");
-    }
+        Log.d(TAG, getClass().getSimpleName() + " \"" + mFilename + "\" successfully created!");    }
 
 
     /**
-     * Creates a new data logger instance
+     * Creates a new data recorder instance
      */
-    public SensorDataLogger(AbstractSensor sensor, HardwareSensor hwSensor, Context context) throws SensorException {
+    public SensorDataRecorder(AbstractSensor sensor, HardwareSensor hwSensor, Context context) throws SensorException {
         mContext = context;
         String currTime = new SimpleDateFormat("yyyyMMdd_HHmm", Locale.getDefault()).format(new Date());
-        // Filename consists of sensor device name and start time of data logging
+        // Filename consists of sensor device name and start time of data recording
         mFilename = sensor.getDeviceName() + "_" + hwSensor.getShortDescription() + "_" + currTime + ".csv";
 
         StringBuilder headerBuilder = new StringBuilder();
@@ -151,7 +150,7 @@ public class SensorDataLogger {
             throw new SensorException(SensorException.SensorExceptionType.permissionsMissing);
         }
 
-        Log.d(TAG, "Logger successfully created!");
+        Log.d(TAG, getClass().getSimpleName() + " \"" + mFilename + "\" successfully created!");
     }
 
     /**
@@ -293,9 +292,9 @@ public class SensorDataLogger {
     }
 
     /**
-     * Closes file after data logging has been completed
+     * Closes file after data recording has been completed
      */
-    public void completeLogger() {
+    public void completeRecorder() {
         if (isWritable()) {
             try {
                 // flush and close writer
@@ -303,7 +302,7 @@ public class SensorDataLogger {
                 mBufferedWriter.close();
                 mBufferedWriter = null;
             } catch (Exception e) {
-                Log.e(TAG, "Error on completing writer!");
+                Log.e(TAG, "Error on completing recorder!");
             }
         }
     }

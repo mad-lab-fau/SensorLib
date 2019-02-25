@@ -106,8 +106,8 @@ public class NilsPodSensor extends AbstractNilsPodSensor {
 
             sendNewData(df);
             lastCounter = localCounter;
-            if (mLoggingEnabled) {
-                mDataLogger.writeData(df);
+            if (mRecordingEnabled) {
+                mDataRecorder.writeData(df);
             }
         }
     }

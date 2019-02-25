@@ -8,14 +8,17 @@
 package de.fau.sensorlib.sensors;
 
 /**
- *
+ * Interface indicating whether the sensor supports recording streamed data to csv files.
  */
-public interface Resettable {
+public interface Recordable {
 
     /**
-     * Attempts a sensor reset.
-     *
-     * @return true if reset message was successfully sent.
+     * Enables data recording for this sensor
      */
-    boolean reset();
+    void setRecorderEnabled();
+
+    /**
+     * Disables data recording for this sensor
+     */
+    void setRecorderDisabled();
 }

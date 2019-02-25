@@ -21,7 +21,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import de.fau.sensorlib.SensorDataLogger;
+import de.fau.sensorlib.SensorDataRecorder;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorException;
 import de.fau.sensorlib.SensorInfo;
@@ -42,7 +42,7 @@ import de.fau.sensorlib.enums.SensorMessage;
 /**
  * Implementation of the internal/hardware sensors of the Android device.
  */
-public class InternalSensor extends AbstractSensor implements SensorEventListener, Loggable {
+public class InternalSensor extends AbstractSensor implements SensorEventListener, Recordable {
 
     public static final String INTERNAL_SENSOR_NAME = "Internal";
     public static final String INTERNAL_SENSOR_ADDRESS = "n/a";
@@ -50,14 +50,14 @@ public class InternalSensor extends AbstractSensor implements SensorEventListene
     private SensorManager mSensorManager;
 
     /**
-     * Flag indicating whether data should be logged
+     * Flag indicating whether data should be recorded
      */
-    protected boolean mLoggingEnabled;
+    protected boolean mRecordingEnabled;
 
     /**
      * Data logger
      */
-    protected ArrayList<SensorDataLogger> mDataLogger = new ArrayList<>();
+    protected ArrayList<SensorDataRecorder> mDataRecorder = new ArrayList<>();
 
     private ArrayList<Sensor> mSelectedSensors = new ArrayList<>();
     private ArrayList<Integer> mSensorCounter = new ArrayList<>();
@@ -582,7 +582,7 @@ public class InternalSensor extends AbstractSensor implements SensorEventListene
             setSamplingRate(100);
         }
 
-        mDataLogger = new ArrayList<>();
+        mDataRecorder = new ArrayList<>();
         mSamplingPeriodUs = 1000000 / (int) getSamplingRate();
         mSensorManager = (SensorManager) super.mContext.getSystemService(Context.SENSOR_SERVICE);
 
@@ -656,9 +656,9 @@ public class InternalSensor extends AbstractSensor implements SensorEventListene
     @Override
     public void startStreaming() {
         try {
-            if (mLoggingEnabled) {
+            if (mRecordingEnabled) {
                 for (HardwareSensor hwSensor : getSelectedSensors()) {
-                    mDataLogger.add(new SensorDataLogger(this, hwSensor, mContext));
+                    mDataRecorder.add(new SensorDataRecorder(this, hwSensor, mContext));
                 }
             }
         } catch (SensorException e) {
@@ -679,8 +679,8 @@ public class InternalSensor extends AbstractSensor implements SensorEventListene
     @Override
     public void stopStreaming() {
         mSensorManager.unregisterListener(this);
-        for (SensorDataLogger logger : mDataLogger) {
-            logger.completeLogger();
+        for (SensorDataRecorder logger : mDataRecorder) {
+            logger.completeRecorder();
         }
         sendStopStreaming();
     }
@@ -724,8 +724,8 @@ public class InternalSensor extends AbstractSensor implements SensorEventListene
         //Log.d(TAG, "sensor: " + event.sensor.getStringType() + ", timestamp: " + ((long) ((RealTimeTimestampDataFrame) df).getRealTimeTimestamp()));
 
         sendNewData(df);
-        if (mLoggingEnabled) {
-            mDataLogger.get(mSelectedSensors.indexOf(event.sensor)).writeData(df);
+        if (mRecordingEnabled) {
+            mDataRecorder.get(mSelectedSensors.indexOf(event.sensor)).writeData(df);
         }
         mSensorCounter.set(mSelectedSensors.indexOf(event.sensor), ++localCounter);
     }
@@ -740,12 +740,12 @@ public class InternalSensor extends AbstractSensor implements SensorEventListene
 
 
     @Override
-    public void setLoggerEnabled() {
-        mLoggingEnabled = true;
+    public void setRecorderEnabled() {
+        mRecordingEnabled = true;
     }
 
     @Override
-    public void setLoggerDisabled() {
-        mLoggingEnabled = false;
+    public void setRecorderDisabled() {
+        mRecordingEnabled = false;
     }
 }

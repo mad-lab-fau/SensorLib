@@ -84,8 +84,8 @@ public class NilsPodPpgSensor extends NilsPodSensor {
             // send new data to the SensorDataProcessor
             sendNewData(df);
             lastCounter = localCounter;
-            if (mLoggingEnabled) {
-                mDataLogger.writeData(df);
+            if (mRecordingEnabled) {
+                mDataRecorder.writeData(df);
             }
         }
     }

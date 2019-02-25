@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import de.fau.sensorlib.BleGattAttributes;
-import de.fau.sensorlib.SensorDataLogger;
+import de.fau.sensorlib.SensorDataRecorder;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorException;
 import de.fau.sensorlib.SensorInfo;
@@ -23,7 +23,7 @@ import de.fau.sensorlib.dataframe.SensorDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
 import de.fau.sensorlib.sensors.configs.BaseConfigItem;
 
-public abstract class AbstractNilsPodSensor extends GenericBleSensor implements Loggable, Resettable {
+public abstract class AbstractNilsPodSensor extends GenericBleSensor implements Recordable, Resettable {
 
     public static final String TAG = AbstractNilsPodSensor.class.getSimpleName();
 
@@ -88,12 +88,12 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     /**
      * Flag indicating whether data should be logged
      */
-    protected boolean mLoggingEnabled;
+    protected boolean mRecordingEnabled;
 
     /**
      * Data logger
      */
-    protected SensorDataLogger mDataLogger;
+    protected SensorDataRecorder mDataRecorder;
 
     /**
      * Keep a local reference to the Streaming Service
@@ -293,7 +293,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     protected void onAllGattNotificationsEnabled() {
         super.onAllGattNotificationsEnabled();
         if (send(NilsPodSensorCommand.START_STREAMING)) {
-            enableLogger();
+            enableRecorder();
         } else {
             Log.e(TAG, "startStreaming failed!");
         }
@@ -306,8 +306,8 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         // onNewCharacteristicWrite (callback indicating that STOP_STREAMING command was successfully
         // sent to sensor)
         if (send(NilsPodSensorCommand.STOP_STREAMING)) {
-            if (mDataLogger != null) {
-                mDataLogger.completeLogger();
+            if (mDataRecorder != null) {
+                mDataRecorder.completeRecorder();
             }
         } else {
             Log.e(TAG, "stopStreaming failed!");
@@ -340,13 +340,13 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     }
 
     @Override
-    public void setLoggerEnabled() {
-        mLoggingEnabled = true;
+    public void setRecorderEnabled() {
+        mRecordingEnabled = true;
     }
 
     @Override
-    public void setLoggerDisabled() {
-        mLoggingEnabled = false;
+    public void setRecorderDisabled() {
+        mRecordingEnabled = false;
     }
 
     @Override
@@ -651,10 +651,10 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         sendNotification(e);
     }
 
-    private void enableLogger() {
+    private void enableRecorder() {
         try {
-            if (mLoggingEnabled) {
-                mDataLogger = new SensorDataLogger(this, mContext);
+            if (mRecordingEnabled) {
+                mDataRecorder = new SensorDataRecorder(this, mContext);
             }
         } catch (SensorException e) {
             switch (e.getExceptionType()) {
