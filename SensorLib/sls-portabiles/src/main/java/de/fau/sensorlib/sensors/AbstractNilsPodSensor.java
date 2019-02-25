@@ -388,6 +388,8 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
             return true;
         } else if (NILS_POD_STREAMING.equals(c.getUuid())) {
             return true;
+        } else if (NILS_POD_SYSTEM_STATE.equals(c.getUuid())) {
+            return true;
         }
 
         return false;
