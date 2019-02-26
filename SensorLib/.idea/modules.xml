@@ -4,12 +4,11 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/SensorLib.iml" filepath="$PROJECT_DIR$/SensorLib.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/dataprocessinglib/dataprocessinglib.iml" filepath="$PROJECT_DIR$/dataprocessinglib/dataprocessinglib.iml" />
       <module fileurl="file://$PROJECT_DIR$/sensorlib/sensorlib.iml" filepath="$PROJECT_DIR$/sensorlib/sensorlib.iml" />
       <module fileurl="file://$PROJECT_DIR$/sensorlibutils/sensorlibutils.iml" filepath="$PROJECT_DIR$/sensorlibutils/sensorlibutils.iml" />
       <module fileurl="file://$PROJECT_DIR$/sls-bitalino/sls-bitalino.iml" filepath="$PROJECT_DIR$/sls-bitalino/sls-bitalino.iml" />
-      <module fileurl="file://$PROJECT_DIR$/sls-empatica/sls-empatica.iml" filepath="$PROJECT_DIR$/sls-empatica/sls-empatica.iml" />
       <module fileurl="file://$PROJECT_DIR$/sls-fitnessshirt/sls-fitnessshirt.iml" filepath="$PROJECT_DIR$/sls-fitnessshirt/sls-fitnessshirt.iml" />
-      <module fileurl="file://$PROJECT_DIR$/sls-myo/sls-myo.iml" filepath="$PROJECT_DIR$/sls-myo/sls-myo.iml" />
       <module fileurl="file://$PROJECT_DIR$/sls-portabiles/sls-portabiles.iml" filepath="$PROJECT_DIR$/sls-portabiles/sls-portabiles.iml" />
       <module fileurl="file://$PROJECT_DIR$/sls-shimmer/sls-shimmer.iml" filepath="$PROJECT_DIR$/sls-shimmer/sls-shimmer.iml" />
       <module fileurl="file://$PROJECT_DIR$/sls-simblee/sls-simblee.iml" filepath="$PROJECT_DIR$/sls-simblee/sls-simblee.iml" />
