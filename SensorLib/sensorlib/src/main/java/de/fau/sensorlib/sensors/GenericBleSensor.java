@@ -222,6 +222,7 @@ public class GenericBleSensor extends AbstractSensor {
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             super.onCharacteristicWrite(gatt, characteristic, status);
+            
             // Peek at the request queue and check if this was our request (which it always should be), then remove it from the queue.
             BluetoothGattCharacteristic qc = mCharacteristicsWriteRequests.peek();
             if (qc != null && qc.equals(characteristic)) {
@@ -388,18 +389,26 @@ public class GenericBleSensor extends AbstractSensor {
             return;
         }
 
+        enableGattNotifications();
+    }
+
+
+    public void enableGattNotifications() {
         for (BluetoothGattCharacteristic charac : mNotificationsList) {
-            enableGattNotifications(charac);
+            enableGattNotification(charac);
         }
-        // sendStartStreaming() is called after successfully subscribing to all notifications
+    }
+
+
+    public void disableGattNotifications() {
+        for (BluetoothGattCharacteristic charac : mNotificationsList) {
+            disableGattNotification(charac);
+        }
     }
 
     @Override
     public void stopStreaming() {
-        for (BluetoothGattCharacteristic charac : mNotificationsList) {
-            disableGattNotifications(charac);
-        }
-        // sendStopStreaming() is called after successfully unsubscribing from all notifications
+        disableGattNotifications();
     }
 
 
@@ -450,7 +459,7 @@ public class GenericBleSensor extends AbstractSensor {
      *
      * @param characteristic the characteristic for which to enable notifications.
      */
-    private boolean enableGattNotifications(BluetoothGattCharacteristic characteristic) {
+    private boolean enableGattNotification(BluetoothGattCharacteristic characteristic) {
         mGatt.setCharacteristicNotification(characteristic, true);
         BluetoothGattDescriptor desc = characteristic.getDescriptor(BleGattAttributes.CLIENT_CHARACTERISTIC_CONFIGURATION);
 
@@ -470,7 +479,7 @@ public class GenericBleSensor extends AbstractSensor {
      *
      * @param characteristic the characteristic for which to disable notifications.
      */
-    private boolean disableGattNotifications(BluetoothGattCharacteristic characteristic) {
+    private boolean disableGattNotification(BluetoothGattCharacteristic characteristic) {
         mGatt.setCharacteristicNotification(characteristic, false);
         BluetoothGattDescriptor desc = characteristic.getDescriptor(BleGattAttributes.CLIENT_CHARACTERISTIC_CONFIGURATION);
 
@@ -526,18 +535,21 @@ public class GenericBleSensor extends AbstractSensor {
 
     protected void readCharacteristic(BluetoothGattCharacteristic c) {
         mCharacteristicsReadRequests.add(c);
-        if (mCharacteristicsReadRequests.size() == 1) {
+        mGatt.readCharacteristic(mCharacteristicsReadRequests.peek());
+        /*if (mCharacteristicsReadRequests.size() == 1) {
             mGatt.readCharacteristic(c);
-        }
+        }*/
     }
 
     protected boolean writeCharacteristic(BluetoothGattCharacteristic c, byte[] value) {
         c.setValue(value);
         c.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
         mCharacteristicsWriteRequests.add(c);
-        if (mCharacteristicsWriteRequests.size() == 1) {
+
+        mGatt.writeCharacteristic(mCharacteristicsWriteRequests.peek());
+        /*if (mCharacteristicsWriteRequests.size() == 1) {
             return mGatt.writeCharacteristic(c);
-        }
+        }*/
 
         return true;
     }

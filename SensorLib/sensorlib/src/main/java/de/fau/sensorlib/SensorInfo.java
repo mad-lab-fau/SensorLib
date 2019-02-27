@@ -77,8 +77,9 @@ public class SensorInfo {
      * @param newState the new state for the sensor.
      */
     protected void setState(SensorState newState) {
-        onStateChange(mSensorState, newState);
+        SensorState tmp = mSensorState;
         mSensorState = newState;
+        onStateChange(tmp, mSensorState);
     }
 
     /**

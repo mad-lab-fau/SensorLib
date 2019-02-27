@@ -16,7 +16,6 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.EnumSet;
 
-import de.fau.sensorlib.BleGattAttributes;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorException;
 import de.fau.sensorlib.SensorInfo;
