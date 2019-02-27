@@ -21,6 +21,7 @@ import de.fau.sensorlib.dataframe.AccelDataFrame;
 import de.fau.sensorlib.dataframe.GyroDataFrame;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
+import de.fau.sensorlib.enums.SensorState;
 import de.fau.sensorlib.sensors.configs.BaseConfigItem;
 
 public abstract class AbstractNilsPodSensor extends GenericBleSensor implements Recordable, Resettable {
@@ -67,7 +68,6 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
      * UUID for Firmware Version Characteristic (read) of NilsPod Sensor
      */
     protected static final UUID NILS_POD_FIRMWARE_VERSION = UUID.fromString("98ff0f0f-770d-4a83-9e9b-ce6bbd75e472");
-
 
     /**
      * Default packet size: 12 Byte IMU + 2 Byte Counter
@@ -206,6 +206,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         }
 
         public static NilsPodPowerState inferPowerState(int powerState) {
+
             if (powerState == NO_POWER.getPowerState()) {
                 return NO_POWER;
             } else if (powerState == WP_CHR_COMPLETE.getPowerState()) {
@@ -310,15 +311,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
     @Override
     public void startStreaming() {
-        // enable notifications to subscribe to characteristics (i.e. write descriptors)
-        // START_STREAMING command is sent to sensor as soon as all descriptors are written
-        // (in onAllGattNotificationsEnabled)
-        super.startStreaming();
-    }
-
-    @Override
-    protected void onAllGattNotificationsEnabled() {
-        super.onAllGattNotificationsEnabled();
+        // send START_STREAMING command to NilsPod
         if (send(NilsPodSensorCommand.START_STREAMING)) {
             enableRecorder();
         } else {
@@ -329,9 +322,6 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     @Override
     public void stopStreaming() {
         // send STOP_STREAMING command to sensor
-        // super.stopStreaming() (where characteristics are unsubscribed) is called in
-        // onNewCharacteristicWrite (callback indicating that STOP_STREAMING command was successfully
-        // sent to sensor)
         if (send(NilsPodSensorCommand.STOP_STREAMING)) {
             if (mDataRecorder != null) {
                 mDataRecorder.completeRecorder();
@@ -339,6 +329,39 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         } else {
             Log.e(TAG, "stopStreaming failed!");
         }
+    }
+
+    @Override
+    public void disconnect() {
+        disableGattNotifications();
+        super.disconnect();
+    }
+
+    @Override
+    protected void onStateChange(SensorState oldState, SensorState newState) {
+        super.onStateChange(oldState, newState);
+
+        if (oldState == SensorState.CONNECTING && newState == SensorState.CONNECTED) {
+            enableGattNotifications();
+        }
+
+        // TODO should be replaced by notification in latest NilsPod firmware
+        /*if (isConnected()) {
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    readSystemState();
+                }
+            }, 200);
+        }*/
+    }
+
+    protected void onOperationStateChanged(NilsPodOperationState oldState, NilsPodOperationState newState) {
+        Log.d(TAG, "onNilsPodOperationStateChanged: <" + oldState + "> -> <" + newState + ">");
+    }
+
+    protected NilsPodOperationState getOperationState() {
+        return mOperationState;
     }
 
     /**
@@ -424,8 +447,10 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
             return true;
         } else {
             if (NILS_POD_STREAMING.equals(characteristic.getUuid())) {
-                extractSensorData(characteristic);
-                return true;
+                if (getOperationState() == NilsPodOperationState.STREAMING || isStreaming()) {
+                    extractSensorData(characteristic);
+                    return true;
+                }
             } else if (NILS_POD_SYSTEM_STATE.equals(characteristic.getUuid())) {
                 try {
                     extractSystemState(characteristic);
@@ -468,9 +493,12 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         } else if (NILS_POD_COMMANDS.equals(characteristic.getUuid())) {
             // check if the command sent to the sensor was STOP_STREAMING
             byte[] values = characteristic.getValue();
-            if (values.length > 0 && (values[0] == NilsPodSensorCommand.STOP_STREAMING.cmd[0])) {
-                // call stopStreaming() to unsubscribe from characteristic notifications
-                super.stopStreaming();
+            if (values.length > 0) {
+                if (values[0] == NilsPodSensorCommand.STOP_STREAMING.cmd[0]) {
+                    sendStopStreaming();
+                } else if (values[0] == NilsPodSensorCommand.START_STREAMING.cmd[0]) {
+                    sendStartStreaming();
+                }
             }
         }
     }

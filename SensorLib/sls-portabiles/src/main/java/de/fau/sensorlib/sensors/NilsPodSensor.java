@@ -11,26 +11,41 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.content.Context;
 import android.util.Log;
 
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.BarometricPressureDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
-import de.fau.sensorlib.enums.SensorState;
+import de.fau.sensorlib.sensors.logging.NilsPodLoggable;
+import de.fau.sensorlib.sensors.logging.Session;
+import de.fau.sensorlib.sensors.logging.SessionHandler;
 
 
 /**
  * Represents a NilsPod Sensor device.
  */
-public class NilsPodSensor extends AbstractNilsPodSensor {
+public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLoggable {
+
+    private static final String TAG = NilsPodSensor.class.getSimpleName();
+
+    public interface NilsPodLoggingCallback {
+        void onSessionListRead(List<Session> sessionList);
+    }
+
+    protected NilsPodLoggingCallback mNilsPodCallback;
 
 
     /**
      * Global counter for incoming packages (local counter only has 15 bit)
      */
     private int globalCounter = 0;
+
+
+    private SessionHandler mSessionHandler;
 
 
     public NilsPodSensor(Context context, SensorInfo info, SensorDataProcessor dataHandler) {
@@ -42,6 +57,49 @@ public class NilsPodSensor extends AbstractNilsPodSensor {
         super.startStreaming();
         lastCounter = 0;
         globalCounter = 0;
+    }
+
+
+    public void setNilsPodCallback(NilsPodLoggingCallback callback) {
+        mNilsPodCallback = callback;
+    }
+
+    @Override
+    protected boolean onNewCharacteristicValue(BluetoothGattCharacteristic characteristic, boolean isChange) {
+        if (super.onNewCharacteristicValue(characteristic, isChange)) {
+            return true;
+        } else {
+            if (NILS_POD_STREAMING.equals(characteristic.getUuid())) {
+                extractSessionListData(characteristic);
+                // TODO
+                /*switch (getOperationState()) {
+                    case FLASH_SESSION_LIST_TRANSMISSION:
+                        return true;
+                }*/
+            }
+        }
+        return false;
+    }
+
+    protected void extractSessionListData(BluetoothGattCharacteristic characteristic) {
+        byte[] values = characteristic.getValue();
+
+        Log.e(TAG, "EXTRACT SESSION LIST DATA: " + Arrays.toString(values));
+
+        if (!mSessionHandler.firstPacketRead()) {
+            mSessionHandler.setSessionCount(values[0]);
+        } else {
+            Session session = new Session(values);
+            mSessionHandler.addSession(session);
+            Log.d(TAG, session.toString());
+        }
+
+        if (mSessionHandler.allSessionsRead()) {
+            Log.d(TAG, "all sessions read!");
+            if (mNilsPodCallback != null) {
+                mNilsPodCallback.onSessionListRead(mSessionHandler.getSessionList());
+            }
+        }
     }
 
     /**
@@ -112,13 +170,23 @@ public class NilsPodSensor extends AbstractNilsPodSensor {
         }
     }
 
+    @Override
+    protected void onAllGattNotificationsEnabled() {
+        super.onAllGattNotificationsEnabled();
+        setTimeDate();
+    }
 
     @Override
-    protected void onStateChange(SensorState oldState, SensorState newState) {
-        super.onStateChange(oldState, newState);
-        if (oldState == SensorState.CONNECTING && newState == SensorState.CONNECTED) {
-            setTimeDate();
-        }
+    public void requestReadSessionList() {
+        // clear session list (if there was some before)
+        mSessionHandler = new SessionHandler();
+        send(NilsPodSensorCommand.FLASH_READ_SESSION_LIST);
+        //readSystemState();
+    }
+
+
+    private void createDummySessions() {
+        send(new byte[]{(byte) 0xAB});
     }
 
     /**
@@ -138,7 +206,6 @@ public class NilsPodSensor extends AbstractNilsPodSensor {
 
         BluetoothGattCharacteristic dateTimeCharacteristic = getConfigurationService().getCharacteristic(AbstractNilsPodSensor.NILS_POD_DATE_TIME_CONFIG);
         writeCharacteristic(dateTimeCharacteristic, data);
-
     }
 
 
