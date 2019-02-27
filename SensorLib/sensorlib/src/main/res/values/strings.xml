@@ -20,8 +20,8 @@
 
     <!-- Streaming Footer -->
     <string name="start">Start</string>
-    <string name="pause">Pause</string>
     <string name="stop">Stop</string>
+    <string name="disconnect">Disconnect</string>
     <string name="string_fab">FAB</string>
 
     <string name="string_sensor_name">Sensor Name: &lt;b>%1$s&lt;/b></string>

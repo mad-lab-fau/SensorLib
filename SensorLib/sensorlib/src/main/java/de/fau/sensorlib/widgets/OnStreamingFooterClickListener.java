@@ -22,10 +22,10 @@ public interface OnStreamingFooterClickListener {
     /**
      * Called when the Pause Button was clicked.
      */
-    void onPauseButtonClicked();
+    void onStartStopButtonClicked();
 
     /**
      * Called when the Stop Button was clicked.
      */
-    void onStopButtonClicked();
+    void onDisconnectButtonClicked();
 }

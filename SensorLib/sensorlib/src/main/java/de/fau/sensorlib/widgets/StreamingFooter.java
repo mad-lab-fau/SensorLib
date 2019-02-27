@@ -24,7 +24,7 @@ import de.fau.sensorlib.enums.SensorState;
 import de.fau.sensorlib.sensors.AbstractSensor;
 
 /**
- * Provides a UI element with buttons to connect/disconnect sensors, and to pause/resume streaming. This Widget implements the {@link SensorEventListener},
+ * Provides a UI element with buttons to connect/disconnect sensors, and to start/stop streaming. This Widget implements the {@link SensorEventListener},
  * so can subscribe to the {@link SensorEventGenerator}.
  */
 public class StreamingFooter extends RelativeLayout implements View.OnClickListener, SensorEventListener {
@@ -32,8 +32,8 @@ public class StreamingFooter extends RelativeLayout implements View.OnClickListe
     private Context mContext;
 
     private ImageButton mFab;
-    private Button mPauseButton;
-    private Button mStopButton;
+    private Button mStartStopButton;
+    private Button mDisconnectButton;
     private boolean mFabOpen;
 
     private OnStreamingFooterClickListener mListener;
@@ -65,20 +65,20 @@ public class StreamingFooter extends RelativeLayout implements View.OnClickListe
         mContext = context;
 
         mFab = findViewById(R.id.fab);
-        mPauseButton = findViewById(R.id.button_pause);
-        mStopButton = findViewById(R.id.button_stop);
+        mStartStopButton = findViewById(R.id.button_start_stop);
+        mDisconnectButton = findViewById(R.id.button_disconnect);
 
         mFab.setOnClickListener(this);
-        mPauseButton.setOnClickListener(this);
-        mStopButton.setOnClickListener(this);
+        mStartStopButton.setOnClickListener(this);
+        mDisconnectButton.setOnClickListener(this);
 
-        // load animations for closing Pause and Stop Buttons and animate FAB
-        mAnimLeftClose = AnimationUtils.loadAnimation(mContext, R.anim.view_pause_close);
-        mAnimRightClose = AnimationUtils.loadAnimation(mContext, R.anim.view_stop_close);
+        // load animations for closing Start/Stop and Disconnect Buttons and animate FAB
+        mAnimLeftClose = AnimationUtils.loadAnimation(mContext, R.anim.view_start_stop_close);
+        mAnimRightClose = AnimationUtils.loadAnimation(mContext, R.anim.view_disconnnect_close);
         mAnimFabPressed = AnimationUtils.loadAnimation(mContext, R.anim.fab_pressed);
 
-        mAnimLeftOpen = AnimationUtils.loadAnimation(mContext, R.anim.view_pause_open);
-        mAnimRightOpen = AnimationUtils.loadAnimation(mContext, R.anim.view_stop_open);
+        mAnimLeftOpen = AnimationUtils.loadAnimation(mContext, R.anim.view_start_stop_open);
+        mAnimRightOpen = AnimationUtils.loadAnimation(mContext, R.anim.view_disconnect_open);
         mAnimFabNotPressed = AnimationUtils.loadAnimation(mContext, R.anim.fab_not_pressed);
 
         mAnimLeftCloseListener = new Animation.AnimationListener() {
@@ -89,8 +89,8 @@ public class StreamingFooter extends RelativeLayout implements View.OnClickListe
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                mPauseButton.setVisibility(View.INVISIBLE);
-                mPauseButton.setEnabled(false);
+                mStartStopButton.setVisibility(View.INVISIBLE);
+                mStartStopButton.setEnabled(false);
             }
 
             @Override
@@ -106,8 +106,8 @@ public class StreamingFooter extends RelativeLayout implements View.OnClickListe
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                mStopButton.setVisibility(View.INVISIBLE);
-                mStopButton.setEnabled(false);
+                mDisconnectButton.setVisibility(View.INVISIBLE);
+                mDisconnectButton.setEnabled(false);
             }
 
             @Override
@@ -130,18 +130,18 @@ public class StreamingFooter extends RelativeLayout implements View.OnClickListe
         if (mFabOpen) {
             mAnimLeftClose.setAnimationListener(mAnimLeftCloseListener);
             mAnimRightClose.setAnimationListener(mAnimRightCloseListener);
-            mPauseButton.startAnimation(mAnimLeftClose);
-            mStopButton.startAnimation(mAnimRightClose);
+            mStartStopButton.startAnimation(mAnimLeftClose);
+            mDisconnectButton.startAnimation(mAnimRightClose);
             mFab.startAnimation(mAnimFabPressed);
         } else {
-            mPauseButton.setVisibility(View.VISIBLE);
-            mStopButton.setVisibility(View.VISIBLE);
+            mStartStopButton.setVisibility(View.VISIBLE);
+            mDisconnectButton.setVisibility(View.VISIBLE);
             if (mState.ordinal() >= SensorState.CONNECTED.ordinal()) {
-                mPauseButton.setEnabled(true);
+                mStartStopButton.setEnabled(true);
             }
-            mStopButton.setEnabled(true);
-            mPauseButton.startAnimation(mAnimLeftOpen);
-            mStopButton.startAnimation(mAnimRightOpen);
+            mDisconnectButton.setEnabled(true);
+            mStartStopButton.startAnimation(mAnimLeftOpen);
+            mDisconnectButton.startAnimation(mAnimRightOpen);
             mFab.startAnimation(mAnimFabNotPressed);
             mFab.setImageResource(R.drawable.ic_stop);
         }
@@ -151,27 +151,27 @@ public class StreamingFooter extends RelativeLayout implements View.OnClickListe
         mFabOpen = !mFabOpen;
     }
 
-    private void onPauseButtonPressed() {
-        if (!mPauseButton.isEnabled()) {
+    private void onStartStopButtonPressed() {
+        if (!mStartStopButton.isEnabled()) {
             return;
         }
 
         if (mListener != null) {
-            mListener.onPauseButtonClicked();
+            mListener.onStartStopButtonClicked();
         }
     }
 
-    private void onStopButtonPressed() {
-        if (!mStopButton.isEnabled()) {
+    private void onDisconnectButtonPressed() {
+        if (!mDisconnectButton.isEnabled()) {
             return;
         }
         // start animations
-        mPauseButton.startAnimation(mAnimLeftClose);
-        mStopButton.startAnimation(mAnimRightClose);
+        mStartStopButton.startAnimation(mAnimLeftClose);
+        mDisconnectButton.startAnimation(mAnimRightClose);
         reset();
 
         if (mListener != null) {
-            mListener.onStopButtonClicked();
+            mListener.onDisconnectButtonClicked();
         }
     }
 
@@ -188,10 +188,10 @@ public class StreamingFooter extends RelativeLayout implements View.OnClickListe
         int id = v.getId();
         if (id == R.id.fab) {
             animateFAB();
-        } else if (id == R.id.button_pause) {
-            onPauseButtonPressed();
-        } else if (id == R.id.button_stop) {
-            onStopButtonPressed();
+        } else if (id == R.id.button_start_stop) {
+            onStartStopButtonPressed();
+        } else if (id == R.id.button_disconnect) {
+            onDisconnectButtonPressed();
         }
     }
 
@@ -202,18 +202,18 @@ public class StreamingFooter extends RelativeLayout implements View.OnClickListe
             case STREAMING:
                 if (mFabOpen) {
                     mFab.performClick();
-                    mPauseButton.setText(R.string.pause);
+                    mStartStopButton.setText(R.string.stop);
                 }
                 break;
             case CONNECTED:
                 if (sensor == null) {
-                    mPauseButton.setEnabled(true);
-                    mPauseButton.setText(R.string.start);
+                    mStartStopButton.setEnabled(true);
+                    mStartStopButton.setText(R.string.start);
                 }
                 break;
             case CONNECTION_LOST:
                 mFab.performClick();
-                mStopButton.performClick();
+                mDisconnectButton.performClick();
                 break;
             case DISCONNECTED:
                 mFab.setImageResource(R.drawable.ic_play);
