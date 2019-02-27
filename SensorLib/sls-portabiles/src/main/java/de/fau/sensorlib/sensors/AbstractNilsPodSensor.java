@@ -111,6 +111,9 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
     private HashMap<String, BaseConfigItem> mConfigMap = new HashMap<>();
 
+    private NilsPodOperationState mOperationState;
+
+
     public static final String KEY_SENSOR_ENABLE = "sensors_enable";
 
 
@@ -145,9 +148,9 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
          */
         FLASH_FULL_ERASE(new byte[]{(byte) 0xF0}),
         /**
-         * Flash Read Config Command
+         * Flash Read Session List Command
          */
-        FLASH_READ_CONFIG(new byte[]{(byte) 0xF2}),
+        FLASH_READ_SESSION_LIST(new byte[]{(byte) 0xF2}),
         /**
          * Flash Transmit Session Command
          */
@@ -344,17 +347,17 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
      * @param cmd Sensor Command
      * @return true if data has been successfully sent, false otherwise
      */
-    private boolean send(NilsPodSensorCommand cmd) {
+    protected boolean send(NilsPodSensorCommand cmd) {
         Log.d(TAG, "Sending " + cmd + " command to " + getName());
         return send(cmd.cmd);
     }
 
-    private boolean send(byte[] data) {
-        if (mStreamingService == null) {
+    protected boolean send(byte[] data) {
+        if (getStreamingService() == null) {
             Log.w(TAG, "Service not found");
             return false;
         }
-        BluetoothGattCharacteristic characteristic = mStreamingService.getCharacteristic(NILS_POD_COMMANDS);
+        BluetoothGattCharacteristic characteristic = getStreamingService().getCharacteristic(NILS_POD_COMMANDS);
         if (characteristic == null) {
             Log.w(TAG, "Send characteristic not found");
             return false;
@@ -395,6 +398,15 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         return false;
     }
 
+    @Override
+    protected void onAllGattNotificationsEnabled() {
+        Log.d(TAG, "onAllGattNotificationsEnabled");
+    }
+
+    @Override
+    protected void onAllGattNotificationsDisabled() {
+        Log.d(TAG, "onAllGattNotificationsDisabled");
+    }
 
     @Override
     protected void onDiscoveredService(BluetoothGattService service) {
@@ -416,31 +428,35 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
                 return true;
             } else if (NILS_POD_SYSTEM_STATE.equals(characteristic.getUuid())) {
                 try {
-                    readSystemState(characteristic);
+                    extractSystemState(characteristic);
                 } catch (SensorException e) {
                     handleSensorException(e);
                 }
+                return true;
             } else if (NILS_POD_TS_CONFIG.equals(characteristic.getUuid())) {
                 try {
-                    readTsConfig(characteristic);
+                    extractTsConfig(characteristic);
                 } catch (SensorException e) {
                     handleSensorException(e);
                 }
+                return true;
             } else if (NILS_POD_SENSOR_CONFIG.equals(characteristic.getUuid())) {
                 try {
-                    readSensorConfig(characteristic);
+                    extractSensorConfig(characteristic);
                 } catch (SensorException e) {
                     handleSensorException(e);
                 }
+                return true;
             } else if (NILS_POD_METADATA_CONFIG.equals(characteristic.getUuid())) {
                 try {
-                    readSensorPosition(characteristic);
+                    extractSensorPosition(characteristic);
                 } catch (SensorException e) {
                     handleSensorException(e);
                 }
+                return true;
             }
-            return false;
         }
+        return false;
     }
 
     @Override
@@ -486,7 +502,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     }
 
 
-    protected void readSystemState(BluetoothGattCharacteristic characteristic) throws SensorException {
+    protected void extractSystemState(BluetoothGattCharacteristic characteristic) throws SensorException {
         int offset = 0;
         byte[] values = characteristic.getValue();
         boolean connectionState;
@@ -500,6 +516,10 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         try {
             connectionState = values[offset++] == 1;
             operationState = NilsPodOperationState.values()[values[offset++]];
+            // call callback
+            onOperationStateChanged(mOperationState, operationState);
+            // set new state
+            mOperationState = operationState;
             powerState = NilsPodPowerState.inferPowerState(values[offset++]);
             errorFlags = values[offset++];
             batteryLevel = values[offset];
@@ -521,7 +541,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     }
 
 
-    protected void readTsConfig(BluetoothGattCharacteristic characteristic) throws SensorException {
+    protected void extractTsConfig(BluetoothGattCharacteristic characteristic) throws SensorException {
         int offset = 0;
         byte[] values = characteristic.getValue();
         NilsPodSyncRole syncRole;
@@ -546,7 +566,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         Log.d(TAG, "\tRF Group: " + rfGroup);
     }
 
-    protected void readSensorConfig(BluetoothGattCharacteristic characteristic) throws SensorException {
+    protected void extractSensorConfig(BluetoothGattCharacteristic characteristic) throws SensorException {
         int offset = 0;
         byte[] values = characteristic.getValue();
         int sensors;
@@ -580,7 +600,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         }
     }
 
-    protected void readSensorPosition(BluetoothGattCharacteristic characteristic) throws SensorException {
+    protected void extractSensorPosition(BluetoothGattCharacteristic characteristic) throws SensorException {
         try {
             mSensorPosition = NilsPodSensorPosition.values()[characteristic.getValue()[0]];
         } catch (Exception e) {
@@ -619,7 +639,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         }
 
 
-        BluetoothGattCharacteristic configChara = mGatt.getService(NILS_POD_CONFIGURATION_SERVICE).getCharacteristic(NILS_POD_SENSOR_CONFIG);
+        BluetoothGattCharacteristic configChara = mConfigurationService.getCharacteristic(NILS_POD_SENSOR_CONFIG);
         return writeCharacteristic(configChara, new byte[]{value});
     }
 
@@ -627,8 +647,20 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
      * Sends a read request to the sensor to check which HardwareSensors are currently enabled.
      */
     public void readEnabledSensors() {
-        BluetoothGattCharacteristic configChara = mGatt.getService(NILS_POD_CONFIGURATION_SERVICE).getCharacteristic(NILS_POD_SENSOR_CONFIG);
-        readCharacteristic(configChara);
+        if (mConfigurationService != null) {
+            BluetoothGattCharacteristic configChara = mConfigurationService.getCharacteristic(NILS_POD_SENSOR_CONFIG);
+            readCharacteristic(configChara);
+        }
+    }
+
+    /**
+     * Sends a read request to the sensor to read the current system state.
+     */
+    public void readSystemState() {
+        if (mConfigurationService != null) {
+            BluetoothGattCharacteristic systemStateChara = mConfigurationService.getCharacteristic(NILS_POD_SYSTEM_STATE);
+            readCharacteristic(systemStateChara);
+        }
     }
 
     private double convertSamplingRate(byte value) {
