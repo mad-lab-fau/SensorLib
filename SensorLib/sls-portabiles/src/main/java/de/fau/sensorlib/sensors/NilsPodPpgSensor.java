@@ -23,6 +23,8 @@ import de.fau.sensorlib.dataframe.PpgDataFrame;
  */
 public class NilsPodPpgSensor extends NilsPodSensor {
 
+    private static final String TAG = NilsPodSensor.class.getSimpleName();
+
     public NilsPodPpgSensor(Context context, SensorInfo info, SensorDataProcessor dataHandler) {
         super(context, info, dataHandler);
     }

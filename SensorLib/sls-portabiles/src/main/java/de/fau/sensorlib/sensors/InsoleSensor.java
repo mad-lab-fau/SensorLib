@@ -24,6 +24,8 @@ import de.fau.sensorlib.enums.HardwareSensor;
  */
 public class InsoleSensor extends NilsPodSensor {
 
+    private static final String TAG = NilsPodSensor.class.getSimpleName();
+
     /**
      * Global counter for incoming packages (local counter only has 15 bit)
      */
