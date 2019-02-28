@@ -21,6 +21,7 @@ import de.fau.sensorlib.dataframe.AccelDataFrame;
 import de.fau.sensorlib.dataframe.GyroDataFrame;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
+import de.fau.sensorlib.enums.SensorMessage;
 import de.fau.sensorlib.enums.SensorState;
 import de.fau.sensorlib.sensors.configs.BaseConfigItem;
 
@@ -181,7 +182,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     /**
      * Enum describing the operation state of the NilsPod sensor
      */
-    protected enum NilsPodOperationState {
+    public enum NilsPodOperationState {
         IDLE,
         STREAMING,
         LOGGING,
@@ -358,9 +359,10 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
     protected void onOperationStateChanged(NilsPodOperationState oldState, NilsPodOperationState newState) {
         Log.d(TAG, "onNilsPodOperationStateChanged: <" + oldState + "> -> <" + newState + ">");
+        sendNotification(SensorMessage.OPERATION_STATE_CHANGED);
     }
 
-    protected NilsPodOperationState getOperationState() {
+    public NilsPodOperationState getOperationState() {
         return mOperationState;
     }
 
@@ -544,10 +546,11 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         try {
             connectionState = values[offset++] == 1;
             operationState = NilsPodOperationState.values()[values[offset++]];
-            // call callback
-            onOperationStateChanged(mOperationState, operationState);
+            NilsPodOperationState oldState = mOperationState;
             // set new state
             mOperationState = operationState;
+            // call callback
+            onOperationStateChanged(oldState, mOperationState);
             powerState = NilsPodPowerState.inferPowerState(values[offset++]);
             errorFlags = values[offset++];
             batteryLevel = values[offset];
