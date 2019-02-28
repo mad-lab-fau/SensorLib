@@ -27,9 +27,10 @@ public interface SensorEventListener {
     /**
      * Called when the sensor issued a message.
      *
-     * @param sensor  The sensor who issued a message.
-     * @param message The sensor message.
+     * @param sensor      The sensor who issued a message.
+     * @param messageType Type of sensor message.
+     * @param message     Optional sensor message.
      */
-    void onSensorMessage(AbstractSensor sensor, SensorMessage message);
+    void onSensorMessage(AbstractSensor sensor, SensorMessage messageType, String message);
 
 }

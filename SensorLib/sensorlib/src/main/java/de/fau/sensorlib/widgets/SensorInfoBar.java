@@ -18,11 +18,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -88,10 +88,13 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
     }
 
     @Override
-    public void onSensorMessage(AbstractSensor sensor, SensorMessage message) {
-        switch (message) {
+    public void onSensorMessage(AbstractSensor sensor, SensorMessage messageType, String message) {
+        Log.e(TAG, messageType.getName() + ", " + message);
+        switch (messageType) {
+            case OPERATION_STATE_CHANGED:
+                mAdapter.updateAdditionalInfo(sensor, message);
             case BATTERY_LEVEL_CHANGED:
-                mAdapter.updateBatteryLevel(sensor);
+                mAdapter.updateSensor(sensor);
                 break;
         }
     }
@@ -101,13 +104,15 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
 
         private Context mContext;
         private ArrayList<AbstractSensor> mAttachedSensors;
+        private ArrayList<String> mAdditionalInfos;
 
         private SensorInfoGridAdapter(Context context) {
             mContext = context;
             mAttachedSensors = new ArrayList<>();
+            mAdditionalInfos = new ArrayList<>();
         }
 
-        private void updateBatteryLevel(AbstractSensor sensor) {
+        private void updateSensor(AbstractSensor sensor) {
             int idx = mAttachedSensors.indexOf(sensor);
             if (idx != -1) {
                 mAttachedSensors.set(idx, sensor);
@@ -115,13 +120,23 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
             }
         }
 
+        private void updateAdditionalInfo(AbstractSensor sensor, String message) {
+            int position = mAttachedSensors.indexOf(sensor);
+            if (position != -1) {
+                mAdditionalInfos.set(position, message);
+                notifyDataSetChanged();
+            }
+        }
+
         private void addSensor(AbstractSensor sensor) {
             mAttachedSensors.add(sensor);
+            mAdditionalInfos.add("");
             notifyDataSetChanged();
         }
 
         private void clear() {
             mAttachedSensors.clear();
+            mAdditionalInfos.clear();
             notifyDataSetChanged();
         }
 
@@ -136,6 +151,7 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
         public void onBindViewHolder(@NonNull SensorInfoViewHolder holder, int position) {
             holder.setSensorName(mAttachedSensors.get(position).getDeviceName());
             holder.updateBatteryLevel(mAttachedSensors.get(position).getBatteryLevel());
+            holder.updateAdditionalInfo(mAdditionalInfos.get(position));
         }
 
         @Override
@@ -176,6 +192,7 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
         private Context mContext;
         private TextView mSensorNameTextView;
         private TextView mBatteryLevelTextView;
+        private TextView mAdditionalInfoTextView;
         private ItemClickListener mItemClickListener;
 
         private SensorInfoViewHolder(Context context, View itemView, ItemClickListener listener) {
@@ -183,6 +200,7 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
             mContext = context;
             mSensorNameTextView = itemView.findViewById(R.id.tv_sensor_name);
             mBatteryLevelTextView = itemView.findViewById(R.id.tv_battery_level);
+            mAdditionalInfoTextView = itemView.findViewById(R.id.tv_additional_info);
             mItemClickListener = listener;
             itemView.setOnClickListener(this);
             itemView.setOnLongClickListener(this);
@@ -190,11 +208,16 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
 
         public void setSensorName(String sensorName) {
             mSensorNameTextView.setText(sensorName);
-            TextViewCompat.setAutoSizeTextTypeWithDefaults(mSensorNameTextView, TextViewCompat.AUTO_SIZE_TEXT_TYPE_UNIFORM);
+            TextViewCompat.setAutoSizeTextTypeUniformWithPresetSizes(mSensorNameTextView, new int[]{8, 10, 12}, TextViewCompat.AUTO_SIZE_TEXT_TYPE_UNIFORM);
         }
 
         public void updateBatteryLevel(int batteryLevel) {
             mBatteryLevelTextView.setText(mContext.getString(R.string.placeholder_battery_level, batteryLevel));
+        }
+
+        public void updateAdditionalInfo(String message) {
+            mAdditionalInfoTextView.setText(message);
+            TextViewCompat.setAutoSizeTextTypeUniformWithPresetSizes(mAdditionalInfoTextView, new int[]{8, 10, 12}, TextViewCompat.AUTO_SIZE_TEXT_TYPE_UNIFORM);
         }
 
         @Override

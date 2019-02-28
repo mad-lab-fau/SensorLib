@@ -282,7 +282,7 @@ public class SensorPlotter extends CardView implements SensorEventListener {
     }
 
     @Override
-    public void onSensorMessage(AbstractSensor sensor, SensorMessage message) {
+    public void onSensorMessage(AbstractSensor sensor, SensorMessage messageType, String message) {
 
     }
 

@@ -223,7 +223,7 @@ public class StreamingFooter extends RelativeLayout implements View.OnClickListe
     }
 
     @Override
-    public void onSensorMessage(AbstractSensor sensor, SensorMessage messsage) {
+    public void onSensorMessage(AbstractSensor sensor, SensorMessage messsageType, String message) {
 
     }
 }

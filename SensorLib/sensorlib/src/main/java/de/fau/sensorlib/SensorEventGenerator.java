@@ -114,12 +114,23 @@ public class SensorEventGenerator {
     /**
      * Broadcasts a sensor message of a specific sensor
      *
-     * @param sensor  the sensor where the message originated from
-     * @param message the sensor message
+     * @param sensor      the sensor where the message originated from
+     * @param messageType Type of sensor message
      */
-    public void broadcastMessage(AbstractSensor sensor, SensorMessage message) {
+    public void broadcastMessage(AbstractSensor sensor, SensorMessage messageType) {
+        broadcastMessage(sensor, messageType, null);
+    }
+
+    /**
+     * Broadcasts a sensor message of a specific sensor
+     *
+     * @param sensor      the sensor where the message originated from
+     * @param messageType Type of sensor message
+     * @param message     An optional sensor message
+     */
+    public void broadcastMessage(AbstractSensor sensor, SensorMessage messageType, String message) {
         for (SensorEventListener listener : mEventListener) {
-            listener.onSensorMessage(sensor, message);
+            listener.onSensorMessage(sensor, messageType, message);
         }
     }
 
