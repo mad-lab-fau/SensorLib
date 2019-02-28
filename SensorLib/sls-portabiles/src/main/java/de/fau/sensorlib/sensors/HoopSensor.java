@@ -15,6 +15,7 @@ import java.util.Arrays;
 
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorInfo;
+import de.fau.sensorlib.enums.SensorState;
 
 
 /**
@@ -31,6 +32,19 @@ public class HoopSensor extends AbstractNilsPodSensor {
 
     public HoopSensor(Context context, SensorInfo info, SensorDataProcessor dataHandler) {
         super(context, info, dataHandler);
+    }
+
+    @Override
+    protected void onStateChange(SensorState oldState, SensorState newState) {
+        super.onStateChange(oldState, newState);
+        switch (newState) {
+            case STREAMING:
+                setOperationState(NilsPodOperationState.STREAMING);
+                break;
+            default:
+                setOperationState(NilsPodOperationState.IDLE);
+                break;
+        }
     }
 
     /**
