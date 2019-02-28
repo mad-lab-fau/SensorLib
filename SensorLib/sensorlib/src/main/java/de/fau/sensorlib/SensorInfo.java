@@ -10,13 +10,15 @@ package de.fau.sensorlib;
 import android.util.Log;
 import android.util.SparseArray;
 
+import java.io.Serializable;
+
 import de.fau.sensorlib.enums.KnownSensor;
 import de.fau.sensorlib.enums.SensorState;
 
 /**
  * Basic sensor information that is used to describe all sensors and handle sensors not constructed (yet).
  */
-public class SensorInfo {
+public class SensorInfo implements Serializable {
 
     private static final String TAG = SensorInfo.class.getSimpleName();
 

@@ -18,7 +18,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -89,7 +88,6 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
 
     @Override
     public void onSensorMessage(AbstractSensor sensor, SensorMessage messageType, String message) {
-        Log.e(TAG, messageType.getName() + ", " + message);
         switch (messageType) {
             case OPERATION_STATE_CHANGED:
                 mAdapter.updateAdditionalInfo(sensor, message);
