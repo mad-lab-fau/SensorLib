@@ -112,7 +112,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
     private HashMap<String, BaseConfigItem> mConfigMap = new HashMap<>();
 
-    private NilsPodOperationState mOperationState;
+    private NilsPodOperationState mOperationState = NilsPodOperationState.IDLE;
 
 
     public static final String KEY_SENSOR_ENABLE = "sensors_enable";
@@ -364,6 +364,12 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
     public NilsPodOperationState getOperationState() {
         return mOperationState;
+    }
+
+    protected void setOperationState(NilsPodOperationState operationState) {
+        NilsPodOperationState oldState = mOperationState;
+        mOperationState = operationState;
+        onOperationStateChanged(oldState, mOperationState);
     }
 
     /**
