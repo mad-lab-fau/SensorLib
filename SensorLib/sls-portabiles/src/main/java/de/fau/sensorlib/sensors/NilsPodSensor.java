@@ -11,16 +11,15 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.content.Context;
 import android.util.Log;
 
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.BarometricPressureDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
 import de.fau.sensorlib.sensors.logging.NilsPodLoggable;
+import de.fau.sensorlib.sensors.logging.NilsPodLoggingCallback;
 import de.fau.sensorlib.sensors.logging.Session;
 import de.fau.sensorlib.sensors.logging.SessionHandler;
 
@@ -31,10 +30,6 @@ import de.fau.sensorlib.sensors.logging.SessionHandler;
 public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLoggable {
 
     private static final String TAG = NilsPodSensor.class.getSimpleName();
-
-    public interface NilsPodLoggingCallback {
-        void onSessionListRead(List<Session> sessionList);
-    }
 
     protected NilsPodLoggingCallback mNilsPodCallback;
 
@@ -84,8 +79,6 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     protected void extractSessionListData(BluetoothGattCharacteristic characteristic) {
         byte[] values = characteristic.getValue();
 
-        Log.e(TAG, "EXTRACT SESSION LIST DATA: " + Arrays.toString(values));
-
         if (!mSessionHandler.firstPacketRead()) {
             mSessionHandler.setSessionCount(values[0]);
         } else {
@@ -97,7 +90,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         if (mSessionHandler.allSessionsRead()) {
             Log.d(TAG, "all sessions read!");
             if (mNilsPodCallback != null) {
-                mNilsPodCallback.onSessionListRead(mSessionHandler.getSessionList());
+                mNilsPodCallback.onSessionListRead(this, mSessionHandler.getSessionList());
             }
         }
     }
