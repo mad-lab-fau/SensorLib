@@ -31,7 +31,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
 
     private static final String TAG = NilsPodSensor.class.getSimpleName();
 
-    protected NilsPodLoggingCallback mNilsPodCallback;
+    protected NilsPodLoggingCallback mNilsPodLoggingCallback;
 
 
     /**
@@ -55,8 +55,8 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     }
 
 
-    public void setNilsPodCallback(NilsPodLoggingCallback callback) {
-        mNilsPodCallback = callback;
+    public void setNilsPodLoggingCallback(NilsPodLoggingCallback callback) {
+        mNilsPodLoggingCallback = callback;
     }
 
     @Override
@@ -89,8 +89,8 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
 
         if (mSessionHandler.allSessionsRead()) {
             Log.d(TAG, "all sessions read!");
-            if (mNilsPodCallback != null) {
-                mNilsPodCallback.onSessionListRead(this, mSessionHandler.getSessionList());
+            if (mNilsPodLoggingCallback != null) {
+                mNilsPodLoggingCallback.onSessionListRead(this, mSessionHandler.getSessionList());
             }
         }
     }
