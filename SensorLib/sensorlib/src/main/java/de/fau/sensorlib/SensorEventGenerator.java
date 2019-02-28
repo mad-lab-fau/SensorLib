@@ -49,6 +49,10 @@ public class SensorEventGenerator {
         mEventListener.remove(listener);
     }
 
+    public boolean isSensorEventListenerRegistered(SensorEventListener listener) {
+        return mEventListener.contains(listener);
+    }
+
     /**
      * Sets a new global state and notifies all attached listeners about the state change.
      *
