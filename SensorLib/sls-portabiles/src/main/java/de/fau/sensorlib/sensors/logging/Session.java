@@ -14,6 +14,13 @@ public class Session {
 
     private static final String TAG = Session.class.getSimpleName();
 
+    /**
+     * Flash page size in Byte
+     */
+    private static final int PAGE_SIZE = 2048;
+
+    private int mSessionNumber;
+
     private int mStartPage;
     private int mEndPage;
 
@@ -38,12 +45,34 @@ public class Session {
         mSampleSize = sessionPacket[offset];
     }
 
+    public void setSessionNumber(int sessionNumber) {
+        mSessionNumber = sessionNumber;
+    }
+
+    public int getSessionNumber() {
+        return mSessionNumber;
+    }
+
+    public Date getStartTime() {
+        return mStartTime;
+    }
+
+    public int getSampleSize() {
+        return mSampleSize;
+    }
+
+    public boolean wasSessionVoltageTerminated() {
+        return mVoltageTerminated;
+    }
+
+    public int getSamplingRate() {
+        return mSamplingRate;
+    }
 
     @Override
     public String toString() {
-        return "<Session> [" +
-                mStartPage + "-" + mEndPage + "] @ " + mStartTime + " | " +
-                "sampling rate: " + mSamplingRate + " Hz, sample size: " +
-                mSampleSize + ", voltage terminated: " + mVoltageTerminated;
+        return "<Session #" + mSessionNumber + "> [" + mStartPage + "-" + mEndPage + "] @ " +
+                mStartTime + " | " + "fs=" + mSamplingRate + " Hz, sample size: " +
+                mSampleSize;
     }
 }

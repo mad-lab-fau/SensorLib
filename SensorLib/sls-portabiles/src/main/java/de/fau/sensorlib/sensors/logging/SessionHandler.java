@@ -35,6 +35,7 @@ public class SessionHandler {
     }
 
     public void addSession(Session session) {
+        session.setSessionNumber(mSessionList.size());
         mSessionList.add(session);
     }
 
