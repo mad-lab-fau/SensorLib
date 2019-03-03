@@ -15,11 +15,11 @@ import java.util.Objects;
 
 import de.fau.sensorlib.Constants;
 import de.fau.sensorlib.R;
+import de.fau.sensorlib.sensors.AbstractSensor;
 
 public class SensorInfoDialog extends DialogFragment implements View.OnClickListener {
 
     private static final String TAG = SensorInfoDialog.class.getSimpleName();
-
 
     private Context mContext;
 
@@ -27,7 +27,6 @@ public class SensorInfoDialog extends DialogFragment implements View.OnClickList
     private TextView mSensorAddressTextView;
     private TextView mManufacturerTextView;
     private TextView mFirmwareRevisionTextView;
-
 
     @Nullable
     @Override
@@ -48,17 +47,19 @@ public class SensorInfoDialog extends DialogFragment implements View.OnClickList
         String manufacturer = "n/a";
         String firmwareRevision = "n/a";
         if (getArguments() != null) {
-            sensorName = getArguments().getString(Constants.KEY_SENSOR_NAME, "n/a");
-            sensorAddress = getArguments().getString(Constants.KEY_SENSOR_ADDRESS, "n/a");
-            manufacturer = getArguments().getString(Constants.KEY_MANUFACTURER, "n/a");
-            firmwareRevision = getArguments().getString(Constants.KEY_FIRMWARE_REVISION, "n/a");
+            AbstractSensor sensor = (AbstractSensor) getArguments().getSerializable(Constants.KEY_SENSOR);
+            if (sensor != null) {
+                sensorName = sensor.getDeviceName();
+                sensorAddress = sensor.getDeviceAddress();
+                manufacturer = sensor.getManufacturer();
+                firmwareRevision = sensor.getFirmwareRevision();
+            }
         }
 
         mSensorNameTextView.setText(Html.fromHtml(getResources().getString(R.string.string_sensor_name, sensorName)));
         mSensorAddressTextView.setText(Html.fromHtml(getResources().getString(R.string.string_sensor_address, sensorAddress)));
         mManufacturerTextView.setText(Html.fromHtml(getResources().getString(R.string.string_manufacturer, manufacturer)));
         mFirmwareRevisionTextView.setText(Html.fromHtml(getResources().getString(R.string.string_firmware_revision, firmwareRevision)));
-
 
         return rootView;
 

@@ -154,26 +154,20 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
 
         @Override
         public void onItemClick(View view, int position) {
-            SensorInfoViewHolder viewHolder = (SensorInfoViewHolder) findViewHolderForAdapterPosition(position);
-        }
-
-        @Override
-        public void onLongItemClick(View view, int position) {
+            //SensorInfoViewHolder viewHolder = (SensorInfoViewHolder) findViewHolderForAdapterPosition(position);
             AbstractSensor sensor = mAttachedSensors.get(position);
 
             Bundle bundle = new Bundle();
-            bundle.putString(Constants.KEY_SENSOR_NAME, sensor.getName());
-            bundle.putString(Constants.KEY_SENSOR_ADDRESS, sensor.getDeviceAddress());
-            bundle.putString(Constants.KEY_MANUFACTURER, sensor.getManufacturer());
-            bundle.putString(Constants.KEY_FIRMWARE_REVISION, sensor.getFirmwareRevision());
+            bundle.putSerializable(Constants.KEY_SENSOR, sensor);
 
-            SensorInfoDialog dialog = new SensorInfoDialog();
+            SensorActionDialog dialog = new SensorActionDialog();
             dialog.setArguments(bundle);
+
             AppCompatActivity activity = getActivity();
             if (activity != null) {
                 FragmentManager fm = activity.getSupportFragmentManager();
                 if (fm != null) {
-                    dialog.show(fm, "sensor_info");
+                    dialog.show(fm, "sensor_action");
                 }
             }
         }
@@ -185,7 +179,7 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
 
     }
 
-    private static class SensorInfoViewHolder extends ViewHolder implements View.OnClickListener, View.OnLongClickListener {
+    private static class SensorInfoViewHolder extends ViewHolder implements View.OnClickListener {
 
         private Context mContext;
         private TextView mSensorNameTextView;
@@ -201,7 +195,6 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
             mAdditionalInfoTextView = itemView.findViewById(R.id.tv_additional_info);
             mItemClickListener = listener;
             itemView.setOnClickListener(this);
-            itemView.setOnLongClickListener(this);
         }
 
         public void setSensorName(String sensorName) {
@@ -223,16 +216,8 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
             mItemClickListener.onItemClick(v, getAdapterPosition());
         }
 
-        @Override
-        public boolean onLongClick(View v) {
-            mItemClickListener.onLongItemClick(v, getAdapterPosition());
-            return true;
-        }
-
         interface ItemClickListener {
             void onItemClick(View view, int position);
-
-            void onLongItemClick(View view, int position);
         }
     }
 
