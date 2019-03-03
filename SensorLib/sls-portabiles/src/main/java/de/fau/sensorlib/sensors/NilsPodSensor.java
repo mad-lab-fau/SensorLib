@@ -16,12 +16,14 @@ import java.util.Calendar;
 import java.util.Date;
 
 import de.fau.sensorlib.SensorDataProcessor;
+import de.fau.sensorlib.SensorException;
 import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.BarometricPressureDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
 import de.fau.sensorlib.sensors.logging.NilsPodLoggable;
 import de.fau.sensorlib.sensors.logging.NilsPodLoggingCallback;
 import de.fau.sensorlib.sensors.logging.Session;
+import de.fau.sensorlib.sensors.logging.SessionByteWriter;
 import de.fau.sensorlib.sensors.logging.SessionHandler;
 
 
@@ -42,6 +44,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
 
 
     private SessionHandler mSessionHandler;
+    private SessionByteWriter mSessionWriter;
 
 
     public NilsPodSensor(Context context, SensorInfo info, SensorDataProcessor dataHandler) {
@@ -71,6 +74,9 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
                     case FLASH_SESSION_LIST_TRANSMISSION:
                         extractSessionListData(characteristic);
                         return true;
+                    case FLASH_PAGE_TRANSMISSION:
+                        extractSessionData(characteristic);
+                        return true;
                 }
             }
         }
@@ -96,6 +102,11 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
                 }
             }
         }
+    }
+
+    protected void extractSessionData(BluetoothGattCharacteristic characteristic) {
+        byte[] values = characteristic.getValue();
+        mSessionWriter.writeData(values);
     }
 
     /**
@@ -175,22 +186,30 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     @Override
     protected void onOperationStateChanged(NilsPodOperationState oldState, NilsPodOperationState newState) {
         super.onOperationStateChanged(oldState, newState);
-        if (newState == NilsPodOperationState.IDLE) {
-            switch (oldState) {
-                case LOGGING:
-                    readSessionList();
-                    for (NilsPodLoggingCallback callback : mCallbacks) {
-                        callback.onStopLogging(this);
-                    }
-                    break;
-                case NAND_FLASH_ERASE:
-                    readSessionList();
-                    for (NilsPodLoggingCallback callback : mCallbacks) {
-                        callback.onClearSessions(this);
-                    }
-                    break;
-            }
-
+        switch (newState) {
+            case IDLE:
+                switch (oldState) {
+                    case LOGGING:
+                        readSessionList();
+                        for (NilsPodLoggingCallback callback : mCallbacks) {
+                            callback.onStopLogging(this);
+                        }
+                        break;
+                    case NAND_FLASH_ERASE:
+                        readSessionList();
+                        for (NilsPodLoggingCallback callback : mCallbacks) {
+                            callback.onClearSessions(this);
+                        }
+                        break;
+                    case FLASH_PAGE_TRANSMISSION:
+                        Log.e(TAG, "CALLBACKS: " + mCallbacks);
+                        for (NilsPodLoggingCallback callback : mCallbacks) {
+                            callback.onSessionDownloaded(this, mSessionWriter.getSession());
+                        }
+                        mSessionWriter.completeWriter();
+                        break;
+                }
+                break;
         }
     }
 
@@ -204,25 +223,26 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
 
     @Override
     public void clearSessions() {
-        Log.d(TAG, "CLEAR SESSIONS");
         send(NilsPodSensorCommand.FLASH_FULL_ERASE);
     }
 
     @Override
     public void startLogging() {
-        Log.d(TAG, "START LOGGING");
         send(NilsPodSensorCommand.START_LOGGING);
     }
 
     @Override
     public void stopLogging() {
-        Log.d(TAG, "STOP LOGGING");
         send(NilsPodSensorCommand.STOP_LOGGING);
     }
 
     @Override
-    public void transmitSession(Session session) {
-        // TODO implement
+    public void downloadSession(Session session) throws SensorException {
+        mSessionWriter = new SessionByteWriter(this, session, mContext);
+        int sessionId = session.getSessionNumber();
+        byte[] cmd = NilsPodSensorCommand.FLASH_TRANSMIT_SESSION.getByteCmd();
+        cmd[1] = (byte) sessionId;
+        send(cmd);
     }
 
 

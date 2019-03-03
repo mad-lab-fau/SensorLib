@@ -155,7 +155,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         /**
          * Flash Transmit Session Command
          */
-        FLASH_TRANSMIT_SESSION(new byte[]{(byte) 0xF3}),
+        FLASH_TRANSMIT_SESSION(new byte[]{(byte) 0xF3, 0x00}),
         /**
          * Flash Transmit Pages Command
          */
@@ -175,6 +175,10 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
         NilsPodSensorCommand(byte[] cmd) {
             this.cmd = cmd;
+        }
+
+        public byte[] getByteCmd() {
+            return cmd;
         }
     }
 
