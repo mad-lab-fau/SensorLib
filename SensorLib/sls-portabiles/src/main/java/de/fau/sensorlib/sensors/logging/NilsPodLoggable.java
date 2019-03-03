@@ -8,12 +8,13 @@
 
 package de.fau.sensorlib.sensors.logging;
 
+import de.fau.sensorlib.SensorException;
 import de.fau.sensorlib.sensors.Loggable;
 
 public interface NilsPodLoggable extends Loggable {
 
     void readSessionList();
 
-    void transmitSession(Session session);
+    void downloadSession(Session session) throws SensorException;
 
 }

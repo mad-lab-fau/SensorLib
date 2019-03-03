@@ -20,4 +20,8 @@ public interface NilsPodLoggingCallback {
 
     void onClearSessions(NilsPodSensor sensor);
 
+    void onSessionDataReceived(NilsPodSensor sensor, Session session, byte[] sessionData);
+
+    void onSessionDownloaded(NilsPodSensor sensor, Session session);
+
 }
