@@ -72,7 +72,12 @@ public class Session {
     @Override
     public String toString() {
         return "<Session #" + mSessionNumber + "> [" + mStartPage + "-" + mEndPage + "] @ " +
-                mStartTime + " | " + "fs=" + mSamplingRate + " Hz, sample size: " +
+                mStartTime + " | fs=" + mSamplingRate + " Hz, sample size: " +
                 mSampleSize;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return (obj instanceof Session) && (getSessionNumber() == ((Session) obj).getSessionNumber());
     }
 }
