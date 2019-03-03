@@ -11,6 +11,7 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.content.Context;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -31,7 +32,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
 
     private static final String TAG = NilsPodSensor.class.getSimpleName();
 
-    protected NilsPodLoggingCallback mNilsPodLoggingCallback;
+    protected ArrayList<NilsPodLoggingCallback> mCallbacks;
 
 
     /**
@@ -45,6 +46,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
 
     public NilsPodSensor(Context context, SensorInfo info, SensorDataProcessor dataHandler) {
         super(context, info, dataHandler);
+        mCallbacks = new ArrayList<>();
     }
 
     @Override
@@ -55,8 +57,8 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     }
 
 
-    public void setNilsPodLoggingCallback(NilsPodLoggingCallback callback) {
-        mNilsPodLoggingCallback = callback;
+    public void addNilsPodLoggingCallback(NilsPodLoggingCallback callback) {
+        mCallbacks.add(callback);
     }
 
     @Override
@@ -65,12 +67,11 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             return true;
         } else {
             if (NILS_POD_STREAMING.equals(characteristic.getUuid())) {
-                extractSessionListData(characteristic);
-                // TODO
-                /*switch (getOperationState()) {
+                switch (getOperationState()) {
                     case FLASH_SESSION_LIST_TRANSMISSION:
+                        extractSessionListData(characteristic);
                         return true;
-                }*/
+                }
             }
         }
         return false;
@@ -89,8 +90,10 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
 
         if (mSessionHandler.allSessionsRead()) {
             Log.d(TAG, "all sessions read!");
-            if (mNilsPodLoggingCallback != null) {
-                mNilsPodLoggingCallback.onSessionListRead(this, mSessionHandler.getSessionList());
+            if (mCallbacks != null) {
+                for (NilsPodLoggingCallback callback : mCallbacks) {
+                    callback.onSessionListRead(this, mSessionHandler.getSessionList());
+                }
             }
         }
     }
@@ -170,11 +173,56 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     }
 
     @Override
-    public void requestReadSessionList() {
+    protected void onOperationStateChanged(NilsPodOperationState oldState, NilsPodOperationState newState) {
+        super.onOperationStateChanged(oldState, newState);
+        if (newState == NilsPodOperationState.IDLE) {
+            switch (oldState) {
+                case LOGGING:
+                    readSessionList();
+                    for (NilsPodLoggingCallback callback : mCallbacks) {
+                        callback.onStopLogging(this);
+                    }
+                    break;
+                case NAND_FLASH_ERASE:
+                    readSessionList();
+                    for (NilsPodLoggingCallback callback : mCallbacks) {
+                        callback.onClearSessions(this);
+                    }
+                    break;
+            }
+
+        }
+    }
+
+    @Override
+    public void readSessionList() {
         // clear session list (if there was some before)
         mSessionHandler = new SessionHandler();
         send(NilsPodSensorCommand.FLASH_READ_SESSION_LIST);
         //readSystemState();
+    }
+
+    @Override
+    public void clearSessions() {
+        Log.d(TAG, "CLEAR SESSIONS");
+        send(NilsPodSensorCommand.FLASH_FULL_ERASE);
+    }
+
+    @Override
+    public void startLogging() {
+        Log.d(TAG, "START LOGGING");
+        send(NilsPodSensorCommand.START_LOGGING);
+    }
+
+    @Override
+    public void stopLogging() {
+        Log.d(TAG, "STOP LOGGING");
+        send(NilsPodSensorCommand.STOP_LOGGING);
+    }
+
+    @Override
+    public void transmitSession(Session session) {
+        // TODO implement
     }
 
 
@@ -188,7 +236,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     public void setTimeDate() {
         Date currentTime = Calendar.getInstance().getTime();
 
-        Log.d(TAG, "Updating RTC time on " + getName() + " - new time: " + currentTime);
+        Log.d(TAG, "Updating RTC time on " + getDeviceName() + " - new time: " + currentTime);
 
         long unixTime = currentTime.getTime() / 1000; //convert from milliseconds to seconds
         byte[] data = new byte[4];

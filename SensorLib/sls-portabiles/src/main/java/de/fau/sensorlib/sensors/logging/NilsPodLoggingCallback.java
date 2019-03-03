@@ -16,4 +16,8 @@ public interface NilsPodLoggingCallback {
 
     void onSessionListRead(NilsPodSensor sensor, List<Session> sessionList);
 
+    void onStopLogging(NilsPodSensor sensor);
+
+    void onClearSessions(NilsPodSensor sensor);
+
 }

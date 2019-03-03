@@ -307,7 +307,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
     public AbstractNilsPodSensor(Context context, SensorInfo info, SensorDataProcessor dataHandler) {
         // set sampling rate to default value
-        super(context, info.getName(), info.getDeviceAddress(), dataHandler, 200);
+        super(context, info.getDeviceName(), info.getDeviceAddress(), dataHandler, 200);
     }
 
     @Override
@@ -379,7 +379,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
      * @return true if data has been successfully sent, false otherwise
      */
     protected boolean send(NilsPodSensorCommand cmd) {
-        Log.d(TAG, "Sending " + cmd + " command to " + getName());
+        Log.d(TAG, "Sending " + cmd + " command to " + getDeviceName());
         return send(cmd.cmd);
     }
 

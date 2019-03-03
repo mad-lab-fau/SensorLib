@@ -8,8 +8,12 @@
 
 package de.fau.sensorlib.sensors.logging;
 
-public interface NilsPodLoggable {
+import de.fau.sensorlib.sensors.Loggable;
 
-    void requestReadSessionList();
+public interface NilsPodLoggable extends Loggable {
+
+    void readSessionList();
+
+    void transmitSession(Session session);
 
 }
