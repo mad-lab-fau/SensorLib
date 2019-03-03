@@ -177,7 +177,7 @@ public abstract class AbstractSensor extends SensorInfo {
      */
     public AbstractSensor(Context context, String deviceName, String deviceAddress, SensorDataProcessor dataHandler, double desiredSamplingRate) {
         super(deviceName, deviceAddress, desiredSamplingRate);
-        mName = deviceName;
+        mDeviceName = deviceName;
         mDeviceAddress = deviceAddress;
         mContext = context;
         mInternalHandler = new InternalHandler(this);
@@ -201,7 +201,7 @@ public abstract class AbstractSensor extends SensorInfo {
      * @param dataHandler the data handler.
      */
     public AbstractSensor(Context context, SensorInfo knownSensor, SensorDataProcessor dataHandler) {
-        this(context, knownSensor.getName(), knownSensor.getDeviceAddress(), dataHandler);
+        this(context, knownSensor.getDeviceName(), knownSensor.getDeviceAddress(), dataHandler);
     }
 
     /**
@@ -241,20 +241,6 @@ public abstract class AbstractSensor extends SensorInfo {
      * Requests the data streaming to stop. Depending on the sensor, this might induce a disconnect.
      */
     public abstract void stopStreaming();
-
-    /**
-     * @return the address under which this device can be found, e.g. this can be the Bluetooth MAC-address, or the IP-address for WLAN-connected sensors.
-     */
-    public String getDeviceAddress() {
-        return mDeviceAddress;
-    }
-
-    /**
-     * @return a not necessarily unique, human readable name for this sensor.
-     */
-    public String getDeviceName() {
-        return mName;
-    }
 
     public Context getContext() {
         return mContext;

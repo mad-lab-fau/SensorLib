@@ -150,7 +150,7 @@ public class SensorPlotter extends CardView implements SensorEventListener {
 
 
     public void onNewData(SensorDataFrame dataFrame) {
-        String sensorId = dataFrame.getOriginatingSensor().getName() + "@" + dataFrame.getOriginatingSensor().getDeviceAddress();
+        String sensorId = dataFrame.getOriginatingSensor().getDeviceName() + "@" + dataFrame.getOriginatingSensor().getDeviceAddress();
 
         for (int i = 0; i < mSensorBundles.size(); i++) {
             //long timestamp = (long) ((time - (offset + pauseOffset)) / mSensorBundles.get(i).getSampleDistance());
@@ -511,7 +511,7 @@ public class SensorPlotter extends CardView implements SensorEventListener {
         public ArrayList<String> getSensorIds() {
             ArrayList<String> sensorIds = new ArrayList<>();
             for (SensorInfo sensor : mSensorList) {
-                sensorIds.add(sensor.getName() + "@" + sensor.getDeviceAddress());
+                sensorIds.add(sensor.getDeviceName() + "@" + sensor.getDeviceAddress());
             }
 
             return sensorIds;
@@ -520,7 +520,7 @@ public class SensorPlotter extends CardView implements SensorEventListener {
         public ArrayList<String> getSensorNames() {
             ArrayList<String> sensorIds = new ArrayList<>();
             for (SensorInfo sensor : mSensorList) {
-                sensorIds.add(sensor.getName());
+                sensorIds.add(sensor.getDeviceName());
             }
             return sensorIds;
         }

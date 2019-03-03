@@ -10,8 +10,6 @@ package de.fau.sensorlib;
 import android.util.Log;
 import android.util.SparseArray;
 
-import java.io.Serializable;
-
 import de.fau.sensorlib.enums.KnownSensor;
 import de.fau.sensorlib.enums.SensorState;
 
@@ -30,33 +28,33 @@ public class SensorInfo implements Serializable {
     /**
      * The descriptive name of this sensor. Should be Human-readable and Human-understandable.
      */
-    protected String mName = "Unknown";
+    protected String mDeviceName;
 
     /**
      * The address under which this device can be found, e.g. this can be the Bluetooth MAC-address, or the IP-address for WLAN-connected sensors.
      */
-    protected String mDeviceAddress = "n/a";
+    protected String mDeviceAddress;
 
     /**
      * The class of the device, if it is known and implemented in the sensorlib.
      */
-    protected KnownSensor mDeviceClass = null;
+    protected KnownSensor mDeviceClass;
 
-    protected double mSamplingRate = -1;
+    protected double mSamplingRate;
 
 
-    protected SparseArray<byte[]> mManufacturerData = null;
+    protected SparseArray<byte[]> mManufacturerData;
 
 
     /**
-     * @return the device name.
+     * @return a not necessarily unique, human readable name for this sensor.
      */
-    public String getName() {
-        return mName;
+    public String getDeviceName() {
+        return mDeviceName;
     }
 
     /**
-     * @return the address of a given implementation identified by this enum instance.
+     * @return the address under which this device can be found, e.g. this can be the Bluetooth MAC-address, or the IP-address for WLAN-connected sensors.
      */
     public String getDeviceAddress() {
         return mDeviceAddress;
@@ -92,7 +90,7 @@ public class SensorInfo implements Serializable {
     }
 
     protected void onStateChange(SensorState oldState, SensorState newState) {
-        Log.d(TAG, "<" + mName + "> " + oldState + " --> " + newState);
+        Log.d(TAG, "<" + mDeviceName + "> " + oldState + " --> " + newState);
     }
 
     /**
@@ -168,7 +166,7 @@ public class SensorInfo implements Serializable {
     }
 
     public SensorInfo(String deviceName, String deviceAddress, KnownSensor deviceClass, double samplingRate, SparseArray<byte[]> manufacturerData) {
-        mName = deviceName;
+        mDeviceName = deviceName;
         mDeviceAddress = deviceAddress;
         mDeviceClass = deviceClass;
         mManufacturerData = manufacturerData;
@@ -182,6 +180,6 @@ public class SensorInfo implements Serializable {
 
     @Override
     public String toString() {
-        return getName() + ": <" + getState() + ">";
+        return getDeviceName() + ": <" + getState() + ">";
     }
 }

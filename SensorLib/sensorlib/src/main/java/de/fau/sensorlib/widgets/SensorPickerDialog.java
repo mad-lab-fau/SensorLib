@@ -425,7 +425,7 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
                                             && mSensorFilter.contains(sensor.getDeviceClass()))) {
                                 Bundle bundle = new Bundle();
                                 bundle.putString(Constants.KEY_SENSOR_ADDRESS, sensor.getDeviceAddress());
-                                bundle.putString(Constants.KEY_SENSOR_NAME, sensor.getName());
+                                bundle.putString(Constants.KEY_SENSOR_NAME, sensor.getDeviceName());
                                 bundle.putSerializable(Constants.KEY_KNOWN_SENSOR, sensor.getDeviceClass());
                                 bundle.putInt(Constants.KEY_SENSOR_RSSI, rssi);
                                 mAdapter.add(bundle);

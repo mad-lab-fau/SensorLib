@@ -24,8 +24,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -33,7 +31,6 @@ import java.util.UUID;
 
 import de.fau.sensorlib.SensorException.SensorExceptionType;
 import de.fau.sensorlib.enums.KnownSensor;
-import de.fau.sensorlib.sensors.AbstractSensor;
 import de.fau.sensorlib.sensors.InternalSensor;
 
 
@@ -140,7 +137,7 @@ public class BleSensorManager {
         List<SensorInfo> sensors = getConnectableSensors();
         for (SensorInfo s : sensors) {
             if (s.getDeviceAddress().equals(address))
-                return s.getName();
+                return s.getDeviceName();
         }
         return address;
     }
@@ -153,7 +150,7 @@ public class BleSensorManager {
     public static String findFirstMatchingAddressForName(String name) {
         List<SensorInfo> sensors = getConnectableSensors();
         for (SensorInfo s : sensors) {
-            if (s.getName().equals(name))
+            if (s.getDeviceName().equals(name))
                 return s.getDeviceAddress();
         }
         return null;

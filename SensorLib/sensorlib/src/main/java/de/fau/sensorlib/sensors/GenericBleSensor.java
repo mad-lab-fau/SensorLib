@@ -150,7 +150,7 @@ public class GenericBleSensor extends AbstractSensor {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 if (newState == BluetoothGatt.STATE_CONNECTED) {
                     // assign the custom name from the device
-                    mName = gatt.getDevice().getName();
+                    mDeviceName = gatt.getDevice().getName();
                     // discover provided services/sensors for this BLE device
                     mGatt.requestMtu(MAX_MTU_SIZE);
                     mGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH);
@@ -222,7 +222,7 @@ public class GenericBleSensor extends AbstractSensor {
         @Override
         public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
             super.onCharacteristicWrite(gatt, characteristic, status);
-            
+
             // Peek at the request queue and check if this was our request (which it always should be), then remove it from the queue.
             BluetoothGattCharacteristic qc = mCharacteristicsWriteRequests.peek();
             if (qc != null && qc.equals(characteristic)) {
@@ -334,7 +334,7 @@ public class GenericBleSensor extends AbstractSensor {
 
 
     public GenericBleSensor(Context context, SensorInfo info, SensorDataProcessor dataHandler) {
-        this(context, info.getName(), info.getDeviceAddress(), dataHandler);
+        this(context, info.getDeviceName(), info.getDeviceAddress(), dataHandler);
     }
 
     public GenericBleSensor(Context context, String deviceName, String deviceAddress, SensorDataProcessor dataHandler) {
@@ -573,8 +573,8 @@ public class GenericBleSensor extends AbstractSensor {
 
         // the following are more or less one-time reads
         else if (BleGattAttributes.DEVICE_NAME.equals(characteristic.getUuid())) {
-            mName = characteristic.getStringValue(0);
-            Log.d(TAG, "Name: " + mName);
+            mDeviceName = characteristic.getStringValue(0);
+            Log.d(TAG, "Name: " + mDeviceName);
         } else if (BleGattAttributes.SERIAL_NUMBER_STRING.equals(characteristic.getUuid())) {
             mSerialNumber = characteristic.getStringValue(0);
             Log.d(TAG, "Serial number: " + mSerialNumber);

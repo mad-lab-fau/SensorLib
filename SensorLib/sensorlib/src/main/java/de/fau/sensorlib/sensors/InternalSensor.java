@@ -21,8 +21,8 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import de.fau.sensorlib.SensorDataRecorder;
 import de.fau.sensorlib.SensorDataProcessor;
+import de.fau.sensorlib.SensorDataRecorder;
 import de.fau.sensorlib.SensorException;
 import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.AccelDataFrame;
@@ -557,7 +557,7 @@ public class InternalSensor extends AbstractSensor implements SensorEventListene
      * @param dataHandler method to provide unified data handling
      */
     public InternalSensor(Context context, SensorInfo info, SensorDataProcessor dataHandler) {
-        super(context, info.getName(), info.getDeviceAddress(), dataHandler, 10);
+        super(context, info.getDeviceName(), info.getDeviceAddress(), dataHandler, 10);
     }
 
     @Override
