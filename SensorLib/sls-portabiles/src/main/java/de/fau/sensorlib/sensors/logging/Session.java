@@ -8,7 +8,10 @@
 
 package de.fau.sensorlib.sensors.logging;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 public class Session {
 
@@ -21,28 +24,38 @@ public class Session {
 
     private int mSessionNumber;
 
+    private int mSessionSize;
+
+    private long mDuration;
+
     private int mStartPage;
     private int mEndPage;
 
-    private int mSamplingRate;
+    private double mSamplingRate;
     private boolean mVoltageTerminated;
 
     private Date mStartTime;
     private int mSampleSize;
 
+    private SimpleDateFormat mStartTimeFormat = new SimpleDateFormat("EEE, dd.MM.yyyy HH:mm", Locale.getDefault());
+
 
     public Session(byte[] sessionPacket) {
         int offset = 0;
-        mStartPage = (sessionPacket[offset++] << 16) | (sessionPacket[offset++] << 8) | sessionPacket[offset++];
-        mEndPage = (sessionPacket[offset++] << 16) | (sessionPacket[offset++] << 8) | sessionPacket[offset++];
+        mStartPage = ((sessionPacket[offset++] & 0xFF) << 16) | ((sessionPacket[offset++] & 0xFF) << 8) | (sessionPacket[offset++] & 0xFF);
+        mEndPage = ((sessionPacket[offset++] & 0xFF) << 16) | ((sessionPacket[offset++] & 0xFF) << 8) | (sessionPacket[offset++] & 0xFF);
 
         mSamplingRate = sessionPacket[offset] & 0x7F;
         mVoltageTerminated = (sessionPacket[offset++] & 0x80) != 0;
 
-        int tmpTime = (sessionPacket[offset++] << 24) | (sessionPacket[offset++] << 16) | (sessionPacket[offset++] << 8) | sessionPacket[offset++];
+        int tmpTime = ((sessionPacket[offset++] & 0xFF) << 24) | ((sessionPacket[offset++] & 0xFF) << 16) | ((sessionPacket[offset++] & 0xFF) << 8) | (sessionPacket[offset++] & 0xFF);
         mStartTime = new Date(((long) tmpTime) * 1000);
 
-        mSampleSize = sessionPacket[offset];
+        mSampleSize = (sessionPacket[offset] & 0xFF);
+
+        mSessionSize = (mEndPage - mStartPage + 1) * PAGE_SIZE;
+        // TODO check for bug
+        mDuration = (long) (((double) mSessionSize) / mSampleSize / 102.4);
     }
 
     public void setSessionNumber(int sessionNumber) {
@@ -53,8 +66,20 @@ public class Session {
         return mSessionNumber;
     }
 
-    public Date getStartTime() {
+    public Date getStartDate() {
         return mStartTime;
+    }
+
+    public String getStartTime() {
+        // TODO check for bug
+        return mStartTimeFormat.format(getStartDate());
+    }
+
+    public String getDurationString() {
+        long hours = TimeUnit.SECONDS.toHours(mDuration);
+        long minutes = TimeUnit.SECONDS.toMinutes(mDuration) - TimeUnit.HOURS.toMinutes(hours);
+        long seconds = TimeUnit.SECONDS.toSeconds(mDuration) - TimeUnit.MINUTES.toSeconds(minutes) - TimeUnit.HOURS.toSeconds(hours);
+        return String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, seconds);
     }
 
     public int getSampleSize() {
@@ -65,15 +90,23 @@ public class Session {
         return mVoltageTerminated;
     }
 
-    public int getSamplingRate() {
+    public double getSamplingRate() {
         return mSamplingRate;
+    }
+
+    public int getSessionSize() {
+        return mSessionSize;
+    }
+
+    public static double toKiloByte(double valueByte) {
+        return valueByte / 1024.0;
     }
 
     @Override
     public String toString() {
         return "<Session #" + mSessionNumber + "> [" + mStartPage + "-" + mEndPage + "] @ " +
-                mStartTime + " | fs=" + mSamplingRate + " Hz, sample size: " +
-                mSampleSize;
+                getStartTime() + " | fs=" + mSamplingRate + " Hz, duration: " + getDurationString() +
+                " (" + mSessionSize + " Byte)";
     }
 
     @Override
