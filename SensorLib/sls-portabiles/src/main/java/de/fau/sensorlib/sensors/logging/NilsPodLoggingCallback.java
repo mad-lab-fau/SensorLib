@@ -16,11 +16,15 @@ public interface NilsPodLoggingCallback {
 
     void onSessionListRead(NilsPodSensor sensor, List<Session> sessionList);
 
+    void onStartLogging(NilsPodSensor sensor);
+
     void onStopLogging(NilsPodSensor sensor);
 
     void onClearSessions(NilsPodSensor sensor);
 
-    void onSessionDataReceived(NilsPodSensor sensor, Session session, byte[] sessionData);
+    void onSessionDownloadStarted(NilsPodSensor sensor, Session session);
+
+    void onSessionDownloadProgress(NilsPodSensor sensor, SessionDownloader sessionDownloader);
 
     void onSessionDownloaded(NilsPodSensor sensor, Session session);
 
