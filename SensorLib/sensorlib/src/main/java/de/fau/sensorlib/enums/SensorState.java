@@ -41,6 +41,10 @@ public enum SensorState {
      */
     STREAMING,
     /**
+     * Sensor logging
+     */
+    LOGGING,
+    /**
      * Virtual sensor simulating a real sensor
      */
     SIMULATING

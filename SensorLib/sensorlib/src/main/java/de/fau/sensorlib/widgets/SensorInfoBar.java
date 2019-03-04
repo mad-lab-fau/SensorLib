@@ -127,9 +127,11 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
         }
 
         private void addSensor(AbstractSensor sensor) {
-            mAttachedSensors.add(sensor);
-            mAdditionalInfos.add("");
-            notifyDataSetChanged();
+            if (!mAttachedSensors.contains(sensor)) {
+                mAttachedSensors.add(sensor);
+                mAdditionalInfos.add("");
+                notifyDataSetChanged();
+            }
         }
 
         private void clear() {

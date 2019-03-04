@@ -463,7 +463,7 @@ public class GenericBleSensor extends AbstractSensor {
         mGatt.setCharacteristicNotification(characteristic, true);
         BluetoothGattDescriptor desc = characteristic.getDescriptor(BleGattAttributes.CLIENT_CHARACTERISTIC_CONFIGURATION);
 
-        if (desc != null) {
+        if (mGatt != null && desc != null) {
             desc.setValue(ENABLE_NOTIFICATION_VALUE);
             mDescriptorWriteRequests.add(desc);
             return mGatt.writeDescriptor(mDescriptorWriteRequests.peek());
@@ -483,7 +483,7 @@ public class GenericBleSensor extends AbstractSensor {
         mGatt.setCharacteristicNotification(characteristic, false);
         BluetoothGattDescriptor desc = characteristic.getDescriptor(BleGattAttributes.CLIENT_CHARACTERISTIC_CONFIGURATION);
 
-        if (desc != null) {
+        if (mGatt != null && desc != null) {
             desc.setValue(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
             mDescriptorWriteRequests.add(desc);
             return mGatt.writeDescriptor(mDescriptorWriteRequests.peek());
