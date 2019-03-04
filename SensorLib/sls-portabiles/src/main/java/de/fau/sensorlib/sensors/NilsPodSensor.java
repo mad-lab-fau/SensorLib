@@ -20,10 +20,11 @@ import de.fau.sensorlib.SensorException;
 import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.BarometricPressureDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
+import de.fau.sensorlib.enums.SensorState;
 import de.fau.sensorlib.sensors.logging.NilsPodLoggable;
 import de.fau.sensorlib.sensors.logging.NilsPodLoggingCallback;
 import de.fau.sensorlib.sensors.logging.Session;
-import de.fau.sensorlib.sensors.logging.SessionByteWriter;
+import de.fau.sensorlib.sensors.logging.SessionDownloader;
 import de.fau.sensorlib.sensors.logging.SessionHandler;
 
 
@@ -44,7 +45,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
 
 
     private SessionHandler mSessionHandler;
-    private SessionByteWriter mSessionWriter;
+    private SessionDownloader mSessionDownloader;
 
 
     public NilsPodSensor(Context context, SensorInfo info, SensorDataProcessor dataHandler) {
@@ -95,7 +96,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         }
 
         if (mSessionHandler.allSessionsRead()) {
-            Log.d(TAG, "all sessions read!");
+            Log.d(TAG, "All Sessions read!");
             if (mCallbacks != null) {
                 for (NilsPodLoggingCallback callback : mCallbacks) {
                     callback.onSessionListRead(this, mSessionHandler.getSessionList());
@@ -106,7 +107,10 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
 
     protected void extractSessionData(BluetoothGattCharacteristic characteristic) {
         byte[] values = characteristic.getValue();
-        mSessionWriter.writeData(values);
+        mSessionDownloader.onNewData(values);
+        for (NilsPodLoggingCallback callback : mCallbacks) {
+            callback.onSessionDownloadProgress(this, mSessionDownloader);
+        }
     }
 
     /**
@@ -191,6 +195,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
                 switch (oldState) {
                     case LOGGING:
                         readSessionList();
+                        setState(SensorState.CONNECTED);
                         for (NilsPodLoggingCallback callback : mCallbacks) {
                             callback.onStopLogging(this);
                         }
@@ -202,11 +207,29 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
                         }
                         break;
                     case FLASH_PAGE_TRANSMISSION:
-                        Log.e(TAG, "CALLBACKS: " + mCallbacks);
                         for (NilsPodLoggingCallback callback : mCallbacks) {
-                            callback.onSessionDownloaded(this, mSessionWriter.getSession());
+                            callback.onSessionDownloaded(this, mSessionDownloader.getSession());
                         }
-                        mSessionWriter.completeWriter();
+                        mSessionDownloader.completeDownload();
+                        break;
+                }
+                break;
+            case LOGGING:
+                switch (oldState) {
+                    case IDLE:
+                        setState(SensorState.LOGGING);
+                        for (NilsPodLoggingCallback callback : mCallbacks) {
+                            callback.onStartLogging(this);
+                        }
+                        break;
+                }
+                break;
+            case FLASH_PAGE_TRANSMISSION:
+                switch (oldState) {
+                    case IDLE:
+                        for (NilsPodLoggingCallback callback : mCallbacks) {
+                            callback.onSessionDownloadStarted(this, mSessionDownloader.getSession());
+                        }
                         break;
                 }
                 break;
@@ -218,7 +241,6 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         // clear session list (if there was some before)
         mSessionHandler = new SessionHandler();
         send(NilsPodSensorCommand.FLASH_READ_SESSION_LIST);
-        //readSystemState();
     }
 
     @Override
@@ -238,7 +260,8 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
 
     @Override
     public void downloadSession(Session session) throws SensorException {
-        mSessionWriter = new SessionByteWriter(this, session, mContext);
+        mSessionDownloader = new SessionDownloader(this, session);
+        mSessionDownloader.setSessionWriter();
         int sessionId = session.getSessionNumber();
         byte[] cmd = NilsPodSensorCommand.FLASH_TRANSMIT_SESSION.getByteCmd();
         cmd[1] = (byte) sessionId;
