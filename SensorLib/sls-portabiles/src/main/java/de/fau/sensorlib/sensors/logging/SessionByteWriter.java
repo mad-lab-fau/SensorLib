@@ -51,7 +51,7 @@ public class SessionByteWriter {
         mContext = context;
         mSession = session;
 
-        mFilename = sensor.getDeviceName() + "_" + new SimpleDateFormat("yyyyMMdd_HHmm", Locale.getDefault()).format(session.getStartTime()) + ".bin";
+        mFilename = sensor.getDeviceName() + "_" + new SimpleDateFormat("yyyyMMdd_HHmm", Locale.getDefault()).format(session.getStartDate()) + ".bin";
 
 
         if (checkPermissions()) {
@@ -161,6 +161,7 @@ public class SessionByteWriter {
 
 
     public void writeData(byte[] data) {
+        //Log.d(TAG, mBytes + "/" + mSession.getSessionSize() + " Bytes written!");
         try {
             mBufferedOutputStream.write(data);
         } catch (IOException e) {
