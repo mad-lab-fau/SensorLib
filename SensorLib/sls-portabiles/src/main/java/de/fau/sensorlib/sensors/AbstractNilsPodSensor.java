@@ -349,16 +349,6 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         if (oldState == SensorState.CONNECTING && newState == SensorState.CONNECTED) {
             enableGattNotifications();
         }
-
-        // TODO should be replaced by notification in latest NilsPod firmware
-        /*if (isConnected()) {
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    readSystemState();
-                }
-            }, 200);
-        }*/
     }
 
     protected void onOperationStateChanged(NilsPodOperationState oldState, NilsPodOperationState newState) {
