@@ -349,6 +349,11 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         if (oldState == SensorState.CONNECTING && newState == SensorState.CONNECTED) {
             enableGattNotifications();
         }
+
+        if (oldState == SensorState.CONNECTING && newState == SensorState.LOGGING) {
+            sendConnected();
+            enableGattNotifications();
+        }
     }
 
     protected void onOperationStateChanged(NilsPodOperationState oldState, NilsPodOperationState newState) {
@@ -539,7 +544,6 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         NilsPodOperationState operationState;
         NilsPodPowerState powerState;
         int errorFlags;
-        int batteryLevel;
         // no longer in latest firmware version
         //int activityLabel;
 
@@ -553,7 +557,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
             onOperationStateChanged(oldState, mOperationState);
             powerState = NilsPodPowerState.inferPowerState(values[offset++]);
             errorFlags = values[offset++];
-            batteryLevel = values[offset];
+            mBatteryLevel = values[offset];
             //activityLabel = values[offset];
         } catch (Exception e) {
             e.printStackTrace();
@@ -567,7 +571,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         Log.d(TAG, "\tOperation State: " + operationState);
         Log.d(TAG, "\tWireless Power State: " + powerState);
         Log.d(TAG, "\tError Flags: " + Integer.toBinaryString(errorFlags));
-        Log.d(TAG, "\tBattery Level: " + batteryLevel);
+        Log.d(TAG, "\tBattery Level: " + mBatteryLevel);
         //Log.d(TAG, "\tActivity Label: " + activityLabel);
     }
 
