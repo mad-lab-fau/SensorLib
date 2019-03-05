@@ -23,6 +23,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import java.util.Objects;
+
 import de.fau.sensorlib.Constants;
 import de.fau.sensorlib.R;
 import de.fau.sensorlib.sensors.AbstractSensor;
@@ -44,8 +46,26 @@ public class SensorActionDialog extends DialogFragment implements AdapterView.On
         View rootView = inflater.inflate(R.layout.widget_sensor_action_dialog, container);
 
         mListView = rootView.findViewById(R.id.list_view);
-        mListView.setAdapter(new ArrayAdapter<>(getActivity(), android.R.layout.simple_expandable_list_item_1, values));
+        mListView.setAdapter(new ArrayAdapter<>(Objects.requireNonNull(getActivity()), android.R.layout.simple_expandable_list_item_1, values));
         mListView.setOnItemClickListener(this);
+        mListView.post(new Runnable() {
+            @Override
+            public void run() {
+                switch (Objects.requireNonNull(mSensor).getState()) {
+                    case LOGGING:
+                        // disable Start Logging, Clear Flash and Configure
+                        mListView.getChildAt(1).setEnabled(false);
+                        mListView.getChildAt(3).setEnabled(false);
+                        mListView.getChildAt(0).setEnabled(false);
+                        break;
+                    case CONNECTED:
+                        // disable Stop Logging
+                        mListView.getChildAt(2).setEnabled(false);
+                        break;
+
+                }
+            }
+        });
 
         Bundle bundle = getArguments();
         if (bundle != null) {
@@ -57,6 +77,19 @@ public class SensorActionDialog extends DialogFragment implements AdapterView.On
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        switch (mSensor.getState()) {
+            case CONNECTED:
+                if (position == 2) {
+                    return;
+                }
+                break;
+            case LOGGING:
+                if (position == 0 || position == 1 || position == 3) {
+                    return;
+                }
+                break;
+        }
+
         switch (position) {
             case 1:
                 if (mSensor instanceof Loggable) {
