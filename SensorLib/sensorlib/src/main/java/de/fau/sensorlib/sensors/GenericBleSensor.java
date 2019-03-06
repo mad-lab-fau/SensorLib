@@ -591,6 +591,9 @@ public class GenericBleSensor extends AbstractSensor {
         } else if (BleGattAttributes.MANUFACTURER_NAME_STRING.equals(characteristic.getUuid())) {
             mManufacturer = characteristic.getStringValue(0);
             Log.d(TAG, "Manufacturer: " + mManufacturer);
+        } else if (BleGattAttributes.MODEL_NUMBER_STRING.equals(characteristic.getUuid())) {
+            mModelNumber = characteristic.getStringValue(0);
+            Log.d(TAG, "Model Number: " + mModelNumber);
         } else if (BleGattAttributes.SYSTEM_ID.equals(characteristic.getUuid())) {
             mSensorSystemID = BleGattAttributes.valueToInt64(characteristic);
             Log.d(TAG, "Sensor System ID: " + mSensorSystemID);

@@ -69,6 +69,7 @@ public abstract class AbstractSensor extends SensorInfo {
 
     protected String mSerialNumber;
     protected String mManufacturer;
+    protected String mModelNumber;
     protected String mFirmwareRevision;
     protected String mSoftwareRevision;
     protected long mSensorSystemID;
@@ -377,6 +378,10 @@ public abstract class AbstractSensor extends SensorInfo {
 
     public String getManufacturer() {
         return mManufacturer;
+    }
+
+    public String getModelNumber() {
+        return mModelNumber;
     }
 
     public String getFirmwareRevision() {
