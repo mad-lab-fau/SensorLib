@@ -152,7 +152,7 @@ public class GenericBleSensor extends AbstractSensor {
                     // assign the custom name from the device
                     mDeviceName = gatt.getDevice().getName();
                     // discover provided services/sensors for this BLE device
-                    mGatt.requestMtu(MAX_MTU_SIZE);
+                    //mGatt.requestMtu(MAX_MTU_SIZE);
                     mGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH);
                     mGatt.discoverServices();
                 } else if (newState == BluetoothGatt.STATE_DISCONNECTED) {
@@ -343,6 +343,7 @@ public class GenericBleSensor extends AbstractSensor {
 
     public GenericBleSensor(Context context, String deviceName, String deviceAddress, SensorDataProcessor dataHandler, double desiredSamplingRate) {
         super(context, deviceName, deviceAddress, dataHandler, desiredSamplingRate);
+        mNotificationsList = new ConcurrentLinkedQueue<>();
     }
 
     @Override

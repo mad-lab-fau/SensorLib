@@ -131,7 +131,7 @@ public class SessionByteWriter {
             try {
                 // create directory
                 path = new File(root, mDirName);
-                mFileCreated = path.mkdir();
+                mFileCreated = path.mkdirs();
                 if (!mFileCreated) {
                     mFileCreated = path.exists();
                     if (!mFileCreated) {

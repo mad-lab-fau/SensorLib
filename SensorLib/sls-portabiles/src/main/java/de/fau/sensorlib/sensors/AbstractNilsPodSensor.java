@@ -504,7 +504,9 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
                 if (values[0] == NilsPodSensorCommand.STOP_STREAMING.cmd[0]) {
                     sendStopStreaming();
                 } else if (values[0] == NilsPodSensorCommand.START_STREAMING.cmd[0]) {
-                    sendStartStreaming();
+                    if (getOperationState().ordinal() < NilsPodOperationState.STREAMING.ordinal()) {
+                        sendStartStreaming();
+                    }
                 }
             }
         }
