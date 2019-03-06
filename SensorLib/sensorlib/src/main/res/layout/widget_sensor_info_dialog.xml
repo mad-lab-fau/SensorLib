@@ -31,6 +31,14 @@
         android:textSize="14sp" />
 
     <TextView
+        android:id="@+id/tv_sensor_model_number"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:text="@string/string_model_number"
+        android:textSize="14sp" />
+
+    <TextView
         android:id="@+id/tv_sensor_firmware_revision"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -26,6 +26,7 @@ public class SensorInfoDialog extends DialogFragment implements View.OnClickList
     private TextView mSensorNameTextView;
     private TextView mSensorAddressTextView;
     private TextView mManufacturerTextView;
+    private TextView mModelNumberTextView;
     private TextView mFirmwareRevisionTextView;
 
     @Nullable
@@ -38,6 +39,7 @@ public class SensorInfoDialog extends DialogFragment implements View.OnClickList
         mSensorNameTextView = rootView.findViewById(R.id.tv_sensor_name);
         mSensorAddressTextView = rootView.findViewById(R.id.tv_sensor_address);
         mManufacturerTextView = rootView.findViewById(R.id.tv_sensor_manufacturer);
+        mModelNumberTextView = rootView.findViewById(R.id.tv_sensor_model_number);
         mFirmwareRevisionTextView = rootView.findViewById(R.id.tv_sensor_firmware_revision);
         Button okButton = rootView.findViewById(de.fau.sensorlib.R.id.button_ok);
         okButton.setOnClickListener(this);
@@ -45,6 +47,7 @@ public class SensorInfoDialog extends DialogFragment implements View.OnClickList
         String sensorName = "n/a";
         String sensorAddress = "n/a";
         String manufacturer = "n/a";
+        String modelNumber = "n/a";
         String firmwareRevision = "n/a";
         if (getArguments() != null) {
             AbstractSensor sensor = (AbstractSensor) getArguments().getSerializable(Constants.KEY_SENSOR);
@@ -52,6 +55,7 @@ public class SensorInfoDialog extends DialogFragment implements View.OnClickList
                 sensorName = sensor.getDeviceName();
                 sensorAddress = sensor.getDeviceAddress();
                 manufacturer = sensor.getManufacturer();
+                modelNumber = sensor.getModelNumber();
                 firmwareRevision = sensor.getFirmwareRevision();
             }
         }
@@ -59,6 +63,7 @@ public class SensorInfoDialog extends DialogFragment implements View.OnClickList
         mSensorNameTextView.setText(Html.fromHtml(getResources().getString(R.string.string_sensor_name, sensorName)));
         mSensorAddressTextView.setText(Html.fromHtml(getResources().getString(R.string.string_sensor_address, sensorAddress)));
         mManufacturerTextView.setText(Html.fromHtml(getResources().getString(R.string.string_manufacturer, manufacturer)));
+        mModelNumberTextView.setText(Html.fromHtml(getResources().getString(R.string.string_model_number, modelNumber)));
         mFirmwareRevisionTextView.setText(Html.fromHtml(getResources().getString(R.string.string_firmware_revision, firmwareRevision)));
 
         return rootView;
