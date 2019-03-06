@@ -73,6 +73,8 @@ public class GenericBleSensor extends AbstractSensor {
         }
     }
 
+    private static final int MAX_MTU_SIZE = 247;
+
 
     /**
      * GATT client instance for the BLE connection.
@@ -150,6 +152,8 @@ public class GenericBleSensor extends AbstractSensor {
                     // assign the custom name from the device
                     mName = gatt.getDevice().getName();
                     // discover provided services/sensors for this BLE device
+                    mGatt.requestMtu(MAX_MTU_SIZE);
+                    mGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH);
                     mGatt.discoverServices();
                 } else if (newState == BluetoothGatt.STATE_DISCONNECTED) {
                     sendDisconnected();
@@ -323,6 +327,7 @@ public class GenericBleSensor extends AbstractSensor {
         @Override
         public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
             super.onMtuChanged(gatt, mtu, status);
+            Log.d(TAG, "onMtuChanged: " + mtu);
         }
     };
 
