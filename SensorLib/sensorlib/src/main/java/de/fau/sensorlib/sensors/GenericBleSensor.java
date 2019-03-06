@@ -141,6 +141,7 @@ public class GenericBleSensor extends AbstractSensor {
      * GATT callback instance.
      */
     private BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
+
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             super.onConnectionStateChange(gatt, status, newState);
@@ -152,8 +153,6 @@ public class GenericBleSensor extends AbstractSensor {
                     // assign the custom name from the device
                     mDeviceName = gatt.getDevice().getName();
                     // discover provided services/sensors for this BLE device
-                    //mGatt.requestMtu(MAX_MTU_SIZE);
-                    mGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH);
                     mGatt.discoverServices();
                 } else if (newState == BluetoothGatt.STATE_DISCONNECTED) {
                     sendDisconnected();
@@ -192,9 +191,9 @@ public class GenericBleSensor extends AbstractSensor {
 
             onNewCharacteristicValue(characteristic, false);
 
-            // send connected message as soon as all read requests have been completed
+            // request MTU update as soon as all read requests have been completed (sensor is considered 'connected' when receiving MTU callback)
             if (!isConnected() && mCharacteristicsReadRequests.isEmpty()) {
-                sendConnected();
+                mGatt.requestMtu(MAX_MTU_SIZE);
                 return;
             }
 
@@ -207,11 +206,12 @@ public class GenericBleSensor extends AbstractSensor {
 
                 if (qc != null) {
                     read = mGatt.readCharacteristic(qc);
+
                 }
-                // send connected message if queue is empty and there is no more characteristic to be read
-                // otherwise send connected message when last characteristic has been read
+                // request MTU update if queue is empty and there is no more characteristic to be read
+                // otherwise request MTU update when last characteristic has been read (sensor is considered 'connected' when receiving MTU callback)
                 if (!isConnected() && mCharacteristicsReadRequests.isEmpty() && !read) {
-                    sendConnected();
+                    mGatt.requestMtu(MAX_MTU_SIZE);
                     break;
                 }
 
@@ -328,7 +328,10 @@ public class GenericBleSensor extends AbstractSensor {
         @Override
         public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
             super.onMtuChanged(gatt, mtu, status);
-            Log.d(TAG, "onMtuChanged: " + mtu);
+            // request higher connection priority
+            mGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH);
+            // Sensor is now connected
+            sendConnected();
         }
     };
 
