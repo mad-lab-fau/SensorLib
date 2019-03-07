@@ -60,6 +60,21 @@ public class ShimmerSensor extends AbstractSensor {
             super(fromSensor, timestamp);
         }
 
+        public ShimmerDataFrame(AbstractSensor fromSensor, double timestamp, double emg, double[] accel, double [] gyro, double[] ecg) {
+            super(fromSensor, timestamp);
+            this.ecg = ecg[0];
+            this.emg = emg;
+            this.ax = accel[0];
+            this.ay = accel[1];
+            this.az = accel[2];
+            this.gx = gyro[0];
+            this.gy = gyro[1];
+            this.gz = gyro[2];
+            this.ecgRA = ecg[0];
+            this.ecgLA = ecg[1];
+            this.isTwoChannelEcg = ecg.length == 2;
+        }
+
         @Override
         public double getEcgSample() {
             if (isTwoChannelEcg) {
