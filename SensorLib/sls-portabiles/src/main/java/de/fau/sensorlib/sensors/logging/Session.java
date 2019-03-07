@@ -134,9 +134,13 @@ public class Session {
 
     @Override
     public String toString() {
-        return "<Session #" + mSessionNumber + "> [" + mStartPage + "-" + mEndPage + "] @ " +
-                getStartTime() + " | fs=" + mSamplingRate + " Hz, duration: " + getDurationString() +
-                " (" + mSessionSize + " Byte)";
+        return "<Session #" + getSessionNumber() + ">: " + getStartTime() + " [" + getDurationString() + "]";
+    }
+
+    public String toDebugString() {
+        return "<Session #" + getSessionNumber() + "> [" + mStartPage + "-" + mEndPage + "] @ " +
+                getStartTime() + " | fs=" + getSamplingRate() + " Hz, duration: " + getDurationString() +
+                " (" + getSessionSize() + " Byte)";
     }
 
     @Override

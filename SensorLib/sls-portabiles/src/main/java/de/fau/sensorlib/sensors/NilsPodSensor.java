@@ -92,7 +92,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         } else {
             Session session = new Session(values);
             mSessionHandler.addSession(session);
-            Log.d(TAG, session.toString());
+            Log.d(TAG, session.toDebugString());
         }
 
         if (mSessionHandler.allSessionsRead()) {

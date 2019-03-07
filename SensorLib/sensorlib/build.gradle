@@ -56,7 +56,7 @@ android {
 
         def versionMajor = 0
         def versionMinor = 1
-        def versionPatch = 6
+        def versionPatch = 7
 
         versionCode versionMajor * 10000 + versionMinor * 100 + versionPatch
         versionName "${versionMajor}.${versionMinor}.${versionPatch}." + versionBuild + "_" + getGitDate() + "-" + getGitHash()
@@ -80,8 +80,8 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'org.apache.commons:commons-lang3:3.0'
     api 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support:recyclerview-v7:27.1.1'
     implementation 'com.android.support:cardview-v7:27.1.1'
