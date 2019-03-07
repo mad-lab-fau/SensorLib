@@ -13,9 +13,40 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import de.fau.sensorlib.sensors.AbstractNilsPodSensor;
+
 public class Session {
 
     private static final String TAG = Session.class.getSimpleName();
+
+    public enum NilsPodTerminationSource {
+
+        NO_MEMORY(0x10),
+        BLE(0x20),
+        DOCK(0x40),
+        LOW_VOLTAGE(0x80);
+
+        private int termSource;
+
+        NilsPodTerminationSource(int termSource) {
+            this.termSource = termSource;
+        }
+
+        public static NilsPodTerminationSource inferTerminationSource(int termState) {
+            switch (termState) {
+                case 0x10:
+                    return NO_MEMORY;
+                case 0x20:
+                    return BLE;
+                case 0x40:
+                    return DOCK;
+                case 0x80:
+                    return LOW_VOLTAGE;
+                default:
+                    return null;
+            }
+        }
+    }
 
     /**
      * Flash page size in Byte
@@ -32,7 +63,7 @@ public class Session {
     private int mEndPage;
 
     private double mSamplingRate;
-    private boolean mVoltageTerminated;
+    private NilsPodTerminationSource mTerminationSource;
 
     private Date mStartTime;
     private int mSampleSize;
@@ -45,8 +76,8 @@ public class Session {
         mStartPage = ((sessionPacket[offset++] & 0xFF) << 16) | ((sessionPacket[offset++] & 0xFF) << 8) | (sessionPacket[offset++] & 0xFF);
         mEndPage = ((sessionPacket[offset++] & 0xFF) << 16) | ((sessionPacket[offset++] & 0xFF) << 8) | (sessionPacket[offset++] & 0xFF);
 
-        mSamplingRate = sessionPacket[offset] & 0x7F;
-        mVoltageTerminated = (sessionPacket[offset++] & 0x80) != 0;
+        mSamplingRate = AbstractNilsPodSensor.inferSamplingRate(sessionPacket[offset] & 0x0F);
+        mTerminationSource = NilsPodTerminationSource.inferTerminationSource((sessionPacket[offset++] >> 4) & 0x0F);
 
         int tmpTime = ((sessionPacket[offset++] & 0xFF) << 24) | ((sessionPacket[offset++] & 0xFF) << 16) | ((sessionPacket[offset++] & 0xFF) << 8) | (sessionPacket[offset++] & 0xFF);
         mStartTime = new Date(((long) tmpTime) * 1000);
@@ -54,8 +85,7 @@ public class Session {
         mSampleSize = (sessionPacket[offset] & 0xFF);
 
         mSessionSize = (mEndPage - mStartPage + 1) * PAGE_SIZE;
-        // TODO check for bug
-        mDuration = (long) (((double) mSessionSize) / mSampleSize / 102.4);
+        mDuration = (long) (((double) getSessionSize()) / getSampleSize() / getSamplingRate());
     }
 
     public void setSessionNumber(int sessionNumber) {
@@ -86,8 +116,8 @@ public class Session {
         return mSampleSize;
     }
 
-    public boolean wasSessionVoltageTerminated() {
-        return mVoltageTerminated;
+    public NilsPodTerminationSource getTerminationSource() {
+        return mTerminationSource;
     }
 
     public double getSamplingRate() {
