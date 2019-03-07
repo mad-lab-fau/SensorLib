@@ -357,7 +357,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     }
 
     protected void onOperationStateChanged(NilsPodOperationState oldState, NilsPodOperationState newState) {
-        Log.d(TAG, "onNilsPodOperationStateChanged: <" + oldState + "> -> <" + newState + ">");
+        Log.d(TAG, "<" + getDeviceName() + "> onOperationStateChanged: <" + oldState + "> -> <" + newState + ">");
         sendNotification(SensorMessage.OPERATION_STATE_CHANGED);
     }
 
@@ -587,7 +587,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
         try {
 
-            requestSamplingRateChange(convertSamplingRate(values[offset++]));
+            requestSamplingRateChange(inferSamplingRate(values[offset++]));
             syncRole = NilsPodSyncRole.values()[values[offset++]];
             syncDistance = values[offset++] * 100;
             rfGroup = NilsPodRfGroup.values()[values[offset]];
@@ -700,8 +700,8 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         }
     }
 
-    private double convertSamplingRate(byte value) {
-        switch (value) {
+    public static double inferSamplingRate(int value) {
+        /*switch (value) {
             case 20:
                 return 61.0;
             case 10:
@@ -716,6 +716,18 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
                 return 500.0;
             case 1:
                 return 1000.0;
+        }*/
+        switch (value) {
+            case 10:
+                return 102.4;
+            case 5:
+                return 204.8;
+            case 4:
+                return 256.0;
+            case 2:
+                return 512.0;
+            case 1:
+                return 1024.0;
         }
         return 0.0;
     }
