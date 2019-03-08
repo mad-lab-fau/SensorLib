@@ -35,6 +35,7 @@ import de.fau.sensorlib.SensorException.SensorExceptionType;
 import de.fau.sensorlib.enums.KnownSensor;
 import de.fau.sensorlib.sensors.AbstractSensor;
 import de.fau.sensorlib.sensors.InternalSensor;
+import de.fau.sensorlib.sensors.SimulatedEcgSensor;
 
 
 /**
@@ -84,6 +85,9 @@ public class BleSensorManager {
 
         // Add internal sensor
         sensorList.add(new SensorInfo(InternalSensor.INTERNAL_SENSOR_NAME, InternalSensor.INTERNAL_SENSOR_ADDRESS));
+
+        // Add simulated sensors
+        sensorList.add(new SensorInfo(SimulatedEcgSensor.SIMULATED_ECG_SENSOR_NAME, SimulatedEcgSensor.SIMULATED_ECG_SENSOR_ADDRESS));
 
         // Search for Bluetooth sensors
         BluetoothAdapter bta = BluetoothAdapter.getDefaultAdapter();

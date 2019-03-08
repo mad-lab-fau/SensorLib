@@ -20,9 +20,9 @@
     <color name="status_bar_simulating">#03A9F4</color>
 
     <!-- Streaming Footer -->
-    <color name="button_pause_color">#FFC107</color>
+    <color name="button_start_stop_color">#FFC107</color>
     <color name="button_pause_color_pressed">#FFA000</color>
-    <color name="button_stop_color">#D32F2F</color>
+    <color name="button_disconnect_color">#D32F2F</color>
     <color name="button_stop_color_pressed">#B71C1C</color>
 
 

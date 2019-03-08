@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="024d86d3-913d-45f0-831f-cd6b0b24f5d0" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SensorLib/settings.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/SensorLib/settings.gradle" afterDir="false" />
+    </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FUSProjectUsageTrigger">
+    <session id="-1274238110">
+      <usages-collector id="statistics.lifecycle.project">
+        <counts>
+          <entry key="project.closed" value="1" />
+          <entry key="project.open.time.0" value="1" />
+          <entry key="project.opened" value="1" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.vcs.git.usages">
+        <counts>
+          <entry key="git.branch.checkout.remote" value="1" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.extensions.open">
+        <counts>
+          <entry key="gradle" value="5" />
+          <entry key="java" value="9" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.types.open">
+        <counts>
+          <entry key="Groovy" value="5" />
+          <entry key="JAVA" value="9" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.extensions.edit">
+        <counts>
+          <entry key="gradle" value="25" />
+          <entry key="java" value="16" />
+        </counts>
+      </usages-collector>
+      <usages-collector id="statistics.file.types.edit">
+        <counts>
+          <entry key="Groovy" value="25" />
+          <entry key="JAVA" value="16" />
+        </counts>
+      </usages-collector>
+    </session>
+  </component>
+  <component name="FileEditorManager">
+    <leaf>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/SensorLib/dataprocessinglib/build.gradle">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="459">
+              <caret line="27" column="60" selection-start-line="27" selection-start-column="60" selection-end-line="27" selection-end-column="60" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/SensorLib/settings.gradle" />
+        <option value="$PROJECT_DIR$/SensorLib/dataprocessinglib/build.gradle" />
+        <option value="$PROJECT_DIR$/SensorLib/dataprocessinglib/src/main/java/de/sensorlib/dataprocessinglib/PPGExtract.java" />
+        <option value="$PROJECT_DIR$/SensorLib/dataprocessinglib/src/main/java/de/sensorlib/dataprocessinglib/PPGFilterer.java" />
+        <option value="$PROJECT_DIR$/SensorLib/dataprocessinglib/src/main/java/de/sensorlib/dataprocessinglib/PPGPointDetector.java" />
+        <option value="$PROJECT_DIR$/SensorLib/dataprocessinglib/src/main/java/de/sensorlib/dataprocessinglib/ProcessingEventGenerator.java" />
+        <option value="$PROJECT_DIR$/SensorLib/dataprocessinglib/src/main/java/de/sensorlib/dataprocessinglib/ProcessingEventListener.java" />
+        <option value="$PROJECT_DIR$/SensorLib/dataprocessinglib/src/main/java/de/sensorlib/dataprocessinglib/QRSDetector.java" />
+        <option value="$PROJECT_DIR$/SensorLib/dataprocessinglib/src/main/java/de/sensorlib/dataprocessinglib/QRSDetectorParameters.java" />
+        <option value="$PROJECT_DIR$/SensorLib/dataprocessinglib/src/main/java/de/sensorlib/dataprocessinglib/QRSFilterer.java" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectFrameBounds">
+    <option name="x" value="48" />
+    <option name="y" value="73" />
+    <option name="width" value="1780" />
+    <option name="height" value="990" />
+  </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectView">
+    <navigator currentView="ProjectPane" proportions="" version="1">
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="SensorLib" type="b2602c69:ProjectViewProjectNode" />
+              <item name="sensorlib" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SensorLib" type="b2602c69:ProjectViewProjectNode" />
+              <item name="sensorlib" type="462c0819:PsiDirectoryNode" />
+              <item name="SensorLib" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SensorLib" type="b2602c69:ProjectViewProjectNode" />
+              <item name="sensorlib" type="462c0819:PsiDirectoryNode" />
+              <item name="SensorLib" type="462c0819:PsiDirectoryNode" />
+              <item name="dataprocessinglib" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SensorLib" type="b2602c69:ProjectViewProjectNode" />
+              <item name="sensorlib" type="462c0819:PsiDirectoryNode" />
+              <item name="SensorLib" type="462c0819:PsiDirectoryNode" />
+              <item name="dataprocessinglib" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SensorLib" type="b2602c69:ProjectViewProjectNode" />
+              <item name="sensorlib" type="462c0819:PsiDirectoryNode" />
+              <item name="SensorLib" type="462c0819:PsiDirectoryNode" />
+              <item name="dataprocessinglib" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SensorLib" type="b2602c69:ProjectViewProjectNode" />
+              <item name="sensorlib" type="462c0819:PsiDirectoryNode" />
+              <item name="SensorLib" type="462c0819:PsiDirectoryNode" />
+              <item name="dataprocessinglib" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SensorLib" type="b2602c69:ProjectViewProjectNode" />
+              <item name="sensorlib" type="462c0819:PsiDirectoryNode" />
+              <item name="SensorLib" type="462c0819:PsiDirectoryNode" />
+              <item name="dataprocessinglib" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="de" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SensorLib" type="b2602c69:ProjectViewProjectNode" />
+              <item name="sensorlib" type="462c0819:PsiDirectoryNode" />
+              <item name="SensorLib" type="462c0819:PsiDirectoryNode" />
+              <item name="dataprocessinglib" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="de" type="462c0819:PsiDirectoryNode" />
+              <item name="sensorlib" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SensorLib" type="b2602c69:ProjectViewProjectNode" />
+              <item name="sensorlib" type="462c0819:PsiDirectoryNode" />
+              <item name="SensorLib" type="462c0819:PsiDirectoryNode" />
+              <item name="dataprocessinglib" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="de" type="462c0819:PsiDirectoryNode" />
+              <item name="sensorlib" type="462c0819:PsiDirectoryNode" />
+              <item name="dataprocessinglib" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="SensorLib" type="b2602c69:ProjectViewProjectNode" />
+              <item name="sensorlib" type="462c0819:PsiDirectoryNode" />
+              <item name="SensorLib" type="462c0819:PsiDirectoryNode" />
+              <item name="sls-portabiles" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+      <pane id="Scope" />
+      <pane id="PackagesPane" />
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="android.sdk.path" value="$USER_HOME$/AppData/Local/Android/Sdk" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/SensorLib" />
+    <property name="settings.editor.selected.configurable" value="AndroidSdkUpdater" />
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="024d86d3-913d-45f0-831f-cd6b0b24f5d0" name="Default Changelist" comment="" />
+      <created>1551176720571</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1551176720571</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="39" y="59" width="1424" height="792" extended-state="0" />
+    <editor active="true" />
+    <layout>
+      <window_info active="true" content_ui="combo" id="Project" visible="true" weight="0.3294881" />
+      <window_info id="Structure" side_tool="true" />
+      <window_info id="Image Layers" />
+      <window_info id="Designer" />
+      <window_info id="Capture Tool" />
+      <window_info id="Favorites" side_tool="true" />
+      <window_info id="Captures" order="0" weight="0.25" />
+      <window_info anchor="bottom" id="Version Control" />
+      <window_info anchor="bottom" id="TODO" />
+      <window_info anchor="bottom" id="Terminal" />
+      <window_info anchor="bottom" id="Event Log" side_tool="true" />
+      <window_info anchor="right" id="Capture Analysis" />
+      <window_info anchor="right" id="Theme Preview" />
+      <window_info anchor="right" id="Palette&#9;" />
+    </layout>
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/SensorLib/settings.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="208" selection-start-column="208" selection-end-column="208" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/SensorLib/sls-portabiles/build.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-72" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/SensorLib/sensorlib/build.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-255" />
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/SensorLib/dataprocessinglib/src/main/java/de/sensorlib/dataprocessinglib/QRSFilterer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="39" selection-start-column="39" selection-end-column="39" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/SensorLib/dataprocessinglib/src/main/java/de/sensorlib/dataprocessinglib/QRSDetectorParameters.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="39" selection-start-column="39" selection-end-column="39" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/SensorLib/dataprocessinglib/src/main/java/de/sensorlib/dataprocessinglib/QRSDetector.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="39" selection-start-column="39" selection-end-column="39" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/SensorLib/dataprocessinglib/src/main/java/de/sensorlib/dataprocessinglib/ProcessingEventListener.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="39" selection-start-column="39" selection-end-column="39" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/SensorLib/dataprocessinglib/src/main/java/de/sensorlib/dataprocessinglib/ProcessingEventGenerator.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="39" selection-start-column="39" selection-end-column="39" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/SensorLib/dataprocessinglib/src/main/java/de/sensorlib/dataprocessinglib/PPGPointDetector.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="39" selection-start-column="39" selection-end-column="39" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/SensorLib/dataprocessinglib/src/main/java/de/sensorlib/dataprocessinglib/PPGFilterer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="238">
+          <caret line="14" column="39" selection-start-line="14" selection-start-column="39" selection-end-line="14" selection-end-column="39" />
+          <folding>
+            <element signature="e#0#3268#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/SensorLib/dataprocessinglib/src/main/java/de/sensorlib/dataprocessinglib/PPGExtract.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="39" selection-start-column="39" selection-end-column="39" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/SensorLib/dataprocessinglib/src/main/java/de/sensorlib/dataprocessinglib/ComputePAT.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <caret column="39" lean-forward="true" selection-end-column="39" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/SensorLib/dataprocessinglib/build.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="459">
+          <caret line="27" column="60" selection-start-line="27" selection-start-column="60" selection-end-line="27" selection-end-column="60" />
+        </state>
+      </provider>
+    </entry>
+  </component>
+  <component name="masterDetails">
+    <states>
+      <state key="ProjectJDKs.UI">
+        <settings>
+          <last-edited>Android API 27 Platform</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+    </states>
+  </component>
+</project>

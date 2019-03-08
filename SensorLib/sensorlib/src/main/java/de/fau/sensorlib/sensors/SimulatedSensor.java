@@ -11,9 +11,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.BatteryManager;
+import android.os.Environment;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStreamReader;
 
 import de.fau.sensorlib.SensorDataProcessor;
@@ -61,13 +65,20 @@ public abstract class SimulatedSensor extends AbstractSensor {
     public SimulatedSensor(Context context, String deviceName, String fileName, SensorDataProcessor dataHandler, double samplingRate, boolean liveMode) {
         super(context, deviceName, "SensorLib::SimulatedSensor::" + deviceName, dataHandler, samplingRate);
 
+        // read file from external Storage
         try {
-            mBufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(fileName)));
+            File folder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
+            File file = new File(folder, fileName);
+
+            mBufferedReader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
             mBufferedReader.mark(Integer.MAX_VALUE);
 
-        } catch (Exception e) {
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
+
         mLiveMode = liveMode;
         mUsesFile = true;
     }
@@ -120,6 +131,7 @@ public abstract class SimulatedSensor extends AbstractSensor {
     public void stopStreaming() {
         sendStopStreaming();
     }
+
 
     protected abstract void transmitData();
 

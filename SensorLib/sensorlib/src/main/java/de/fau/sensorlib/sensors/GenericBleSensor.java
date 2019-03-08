@@ -235,11 +235,9 @@ public class GenericBleSensor extends AbstractSensor {
             while (!ret) {
                 boolean write = false;
                 qc = mCharacteristicsWriteRequests.poll();
-
                 if (qc != null) {
                     write = mGatt.writeCharacteristic(qc);
                 }
-
                 ret = (qc == null) || write;
             }*/
 

@@ -42,6 +42,19 @@ public enum KnownSensor {
                     HardwareSensor.class
             ), true, "SimulatedSensor"),
 
+    SIMULATED_ECG("Simulated ECG Sensor", new String[]{"SimulatedEcg"},
+            EnumSet.of(
+                    HardwareSensor.ACCELEROMETER,
+                    HardwareSensor.ECG
+            ), true, "SimulatedEcgSensor"),
+    SIMULATED_PPG("Simulated PPG Sensor", new String[]{"SimulatedPpg"},
+            EnumSet.of(
+                    HardwareSensor.PPG,
+                    HardwareSensor.GYROSCOPE,
+                    HardwareSensor.ACCELEROMETER,
+                    HardwareSensor.BAROMETER
+            ), true, "SimulatedPpgSensor"),
+
     EMPATICA("Empatica", new String[]{"Empatica"},
             EnumSet.of(
                     HardwareSensor.ACCELEROMETER,

@@ -107,5 +107,9 @@
     <orderEntry type="library" name="Gradle: android.arch.core:common:1.1.0@jar" level="project" />
     <orderEntry type="module" module-name="sls-tek" />
     <orderEntry type="module" module-name="sensorlib" />
+    <orderEntry type="module" module-name="sls-tek" />
+    <orderEntry type="module" module-name="sensorlib" />
+    <orderEntry type="module" module-name="sls-tek" />
+    <orderEntry type="module" module-name="sensorlib" />
   </component>
 </module>

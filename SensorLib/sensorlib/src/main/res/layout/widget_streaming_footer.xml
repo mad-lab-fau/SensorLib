@@ -14,10 +14,10 @@
         android:gravity="center">
 
         <Button
-            android:id="@+id/button_pause"
-            android:layout_width="110dp"
+            android:id="@+id/button_start_stop"
+            android:layout_width="130dp"
             android:layout_height="50dp"
-            android:backgroundTint="@color/button_pause_color"
+            android:backgroundTint="@color/button_start_stop_color"
             android:backgroundTintMode="multiply"
             android:enabled="false"
             android:text="@string/start"
@@ -26,12 +26,13 @@
             tools:ignore="ButtonStyle" />
 
         <Button
-            android:id="@+id/button_stop"
-            android:layout_width="110dp"
+            android:id="@+id/button_disconnect"
+            android:layout_width="130dp"
             android:layout_height="50dp"
-            android:backgroundTint="@color/button_stop_color"
+            android:backgroundTint="@color/button_disconnect_color"
             android:backgroundTintMode="multiply"
-            android:text="@string/stop"
+            android:text="@string/disconnect"
+            android:gravity="end|center_vertical"
             android:textColor="@color/white"
             android:visibility="invisible"
             tools:ignore="ButtonStyle" />

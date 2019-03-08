@@ -38,6 +38,8 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+import de.fau.sensorlib.ProcessingEventGenerator;
+import de.fau.sensorlib.ProcessingEventListener;
 import de.fau.sensorlib.R;
 import de.fau.sensorlib.SensorEventListener;
 import de.fau.sensorlib.SensorInfo;
@@ -119,6 +121,11 @@ public class SensorPlotter extends CardView implements SensorEventListener {
 
         mAdapter = new SensorPlotterRecyclerAdapter();
         mRecyclerView.setAdapter(mAdapter);
+    }
+
+
+    public void onNewOnsetPoint(int qrsDelay, int peak, int turn, int through, double onset, double onsetValue) {
+        System.out.println("draw onsetPoint: " + qrsDelay);
     }
 
 

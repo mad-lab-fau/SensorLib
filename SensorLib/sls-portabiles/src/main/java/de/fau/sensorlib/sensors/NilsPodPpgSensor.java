@@ -77,7 +77,7 @@ public class NilsPodPpgSensor extends NilsPodSensor {
             if ((localCounter - lastCounter) > 1) {
                 Log.w(TAG, this + ": BLE Packet Loss!");
             }
-            
+
             NilsPodPpgDataFrame df = new NilsPodPpgDataFrame(this, localCounter, accel, gyro, baro, ppg);
 
             Log.d(TAG, df.toString());
