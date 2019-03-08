@@ -16,9 +16,9 @@
             android:id="@+id/checkbox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
+            android:layout_alignParentBottom="true"
             android:layout_marginEnd="8dp" />
 
         <TextView
@@ -28,6 +28,20 @@
             android:layout_alignParentTop="true"
             android:layout_toEndOf="@id/checkbox"
             android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/tv_recently"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/tv_sensor_name"
+            android:layout_alignBottom="@id/tv_sensor_name"
+            android:layout_marginStart="4dp"
+            android:layout_toEndOf="@id/tv_sensor_name"
+            android:gravity="center_vertical"
+            android:text="@string/recently"
+            android:textSize="10sp"
+            android:textStyle="italic"
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/tv_sensor_address"
@@ -41,16 +55,16 @@
             android:id="@+id/tv_sensor_rssi"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
             android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
             android:text="@string/placeholder_rssi" />
 
         <ImageView
             android:id="@+id/iv_battery"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_alignParentEnd="true"
             android:layout_alignTop="@+id/gv_sensors"
+            android:layout_alignParentEnd="true"
             android:src="@drawable/ic_battery_not_available"
             android:tint="@color/sensor_not_available" />
 
@@ -58,11 +72,11 @@
             android:id="@+id/gv_sensors"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
             android:layout_below="@+id/tv_sensor_address"
+            android:layout_alignParentBottom="true"
             android:layout_marginTop="4dp"
-            android:layout_toEndOf="@id/checkbox"
             android:layout_toStartOf="@+id/iv_battery"
+            android:layout_toEndOf="@id/checkbox"
             android:horizontalSpacing="1dp"
             android:numColumns="9"
             android:verticalSpacing="0dp" />

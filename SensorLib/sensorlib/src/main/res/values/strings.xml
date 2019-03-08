@@ -10,6 +10,7 @@
     <string name="string_select_sensors">Select sensors:</string>
     <string name="placeholder_rssi">\@ %1$d dB</string>
     <string name="placeholder_battery_level">%1$d %%</string>
+    <string name="recently">Recent</string>
 
     <!-- Status Bar -->
     <string name="status_bar_disconnected">%1$s disconnected</string>

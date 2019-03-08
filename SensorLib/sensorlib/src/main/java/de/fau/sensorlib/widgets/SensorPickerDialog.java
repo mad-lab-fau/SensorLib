@@ -11,6 +11,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -119,6 +120,10 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
             String address = mFoundSensors.get(position).getString(Constants.KEY_SENSOR_ADDRESS);
             int rssi = mFoundSensors.get(position).getInt(Constants.KEY_SENSOR_RSSI);
             holder.mSensorNameTextView.setText(name);
+            if (mLastConnectedSensors.contains(mFoundSensors.get(position).getString(Constants.KEY_SENSOR_NAME))) {
+                holder.mSensorNameTextView.setTypeface(null, Typeface.ITALIC);
+                holder.mRecentlyConnectedTextView.setVisibility(View.VISIBLE);
+            }
             holder.mSensorInformationTextView.setText(address);
             holder.mSensorRssi.setText(mContext.getString(R.string.placeholder_rssi, rssi));
             // if battery measurement is available for sensor
@@ -265,6 +270,7 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
     private static class SensorPickerViewHolder extends ViewHolder implements View.OnClickListener {
 
         private TextView mSensorNameTextView;
+        private TextView mRecentlyConnectedTextView;
         private TextView mSensorInformationTextView;
         private TextView mSensorRssi;
         private ImageView mBatteryImageView;
@@ -275,6 +281,7 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
         private SensorPickerViewHolder(View itemView, ItemClickListener listener) {
             super(itemView);
             mSensorNameTextView = itemView.findViewById(R.id.tv_sensor_name);
+            mRecentlyConnectedTextView = itemView.findViewById(R.id.tv_recently);
             mSensorInformationTextView = itemView.findViewById(R.id.tv_sensor_address);
             mSensorRssi = itemView.findViewById(R.id.tv_sensor_rssi);
             mBatteryImageView = itemView.findViewById(R.id.iv_battery);
