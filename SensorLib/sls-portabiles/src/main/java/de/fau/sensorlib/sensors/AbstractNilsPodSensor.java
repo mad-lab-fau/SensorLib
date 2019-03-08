@@ -190,9 +190,9 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         IDLE,
         STREAMING,
         LOGGING,
-        FLASH_PAGE_TRANSMISSION,
-        FLASH_SESSION_LIST_TRANSMISSION,
-        NAND_FLASH_ERASE
+        DOWNLOADING_SESSION,
+        READING_SESSION_LIST,
+        FLASH_ERASE
     }
 
     /**

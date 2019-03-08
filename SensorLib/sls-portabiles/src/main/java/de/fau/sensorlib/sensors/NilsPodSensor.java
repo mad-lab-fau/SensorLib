@@ -72,10 +72,10 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         } else {
             if (NILS_POD_STREAMING.equals(characteristic.getUuid())) {
                 switch (getOperationState()) {
-                    case FLASH_SESSION_LIST_TRANSMISSION:
+                    case READING_SESSION_LIST:
                         extractSessionListData(characteristic);
                         return true;
-                    case FLASH_PAGE_TRANSMISSION:
+                    case DOWNLOADING_SESSION:
                         extractSessionData(characteristic);
                         return true;
                 }
@@ -200,13 +200,13 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
                             callback.onStopLogging(this);
                         }
                         break;
-                    case NAND_FLASH_ERASE:
+                    case FLASH_ERASE:
                         readSessionList();
                         for (NilsPodLoggingCallback callback : mCallbacks) {
                             callback.onClearSessions(this);
                         }
                         break;
-                    case FLASH_PAGE_TRANSMISSION:
+                    case DOWNLOADING_SESSION:
                         for (NilsPodLoggingCallback callback : mCallbacks) {
                             callback.onSessionDownloaded(this, mSessionDownloader.getSession());
                         }
@@ -224,7 +224,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
                         break;
                 }
                 break;
-            case FLASH_PAGE_TRANSMISSION:
+            case DOWNLOADING_SESSION:
                 switch (oldState) {
                     case IDLE:
                         for (NilsPodLoggingCallback callback : mCallbacks) {

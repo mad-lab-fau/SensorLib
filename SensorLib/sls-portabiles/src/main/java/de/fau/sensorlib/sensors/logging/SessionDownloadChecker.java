@@ -134,8 +134,6 @@ public class SessionDownloadChecker {
             }
         });
         mFileList = new ArrayList<>(Arrays.asList(files));
-
-        Log.e(TAG, "file list: " + mFileList);
     }
 
     public void addSessions(ArrayList<Session> sessionList) {
