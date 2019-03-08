@@ -23,19 +23,34 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import org.apache.commons.lang3.text.WordUtils;
+
+import java.util.EnumSet;
 import java.util.Objects;
 
 import de.fau.sensorlib.Constants;
 import de.fau.sensorlib.R;
 import de.fau.sensorlib.sensors.AbstractSensor;
 import de.fau.sensorlib.sensors.Loggable;
+import de.fau.sensorlib.sensors.Resettable;
 
 public class SensorActionDialog extends DialogFragment implements AdapterView.OnItemClickListener {
 
     private static final String TAG = SensorActionDialog.class.getSimpleName();
 
-    // TODO hardcoded for now => find better solution
-    private String[] values = new String[]{"Configure", "Start Logging", "Stop Logging", "Clear Flash", "Sensor Info"};
+    public enum SensorAction {
+        CONFIGURE,
+        RESET,
+        START_LOGGING,
+        STOP_LOGGING,
+        CLEAR_FLASH,
+        SENSOR_INFO;
+
+        @Override
+        public String toString() {
+            return WordUtils.capitalizeFully(name().replace('_', ' '));
+        }
+    }
 
     private ListView mListView;
     private AbstractSensor mSensor;
@@ -46,31 +61,46 @@ public class SensorActionDialog extends DialogFragment implements AdapterView.On
         View rootView = inflater.inflate(R.layout.widget_sensor_action_dialog, container);
 
         mListView = rootView.findViewById(R.id.list_view);
-        mListView.setAdapter(new ArrayAdapter<>(Objects.requireNonNull(getActivity()), android.R.layout.simple_expandable_list_item_1, values));
-        mListView.setOnItemClickListener(this);
-        mListView.post(new Runnable() {
-            @Override
-            public void run() {
-                switch (Objects.requireNonNull(mSensor).getState()) {
-                    case LOGGING:
-                        // disable Start Logging, Clear Flash and Configure
-                        mListView.getChildAt(1).setEnabled(false);
-                        mListView.getChildAt(3).setEnabled(false);
-                        mListView.getChildAt(0).setEnabled(false);
-                        break;
-                    case CONNECTED:
-                        // disable Stop Logging
-                        mListView.getChildAt(2).setEnabled(false);
-                        break;
 
-                }
-            }
-        });
+        mListView.setAdapter(new ArrayAdapter<>(Objects.requireNonNull(getActivity()), android.R.layout.simple_expandable_list_item_1, SensorAction.values()));
+        mListView.setOnItemClickListener(this);
 
         Bundle bundle = getArguments();
         if (bundle != null) {
             mSensor = (AbstractSensor) bundle.getSerializable(Constants.KEY_SENSOR);
         }
+
+        mListView.post(new Runnable() {
+            @Override
+            public void run() {
+                switch (Objects.requireNonNull(mSensor).getState()) {
+                    case LOGGING:
+                        // disable Configure Start Logging and Clear Flash
+                        for (SensorAction action : EnumSet.of(SensorAction.CONFIGURE, SensorAction.START_LOGGING, SensorAction.CLEAR_FLASH)) {
+                            mListView.getChildAt(action.ordinal()).setEnabled(false);
+                        }
+                        break;
+                    case CONNECTED:
+                        // disable Stop Logging
+                        for (SensorAction action : EnumSet.of(SensorAction.STOP_LOGGING)) {
+                            mListView.getChildAt(action.ordinal()).setEnabled(false);
+                        }
+                        break;
+                }
+
+                if (!(mSensor instanceof Loggable)) {
+                    for (SensorAction action : EnumSet.of(SensorAction.START_LOGGING, SensorAction.STOP_LOGGING, SensorAction.CLEAR_FLASH)) {
+                        mListView.getChildAt(action.ordinal()).setEnabled(false);
+                    }
+                }
+
+                if (!(mSensor instanceof Resettable)) {
+                    for (SensorAction action : EnumSet.of(SensorAction.RESET)) {
+                        mListView.getChildAt(action.ordinal()).setEnabled(false);
+                    }
+                }
+            }
+        });
 
         return rootView;
     }
@@ -79,42 +109,60 @@ public class SensorActionDialog extends DialogFragment implements AdapterView.On
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         switch (mSensor.getState()) {
             case CONNECTED:
-                if (position == 2) {
-                    return;
+                for (SensorAction action : EnumSet.of(SensorAction.STOP_LOGGING)) {
+                    if (position == action.ordinal()) {
+                        return;
+                    }
                 }
                 break;
             case LOGGING:
-                if (position == 0 || position == 1 || position == 3) {
-                    return;
+                for (SensorAction action : EnumSet.of(SensorAction.CONFIGURE, SensorAction.START_LOGGING, SensorAction.CLEAR_FLASH, SensorAction.RESET)) {
+                    if (position == action.ordinal()) {
+                        return;
+                    }
                 }
                 break;
         }
 
-        switch (position) {
-            case 1:
-                if (mSensor instanceof Loggable) {
-                    ((Loggable) mSensor).startLogging();
-                }
-                break;
-            case 2:
-                if (mSensor instanceof Loggable) {
-                    ((Loggable) mSensor).stopLogging();
-                }
-                break;
-            case 3:
-                if (mSensor instanceof Loggable) {
-                    ((Loggable) mSensor).clearSessions();
-                }
-                break;
-            case 0:
+        SensorAction action = SensorAction.values()[position];
+        switch (action) {
+            case CONFIGURE:
                 dismiss();
                 return;
-            case 4:
+            case RESET:
+                if (mSensor instanceof Resettable) {
+                    ((Resettable) mSensor).reset();
+                } else {
+                    return;
+                }
+                break;
+            case START_LOGGING:
+                if (mSensor instanceof Loggable) {
+                    ((Loggable) mSensor).startLogging();
+                } else {
+                    return;
+                }
+                break;
+            case STOP_LOGGING:
+                if (mSensor instanceof Loggable) {
+                    ((Loggable) mSensor).stopLogging();
+                } else {
+                    return;
+                }
+                break;
+            case CLEAR_FLASH:
+                if (mSensor instanceof Loggable) {
+                    ((Loggable) mSensor).clearSessions();
+                } else {
+                    return;
+                }
+                break;
+            case SENSOR_INFO:
                 showSensorInfoDialog();
                 dismiss();
                 return;
         }
-        Toast.makeText(getActivity(), values[position] + " on " + mSensor.getDeviceName(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(getActivity(), SensorAction.values()[position] + " on " + mSensor.getDeviceName(), Toast.LENGTH_SHORT).show();
         dismiss();
     }
 

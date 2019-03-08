@@ -1,6 +1,5 @@
 package de.fau.sensorlib.widgets;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -21,8 +20,6 @@ public class SensorInfoDialog extends DialogFragment implements View.OnClickList
 
     private static final String TAG = SensorInfoDialog.class.getSimpleName();
 
-    private Context mContext;
-
     private TextView mSensorNameTextView;
     private TextView mSensorAddressTextView;
     private TextView mManufacturerTextView;
@@ -33,8 +30,6 @@ public class SensorInfoDialog extends DialogFragment implements View.OnClickList
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.widget_sensor_info_dialog, container);
-
-        mContext = rootView.getContext();
 
         mSensorNameTextView = rootView.findViewById(R.id.tv_sensor_name);
         mSensorAddressTextView = rootView.findViewById(R.id.tv_sensor_address);
