@@ -9,4 +9,5 @@ public final class Constants {
     public static final String KEY_KNOWN_SENSOR = "KNOWN_SENSOR";
     public static final String KEY_SENSOR = "SENSOR";
     public static final String KEY_SENSOR_LIST = "SENSOR_LIST";
+    public static final String KEY_PREF_DEFAULT = "DEFAULT_PREFERENCES";
 }

@@ -8,15 +8,16 @@
 package de.fau.sensorlib.widgets;
 
 import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.util.ArraySet;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -36,7 +37,9 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import de.fau.sensorlib.BleSensorManager;
 import de.fau.sensorlib.Constants;
@@ -62,12 +65,12 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
     private Button mOkButton;
     private SensorPickerRecyclerAdapter mAdapter;
     private SensorFoundCallback mSensorFoundCallback;
-    private BluetoothAdapter mBluetoothAdapter;
 
     private EnumSet<HardwareSensor> mHwSensorFilter = EnumSet.noneOf(HardwareSensor.class);
     private EnumSet<KnownSensor> mSensorFilter = EnumSet.noneOf(KnownSensor.class);
+    private ArrayList<String> mLastConnectedSensors = new ArrayList<>();
     private ArrayList<Bundle> mFoundSensors = new ArrayList<>();
-    private ArrayList<Bundle> mSelectedSensors = new ArrayList<>(2);
+    private ArrayList<Bundle> mSelectedSensors = new ArrayList<>();
 
     @Override
     public void onClick(View view) {
@@ -76,12 +79,17 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
             BleSensorManager.cancelRunningScans();
             dismiss();
         } else if (i == R.id.button_ok) {
+            // Save selected sensors to Shared Preferences to display them at the top the next time
+            SharedPreferences sharedPreferences = mContext.getSharedPreferences(Constants.KEY_PREF_DEFAULT, Context.MODE_PRIVATE);
+            List<String> sensorNames = new ArrayList<>();
             for (Bundle item : mSelectedSensors) {
                 KnownSensor sensor = (KnownSensor) item.getSerializable(Constants.KEY_KNOWN_SENSOR);
                 String name = item.getString(Constants.KEY_SENSOR_NAME);
                 String address = item.getString(Constants.KEY_SENSOR_ADDRESS);
                 mSensorFoundCallback.onKnownSensorFound(new SensorInfo(name, address, sensor));
+                sensorNames.add(name);
             }
+            sharedPreferences.edit().putStringSet(Constants.KEY_SENSOR_LIST, new ArraySet<>(sensorNames)).apply();
             dismiss();
         }
     }
@@ -89,10 +97,11 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
 
     private class SensorPickerRecyclerAdapter extends Adapter<SensorPickerViewHolder> implements SensorPickerViewHolder.ItemClickListener {
 
-        SensorPickerRecyclerAdapter() {
+        private SensorPickerRecyclerAdapter() {
             mFoundSensors = new ArrayList<>(0);
         }
 
+        @NonNull
         @Override
         public SensorPickerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View layout = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_sensor_picker, parent, false);
@@ -105,6 +114,7 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
             if (sensor == null) {
                 return;
             }
+
             String name = mFoundSensors.get(position).getString(Constants.KEY_SENSOR_NAME);
             String address = mFoundSensors.get(position).getString(Constants.KEY_SENSOR_ADDRESS);
             int rssi = mFoundSensors.get(position).getInt(Constants.KEY_SENSOR_RSSI);
@@ -164,7 +174,8 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
             if (!mFoundSensors.contains(element)) {
                 mFoundSensors.add(position, element);
                 notifyItemInserted(position);
-                notifyItemRangeChanged(position, mFoundSensors.size() - position - 1);
+                //notifyItemInserted(position);
+                //notifyItemRangeChanged(position, mFoundSensors.size() - position - 1);
             }
         }
 
@@ -346,6 +357,11 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
         mProgressBar = rootView.findViewById(R.id.progress_bar);
         mProgressTextView = rootView.findViewById(R.id.tv_scanning);
 
+        Set<String> sensors = mContext.getSharedPreferences(Constants.KEY_PREF_DEFAULT, Context.MODE_PRIVATE).getStringSet(Constants.KEY_SENSOR_LIST, null);
+        if (sensors != null) {
+            mLastConnectedSensors.addAll(sensors);
+        }
+
         return rootView;
     }
 
@@ -428,8 +444,11 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
                                 bundle.putString(Constants.KEY_SENSOR_NAME, sensor.getDeviceName());
                                 bundle.putSerializable(Constants.KEY_KNOWN_SENSOR, sensor.getDeviceClass());
                                 bundle.putInt(Constants.KEY_SENSOR_RSSI, rssi);
+                                if (mLastConnectedSensors.contains(sensor.getDeviceName())) {
+                                    // add after internal sensor
+                                    mAdapter.addAt(1, bundle);
+                                }
                                 mAdapter.add(bundle);
-                                mAdapter.notifyDataSetChanged();
                             }
                             return true;
                         }
@@ -454,8 +473,6 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
                 if (isAdded()) {
                     mProgressBar.setVisibility(View.GONE);
                     mProgressTextView.setText(getString(R.string.string_scan_results));
-                    mRecyclerView.getAdapter().notifyDataSetChanged();
-
                 }
             }
         }, BleSensorManager.SCAN_PERIOD);
