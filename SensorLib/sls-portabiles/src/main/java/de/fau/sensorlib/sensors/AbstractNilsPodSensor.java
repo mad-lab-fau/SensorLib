@@ -346,14 +346,19 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     protected void onStateChange(SensorState oldState, SensorState newState) {
         super.onStateChange(oldState, newState);
 
-        if (oldState == SensorState.CONNECTING && newState == SensorState.CONNECTED) {
-            enableGattNotifications();
+        if (newState == SensorState.CONNECTED) {
+            if (getOperationState() == NilsPodOperationState.LOGGING) {
+                setState(SensorState.LOGGING);
+            }
+            if (oldState == SensorState.CONNECTING) {
+                enableGattNotifications();
+            }
         }
 
-        if (oldState == SensorState.CONNECTING && newState == SensorState.LOGGING) {
+        /*if (oldState == SensorState.CONNECTING && newState == SensorState.LOGGING) {
             sendConnected();
             enableGattNotifications();
-        }
+        }*/
     }
 
     protected void onOperationStateChanged(NilsPodOperationState oldState, NilsPodOperationState newState) {

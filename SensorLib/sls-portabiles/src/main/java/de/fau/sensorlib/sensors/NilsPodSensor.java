@@ -169,10 +169,8 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             }
 
             NilsPodDataFrame df = new NilsPodDataFrame(this, globalCounter * (2 << 15) + localCounter, accel, gyro, baro);
+
             // send new data to the SensorDataProcessor
-            Log.d(TAG, "localCounter: [" + values[i + mPacketSize - 2] + "," + values[i + mPacketSize - 1] + "] -> " + localCounter + "  " + ((int) df.getTimestamp()));
-
-
             sendNewData(df);
             lastCounter = localCounter;
             if (mRecordingEnabled) {
@@ -217,7 +215,9 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             case LOGGING:
                 switch (oldState) {
                     case IDLE:
-                        setState(SensorState.LOGGING);
+                        if (isConnected()) {
+                            setState(SensorState.LOGGING);
+                        }
                         for (NilsPodLoggingCallback callback : mCallbacks) {
                             callback.onStartLogging(this);
                         }

@@ -79,9 +79,11 @@ public class SensorInfo implements Serializable {
      * @param newState the new state for the sensor.
      */
     protected void setState(SensorState newState) {
-        SensorState tmp = mSensorState;
-        mSensorState = newState;
-        onStateChange(tmp, mSensorState);
+        if (newState != mSensorState) {
+            SensorState tmp = mSensorState;
+            mSensorState = newState;
+            onStateChange(tmp, mSensorState);
+        }
     }
 
     /**
