@@ -182,7 +182,6 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     @Override
     protected void onAllGattNotificationsEnabled() {
         super.onAllGattNotificationsEnabled();
-        setTimeDate();
     }
 
     @Override
@@ -192,14 +191,14 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             case IDLE:
                 switch (oldState) {
                     case LOGGING:
-                        readSessionList();
+                        //readSessionList();
                         setState(SensorState.CONNECTED);
                         for (NilsPodLoggingCallback callback : mCallbacks) {
                             callback.onStopLogging(this);
                         }
                         break;
                     case FLASH_ERASE:
-                        readSessionList();
+                        //readSessionList();
                         for (NilsPodLoggingCallback callback : mCallbacks) {
                             callback.onClearSessions(this);
                         }
@@ -276,7 +275,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     /**
      * Updates the current date time stamp of the external temperature compensated RTC module.
      */
-    public void setTimeDate() {
+    public void updateRtc() {
         Date currentTime = Calendar.getInstance().getTime();
 
         Log.d(TAG, "Updating RTC time on " + getDeviceName() + " - new time: " + currentTime);
