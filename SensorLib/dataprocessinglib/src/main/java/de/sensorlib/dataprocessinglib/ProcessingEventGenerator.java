@@ -1,4 +1,6 @@
-package de.fau.sensorlib;
+package de.sensorlib.dataprocessinglib;
+
+import de.sensorlib.dataprocessinglib.ProcessingEventListener;
 
 public interface ProcessingEventGenerator {
 
@@ -23,3 +25,4 @@ public interface ProcessingEventGenerator {
 
 
 }
+

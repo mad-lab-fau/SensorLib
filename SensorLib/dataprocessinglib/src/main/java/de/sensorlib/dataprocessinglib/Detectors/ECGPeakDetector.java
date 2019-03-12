@@ -1,18 +1,23 @@
-package de.sensorlib.dataprocessinglib;
+package de.sensorlib.dataprocessinglib.Detectors;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import de.fau.sensorlib.ProcessingEventGenerator;
-import de.fau.sensorlib.ProcessingEventListener;
+import de.sensorlib.dataprocessinglib.ProcessingEventGenerator;
+import de.sensorlib.dataprocessinglib.ProcessingEventListener;
+import de.sensorlib.dataprocessinglib.ECGPeakDetectorParameters;
+import de.sensorlib.dataprocessinglib.enums.ProcessingState;
+import de.sensorlib.dataprocessinglib.filters.AbstractFilterer;
+import de.sensorlib.dataprocessinglib.filters.ECGFilterer;
 
 import static java.lang.Math.abs;
 
-public class QRSDetector implements ProcessingEventGenerator {
+public class ECGPeakDetector implements ProcessingEventGenerator {
 
-    private QRSDetectorParameters qrsDetParas;
-    private QRSDetectorParameters.PreBlankParameters preBlankParas;
-    private QRSFilterer qrsFilterer;
+    private ECGPeakDetectorParameters qrsDetParas;
+    private ECGPeakDetectorParameters.PreBlankParameters preBlankParas;
+    //private ECGFilterer ecgFilterer;
+    private AbstractFilterer ecgFilterer;
 
     private int detThresh;
     private int qpkcnt = 0;
@@ -46,6 +51,8 @@ public class QRSDetector implements ProcessingEventGenerator {
     private int peakTimeSinceMax = 0;
     private int peakLastDatum;
 
+    private ProcessingState mState;
+
     /**
      * variables and methods making QRSDet observable
      */
@@ -74,8 +81,10 @@ public class QRSDetector implements ProcessingEventGenerator {
      */
     public void notifyListeners() {
         for (ProcessingEventListener listener : listeners) {
-            listener.update(this);
+            //listener.onNewProcessingEvent(this);
+            listener.onNewProcessingEvent(mState);
         }
+        mState = ProcessingState.NO_EVENT_DETECTED;
     }
 
     public int getQrsDelay() {
@@ -87,24 +96,25 @@ public class QRSDetector implements ProcessingEventGenerator {
      *
      * @param qrsDetectorParameters The sampleRate-dependent parameters
      */
-    public QRSDetector(QRSDetectorParameters qrsDetectorParameters) {
+    public ECGPeakDetector(ECGPeakDetectorParameters qrsDetectorParameters) {
         qrsDetParas = qrsDetectorParameters;
-        preBlankParas = new QRSDetectorParameters.PreBlankParameters(qrsDetectorParameters, qrsDetectorParameters.ms200);
+        preBlankParas = new ECGPeakDetectorParameters.PreBlankParameters(qrsDetectorParameters, qrsDetectorParameters.ms200);
 
         sbcount = qrsDetectorParameters.ms1500;
         ddBuffer = new int[preBlankParas.derDelay];
         for (int i = 0; i < 8; ++i) {
             rrbuf[i] = qrsDetectorParameters.ms1000;/* Initialize R-to-R interval buffer. */
         }
+
     }
 
     /**
      * Injects the object.
      *
-     * @param qrsFilterer The qrsFilterer
+     * @param ecgFilterer The ecgFilterer
      */
-    public void setObjects(QRSFilterer qrsFilterer) {
-        this.qrsFilterer = qrsFilterer;
+    public void setObjects(AbstractFilterer ecgFilterer) {
+        this.ecgFilterer = ecgFilterer;
     }
 
     /**
@@ -115,11 +125,11 @@ public class QRSDetector implements ProcessingEventGenerator {
      * @param datum sample of an ECG signal
      * @return the detection delay if a QRS complex is detected
      */
-    public int qrsDet(int datum) {
+    public int ecgPeakDet(int datum) {
         int fdatum, qrsDelay = 0;
         int i, newPeak, aPeak;
 
-        fdatum = qrsFilterer.qrsFilter(datum);    /* Filter data. */
+        fdatum = ecgFilterer.filter(datum);    /* Filter data. */
 
         /* Wait until normal detector is ready before calling early detections. */
 
@@ -155,7 +165,7 @@ public class QRSDetector implements ProcessingEventGenerator {
       /* Save derivative of raw signal for T-wave and baseline
          shift discrimination. */
 
-        ddBuffer[ddPtr] = qrsFilterer.deriv1(datum);
+        ddBuffer[ddPtr] = ecgFilterer.deriv1(datum);
         if (++ddPtr == preBlankParas.derDelay) {
             ddPtr = 0;
         }
@@ -290,7 +300,8 @@ public class QRSDetector implements ProcessingEventGenerator {
         // make QRSDet observable by calling notifyListeners when new QRS is detected.
         this.qrsDelay = qrsDelay;
         if (qrsDelay != 0) {
-            notifyListeners();
+            mState = ProcessingState.QRS_DETECTED;
+            this.notifyListeners();
         }
 
         return (qrsDelay);
@@ -445,3 +456,4 @@ public class QRSDetector implements ProcessingEventGenerator {
     }
 
 }
+

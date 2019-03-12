@@ -38,8 +38,6 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-import de.fau.sensorlib.ProcessingEventGenerator;
-import de.fau.sensorlib.ProcessingEventListener;
 import de.fau.sensorlib.R;
 import de.fau.sensorlib.SensorEventListener;
 import de.fau.sensorlib.SensorInfo;

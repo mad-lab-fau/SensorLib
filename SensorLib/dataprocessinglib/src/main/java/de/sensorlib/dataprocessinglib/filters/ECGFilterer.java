@@ -1,8 +1,10 @@
-package de.sensorlib.dataprocessinglib;
+package de.sensorlib.dataprocessinglib.filters;
 
-public class QRSFilterer {
+import de.sensorlib.dataprocessinglib.ECGPeakDetectorParameters;
 
-    private QRSDetectorParameters qrsDetParas;
+public class ECGFilterer extends AbstractFilterer {
+
+    private ECGPeakDetectorParameters qrsDetParas;
 
     private long lpfiltY1 = 0;
     private long lpfiltY2 = 0;
@@ -26,19 +28,19 @@ public class QRSFilterer {
     /**
      * Create a new filterer with the given parameters.
      *
-     * @param qrsDetectorParameters The sampleRate-dependent parameters
+     * @param samplingRate The sampleRate of the ECG signal
      */
-    public QRSFilterer(QRSDetectorParameters qrsDetectorParameters) {
-        qrsDetParas = qrsDetectorParameters;
-        lpfiltData = new int[qrsDetectorParameters.lpBufferLength];
-        hpfiltData = new int[qrsDetectorParameters.hpBufferLength];
-        deriv1DerBuff = new int[qrsDetectorParameters.derivLength];
-        deriv2DerBuff = new int[qrsDetectorParameters.derivLength];
-        mvwintData = new int[qrsDetectorParameters.windowWidth];
+    public ECGFilterer(int samplingRate) {
+        qrsDetParas = new ECGPeakDetectorParameters(samplingRate);
+        lpfiltData = new int[qrsDetParas.lpBufferLength];
+        hpfiltData = new int[qrsDetParas.hpBufferLength];
+        deriv1DerBuff = new int[qrsDetParas.derivLength];
+        deriv2DerBuff = new int[qrsDetParas.derivLength];
+        mvwintData = new int[qrsDetParas.windowWidth];
     }
 
     /**
-     * QRSFilter() takes samples of an ECG signal as input and returns a sample of
+     * filter() takes samples of an ECG signal as input and returns a sample of
      * a signal that is an estimate of the local energy in the QRS bandwidth.  In
      * other words, the signal has a lump in it whenever a QRS complex, or QRS
      * complex like artifact occurs.  The filters were originally designed for data
@@ -48,20 +50,13 @@ public class QRSFilterer {
      * @param datum sample of an ECG signal
      * @return a sample of a signal that is an estimate of the local energy in the QRS bandwidth
      */
-    public int qrsFilter(int datum) {
+    public int filter(int datum) {
         int fdatum;
         fdatum = lpfilt(datum);  // Low pass filter data.
         fdatum = hpfilt(fdatum); // High pass filter data.
         fdatum = deriv2(fdatum); // Take the derivative.
         fdatum = Math.abs(fdatum);    // Take the absolute value.
         fdatum = mvwInt(fdatum); // Average over an 80 ms window .
-        return (fdatum);
-    }
-
-    public int ecgFilter(int datum) {
-        int fdatum;
-        fdatum = lpfilt(datum);
-        fdatum = hpfilt(fdatum);
         return (fdatum);
     }
 
@@ -179,4 +174,3 @@ public class QRSFilterer {
     }
 
 }
-

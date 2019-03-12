@@ -1,17 +1,24 @@
-package de.sensorlib.dataprocessinglib;
+package de.sensorlib.dataprocessinglib.Detectors;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
-import de.fau.sensorlib.ProcessingEventGenerator;
-import de.fau.sensorlib.ProcessingEventListener;
+import de.sensorlib.dataprocessinglib.PPGExtract;
+import de.sensorlib.dataprocessinglib.ProcessingEventGenerator;
+import de.sensorlib.dataprocessinglib.ProcessingEventListener;
+import de.sensorlib.dataprocessinglib.enums.ProcessingState;
+import de.sensorlib.dataprocessinglib.filters.AbstractFilterer;
+import de.sensorlib.dataprocessinglib.filters.PPGFilterer;
 
 public class PPGPointDetector implements ProcessingEventGenerator {
 
-    private PPGFilterer ppgFilterer;
+    //private PPGFilterer ppgFilterer;
+    private AbstractFilterer ppgFilterer;
     private PPGExtract ppgExtract;
     private ArrayList<Integer> ppgFilteredExtract = new ArrayList<Integer>();
     private ArrayList<Integer> ppgDeriv1Extract = new ArrayList<Integer>();
+
+    private ProcessingState mState;
 
     private int peak;
     private int turn;
@@ -58,8 +65,10 @@ public class PPGPointDetector implements ProcessingEventGenerator {
      */
     public void notifyListeners() {
         for (ProcessingEventListener listener : listeners) {
-            listener.update(this);
+            //listener.onNewProcessingEvent(this);
+            listener.onNewProcessingEvent(mState);
         }
+        mState = ProcessingState.NO_EVENT_DETECTED;
     }
 
     /**
@@ -68,11 +77,11 @@ public class PPGPointDetector implements ProcessingEventGenerator {
      * @param ppgFilterer
      * @param ppgExtract
      */
-    public PPGPointDetector(PPGFilterer ppgFilterer, PPGExtract ppgExtract) {
+    public PPGPointDetector(AbstractFilterer ppgFilterer, PPGExtract ppgExtract) {
         this.ppgFilterer = ppgFilterer;
         this.ppgExtract = ppgExtract;
         for (int i = 0; i < ppgExtract.getPPGSequence().size(); i++) {
-            int filtered = ppgFilterer.ppgFilter(ppgExtract.getPPGSequence().get(i));
+            int filtered = ppgFilterer.filter(ppgExtract.getPPGSequence().get(i));
             this.ppgFilteredExtract.add(filtered);
 
         }
@@ -149,7 +158,8 @@ public class PPGPointDetector implements ProcessingEventGenerator {
 
         // call update method if new points are detected.
         if (ppgPeak != 0 && turn != 0 && through != 0) {
-            notifyListeners();
+            mState = ProcessingState.PPG_POINTS_DETECTED;
+            this.notifyListeners();
         }
 
         int[] result = {ppgPeak, turn, through};

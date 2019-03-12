@@ -1,6 +1,6 @@
 package de.sensorlib.dataprocessinglib;
 
-public class QRSDetectorParameters {
+public class ECGPeakDetectorParameters {
     /**
      * Sample rate in Hz.
      */
@@ -33,7 +33,7 @@ public class QRSDetectorParameters {
      */
     public final int windowWidth; //
 
-    public QRSDetectorParameters(int sampleRate) {
+    public ECGPeakDetectorParameters(int sampleRate) {
         this.sampleRate = sampleRate;
         msPerSample = ((double) 1000 / (double) sampleRate);
         ms10 = ((int) (10 / msPerSample + 0.5));
@@ -69,7 +69,7 @@ public class QRSDetectorParameters {
         public int filterDelay;
         public int derDelay;
 
-        public PreBlankParameters(QRSDetectorParameters qrsDetParas, int preBlank) {
+        public PreBlankParameters(ECGPeakDetectorParameters qrsDetParas, int preBlank) {
             this.preBlank = preBlank;
             filterDelay = (int) (((double) qrsDetParas.derivLength / 2) + ((double) qrsDetParas.lpBufferLength / 2 - 1) + (((double) qrsDetParas.hpBufferLength - 1) / 2) + preBlank);
             derDelay = qrsDetParas.windowWidth + filterDelay + qrsDetParas.ms100;

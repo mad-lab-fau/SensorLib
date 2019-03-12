@@ -2,19 +2,20 @@ package de.sensorlib.dataprocessinglib;
 
 import java.util.ArrayList;
 
-import de.fau.sensorlib.ProcessingEventGenerator;
-import de.fau.sensorlib.ProcessingEventListener;
-import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.dataframe.EcgDataFrame;
 import de.fau.sensorlib.dataframe.PpgDataFrame;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
+import de.fau.sensorlib.enums.HardwareSensor;
 import de.fau.sensorlib.sensors.NilsPodPpgSensor.NilsPodPpgDataFrame;
 import de.fau.sensorlib.sensors.NilsPodEcgSensor.NilsPodEcgDataFrame;
-import de.fau.sensorlib.sensors.SimulatedEcgSensor;
 import de.fau.sensorlib.sensors.SimulatedEcgSensor.SimulatedEcgDataFrame;
-import de.fau.sensorlib.sensors.SimulatedPpgSensor;
 import de.fau.sensorlib.sensors.SimulatedPpgSensor.SimulatedPpgDataFrame;
-import de.fau.sensorlib.widgets.SensorPlotter;
+import de.sensorlib.dataprocessinglib.Detectors.ECGPeakDetector;
+import de.sensorlib.dataprocessinglib.Detectors.PPGPointDetector;
+import de.sensorlib.dataprocessinglib.enums.ProcessingState;
+import de.sensorlib.dataprocessinglib.filters.AbstractFilterer;
+import de.sensorlib.dataprocessinglib.filters.ECGFilterer;
+import de.sensorlib.dataprocessinglib.filters.PPGFilterer;
 
 /**
  * The class ComputePAT computes the pulse arrival time (PAT) for a given ECG and PPG signal and their sampling rate
@@ -23,10 +24,12 @@ import de.fau.sensorlib.widgets.SensorPlotter;
 public class ComputePAT implements ProcessingEventListener, ProcessingEventGenerator {
 
     private int samplingRate;
-    private QRSFilterer qrsFilterer;
-    private QRSDetector qrsDetector;
-    private QRSDetectorParameters qrsDetectorParameters;
-    private PPGFilterer ppgFilterer;
+    //private ECGFilterer ecgFilterer;
+    private AbstractFilterer ecgFilterer;
+    private ECGPeakDetector ecgPeakDetector;
+    private ECGPeakDetectorParameters qrsDetectorParameters;
+    //private PPGFilterer ppgFilterer;
+    private AbstractFilterer ppgFilterer;
     private PPGExtract ppgExtract;
 
     private PPGExtract tempPpgExtract;
@@ -44,6 +47,8 @@ public class ComputePAT implements ProcessingEventListener, ProcessingEventGener
     private boolean ecgDataReceived = false;
     private boolean ppgAndEcgDataReceived = false;
 
+    private ProcessingState mState;
+
     /**
      * variables and method making PPGPointDetector observable
      */
@@ -56,7 +61,10 @@ public class ComputePAT implements ProcessingEventListener, ProcessingEventGener
      * @param listener This is the new ProcessEventListener to be added.
      */
     public void addProcessingEventListener(ProcessingEventListener listener) {
-        listeners.add(listener);
+        if (!(listeners.contains(listener))){
+            listeners.add(listener);
+        }
+
     }
 
     /**
@@ -73,8 +81,10 @@ public class ComputePAT implements ProcessingEventListener, ProcessingEventGener
      */
     public void notifyListeners() {
         for (ProcessingEventListener listener : listeners) {
-            listener.update(this);
+            //listener.onNewProcessingEvent(this);
+            listener.onNewProcessingEvent(mState);
         }
+        mState = ProcessingState.NO_EVENT_DETECTED;
     }
 
     //only for plotting
@@ -93,17 +103,19 @@ public class ComputePAT implements ProcessingEventListener, ProcessingEventGener
      */
     public ComputePAT(int samplingRate) {
         this.samplingRate = samplingRate;
-        this.qrsDetectorParameters = new QRSDetectorParameters(samplingRate);
-        this.qrsFilterer = new QRSFilterer(qrsDetectorParameters);
-        this.qrsDetector = new QRSDetector(qrsDetectorParameters);
-        qrsDetector.setObjects(qrsFilterer);
-        this.ppgFilterer = new PPGFilterer(samplingRate);
+        this.qrsDetectorParameters = new ECGPeakDetectorParameters(samplingRate);
+        //this.ecgFilterer = new ECGFilterer(samplingRate);
+        this.ecgFilterer = FilterFactory.getFilterInstance(samplingRate, HardwareSensor.ECG);
+        this.ecgPeakDetector = new ECGPeakDetector(qrsDetectorParameters);
+        ecgPeakDetector.setObjects(ecgFilterer);
+        //this.ppgFilterer = new PPGFilterer(samplingRate);
+        this.ppgFilterer = FilterFactory.getFilterInstance(samplingRate, HardwareSensor.PPG);
         this.ppgExtract = new PPGExtract();
 
         this.nextPPGExtract = new ArrayList<Integer>();
         this.ppgPointDetector = new PPGPointDetector(ppgFilterer, ppgExtract);
         // add this object to the Lists of ProcessEventListeners of qrsDetector and ppgPointDetector -> observable
-        this.qrsDetector.addProcessingEventListener(this);
+        this.ecgPeakDetector.addProcessingEventListener(this);
         this.ppgPointDetector.addProcessingEventListener(this);
 
         //only for Plotting
@@ -146,22 +158,59 @@ public class ComputePAT implements ProcessingEventListener, ProcessingEventGener
 
 
     /**
-     * update method making ComputePat Listener
-     * either calls ppgPointDetection if update is called by new QRS detected, or calls onsetDetector if update is called by PPGPointDetector
+     * onNewProcessingEvent method making ComputePat Listener
+     * either calls ppgPointDetection if it is called by new QRS detected, or calls onsetDetector if update is called by PPGPointDetector
+     *
+     * @param state The processingState from which the method is called.
      */
 
-    public void update(ProcessingEventGenerator generator) {
-        if (generator instanceof QRSDetector) {
-            this.qrsDelay = qrsDetector.getQrsDelay();
+    public void onNewProcessingEvent(ProcessingState state) {
+        switch (state){
+            case QRS_DETECTED:
+                this.qrsDelay = ecgPeakDetector.getQrsDelay();
+                this.nextPPGExtract = this.ppgExtract.removeQRSDelay(this.qrsDelay);
+                this.tempPpgExtract = new PPGExtract(this.ppgExtract.getPPGSequence());
+                this.ppgExtract = new PPGExtract(nextPPGExtract);
+                this.ppgPointDetector = new PPGPointDetector(ppgFilterer, tempPpgExtract);
+                this.ppgPointDetector.addProcessingEventListener(this);
+                this.detectedPoints = ppgPointDetector.pointDetection();
+                break;
+            case PPG_POINTS_DETECTED:
+                int turn = ppgPointDetector.getTurn();
+                int through = ppgPointDetector.getThrough();
+                int peak = ppgPointDetector.getPeak();
+                System.out.println("turn, through, peak: " + turn + ", " + through + ", " + peak);
+                this.onsetPoint = ppgPointDetector.onsetDetection(turn, through);
+                this.pat = (onsetPoint[0] / this.samplingRate) * 1000;
+
+                mState = ProcessingState.NEW_PAT_COMPUTED;
+                this.notifyListeners();
+
+                System.out.println("onsetPoint = " + pat + "ms");
+
+                //only for plotting
+                this.qrsDelayList.add(this.qrsDelay);
+                this.ppgPeakDelay.add(peak + qrsDelay);
+                this.ppgTurnDelay.add(turn + qrsDelay);
+                this.ppgThroughDelay.add(through + qrsDelay);
+                this.ppgOnsetDelay.add(onsetPoint[1] + qrsDelay);
+                this.ppgOnsetValue.add(onsetPoint[2]);
+                break;
+
+        }
+    }
+
+    /*public void onNewProcessingEvent(ProcessingEventGenerator generator) {
+        if (generator instanceof ECGPeakDetector) {
+            this.qrsDelay = ecgPeakDetector.getQrsDelay();
             this.nextPPGExtract = this.ppgExtract.removeQRSDelay(this.qrsDelay);
             this.tempPpgExtract = new PPGExtract(this.ppgExtract.getPPGSequence());
             this.ppgExtract = new PPGExtract(nextPPGExtract);
             this.ppgPointDetector = new PPGPointDetector(ppgFilterer, tempPpgExtract);
             this.ppgPointDetector.addProcessingEventListener(this);
             this.detectedPoints = ppgPointDetector.pointDetection();
-
-        } else if (generator instanceof PPGPointDetector) {
-
+        }
+        if(generator instanceof PPGPointDetector){
             int turn = ppgPointDetector.getTurn();
             int through = ppgPointDetector.getThrough();
             int peak = ppgPointDetector.getPeak();
@@ -178,12 +227,8 @@ public class ComputePAT implements ProcessingEventListener, ProcessingEventGener
             this.ppgOnsetDelay.add(onsetPoint[1] + qrsDelay);
             this.ppgOnsetValue.add(onsetPoint[2]);
 
-            // for plotting in the App
-            notifyListeners();
-            //mPlotter.onNewOnsetPoint(this.qrsDelay, peak+qrsDelay, turn+qrsDelay, through+qrsDelay, onsetPoint[1]+qrsDelay, onsetPoint[2]);
-
         }
-    }
+    }*/
 
     /**
      * This is called when a new ECG dataframe is detected in OnNewData in BleService
@@ -248,7 +293,7 @@ public class ComputePAT implements ProcessingEventListener, ProcessingEventGener
      */
     public double compute(int ecgDatum, int ppgDatum) {
         // R-Peak detection in the ECG-Signal
-        this.qrsDelay = qrsDetector.qrsDet(ecgDatum);
+        this.qrsDelay = ecgPeakDetector.ecgPeakDet(ecgDatum);
 
         // if no R-Peak detected add the next PPG sample to ppgExtract, that stores the PPG data between two R-Peaks
         // if new QRS detected, update method is called
