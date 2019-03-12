@@ -311,11 +311,12 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
     public AbstractNilsPodSensor(Context context, SensorInfo info, SensorDataProcessor dataHandler) {
         // set sampling rate to default value
-        super(context, info.getDeviceName(), info.getDeviceAddress(), dataHandler, 200);
+        super(context, info.getDeviceName(), info.getDeviceAddress(), dataHandler, 200, BleConnectionMode.MODE_NILSPOD);
     }
 
     @Override
     public void startStreaming() {
+        super.startStreaming();
         // send START_STREAMING command to NilsPod
         if (send(NilsPodSensorCommand.START_STREAMING)) {
             enableRecorder();
@@ -326,6 +327,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
     @Override
     public void stopStreaming() {
+        super.stopStreaming();
         // send STOP_STREAMING command to sensor
         if (send(NilsPodSensorCommand.STOP_STREAMING)) {
             if (mDataRecorder != null) {
@@ -349,9 +351,6 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         if (newState == SensorState.CONNECTED) {
             if (getOperationState() == NilsPodOperationState.LOGGING) {
                 setState(SensorState.LOGGING);
-            }
-            if (oldState == SensorState.CONNECTING) {
-                enableGattNotifications();
             }
         }
 
@@ -431,16 +430,6 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         }
 
         return false;
-    }
-
-    @Override
-    protected void onAllGattNotificationsEnabled() {
-        Log.d(TAG, "onAllGattNotificationsEnabled");
-    }
-
-    @Override
-    protected void onAllGattNotificationsDisabled() {
-        Log.d(TAG, "onAllGattNotificationsDisabled");
     }
 
     @Override

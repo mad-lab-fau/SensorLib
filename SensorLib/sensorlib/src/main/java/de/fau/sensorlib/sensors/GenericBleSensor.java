@@ -73,6 +73,11 @@ public class GenericBleSensor extends AbstractSensor {
         }
     }
 
+    protected enum BleConnectionMode {
+        MODE_DEFAULT,
+        MODE_NILSPOD
+    }
+
     private static final int MAX_MTU_SIZE = 247;
 
 
@@ -83,6 +88,7 @@ public class GenericBleSensor extends AbstractSensor {
 
     private BleGattAttributes.BodySenorLocation mBodyLocation;
 
+    private BleConnectionMode mStateMachineMode = BleConnectionMode.MODE_DEFAULT;
 
     private boolean mHasBatteryMeasurement = false;
 
@@ -330,8 +336,13 @@ public class GenericBleSensor extends AbstractSensor {
             super.onMtuChanged(gatt, mtu, status);
             // request higher connection priority
             mGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH);
-            // Sensor is now connected
-            sendConnected();
+            if (mStateMachineMode == BleConnectionMode.MODE_DEFAULT) {
+                // Sensor is now connected
+                sendConnected();
+            } else {
+                // enable Gatt notifications
+                enableGattNotifications();
+            }
         }
     };
 
@@ -347,6 +358,11 @@ public class GenericBleSensor extends AbstractSensor {
     public GenericBleSensor(Context context, String deviceName, String deviceAddress, SensorDataProcessor dataHandler, double desiredSamplingRate) {
         super(context, deviceName, deviceAddress, dataHandler, desiredSamplingRate);
         mNotificationsList = new ConcurrentLinkedQueue<>();
+    }
+
+    public GenericBleSensor(Context context, String deviceName, String deviceAddress, SensorDataProcessor dataHandler, double desiredSamplingRate, BleConnectionMode stateMachineMode) {
+        this(context, deviceName, deviceAddress, dataHandler, desiredSamplingRate);
+        mStateMachineMode = stateMachineMode;
     }
 
     @Override
@@ -393,9 +409,10 @@ public class GenericBleSensor extends AbstractSensor {
             return;
         }
 
-        enableGattNotifications();
+        if (mStateMachineMode == BleConnectionMode.MODE_DEFAULT) {
+            enableGattNotifications();
+        }
     }
-
 
     public void enableGattNotifications() {
         for (BluetoothGattCharacteristic charac : mNotificationsList) {
@@ -412,7 +429,9 @@ public class GenericBleSensor extends AbstractSensor {
 
     @Override
     public void stopStreaming() {
-        disableGattNotifications();
+        if (mStateMachineMode == BleConnectionMode.MODE_DEFAULT) {
+            disableGattNotifications();
+        }
     }
 
 
@@ -612,12 +631,18 @@ public class GenericBleSensor extends AbstractSensor {
 
     protected void onAllGattNotificationsEnabled() {
         Log.d(TAG, "onAllGattNotificationsEnabled");
-        sendStartStreaming();
+        if (mStateMachineMode == BleConnectionMode.MODE_DEFAULT) {
+            sendStartStreaming();
+        } else {
+            sendConnected();
+        }
     }
 
     protected void onAllGattNotificationsDisabled() {
         Log.d(TAG, "onAllGattNotificationsDisabled");
-        sendStopStreaming();
+        if (mStateMachineMode == BleConnectionMode.MODE_DEFAULT) {
+            sendStopStreaming();
+        }
     }
 
     @Override
