@@ -305,7 +305,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
          * @param accel     array storing acceleration values
          * @param gyro      array storing gyroscope values
          */
-        public NilsPodDataFrame(GenericBleSensor sensor, long timestamp, double[] accel, double[] gyro) {
+        public NilsPodDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro) {
             this(sensor, timestamp, accel, gyro, 0);
         }
 
@@ -318,7 +318,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
          * @param accel     array storing acceleration values
          * @param gyro      array storing gyroscope values
          */
-        public NilsPodDataFrame(GenericBleSensor sensor, long timestamp, double[] accel, double[] gyro, double baro) {
+        public NilsPodDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro, double baro) {
             super(sensor, timestamp, accel, gyro);
             this.baro = baro;
         }

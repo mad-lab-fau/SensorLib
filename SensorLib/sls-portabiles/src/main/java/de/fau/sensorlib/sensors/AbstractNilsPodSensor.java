@@ -786,7 +786,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
          * @param accel     array storing acceleration values
          * @param gyro      array storing gyroscope values
          */
-        public GenericNilsPodDataFrame(GenericBleSensor sensor, long timestamp, double[] accel, double[] gyro) {
+        public GenericNilsPodDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro) {
             super(sensor, timestamp);
             if (accel.length != 3 || gyro.length != 3) {
                 throw new IllegalArgumentException("Illegal array size for " + ((accel.length != 3) ? "acceleration" : "gyroscope") + " values! ");

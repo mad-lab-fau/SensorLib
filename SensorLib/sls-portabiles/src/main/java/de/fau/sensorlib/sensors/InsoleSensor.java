@@ -130,7 +130,7 @@ public class InsoleSensor extends NilsPodSensor {
          * @param baro      Atmospheric pressure from barometer
          * @param pressure  Array storing FSR pressure values
          */
-        public InsoleDataFrame(GenericBleSensor sensor, long timestamp, double[] accel, double[] gyro, double baro, double[] pressure) {
+        public InsoleDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro, double baro, double[] pressure) {
             super(sensor, timestamp, accel, gyro, baro);
             this.pressure = pressure;
         }

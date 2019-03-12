@@ -126,7 +126,7 @@ public class HoopSensor extends AbstractNilsPodSensor {
          * @param accel     array storing acceleration values
          * @param gyro      array storing gyroscope values
          */
-        public HoopDataFrame(GenericBleSensor sensor, long timestamp, double[] accel, double[] gyro) {
+        public HoopDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro) {
             super(sensor, timestamp, accel, gyro);
         }
     }
