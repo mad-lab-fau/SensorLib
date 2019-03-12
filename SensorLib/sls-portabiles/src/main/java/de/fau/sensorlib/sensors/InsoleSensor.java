@@ -89,11 +89,11 @@ public class InsoleSensor extends NilsPodSensor {
                 }
             }
 
-            // extract packet counter (only 15 bit, therefore getIntValue() method not applicable)
-            localCounter = (values[mPacketSize - 1] & 0xFF) | ((values[mPacketSize - 2] & 0x7F) << 8);
+            // extract packet counter (16 bit)
+            localCounter = (values[i + mPacketSize - 1] & 0xFF) | ((values[i + mPacketSize - 2] & 0xFF) << 8);
 
             // check if packets have been lost
-            if (((localCounter - lastCounter) % (2 << 14)) > 1) {
+            if (((localCounter - lastCounter) % (2 << 15)) > 1) {
                 Log.w(TAG, this + ": BLE Packet Loss!");
             }
             // increment global counter if local counter overflows
@@ -101,7 +101,7 @@ public class InsoleSensor extends NilsPodSensor {
                 globalCounter++;
             }
 
-            InsoleDataFrame df = new InsoleDataFrame(this, globalCounter * (2 << 14) + localCounter, accel, gyro, baro, pressure);
+            InsoleDataFrame df = new InsoleDataFrame(this, globalCounter * (2 << 15) + localCounter, accel, gyro, baro, pressure);
 
             //Log.d(TAG, df.toString());
             // send new data to the SensorDataProcessor
