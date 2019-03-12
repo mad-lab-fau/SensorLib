@@ -14,39 +14,11 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 import de.fau.sensorlib.sensors.AbstractNilsPodSensor;
+import de.fau.sensorlib.sensors.enums.NilsPodTerminationSource;
 
 public class Session {
 
     private static final String TAG = Session.class.getSimpleName();
-
-    public enum NilsPodTerminationSource {
-
-        NO_MEMORY(0x10),
-        BLE(0x20),
-        DOCK(0x40),
-        LOW_VOLTAGE(0x80);
-
-        private int termSource;
-
-        NilsPodTerminationSource(int termSource) {
-            this.termSource = termSource;
-        }
-
-        public static NilsPodTerminationSource inferTerminationSource(int termState) {
-            switch (termState) {
-                case 0x10:
-                    return NO_MEMORY;
-                case 0x20:
-                    return BLE;
-                case 0x40:
-                    return DOCK;
-                case 0x80:
-                    return LOW_VOLTAGE;
-                default:
-                    return null;
-            }
-        }
-    }
 
     /**
      * Flash page size in Byte
@@ -77,7 +49,7 @@ public class Session {
         mEndPage = ((sessionPacket[offset++] & 0xFF) << 16) | ((sessionPacket[offset++] & 0xFF) << 8) | (sessionPacket[offset++] & 0xFF);
 
         mSamplingRate = AbstractNilsPodSensor.inferSamplingRate(sessionPacket[offset] & 0x0F);
-        mTerminationSource = NilsPodTerminationSource.inferTerminationSource((sessionPacket[offset++] >> 4) & 0x0F);
+        mTerminationSource = NilsPodTerminationSource.inferTerminationSource(sessionPacket[offset++] & 0xF0);
 
         int tmpTime = ((sessionPacket[offset++] & 0xFF) << 24) | ((sessionPacket[offset++] & 0xFF) << 16) | ((sessionPacket[offset++] & 0xFF) << 8) | (sessionPacket[offset++] & 0xFF);
         mStartTime = new Date(((long) tmpTime) * 1000);

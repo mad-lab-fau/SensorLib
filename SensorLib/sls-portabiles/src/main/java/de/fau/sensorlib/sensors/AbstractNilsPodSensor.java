@@ -24,6 +24,8 @@ import de.fau.sensorlib.enums.HardwareSensor;
 import de.fau.sensorlib.enums.SensorMessage;
 import de.fau.sensorlib.enums.SensorState;
 import de.fau.sensorlib.sensors.configs.BaseConfigItem;
+import de.fau.sensorlib.sensors.enums.NilsPodRfGroup;
+import de.fau.sensorlib.sensors.enums.NilsPodSyncRole;
 
 public abstract class AbstractNilsPodSensor extends GenericBleSensor implements Recordable, Resettable {
 
@@ -232,15 +234,6 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
 
     /**
-     * Enum describing the synchronization role of the NilsPod sensor
-     */
-    protected enum NilsPodSyncRole {
-        SYNC_ROLE_DISABLED,
-        SYNC_ROLE_SLAVE,
-        SYNC_ROLE_MASTER
-    }
-
-    /**
      * Enum describing the sensor position
      */
     protected enum NilsPodSensorPosition {
@@ -268,28 +261,6 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
         public int getErrorCode() {
             return errorCode;
-        }
-    }
-
-    protected enum NilsPodRfGroup {
-        SYNC_GROUP_0(0, 27, new byte[]{(byte) 0xDE, (byte) 0xAD, (byte) 0xBE, (byte) 0xEF, (byte) 0x19}),
-        SYNC_GROUP_1(1, 35, new byte[]{(byte) 0xAB, (byte) 0xCD, (byte) 0xEF, (byte) 0x12, (byte) 0x35}),
-        SYNC_GROUP_2(2, 42, new byte[]{(byte) 0xEA, (byte) 0x43, (byte) 0xA7, (byte) 0x35, (byte) 0x42});
-
-        private int syncGroup;
-        private int rfChannel;
-        private byte[] rfAddress;
-
-        NilsPodRfGroup(int syncGroup, int rfChannel, byte[] rfAddress) {
-            this.syncGroup = syncGroup;
-            this.rfChannel = rfChannel;
-            this.rfAddress = rfAddress;
-        }
-
-
-        @Override
-        public String toString() {
-            return "[" + syncGroup + "]: Channel " + rfChannel + " @ " + Arrays.toString(rfAddress);
         }
     }
 
@@ -492,6 +463,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
             // sensor config was changed from app side => read characteristic to update
             readEnabledSensors();
         } else if (NILS_POD_COMMANDS.equals(characteristic.getUuid())) {
+            // TODO move to onOperationStateChanged (CAUTION: HoopSensor has no System State Characteristic!)
             // check if the command sent to the sensor was STOP_STREAMING
             byte[] values = characteristic.getValue();
             if (values.length > 0) {
