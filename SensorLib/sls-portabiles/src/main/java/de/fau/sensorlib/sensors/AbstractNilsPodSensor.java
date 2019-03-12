@@ -151,6 +151,10 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
          */
         FLASH_FULL_ERASE(new byte[]{(byte) 0xF0}),
         /**
+         * Flash Clear Sessions Command
+         */
+        FLASH_CLEAR_SESSIONS(new byte[]{(byte) 0xF1}),
+        /**
          * Flash Read Session List Command
          */
         FLASH_READ_SESSION_LIST(new byte[]{(byte) 0xF2}),

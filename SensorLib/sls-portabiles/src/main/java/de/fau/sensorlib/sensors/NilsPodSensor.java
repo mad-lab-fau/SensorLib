@@ -205,10 +205,10 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
                         }
                         break;
                     case DOWNLOADING_SESSION:
+                        mSessionDownloader.completeDownload();
                         for (NilsPodLoggingCallback callback : mCallbacks) {
                             callback.onSessionDownloaded(this, mSessionDownloader.getSession());
                         }
-                        mSessionDownloader.completeDownload();
                         break;
                 }
                 break;
@@ -245,7 +245,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
 
     @Override
     public void clearSessions() {
-        send(NilsPodSensorCommand.FLASH_FULL_ERASE);
+        send(NilsPodSensorCommand.FLASH_CLEAR_SESSIONS);
     }
 
     @Override
