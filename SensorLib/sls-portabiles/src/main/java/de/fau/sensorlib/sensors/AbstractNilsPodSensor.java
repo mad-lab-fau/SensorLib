@@ -602,10 +602,6 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         ArrayList<String> sensorList = (ArrayList<String>) Arrays.asList("ACC", "GYRO", "BARO");
         BaseConfigItem item = new BaseConfigItem("Sensor Config");
         mConfigMap.put(KEY_SENSOR_ENABLE, item);
-
-        if (!isSensorEnabled(HardwareSensor.BAROMETER)) {
-            setSensorsEnabled(EnumSet.of(HardwareSensor.BAROMETER), true);
-        }
     }
 
     protected void extractSensorPosition(BluetoothGattCharacteristic characteristic) throws SensorException {
