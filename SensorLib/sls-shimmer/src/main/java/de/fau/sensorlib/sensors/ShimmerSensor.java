@@ -444,7 +444,7 @@ public class ShimmerSensor extends AbstractSensor {
     }
 
     @Override
-    public boolean requestSamplingRateChange(double toSamplingRate) {
+    public boolean requestSamplingRateChange(double toSamplingRate) throws SensorException {
         // if we are streaming we can't change the sampling rate
         if (getState().ordinal() >= SensorState.STREAMING.ordinal())
             return false;
