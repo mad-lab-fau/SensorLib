@@ -47,6 +47,24 @@ public class HoopSensor extends AbstractNilsPodSensor {
         }
     }
 
+    @Override
+    protected void onNewCharacteristicWrite(BluetoothGattCharacteristic characteristic, int status) {
+        super.onNewCharacteristicWrite(characteristic, status);
+        if (NILS_POD_COMMANDS.equals(characteristic.getUuid())) {
+            // check if the command sent to the sensor was STOP_STREAMING
+            byte[] values = characteristic.getValue();
+            if (values.length > 0) {
+                if (Arrays.equals(values, NilsPodSensorCommand.STOP_STREAMING.getByteCmd())) {
+                    sendStopStreaming();
+                } else if (Arrays.equals(values, NilsPodSensorCommand.START_STREAMING.getByteCmd())) {
+                    if (getOperationState().ordinal() < NilsPodOperationState.STREAMING.ordinal()) {
+                        sendStartStreaming();
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * Extracts sensor data into data frames from the given characteristic.
      *

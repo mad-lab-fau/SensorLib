@@ -338,6 +338,25 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
     protected void onOperationStateChanged(NilsPodOperationState oldState, NilsPodOperationState newState) {
         Log.d(TAG, "<" + getDeviceName() + "> onOperationStateChanged: <" + oldState + "> -> <" + newState + ">");
+
+        switch (oldState) {
+            case IDLE:
+                switch (newState) {
+                    case STREAMING:
+                        sendStartStreaming();
+                        break;
+                }
+                break;
+            case STREAMING:
+                switch (newState) {
+                    case IDLE:
+                        sendStopStreaming();
+                        break;
+                }
+                break;
+        }
+
+
         sendNotification(SensorMessage.OPERATION_STATE_CHANGED);
     }
 
@@ -467,19 +486,6 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         if (NILS_POD_SENSOR_CONFIG.equals(characteristic.getUuid())) {
             // sensor config was changed from app side => read characteristic to update
             readEnabledSensors();
-        } else if (NILS_POD_COMMANDS.equals(characteristic.getUuid())) {
-            // TODO move to onOperationStateChanged (CAUTION: HoopSensor has no System State Characteristic!)
-            // check if the command sent to the sensor was STOP_STREAMING
-            byte[] values = characteristic.getValue();
-            if (values.length > 0) {
-                if (values[0] == NilsPodSensorCommand.STOP_STREAMING.cmd[0]) {
-                    sendStopStreaming();
-                } else if (values[0] == NilsPodSensorCommand.START_STREAMING.cmd[0]) {
-                    if (getOperationState().ordinal() < NilsPodOperationState.STREAMING.ordinal()) {
-                        sendStartStreaming();
-                    }
-                }
-            }
         }
     }
 
