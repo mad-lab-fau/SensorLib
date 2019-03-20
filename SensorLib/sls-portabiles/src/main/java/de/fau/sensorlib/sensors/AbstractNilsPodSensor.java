@@ -6,7 +6,6 @@ import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -392,6 +391,14 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
             return false;
         }
 
+        while (getOperationState() == NilsPodOperationState.SAVING_CONFIG) {
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
         return writeCharacteristic(characteristic, data);
     }
 
@@ -516,7 +523,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     }
 
 
-    protected void extractSystemState(BluetoothGattCharacteristic characteristic) throws SensorException {
+    protected synchronized void extractSystemState(BluetoothGattCharacteristic characteristic) throws SensorException {
         int offset = 0;
         byte[] values = characteristic.getValue();
         boolean connectionState;
@@ -555,7 +562,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     }
 
 
-    protected void extractTsConfig(BluetoothGattCharacteristic characteristic) throws SensorException {
+    protected synchronized void extractTsConfig(BluetoothGattCharacteristic characteristic) throws SensorException {
         int offset = 0;
         byte[] values = characteristic.getValue();
         NilsPodSyncRole syncRole;
@@ -580,7 +587,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         Log.d(TAG, "\tRF Group: " + rfGroup);
     }
 
-    protected void extractSensorConfig(BluetoothGattCharacteristic characteristic) throws SensorException {
+    protected synchronized void extractSensorConfig(BluetoothGattCharacteristic characteristic) throws SensorException {
         int offset = 0;
         byte[] values = characteristic.getValue();
         int sensors;
@@ -605,12 +612,12 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         mPacketSize = sampleSize;
 
         // TODO just for testing
-        ArrayList<String> sensorList = (ArrayList<String>) Arrays.asList("ACC", "GYRO", "BARO");
+        /*ArrayList<String> sensorList = (ArrayList<String>) Arrays.asList("ACC", "GYRO", "BARO");
         BaseConfigItem item = new BaseConfigItem("Sensor Config");
-        mConfigMap.put(KEY_SENSOR_ENABLE, item);
+        mConfigMap.put(KEY_SENSOR_ENABLE, item);*/
     }
 
-    protected void extractSensorPosition(BluetoothGattCharacteristic characteristic) throws SensorException {
+    protected synchronized void extractSensorPosition(BluetoothGattCharacteristic characteristic) throws SensorException {
         try {
             mSensorPosition = NilsPodSensorPosition.values()[characteristic.getValue()[0]];
         } catch (Exception e) {

@@ -293,7 +293,6 @@ public class GenericBleSensor extends AbstractSensor {
 
             // All descriptors were written and removed from the queue
             if (mDescriptorWriteRequests.isEmpty() && descriptor.getValue().length > 0) {
-
                 if (Arrays.equals(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE, descriptor.getValue())) {
                     onAllGattNotificationsEnabled();
                 } else if (Arrays.equals(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE, descriptor.getValue())) {
@@ -335,7 +334,8 @@ public class GenericBleSensor extends AbstractSensor {
         public void onMtuChanged(BluetoothGatt gatt, int mtu, int status) {
             super.onMtuChanged(gatt, mtu, status);
             // request higher connection priority
-            mGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH);
+            // TODO commented out for testing purposes
+            //mGatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH);
             if (mStateMachineMode == BleConnectionMode.MODE_DEFAULT) {
                 // Sensor is now connected
                 sendConnected();
