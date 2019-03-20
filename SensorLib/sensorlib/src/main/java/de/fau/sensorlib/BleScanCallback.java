@@ -14,9 +14,7 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Callback implementation for the BLE scan callback.
@@ -47,17 +45,19 @@ public class BleScanCallback extends ScanCallback {
         mScannedAddresses.add(result.getDevice().getAddress());
 
         SparseArray<byte[]> manuData = null;
-        try {
-            Log.d(TAG, "New BLE device: " + result.getDevice().getName() + "@" + result.getRssi());
-            manuData = Objects.requireNonNull(result.getScanRecord()).getManufacturerSpecificData();
-        } catch (Exception ignore) {
-
+        //Log.d(TAG, "New BLE device: " + result.getDevice().getName() + "@" + result.getRssi());
+        SensorInfo s;
+        if (result.getScanRecord() != null) {
+            manuData = result.getScanRecord().getManufacturerSpecificData();
+            s = new SensorInfo(result.getDevice().getName(), result.getDevice().getAddress(), manuData);
+            //Log.d(TAG, "Manufacturer Data: " + s.getDeviceClass() + ", " + Arrays.toString(manuData.valueAt(0)));
+        } else {
+            s = new SensorInfo(result.getDevice().getName(), result.getDevice().getAddress());
         }
-        SensorInfo s = new SensorInfo(result.getDevice().getName(), result.getDevice().getAddress(), manuData);
-        Log.d(TAG, "Manufacturer Data: " + s.getDeviceClass() + ", " + Arrays.toString(s.getManufacturerData().valueAt(0)));
 
         boolean ret;
         if (s.getDeviceClass() != null) {
+            Log.d(TAG, "New BLE device: " + s.getDeviceName() + " @ " + result.getRssi());
             // call this method for the DsSensorPickerFragment,
             // because we need some information about the Bluetooth device
             ret = mSensorCallback.onKnownSensorFound(s, result.getRssi());

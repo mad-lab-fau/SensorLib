@@ -152,7 +152,7 @@ public class GenericBleSensor extends AbstractSensor {
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             super.onConnectionStateChange(gatt, status, newState);
 
-            Log.d(TAG, "BleStateChange: " + gatt + " < status: " + BluetoothGattStatus.lookup(status) + " – new state: " + BluetoothProfileState.lookup(newState) + " >");
+            Log.d(TAG, "<" + getDeviceName() + "> BleStateChange: " + gatt + " < status: " + BluetoothGattStatus.lookup(status) + " – new state: " + BluetoothProfileState.lookup(newState) + " >");
 
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 if (newState == BluetoothGatt.STATE_CONNECTED) {
@@ -177,11 +177,11 @@ public class GenericBleSensor extends AbstractSensor {
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             super.onServicesDiscovered(gatt, status);
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                Log.d(TAG, "Gatt: " + gatt + "; " + mGatt);
+                Log.d(TAG, "<" + getDeviceName() + "> Gatt: " + gatt + "; " + mGatt);
                 // find out what sensor flags can be set based on the provided services
                 discoverSensor();
             } else {
-                Log.w(TAG, "onServicesDiscovered received: " + status);
+                Log.d(TAG, "<" + getDeviceName() + "> onServicesDiscovered received: " + status);
             }
         }
 
@@ -276,7 +276,7 @@ public class GenericBleSensor extends AbstractSensor {
         @Override
         public void onDescriptorRead(BluetoothGatt gatt, BluetoothGattDescriptor descriptor, int status) {
             super.onDescriptorRead(gatt, descriptor, status);
-            Log.d(TAG, "onDescriptorRead: " + BleGattAttributes.lookupDescriptor(descriptor.getUuid()) + " :: " + Arrays.toString(descriptor.getValue()));
+            Log.d(TAG, "<" + getDeviceName() + "> onDescriptorRead: " + BleGattAttributes.lookupDescriptor(descriptor.getUuid()) + " :: " + Arrays.toString(descriptor.getValue()));
         }
 
         @Override
@@ -289,7 +289,7 @@ public class GenericBleSensor extends AbstractSensor {
                 mDescriptorWriteRequests.poll();
             }
 
-            Log.d(TAG, "onDescriptorWrite: " + BleGattAttributes.lookupCharacteristic(descriptor.getCharacteristic().getUuid()) + " -> " + BleGattAttributes.lookupDescriptor(descriptor.getUuid()) + " :: " + Arrays.toString(descriptor.getValue()));
+            Log.d(TAG, "<" + getDeviceName() + "> onDescriptorWrite: " + BleGattAttributes.lookupCharacteristic(descriptor.getCharacteristic().getUuid()) + " -> " + BleGattAttributes.lookupDescriptor(descriptor.getUuid()) + " :: " + Arrays.toString(descriptor.getValue()));
 
             // All descriptors were written and removed from the queue
             if (mDescriptorWriteRequests.isEmpty() && descriptor.getValue().length > 0) {
@@ -368,7 +368,7 @@ public class GenericBleSensor extends AbstractSensor {
     @Override
     public boolean connect() throws Exception {
         if (!super.connect()) {
-            Log.e(TAG, "BleSensor connect failed.");
+            Log.e(TAG, "<" + getDeviceName() + "> BleSensor connect failed.");
             return false;
         }
 
@@ -376,7 +376,7 @@ public class GenericBleSensor extends AbstractSensor {
         if (mGatt != null) {
             if (!mGatt.connect()) {
                 setState(SensorState.DISCONNECTED);
-                Log.d(TAG, "GATT not connected, returning...");
+                Log.d(TAG, "<" + getDeviceName() + "> GATT not connected, returning...");
                 return false;
             }
         }
@@ -482,7 +482,7 @@ public class GenericBleSensor extends AbstractSensor {
      *
      * @param characteristic the characteristic for which to enable notifications.
      */
-    private boolean enableGattNotification(BluetoothGattCharacteristic characteristic) {
+    private synchronized boolean enableGattNotification(BluetoothGattCharacteristic characteristic) {
         mGatt.setCharacteristicNotification(characteristic, true);
         BluetoothGattDescriptor desc = characteristic.getDescriptor(BleGattAttributes.CLIENT_CHARACTERISTIC_CONFIGURATION);
 
@@ -502,17 +502,19 @@ public class GenericBleSensor extends AbstractSensor {
      *
      * @param characteristic the characteristic for which to disable notifications.
      */
-    private boolean disableGattNotification(BluetoothGattCharacteristic characteristic) {
-        mGatt.setCharacteristicNotification(characteristic, false);
-        BluetoothGattDescriptor desc = characteristic.getDescriptor(BleGattAttributes.CLIENT_CHARACTERISTIC_CONFIGURATION);
+    private synchronized boolean disableGattNotification(BluetoothGattCharacteristic characteristic) {
+        if (mGatt != null) {
+            mGatt.setCharacteristicNotification(characteristic, false);
+            BluetoothGattDescriptor desc = characteristic.getDescriptor(BleGattAttributes.CLIENT_CHARACTERISTIC_CONFIGURATION);
 
-        if (mGatt != null && desc != null) {
-            desc.setValue(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
-            mDescriptorWriteRequests.add(desc);
-            return mGatt.writeDescriptor(mDescriptorWriteRequests.peek());
-            /*if (mDescriptorWriteRequests.size() == 1) {
-                return mGatt.writeDescriptor(desc);
-            }*/
+            if (mGatt != null && desc != null) {
+                desc.setValue(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
+                mDescriptorWriteRequests.add(desc);
+                return mGatt.writeDescriptor(mDescriptorWriteRequests.peek());
+                /*if (mDescriptorWriteRequests.size() == 1) {
+                    return mGatt.writeDescriptor(desc);
+                }*/
+            }
         }
         return false;
     }
@@ -525,7 +527,7 @@ public class GenericBleSensor extends AbstractSensor {
     protected void onDiscoveredService(BluetoothGattService service) {
         String name = BleGattAttributes.lookupService(service.getUuid());
 
-        Log.d(TAG, mBtDevice.getName() + ">> Service discovered: " + name);
+        Log.d(TAG, getDeviceName() + " >> Service discovered: " + name);
 
         mServiceList.add(service);
 
@@ -552,13 +554,15 @@ public class GenericBleSensor extends AbstractSensor {
             mNotificationsList.add(characteristic);
         }
 
-        Log.d(TAG, mBtDevice.getName() + ">>>>> Characteristic discovered: " + name + " [ " + Arrays.toString(characteristic.getValue()) + " ]");
+        Log.d(TAG, getDeviceName() + " >>>>> Characteristic discovered: " + name + " [ " + Arrays.toString(characteristic.getValue()) + " ]");
     }
 
 
     protected void readCharacteristic(BluetoothGattCharacteristic c) {
         mCharacteristicsReadRequests.add(c);
-        mGatt.readCharacteristic(mCharacteristicsReadRequests.peek());
+        if (mGatt != null) {
+            mGatt.readCharacteristic(mCharacteristicsReadRequests.peek());
+        }
         /*if (mCharacteristicsReadRequests.size() == 1) {
             mGatt.readCharacteristic(c);
         }*/
@@ -569,7 +573,9 @@ public class GenericBleSensor extends AbstractSensor {
         c.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
         mCharacteristicsWriteRequests.add(c);
 
-        mGatt.writeCharacteristic(mCharacteristicsWriteRequests.peek());
+        if (mGatt != null) {
+            mGatt.writeCharacteristic(mCharacteristicsWriteRequests.peek());
+        }
         /*if (mCharacteristicsWriteRequests.size() == 1) {
             return mGatt.writeCharacteristic(c);
         }*/
@@ -591,34 +597,34 @@ public class GenericBleSensor extends AbstractSensor {
             // Once battery level was read it means that battery measurement is available
             mHasBatteryMeasurement = true;
             sendNotification(SensorMessage.BATTERY_LEVEL_CHANGED);
-            Log.d(TAG, "Battery level: " + mBatteryLevel);
+            Log.d(TAG, "<" + getDeviceName() + "> Battery level: " + mBatteryLevel);
         }
 
         // the following are more or less one-time reads
         else if (BleGattAttributes.DEVICE_NAME.equals(characteristic.getUuid())) {
             mDeviceName = characteristic.getStringValue(0);
-            Log.d(TAG, "Name: " + mDeviceName);
+            Log.d(TAG, "<" + getDeviceName() + "> Name: " + mDeviceName);
         } else if (BleGattAttributes.SERIAL_NUMBER_STRING.equals(characteristic.getUuid())) {
             mSerialNumber = characteristic.getStringValue(0);
-            Log.d(TAG, "Serial number: " + mSerialNumber);
+            Log.d(TAG, "<" + getDeviceName() + "> Serial number: " + mSerialNumber);
         } else if (BleGattAttributes.FIRMWARE_REVISION_STRING.equals(characteristic.getUuid())) {
             mFirmwareRevision = characteristic.getStringValue(0);
-            Log.d(TAG, "Firmware revision: " + mFirmwareRevision);
+            Log.d(TAG, "<" + getDeviceName() + "> Firmware revision: " + mFirmwareRevision);
         } else if (BleGattAttributes.SOFTWARE_REVISION_STRING.equals(characteristic.getUuid())) {
             mSoftwareRevision = characteristic.getStringValue(0);
-            Log.d(TAG, "Software revision: " + mSoftwareRevision);
+            Log.d(TAG, "<" + getDeviceName() + "> Software revision: " + mSoftwareRevision);
         } else if (BleGattAttributes.MANUFACTURER_NAME_STRING.equals(characteristic.getUuid())) {
             mManufacturer = characteristic.getStringValue(0);
-            Log.d(TAG, "Manufacturer: " + mManufacturer);
+            Log.d(TAG, "<" + getDeviceName() + "> Manufacturer: " + mManufacturer);
         } else if (BleGattAttributes.MODEL_NUMBER_STRING.equals(characteristic.getUuid())) {
             mModelNumber = characteristic.getStringValue(0);
-            Log.d(TAG, "Model Number: " + mModelNumber);
+            Log.d(TAG, "<" + getDeviceName() + "> Model Number: " + mModelNumber);
         } else if (BleGattAttributes.SYSTEM_ID.equals(characteristic.getUuid())) {
             mSensorSystemID = BleGattAttributes.valueToInt64(characteristic);
-            Log.d(TAG, "Sensor System ID: " + mSensorSystemID);
+            Log.d(TAG, "<" + getDeviceName() + "> Sensor System ID: " + mSensorSystemID);
         } else if (BleGattAttributes.BODY_SENSOR_LOCATION.equals(characteristic.getUuid())) {
             mBodyLocation = BleGattAttributes.BodySenorLocation.inferBodySensorLocation(characteristic.getValue()[0]);
-            Log.d(TAG, "Body location: " + BleGattAttributes.BodySenorLocation.getLocation(mBodyLocation));
+            Log.d(TAG, "<" + getDeviceName() + "> Body location: " + BleGattAttributes.BodySenorLocation.getLocation(mBodyLocation));
         } else {
             return false;
         }
@@ -626,11 +632,11 @@ public class GenericBleSensor extends AbstractSensor {
     }
 
     protected void onNewCharacteristicWrite(BluetoothGattCharacteristic characteristic, int status) {
-        Log.d(TAG, "onCharacteristicWrite: " + BleGattAttributes.lookupCharacteristic(characteristic.getUuid()) + " :: " + Arrays.toString(characteristic.getValue()) + " - success: " + (status == BluetoothGatt.GATT_SUCCESS));
+        Log.d(TAG, "<" + getDeviceName() + "> onCharacteristicWrite: " + BleGattAttributes.lookupCharacteristic(characteristic.getUuid()) + " :: " + Arrays.toString(characteristic.getValue()) + " - success: " + (status == BluetoothGatt.GATT_SUCCESS));
     }
 
     protected void onAllGattNotificationsEnabled() {
-        Log.d(TAG, "onAllGattNotificationsEnabled");
+        Log.d(TAG, "<" + getDeviceName() + "> onAllGattNotificationsEnabled");
         if (mStateMachineMode == BleConnectionMode.MODE_DEFAULT) {
             sendStartStreaming();
         } else {
@@ -639,7 +645,7 @@ public class GenericBleSensor extends AbstractSensor {
     }
 
     protected void onAllGattNotificationsDisabled() {
-        Log.d(TAG, "onAllGattNotificationsDisabled");
+        Log.d(TAG, "<" + getDeviceName() + "> onAllGattNotificationsDisabled");
         if (mStateMachineMode == BleConnectionMode.MODE_DEFAULT) {
             sendStopStreaming();
         }
