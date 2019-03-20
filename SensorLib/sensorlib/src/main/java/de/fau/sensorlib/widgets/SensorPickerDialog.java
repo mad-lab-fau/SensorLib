@@ -106,7 +106,7 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
         @Override
         public SensorPickerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View layout = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_sensor_picker, parent, false);
-            return new SensorPickerViewHolder(layout, this);
+            return new SensorPickerViewHolder(getContext(), layout, this);
         }
 
         @Override
@@ -120,6 +120,8 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
             String address = mFoundSensors.get(position).getString(Constants.KEY_SENSOR_ADDRESS);
             int rssi = mFoundSensors.get(position).getInt(Constants.KEY_SENSOR_RSSI);
             holder.mSensorNameTextView.setText(name);
+
+            // highlight last connected sensors
             if (mLastConnectedSensors.contains(mFoundSensors.get(position).getString(Constants.KEY_SENSOR_NAME))) {
                 holder.mSensorNameTextView.setTypeface(null, Typeface.ITALIC);
                 holder.mRecentlyConnectedTextView.setVisibility(View.VISIBLE);
@@ -132,14 +134,7 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
                 holder.mBatteryImageView.setColorFilter(ContextCompat.getColor(mContext, R.color.sensor_available));
             }
 
-            holder.mSensorGridView.post(new Runnable() {
-                @Override
-                public void run() {
-                    for (final HardwareSensor hw : sensor.getAvailableSensors()) {
-                        ((TextView) holder.mSensorGridView.getChildAt(hw.ordinal())).setTextColor(ContextCompat.getColor(mContext, R.color.sensor_available));
-                    }
-                }
-            });
+            holder.mGridAdapter.setSensorsAvailable(sensor.getAvailableSensors());
         }
 
         @Override
@@ -269,6 +264,8 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
 
     private static class SensorPickerViewHolder extends ViewHolder implements View.OnClickListener {
 
+        private Context mContext;
+
         private TextView mSensorNameTextView;
         private TextView mRecentlyConnectedTextView;
         private TextView mSensorInformationTextView;
@@ -276,10 +273,14 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
         private ImageView mBatteryImageView;
         private GridView mSensorGridView;
         private CheckBox mCheckBox;
+        private HardwareSensorGridAdapter mGridAdapter;
         private ItemClickListener mItemClickListener;
 
-        private SensorPickerViewHolder(View itemView, ItemClickListener listener) {
+        private SensorPickerViewHolder(Context context, View itemView, ItemClickListener listener) {
             super(itemView);
+
+            mContext = context;
+
             mSensorNameTextView = itemView.findViewById(R.id.tv_sensor_name);
             mRecentlyConnectedTextView = itemView.findViewById(R.id.tv_recently);
             mSensorInformationTextView = itemView.findViewById(R.id.tv_sensor_address);
@@ -288,7 +289,8 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
             mCheckBox = itemView.findViewById(R.id.checkbox);
             mCheckBox.setOnClickListener(this);
             mSensorGridView = itemView.findViewById(R.id.gv_sensors);
-            mSensorGridView.setAdapter(new SensorPickerGridAdapter(itemView.getContext()));
+            mGridAdapter = new HardwareSensorGridAdapter(itemView.getContext());
+            mSensorGridView.setAdapter(mGridAdapter);
             mItemClickListener = listener;
             itemView.setOnClickListener(this);
         }
@@ -307,12 +309,13 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
      * Adapter for GridView that lists all hardware sensors
      * and highlights the available hardware sensors.
      */
-    private static class SensorPickerGridAdapter extends BaseAdapter {
+    private static class HardwareSensorGridAdapter extends BaseAdapter {
 
         private Context mContext;
+        private EnumSet<HardwareSensor> mAvailableSensors;
 
-        SensorPickerGridAdapter(Context context) {
-            this.mContext = context;
+        HardwareSensorGridAdapter(Context context) {
+            mContext = context;
         }
 
         @Override
@@ -335,10 +338,18 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
             TextView tv = new TextView(mContext);
             tv.setLayoutParams(new GridView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
             tv.setText(((HardwareSensor) getItem(position)).getShortDescription());
-            tv.setTextColor(ContextCompat.getColor(mContext, R.color.sensor_not_available));
+            if (mAvailableSensors != null && mAvailableSensors.contains(HardwareSensor.values()[position])) {
+                tv.setTextColor(ContextCompat.getColor(mContext, R.color.sensor_available));
+            } else {
+                tv.setTextColor(ContextCompat.getColor(mContext, R.color.sensor_not_available));
+            }
             tv.setBackgroundColor(ContextCompat.getColor(mContext, android.R.color.white));
             tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
             return tv;
+        }
+
+        public void setSensorsAvailable(EnumSet<HardwareSensor> availableSensors) {
+            mAvailableSensors = availableSensors;
         }
     }
 
