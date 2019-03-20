@@ -41,6 +41,7 @@ public class Session {
     private int mSampleSize;
 
     private SimpleDateFormat mStartTimeFormat = new SimpleDateFormat("EEE, dd.MM.yyyy HH:mm", Locale.getDefault());
+    private SimpleDateFormat mSessionTimeFormat = new SimpleDateFormat("yyyyMMdd_HHmm", Locale.getDefault());
 
 
     public Session(byte[] sessionPacket) {
@@ -70,6 +71,10 @@ public class Session {
 
     public Date getStartDate() {
         return mStartTime;
+    }
+
+    public String getSessionStartString() {
+        return mSessionTimeFormat.format(getStartDate());
     }
 
     public String getStartTime() {

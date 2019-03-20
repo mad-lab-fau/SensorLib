@@ -18,10 +18,8 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Locale;
 
 import de.fau.sensorlib.SensorException;
 import de.fau.sensorlib.sensors.AbstractSensor;
@@ -36,6 +34,8 @@ public class SessionDownloadChecker {
      * Directory name where data will be stored on the external storage
      */
     private String mDirName = "SensorLibRecordings/NilsPodSessionDownloads";
+    private File mPath;
+    private String mAbsoluteDirPath = "";
 
     private boolean mStorageReadable;
     private boolean mDirectoryCreated;
@@ -52,7 +52,7 @@ public class SessionDownloadChecker {
         mAlreadyDownloadedList = new ArrayList<>();
 
         if (checkPermissions()) {
-            listFiles();
+            checkDirectory();
         } else {
             throw new SensorException(SensorException.SensorExceptionType.permissionsMissing);
         }
@@ -72,10 +72,9 @@ public class SessionDownloadChecker {
                         == PackageManager.PERMISSION_GRANTED;
     }
 
-    private void listFiles() {
+    private void checkDirectory() {
         String state;
         File root = null;
-        File path;
 
         // try to write on SD card
         state = Environment.getExternalStorageState();
@@ -109,15 +108,16 @@ public class SessionDownloadChecker {
 
         try {
             // create directory
-            path = new File(root, mDirName);
-            mDirectoryCreated = path.mkdirs();
+            mPath = new File(root, mDirName);
+            mDirectoryCreated = mPath.mkdirs();
             if (!mDirectoryCreated) {
-                mDirectoryCreated = path.exists();
+                mDirectoryCreated = mPath.exists();
                 if (!mDirectoryCreated) {
                     Log.e(TAG, "Directory could not be created!");
                     return;
                 } else {
-                    Log.i(TAG, "Working directory is " + path.getAbsolutePath());
+                    mAbsoluteDirPath = mPath.getAbsolutePath();
+                    Log.i(TAG, "Working directory is " + mAbsoluteDirPath);
                 }
             }
         } catch (Exception e) {
@@ -126,8 +126,16 @@ public class SessionDownloadChecker {
             return;
         }
 
+        listFiles();
+    }
+
+
+    public void listFiles() {
+        if (mPath == null) {
+            return;
+        }
         // list files
-        String[] files = path.list(new FilenameFilter() {
+        String[] files = mPath.list(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
                 return name.contains(mSensor.getDeviceName());
@@ -138,16 +146,24 @@ public class SessionDownloadChecker {
 
     public void addSessions(ArrayList<Session> sessionList) {
         mSessionList = sessionList;
+        mAlreadyDownloadedList = new ArrayList<>();
+
+        // reload file list
+        listFiles();
+
         for (Session session : mSessionList) {
             mAlreadyDownloadedList.add(false);
-            String dateString = new SimpleDateFormat("yyyyMMdd_HHmm", Locale.getDefault()).format(session.getStartDate());
             for (String filename : mFileList) {
-                if (filename.contains(dateString)) {
+                if (filename.contains(session.getSessionStartString())) {
                     mAlreadyDownloadedList.set(mSessionList.indexOf(session), true);
                     break;
                 }
             }
         }
+    }
+
+    public void setSessionDownloaded(Session session) {
+        mAlreadyDownloadedList.set(mSessionList.indexOf(session), true);
     }
 
     public void clear() {
@@ -157,5 +173,42 @@ public class SessionDownloadChecker {
 
     public boolean checkSessionAlreadyDownloaded(Session session) {
         return mAlreadyDownloadedList.get(mSessionList.indexOf(session));
+    }
+
+
+    public String getFullDirectoryPath() {
+        return mAbsoluteDirPath;
+    }
+
+    public String getAbsolutePathForSession(Session session) {
+        // reload file list
+        listFiles();
+
+        if (checkSessionAlreadyDownloaded(session)) {
+            for (String filename : mFileList) {
+                if (filename.contains(session.getSessionStartString())) {
+                    return getFullDirectoryPath() + "/" + filename;
+                }
+            }
+        }
+        // this should never happen
+        throw new IllegalArgumentException("Session " + session + " not downloaded yet!");
+    }
+
+
+    public String getFileNameForSession(Session session) {
+        // reload file list
+        listFiles();
+
+        if (checkSessionAlreadyDownloaded(session)) {
+            for (String filename : mFileList) {
+                if (filename.contains(session.getSessionStartString())) {
+                    return filename;
+                }
+            }
+        }
+        // this should never happen
+        throw new IllegalArgumentException("Session " + session + " not downloaded yet!");
+
     }
 }

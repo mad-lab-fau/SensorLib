@@ -20,8 +20,6 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Locale;
 
 import de.fau.sensorlib.SensorException;
 import de.fau.sensorlib.sensors.AbstractSensor;
@@ -51,8 +49,7 @@ public class SessionByteWriter {
         mContext = context;
         mSession = session;
 
-        mFilename = sensor.getDeviceName() + "_" + new SimpleDateFormat("yyyyMMdd_HHmm", Locale.getDefault()).format(session.getStartDate()) + ".bin";
-
+        mFilename = sensor.getDeviceName() + "_" + session.getSessionStartString() + ".bin";
 
         if (checkPermissions()) {
             createFile();

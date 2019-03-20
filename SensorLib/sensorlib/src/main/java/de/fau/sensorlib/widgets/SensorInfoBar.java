@@ -55,6 +55,7 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
         super(context, attrs, defStyleAttr);
         setLayoutManager(new GridLayoutManager(getContext(), 2));
         addItemDecoration(new ItemSpacing(getContext()));
+        setBackgroundColor(getResources().getColor(R.color.transparent));
         mAdapter = new SensorInfoGridAdapter(context);
         setAdapter(mAdapter);
     }
@@ -156,7 +157,6 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
 
         @Override
         public void onItemClick(View view, int position) {
-            //SensorInfoViewHolder viewHolder = (SensorInfoViewHolder) findViewHolderForAdapterPosition(position);
             AbstractSensor sensor = mAttachedSensors.get(position);
 
             Bundle bundle = new Bundle();
