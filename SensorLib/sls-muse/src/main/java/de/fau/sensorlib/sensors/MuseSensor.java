@@ -249,7 +249,7 @@ public class MuseSensor extends AbstractSensor {
     }
 
     public MuseSensor(Context context, SensorInfo knownSensor, SensorDataProcessor dataHandler) {
-        this(context, knownSensor.getName(), knownSensor.getDeviceAddress(), dataHandler);
+        this(context, knownSensor.getDeviceName(), knownSensor.getDeviceAddress(), dataHandler);
     }
 
     @Override
@@ -371,14 +371,16 @@ public class MuseSensor extends AbstractSensor {
             Log.d(TAG, "Muse version --- firmware type: " + museVersion.getFirmwareType() +
                     "\nfirmware version: " + museVersion.getFirmwareVersion() +
                     "\nprotocol version: " + museVersion.getProtocolVersion());
+
+            mFirmwareRevision = museVersion.getFirmwareVersion();
         }
+
 
         if (currentState == ConnectionState.CONNECTED) {
             Log.d(TAG, "Muse connected: " + muse.getName());
+            Log.d(TAG, "Muse connected: " + muse.getMuseConfiguration().getMicrocontrollerId());
             sendConnected();
         }
-
-        //if (currentState == ConnectionState.)
 
         if (currentState == ConnectionState.DISCONNECTED) {
             Log.d(TAG, "Muse disconnected: " + muse.getName());

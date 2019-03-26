@@ -161,13 +161,9 @@ public class EmpaticaSensor extends AbstractSensor {
                 }*/
             } else if (empaStatus == EmpaStatus.CONNECTED) {
                 Log.d(getDeviceName(), "connected.");
-                setState(SensorState.CONNECTED);
                 sendConnected();
-                startStreaming();
             } else if (empaStatus == EmpaStatus.DISCONNECTED) {
                 if (getState() == SensorState.CONNECTED) {
-                    stopStreaming();
-                    //TODO: does this differentiate if the sensor was disconnected or the connection was lost?
                     sendDisconnected();
                 }
             }
@@ -211,31 +207,41 @@ public class EmpaticaSensor extends AbstractSensor {
         @Override
         public void didReceiveGSR(float gsr, double timestamp) {
             // galvanic skin response
-            sendNewData(new EmpaticaEdaDataFrame(this.getSensor(), timestamp * EMPA_TIMESTAMP_TO_MILLISECONDS, gsr));
+            if (getState() == SensorState.STREAMING) {
+                sendNewData(new EmpaticaEdaDataFrame(this.getSensor(), timestamp * EMPA_TIMESTAMP_TO_MILLISECONDS, gsr));
+            }
         }
 
         @Override
         public void didReceiveBVP(float bvp, double timestamp) {
             // blood volume pressure
-            sendNewData(new EmpaticaBvpDataFrame(this.getSensor(), timestamp * EMPA_TIMESTAMP_TO_MILLISECONDS, bvp));
+            if (getState() == SensorState.STREAMING) {
+                sendNewData(new EmpaticaBvpDataFrame(this.getSensor(), timestamp * EMPA_TIMESTAMP_TO_MILLISECONDS, bvp));
+            }
         }
 
         @Override
         public void didReceiveIBI(float ibi, double timestamp) {
             // Inter beat interval
-            sendNewData(new EmpaticaIbiDataFrame(this.getSensor(), timestamp * EMPA_TIMESTAMP_TO_MILLISECONDS, ibi));
+            if (getState() == SensorState.STREAMING) {
+                sendNewData(new EmpaticaIbiDataFrame(this.getSensor(), timestamp * EMPA_TIMESTAMP_TO_MILLISECONDS, ibi));
+            }
         }
 
         @Override
         public void didReceiveTemperature(float temp, double timestamp) {
             Log.d(this.getClass().getSimpleName(), "Temp: " + temp);
-            sendNewData(new SimpleDataFrame(this.getSensor(), timestamp * EMPA_TIMESTAMP_TO_MILLISECONDS, 3, temp));
+            if (getState() == SensorState.STREAMING) {
+                sendNewData(new SimpleDataFrame(this.getSensor(), timestamp * EMPA_TIMESTAMP_TO_MILLISECONDS, 3, temp));
+            }
         }
 
         @Override
         public void didReceiveAcceleration(int x, int y, int z, double timestamp) {
             //Log.d( this.getClass().getSimpleName(), "Accel: " + ax + " " + ay + " " + az + ";  " + mExternalHandlers.size() );
-            sendNewData(new EmpaticaAccelDataFrame(this.getSensor(), timestamp * EMPA_TIMESTAMP_TO_MILLISECONDS, x, y, z));
+            if (getState() == SensorState.STREAMING) {
+                sendNewData(new EmpaticaAccelDataFrame(this.getSensor(), timestamp * EMPA_TIMESTAMP_TO_MILLISECONDS, x, y, z));
+            }
         }
 
         @Override
@@ -247,7 +253,7 @@ public class EmpaticaSensor extends AbstractSensor {
     }
 
     public EmpaticaSensor(Context context, SensorInfo knownSensor, SensorDataProcessor dataHandler) {
-        this(context, knownSensor.getName(), knownSensor.getDeviceAddress(), dataHandler);
+        this(context, knownSensor.getDeviceName(), knownSensor.getDeviceAddress(), dataHandler);
     }
 
     public EmpaticaSensor(Context context, String deviceName, String deviceAddress, SensorDataProcessor dataHandler) {
@@ -279,8 +285,8 @@ public class EmpaticaSensor extends AbstractSensor {
         super.disconnect();
         if (mDeviceManager != null) {
             mDeviceManager.disconnect();
+            sendDisconnected();
         }
-        sendDisconnected();
     }
 
     @Override

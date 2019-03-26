@@ -32,6 +32,7 @@ dependencies {
     implementation project(path: ':sensorlib')
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.squareup.okhttp:okhttp:2.5.0'
-    implementation 'com.empatica.empalink:empalink:2.1@aar'
-    //compile(name: 'empalink-2.0', ext: 'aar')
+    implementation 'com.loopj.android:android-async-http:1.4.9'
+    //implementation 'com.empatica.empalink:empalink:2.1@aar'
+    implementation(name: 'empalink-2.1', ext: 'aar')
 }
