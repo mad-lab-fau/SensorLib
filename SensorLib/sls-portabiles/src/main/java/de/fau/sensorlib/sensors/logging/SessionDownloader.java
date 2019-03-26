@@ -24,6 +24,7 @@ public class SessionDownloader {
     private Session mSession;
 
     private SessionByteWriter mSessionWriter;
+    private SessionBuilder mSessionBuilder;
 
     // in Byte
     private int mProgress;
@@ -60,6 +61,10 @@ public class SessionDownloader {
         mSessionWriter = new SessionByteWriter(mSensor, mSession, mSensor.getContext());
     }
 
+    public void setSessionBuilder() {
+        mSessionBuilder = new SessionBuilder(mSensor, mSession);
+    }
+
     public void onNewData(byte[] values) {
         mProgress += values.length;
         mElapsedTime = System.currentTimeMillis() - mStartTime;
@@ -74,6 +79,7 @@ public class SessionDownloader {
         mEstimatedRemainingTime = (long) (remainingBytes / mDownloadRate) * 1000;
 
         mSessionWriter.writeData(values);
+        mSessionBuilder.nextPacket(values);
     }
 
     public int getProgress() {
