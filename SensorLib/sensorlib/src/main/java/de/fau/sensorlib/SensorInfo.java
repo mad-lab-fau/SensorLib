@@ -56,6 +56,14 @@ public class SensorInfo implements Serializable {
     }
 
     /**
+     * @return a not necessarily unique, human readable name for this sensor.
+     * @deprecated use {@link SensorInfo#getDeviceName()} instead.
+     */
+    public String getName() {
+        return getDeviceName();
+    }
+
+    /**
      * @return the address under which this device can be found, e.g. this can be the Bluetooth MAC-address, or the IP-address for WLAN-connected sensors.
      */
     public String getDeviceAddress() {
