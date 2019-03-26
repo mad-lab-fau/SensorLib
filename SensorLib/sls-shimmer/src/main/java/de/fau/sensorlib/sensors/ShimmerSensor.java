@@ -290,7 +290,7 @@ public class ShimmerSensor extends AbstractSensor {
             if (mShimmerHandler == null) {
                 mShimmerHandler = new ShimmerMessageHandler();
             }
-            shimmer = new Shimmer(mContext, mShimmerHandler, mName, mSamplingRate, accelRange, 4, getShimmerSelectedSensorsInt(), false);
+            shimmer = new Shimmer(mContext, mShimmerHandler, getDeviceName(), mSamplingRate, accelRange, 4, getShimmerSelectedSensorsInt(), false);
         }
         shimmer.connect(mDeviceAddress, "default");
         return true;
@@ -320,7 +320,7 @@ public class ShimmerSensor extends AbstractSensor {
     @Override
     public String getDeviceName() {
         if (shimmer == null)
-            return mName;
+            return getDeviceName();
         return shimmer.getDeviceName();
     }
 
@@ -438,7 +438,13 @@ public class ShimmerSensor extends AbstractSensor {
             shimmer.writeSamplingRate(toSamplingRate);
         else
             // if we aren't even connected we just change our internal value
-            setSamplingRate(toSamplingRate);
+        {
+            try {
+                setSamplingRate(toSamplingRate);
+            } catch (SensorException e) {
+                e.printStackTrace();
+            }
+        }
         return true;
     }
 }

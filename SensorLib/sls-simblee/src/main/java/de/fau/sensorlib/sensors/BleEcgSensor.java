@@ -80,14 +80,14 @@ public class BleEcgSensor extends AbstractSensor {
                  * If at any point we disconnect, send a message to clear the
 				 * values out of the UI
 				 */
-                if (name.equals(mName)) {
+                if (name.equals(getDeviceName())) {
                     sendDisconnected();
                 }
             } else if (status != BluetoothGatt.GATT_SUCCESS) {
                 /*
                  * if there is a failure at any stage, simply disconnect
                  */
-                if (name.equals(mName)) {
+                if (name.equals(getDeviceName())) {
                     sendConnectionLost();
                 }
             }
@@ -100,7 +100,7 @@ public class BleEcgSensor extends AbstractSensor {
              * With services discovered, we are going to reset our state machine
              * and start working through the sensors we need to enable
              */
-            if (gatt.getDevice().getName().equals(mName)) {
+            if (gatt.getDevice().getName().equals(getDeviceName())) {
                 sendNotification("Enabling Sensors...");
                 enableEcgSensor(gatt);
             }
@@ -125,7 +125,7 @@ public class BleEcgSensor extends AbstractSensor {
             } else {
                 Log.d(TAG, "Gatt success!");
             }
-            if (gatt.getDevice().getName().equals(mName)) {
+            if (gatt.getDevice().getName().equals(getDeviceName())) {
                 readEcgSensor(gatt, null, characteristic);
             }
         }
@@ -136,7 +136,7 @@ public class BleEcgSensor extends AbstractSensor {
         public void onCharacteristicChanged(BluetoothGatt gatt,
                                             BluetoothGattCharacteristic characteristic) {
 
-            if (gatt.getDevice().getName().equals(mName)) {
+            if (gatt.getDevice().getName().equals(getDeviceName())) {
                 byte[] values = characteristic.getValue();
                 double[] data = new double[values.length / 2];
                 int i = 0;
@@ -157,7 +157,7 @@ public class BleEcgSensor extends AbstractSensor {
         public void onDescriptorWrite(BluetoothGatt gatt,
                                       BluetoothGattDescriptor descriptor, int status) {
 
-            if (gatt.getDevice().getName().equals(mName)) {
+            if (gatt.getDevice().getName().equals(getDeviceName())) {
                 Log.d(TAG, "Descriptor wrote");
                 readEcgSensor(gatt, descriptor, null);
             }

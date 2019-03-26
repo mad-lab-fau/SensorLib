@@ -16,8 +16,8 @@ import java.util.Arrays;
 import java.util.UUID;
 
 import de.fau.sensorlib.BleGattAttributes;
-import de.fau.sensorlib.SensorDataLogger;
 import de.fau.sensorlib.SensorDataProcessor;
+import de.fau.sensorlib.SensorDataRecorder;
 import de.fau.sensorlib.SensorException;
 import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.AccelDataFrame;
@@ -89,7 +89,7 @@ public class SimbleeSensor extends GenericBleSensor {
     /**
      * Data logger
      */
-    private SensorDataLogger mDataLogger;
+    private SensorDataRecorder mDataRecorder;
 
 
     public static class SimbleeDataFrame extends SensorDataFrame implements AccelDataFrame, EcgDataFrame {
@@ -150,7 +150,7 @@ public class SimbleeSensor extends GenericBleSensor {
             super.startStreaming();
             if (mLoggingEnabled) {
                 try {
-                    mDataLogger = new SensorDataLogger(this, mContext);
+                    mDataRecorder = new SensorDataRecorder(this, mContext);
                 } catch (SensorException e) {
                     Log.e(TAG, e.getMessage());
                 }
@@ -164,8 +164,8 @@ public class SimbleeSensor extends GenericBleSensor {
     public void stopStreaming() {
         if (send(SimbleeSensorCommands.STOP_STREAMING)) {
             super.stopStreaming();
-            if (mDataLogger != null) {
-                mDataLogger.completeLogger();
+            if (mDataRecorder != null) {
+                mDataRecorder.completeRecorder();
             }
         } else {
             Log.e(TAG, "stopStreaming failed!");
@@ -242,7 +242,7 @@ public class SimbleeSensor extends GenericBleSensor {
         sendNewData(df);
         lastCounter = localCounter;
         if (mLoggingEnabled) {
-            mDataLogger.writeData(df);
+            mDataRecorder.writeData(df);
         }
 
     }
