@@ -1,4 +1,4 @@
-include ':app', ':sensorlibutils', ':sensorlib', ':sls-tek', ':sls-fitnessshirt', ':sls-shimmer', ':sls-smartwatch', ':sls-simblee', ':sls-smartband2', ':sls-bitalino', ':sls-portabiles'
+include ':sensorlibutils', ':sensorlib', ':sls-tek', ':sls-fitnessshirt', ':sls-shimmer', ':sls-smartwatch', ':sls-simblee', ':sls-smartband2', ':sls-bitalino', ':sls-portabiles'
 if (!fileTree(dir: 'sls-empatica/libs', include: 'empalink*.aar').isEmpty()) {
     include ':sls-empatica'
 }

@@ -1,8 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 
-group='com.github.gradlman.SensorLib'
-version = '1.0'
+group='com.github.mad-lab-fau'
 
 
 android {
