@@ -159,7 +159,7 @@ public class GenericBleSensor extends AbstractSensor {
     private boolean mWasDiscovered = false;
 
     private int mReconnectAttempts = 0;
-    private static final int MAX_RECONNECT_ATTEMPTS = 5;
+    private static final int MAX_RECONNECT_ATTEMPTS = 2;
 
     /**
      * GATT callback instance.
@@ -184,14 +184,14 @@ public class GenericBleSensor extends AbstractSensor {
                     mGatt = null;
                 }
             } else {
-                if (mReconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-                    mGatt.close();
-                    mGatt = null;
-                    sendConnectionLost();
-                } else {
+                if (getState() == SensorState.CONNECTING && mReconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
                     mReconnectAttempts++;
                     Log.e(TAG, BluetoothGattStatus.lookup(status) + ", attempting to reconnect (" + mReconnectAttempts + "/" + MAX_RECONNECT_ATTEMPTS + ")...");
                     mGatt.connect();
+                } else {
+                    mGatt.close();
+                    mGatt = null;
+                    sendConnectionLost();
                 }
             }
         }
