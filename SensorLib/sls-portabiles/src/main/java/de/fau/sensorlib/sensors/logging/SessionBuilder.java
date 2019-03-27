@@ -193,7 +193,7 @@ public class SessionBuilder {
 
         InsoleSensor.InsoleDataFrame df = new InsoleSensor.InsoleDataFrame(mSensor, timestamp, accel, gyro, baro, pressure);
 
-        Log.d(TAG, df.toString());
+        //Log.d(TAG, df.toString());
         //mDataRecorder.writeData(df);
     }
 
