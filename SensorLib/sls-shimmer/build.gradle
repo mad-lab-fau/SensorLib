@@ -24,7 +24,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(path: ':sensorlib')
     implementation 'com.android.support:appcompat-v7:27.1.1'
-    implementation 'com.google.guava:guava:24.1-jre'
+    implementation 'com.google.guava:guava:22.0'
 }
 
 tasks.create(name: 'copyApk', type: Copy) {
