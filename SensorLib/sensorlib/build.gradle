@@ -55,7 +55,7 @@ android {
         targetSdkVersion 27
 
         def versionMajor = 0
-        def versionMinor = 3
+        def versionMinor = 4
         def versionPatch = 0
 
         versionCode versionMajor * 10000 + versionMinor * 100 + versionPatch

@@ -62,14 +62,29 @@ public class GenericBleSensor extends AbstractSensor {
     }
 
     private enum BluetoothGattStatus {
-        GATT_SUCCESS,
-        GATT_NOT_SUPPORTED,
-        GATT_READ_NOT_PERMITTED,
-        GATT_WRITE_NOT_PERMITTED,
-        GATT_UNKNOWN;
+        GATT_SUCCESS(0x00),
+        GATT_READ_NOT_PERMITTED(0x02),
+        GATT_WRITE_NOT_PERMITTED(0x03),
+        GATT_INSUFFICIENT_AUTHENTICATION(0x05),
+        GATT_REQUEST_NOT_SUPPORTED(0x06),
+        GATT_INVALID_OFFSET(0x07),
+        GATT_INVALID_ATTRIBUTE_LENGTH(0x0D),
+        GATT_INSUFFICIENT_ENCRYPTION(0x0F),
+        GATT_FAILURE(0x101);
+
+        private int status;
+
+        BluetoothGattStatus(int status) {
+            this.status = status;
+        }
 
         public static BluetoothGattStatus lookup(int status) {
-            return (status >= values().length - 1) ? GATT_UNKNOWN : values()[status];
+            for (BluetoothGattStatus gattStatus : BluetoothGattStatus.values()) {
+                if (gattStatus.status == status) {
+                    return gattStatus;
+                }
+            }
+            return GATT_FAILURE;
         }
     }
 
@@ -143,6 +158,9 @@ public class GenericBleSensor extends AbstractSensor {
 
     private boolean mWasDiscovered = false;
 
+    private int mReconnectAttempts = 0;
+    private static final int MAX_RECONNECT_ATTEMPTS = 5;
+
     /**
      * GATT callback instance.
      */
@@ -166,9 +184,15 @@ public class GenericBleSensor extends AbstractSensor {
                     mGatt = null;
                 }
             } else {
-                mGatt.close();
-                mGatt = null;
-                sendConnectionLost();
+                if (mReconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+                    mGatt.close();
+                    mGatt = null;
+                    sendConnectionLost();
+                } else {
+                    mReconnectAttempts++;
+                    Log.e(TAG, BluetoothGattStatus.lookup(status) + ", attempting to reconnect (" + mReconnectAttempts + "/" + MAX_RECONNECT_ATTEMPTS + ")...");
+                    mGatt.connect();
+                }
             }
         }
 
