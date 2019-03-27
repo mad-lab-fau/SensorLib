@@ -13,6 +13,4 @@ public interface Loggable {
     void startLogging();
 
     void stopLogging();
-
-    void clearSessions();
 }

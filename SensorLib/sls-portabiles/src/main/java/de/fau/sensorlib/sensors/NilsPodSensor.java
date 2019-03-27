@@ -243,11 +243,6 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     }
 
     @Override
-    public void clearSessions() {
-        send(NilsPodSensorCommand.FLASH_CLEAR_SESSIONS);
-    }
-
-    @Override
     public void startLogging() {
         send(NilsPodSensorCommand.START_LOGGING);
     }
@@ -289,6 +284,16 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
 
         BluetoothGattCharacteristic dateTimeCharacteristic = getConfigurationService().getCharacteristic(AbstractNilsPodSensor.NILS_POD_DATE_TIME_CONFIG);
         writeCharacteristic(dateTimeCharacteristic, data);
+    }
+
+    @Override
+    public void clearData() {
+        send(NilsPodSensorCommand.FLASH_CLEAR_SESSIONS);
+    }
+
+    @Override
+    public void fullErase() {
+        send(NilsPodSensorCommand.FLASH_FULL_ERASE);
     }
 
 

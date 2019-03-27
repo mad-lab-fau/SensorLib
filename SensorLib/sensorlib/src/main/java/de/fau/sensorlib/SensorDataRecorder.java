@@ -105,7 +105,8 @@ public class SensorDataRecorder {
             throw new SensorException(SensorException.SensorExceptionType.permissionsMissing);
         }
 
-        Log.d(TAG, getClass().getSimpleName() + " \"" + mFilename + "\" successfully created!");    }
+        Log.d(TAG, getClass().getSimpleName() + " \"" + mFilename + "\" successfully created!");
+    }
 
 
     /**
@@ -253,7 +254,6 @@ public class SensorDataRecorder {
      *
      * @param data data frame from Hoop Sensor
      */
-
     public void writeData(SensorDataFrame data) {
         StringBuilder sb = new StringBuilder();
         if (isWritable()) {

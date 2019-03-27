@@ -6,16 +6,18 @@
  * this code you have to keep or cite this comment.
  */
 
-package de.fau.sensorlib.sensors.logging;
+package de.fau.sensorlib.sensors;
 
-import de.fau.sensorlib.SensorException;
-import de.fau.sensorlib.sensors.Erasable;
-import de.fau.sensorlib.sensors.Loggable;
+public interface Erasable {
 
-public interface NilsPodLoggable extends Loggable, Erasable {
+    /**
+     * Deletes the data currently stored on the sensor, but does not perform a full erase (see {@link Erasable#fullErase()} for that).
+     */
+    void clearData();
 
-    void readSessionList();
-
-    void downloadSession(Session session) throws SensorException;
+    /**
+     * Performs a <b>full</b> erase of the sensor storage.
+     */
+    void fullErase();
 
 }

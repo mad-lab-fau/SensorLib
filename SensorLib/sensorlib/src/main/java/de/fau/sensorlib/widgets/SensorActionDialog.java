@@ -31,6 +31,7 @@ import java.util.Objects;
 import de.fau.sensorlib.Constants;
 import de.fau.sensorlib.R;
 import de.fau.sensorlib.sensors.AbstractSensor;
+import de.fau.sensorlib.sensors.Erasable;
 import de.fau.sensorlib.sensors.Loggable;
 import de.fau.sensorlib.sensors.Resettable;
 
@@ -43,7 +44,8 @@ public class SensorActionDialog extends DialogFragment implements AdapterView.On
         RESET,
         START_LOGGING,
         STOP_LOGGING,
-        CLEAR_FLASH,
+        CLEAR_SESSIONS,
+        FULL_ERASE,
         SENSOR_INFO;
 
         @Override
@@ -76,7 +78,7 @@ public class SensorActionDialog extends DialogFragment implements AdapterView.On
                 switch (Objects.requireNonNull(mSensor).getState()) {
                     case LOGGING:
                         // disable Configure Start Logging and Clear Flash
-                        for (SensorAction action : EnumSet.of(SensorAction.CONFIGURE, SensorAction.START_LOGGING, SensorAction.CLEAR_FLASH)) {
+                        for (SensorAction action : EnumSet.of(SensorAction.CONFIGURE, SensorAction.START_LOGGING, SensorAction.CLEAR_SESSIONS, SensorAction.FULL_ERASE)) {
                             mListView.getChildAt(action.ordinal()).setEnabled(false);
                         }
                         break;
@@ -89,7 +91,7 @@ public class SensorActionDialog extends DialogFragment implements AdapterView.On
                 }
 
                 if (!(mSensor instanceof Loggable)) {
-                    for (SensorAction action : EnumSet.of(SensorAction.START_LOGGING, SensorAction.STOP_LOGGING, SensorAction.CLEAR_FLASH)) {
+                    for (SensorAction action : EnumSet.of(SensorAction.START_LOGGING, SensorAction.STOP_LOGGING, SensorAction.CLEAR_SESSIONS, SensorAction.FULL_ERASE)) {
                         mListView.getChildAt(action.ordinal()).setEnabled(false);
                     }
                 }
@@ -116,7 +118,7 @@ public class SensorActionDialog extends DialogFragment implements AdapterView.On
                 }
                 break;
             case LOGGING:
-                for (SensorAction action : EnumSet.of(SensorAction.CONFIGURE, SensorAction.START_LOGGING, SensorAction.CLEAR_FLASH, SensorAction.RESET)) {
+                for (SensorAction action : EnumSet.of(SensorAction.CONFIGURE, SensorAction.START_LOGGING, SensorAction.CLEAR_SESSIONS, SensorAction.FULL_ERASE, SensorAction.RESET)) {
                     if (position == action.ordinal()) {
                         return;
                     }
@@ -150,9 +152,16 @@ public class SensorActionDialog extends DialogFragment implements AdapterView.On
                     return;
                 }
                 break;
-            case CLEAR_FLASH:
-                if (mSensor instanceof Loggable) {
-                    ((Loggable) mSensor).clearSessions();
+            case CLEAR_SESSIONS:
+                if (mSensor instanceof Erasable) {
+                    ((Erasable) mSensor).clearData();
+                } else {
+                    return;
+                }
+                break;
+            case FULL_ERASE:
+                if (mSensor instanceof Erasable) {
+                    ((Erasable) mSensor).fullErase();
                 } else {
                     return;
                 }
