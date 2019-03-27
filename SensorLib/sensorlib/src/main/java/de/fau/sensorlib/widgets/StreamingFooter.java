@@ -211,6 +211,12 @@ public class StreamingFooter extends RelativeLayout implements View.OnClickListe
                     mStartStopButton.setText(R.string.start);
                 }
                 break;
+            case LOGGING:
+                if (mFabOpen) {
+                    mFab.performClick();
+                    mStartStopButton.setText(R.string.stop);
+                }
+                break;
             case CONNECTION_LOST:
                 mFab.performClick();
                 mDisconnectButton.performClick();

@@ -18,6 +18,7 @@
     <color name="status_bar_connecting">#FF9800</color>
     <color name="status_bar_connected">#8BC34A</color>
     <color name="status_bar_streaming">#4CAF50</color>
+    <color name="status_bar_logging">#009688</color>
     <color name="status_bar_simulating">#03A9F4</color>
 
     <!-- Streaming Footer -->

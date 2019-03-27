@@ -17,6 +17,7 @@
     <string name="status_bar_connecting">%1$s connecting</string>
     <string name="status_bar_connected">%1$s connected</string>
     <string name="status_bar_streaming">%1$s streaming</string>
+    <string name="status_bar_loggging">%1$s logging</string>
     <string name="status_bar_simulating">%1$s simulating</string>
 
     <!-- Streaming Footer -->
