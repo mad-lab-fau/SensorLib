@@ -76,7 +76,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
      */
     protected static final UUID NILS_POD_FIRMWARE_VERSION = UUID.fromString("98ff0f0f-770d-4a83-9e9b-ce6bbd75e472");
     /**
-     * UUID for Buffonless DFU Characteristic (write) of NilsPod Sensor
+     * UUID for Buttonless DFU Characteristic (write) of NilsPod Sensor
      */
     protected static final UUID NILS_POD_BUTTONLESS_DFU = UUID.fromString("8ec90003-f315-4f60-9fb8-838830daea50");
 
