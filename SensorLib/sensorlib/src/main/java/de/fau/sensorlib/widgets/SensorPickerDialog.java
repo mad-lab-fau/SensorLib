@@ -121,11 +121,6 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
             int rssi = mFoundSensors.get(position).getInt(Constants.KEY_SENSOR_RSSI);
             holder.mSensorNameTextView.setText(name);
 
-            // highlight last connected sensors
-            if (mLastConnectedSensors.contains(mFoundSensors.get(position).getString(Constants.KEY_SENSOR_NAME))) {
-                holder.mSensorNameTextView.setTypeface(null, Typeface.ITALIC);
-                holder.mRecentlyConnectedTextView.setVisibility(View.VISIBLE);
-            }
             holder.mSensorInformationTextView.setText(address);
             holder.mSensorRssi.setText(mContext.getString(R.string.placeholder_rssi, rssi));
             // if battery measurement is available for sensor
@@ -134,12 +129,22 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
                 holder.mBatteryImageView.setColorFilter(ContextCompat.getColor(mContext, R.color.sensor_available));
             }
 
+            // highlight last connected sensors
+            if (mLastConnectedSensors.contains(mFoundSensors.get(position).getString(Constants.KEY_SENSOR_NAME))) {
+                holder.mSensorNameTextView.setTypeface(null, Typeface.ITALIC);
+                holder.mRecentlyConnectedTextView.setVisibility(View.VISIBLE);
+            }
+
             holder.mGridAdapter.setSensorsAvailable(sensor.getAvailableSensors());
         }
 
         @Override
-        public void onItemClick(View view, int position) {
+        public void onViewAttachedToWindow(@NonNull SensorPickerViewHolder holder) {
+            super.onViewAttachedToWindow(holder);
+        }
 
+        @Override
+        public void onItemClick(View view, int position) {
             SensorPickerViewHolder viewHolder = (SensorPickerViewHolder) mRecyclerView.findViewHolderForAdapterPosition(position);
             viewHolder.mCheckBox.setChecked(!viewHolder.mCheckBox.isChecked());
 
@@ -174,8 +179,6 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
             if (!mFoundSensors.contains(element)) {
                 mFoundSensors.add(position, element);
                 notifyItemInserted(position);
-                //notifyItemInserted(position);
-                //notifyItemRangeChanged(position, mFoundSensors.size() - position - 1);
             }
         }
 
@@ -371,6 +374,8 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
 
         mRecyclerView = rootView.findViewById(R.id.recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+        mRecyclerView.setItemViewCacheSize(100);
+
         mRecyclerView.setAdapter(mAdapter);
         mProgressBar = rootView.findViewById(R.id.progress_bar);
         mProgressTextView = rootView.findViewById(R.id.tv_scanning);
@@ -465,8 +470,9 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
                                 if (mLastConnectedSensors.contains(sensor.getDeviceName())) {
                                     // add after internal sensor
                                     mAdapter.addAt(1, bundle);
+                                } else {
+                                    mAdapter.add(bundle);
                                 }
-                                mAdapter.add(bundle);
                             }
                             return true;
                         }
