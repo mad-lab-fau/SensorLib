@@ -174,7 +174,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
          */
         FLASH_TRANSMIT_SESSION(new byte[]{(byte) 0xF3, 0x00}),
         /**
-         * Flash Transmit Pages Command
+         * Flash Transmit Pages Command (only for debugging)
          */
         FLASH_TRANSMIT_PAGES(new byte[]{(byte) 0xF4}),
         // CONFIG SET COMMANDS
@@ -389,7 +389,11 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
      */
     protected boolean send(NilsPodSensorCommand cmd) {
         Log.d(TAG, "Sending " + cmd + " command to " + getDeviceName());
-        return send(cmd.cmd);
+        if (!send(cmd.cmd)) {
+            Log.e(TAG, cmd + " failed!");
+            return false;
+        }
+        return true;
     }
 
     protected boolean send(byte[] data) {
@@ -429,12 +433,8 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     }
 
     @Override
-    public boolean reset() {
-        if (!send(NilsPodSensorCommand.RESET)) {
-            Log.e(TAG, "resetting failed!");
-            return false;
-        }
-        return true;
+    public void reset() {
+        send(NilsPodSensorCommand.RESET);
     }
 
     @Override
