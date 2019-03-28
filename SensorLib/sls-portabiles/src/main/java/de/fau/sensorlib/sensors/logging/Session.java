@@ -78,7 +78,6 @@ public class Session {
     }
 
     public String getStartTime() {
-        // TODO check for bug
         return mStartTimeFormat.format(getStartDate());
     }
 

@@ -109,6 +109,7 @@ public class SessionDownloader {
     public void completeDownload() {
         mProgress = mSession.getSessionSize();
         mSessionWriter.completeWriter();
+        mSessionBuilder.completeBuilder();
         mElapsedTime = System.currentTimeMillis() - mStartTime;
         mDownloadRate = ((double) mSessionSize) / mElapsedTime;
     }

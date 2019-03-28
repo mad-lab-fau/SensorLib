@@ -13,10 +13,12 @@ import android.util.Log;
 
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 
+import de.fau.sensorlib.SensorDataRecorder;
+import de.fau.sensorlib.SensorException;
+import de.fau.sensorlib.dataframe.SensorDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
 import de.fau.sensorlib.sensors.AbstractSensor;
 import de.fau.sensorlib.sensors.InsoleSensor;
@@ -32,14 +34,14 @@ public class SessionBuilder {
 
     private boolean mFirstPacketRead;
 
-    private int mHeaderSize;
-    private int mSampleSize;
-    private HashMap<HardwareSensor, Boolean> mEnabledSensorsMap = new HashMap<>();
+    private SessionHeader mHeader;
 
     private ByteBuffer mByteBuffer;
 
     private AbstractSensor mSensor;
     private Session mSession;
+
+    private SensorDataRecorder mRecorder;
 
     public SessionBuilder(AbstractSensor sensor, Session session) {
         mSensor = sensor;
@@ -48,36 +50,40 @@ public class SessionBuilder {
 
     public void nextPacket(byte[] values) {
         if (!mFirstPacketRead) {
-            Log.e(TAG, Arrays.toString(values));
             mFirstPacketRead = true;
-            mHeaderSize = values[0];
-            byte[] header = new byte[mHeaderSize];
-            byte[] data = new byte[values.length - mHeaderSize];
+            int headerSize = values[0];
+            byte[] header = new byte[headerSize];
+            byte[] data = new byte[values.length - headerSize];
             System.arraycopy(values, 0, header, 0, header.length);
-            System.arraycopy(values, mHeaderSize, data, 0, data.length);
-            extractHeader(header);
+            System.arraycopy(values, headerSize, data, 0, data.length);
+            try {
+                extractHeader(header);
+            } catch (SensorException e) {
+                e.printStackTrace();
+            }
             onNewData(data);
         } else {
             onNewData(values);
         }
     }
 
-    // TODO TEST!!!
-    private synchronized void extractHeader(byte[] values) {
+    private synchronized void extractHeader(byte[] values) throws SensorException {
         BluetoothGattCharacteristic characteristic = new BluetoothGattCharacteristic(null, 0, 0);
         characteristic.setValue(values);
 
-        Log.e(TAG, "header: " + Arrays.toString(values));
-        int offset = 1;
-        mSampleSize = values[offset++];
+        mHeader = new SessionHeader();
 
-        mByteBuffer = ByteBuffer.allocate(mSampleSize * 1000);
+        int offset = 1;
+        int sampleSize = values[offset++];
+
+        mByteBuffer = ByteBuffer.allocate(sampleSize * 1000);
 
         int sensors = values[offset++];
-        mEnabledSensorsMap.put(HardwareSensor.ACCELEROMETER, ((sensors & 0x01) != 0));
-        mEnabledSensorsMap.put(HardwareSensor.GYROSCOPE, ((sensors & 0x01) != 0));
-        mEnabledSensorsMap.put(HardwareSensor.FSR, ((sensors & 0x02) != 0));
-        mEnabledSensorsMap.put(HardwareSensor.BAROMETER, ((sensors & 0x04) != 0));
+        HashMap<HardwareSensor, Boolean> enabledSensorsMap = new HashMap<>();
+        enabledSensorsMap.put(HardwareSensor.ACCELEROMETER, ((sensors & 0x01) != 0));
+        enabledSensorsMap.put(HardwareSensor.GYROSCOPE, ((sensors & 0x01) != 0));
+        enabledSensorsMap.put(HardwareSensor.FSR, ((sensors & 0x02) != 0));
+        enabledSensorsMap.put(HardwareSensor.BAROMETER, ((sensors & 0x04) != 0));
 
 
         double samplingRate = NilsPodSensor.inferSamplingRate(values[offset] & 0x0F);
@@ -102,31 +108,36 @@ public class SessionBuilder {
 
         tmpTime = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, offset);
         // little endian
-        //tmpTime = (values[offset++] & 0xFF) | ((values[offset++] & 0xFF) << 8) | ((values[offset++] & 0xFF) << 16) | ((values[offset++] & 0xFF) << 24);
         Date endTime = new Date(((long) tmpTime) * 1000);
         offset += 4;
 
-        //int sessionSize = ((values[offset++] & 0xFF) << 24) | ((values[offset++] & 0xFF) << 16) | ((values[offset++] & 0xFF) << 8) | (values[offset++] & 0xFF);
         int sessionSize = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, offset);
         offset += 4;
         String firmwareVersion = values[offset++] + "." + values[offset++] + "." + values[offset];
 
-        String sb = "sample size: " + mSampleSize + "\n" +
-                "enabled sensors: " + mEnabledSensorsMap + "\n" +
-                "sampling rate: " + samplingRate + "\n" +
-                "termination source: " + terminationSource + "\n" +
-                "sync role: " + syncRole + "\n" +
-                "sync distance: " + syncDistance + "\n" +
-                "rf group: " + syncGroup + "\n" +
-                "acc range: " + accRange + "\n" +
-                "gyro range: " + gyroRange + "\n" +
-                "sensor position: " + sensorPosition + "\n" +
-                "special function: " + specialFunction + "\n" +
-                "start Time: " + startTime + "\n" +
-                "end Time: " + endTime + "\n" +
-                "session size: " + sessionSize + "\n" +
-                "firmware version: " + firmwareVersion + "\n";
-        Log.e(TAG, sb);
+        mHeader.setSensorName(mSensor.getDeviceName());
+        mHeader.setFirmwareVersion(mSensor.getFirmwareRevision());
+        mHeader.setModelNumber(mSensor.getModelNumber());
+        mHeader.setSampleSize(sampleSize);
+        mHeader.setSamplingRate(samplingRate);
+        mHeader.setEnabledSensors(enabledSensorsMap);
+        mHeader.setTerminationSource(terminationSource);
+        mHeader.setSyncRole(syncRole);
+        mHeader.setSyncDistance(syncDistance);
+        mHeader.setSyncGroup(syncGroup);
+        mHeader.setAccRange(accRange);
+        mHeader.setGyroRange(gyroRange);
+        mHeader.setSensorPosition(sensorPosition);
+        mHeader.setSpecialFunction(specialFunction);
+        mHeader.setStartDate(startTime.toString());
+        mHeader.setEndDate(endTime.toString());
+        mHeader.setSessionSize(sessionSize);
+        mHeader.setFirmwareVersion(firmwareVersion);
+
+        Log.d(TAG, mHeader.toString());
+
+        String subDir = "NilsPodSessionDownloads";
+        mRecorder = new SensorDataRecorder(mSensor, mSensor.getContext(), mHeader.toJson(), subDir, mSession.getStartDate());
     }
 
 
@@ -140,8 +151,8 @@ public class SessionBuilder {
         byte[] sample;
         // flip buffer to start reading
         mByteBuffer.flip();
-        while (mByteBuffer.remaining() / mSampleSize > 0) {
-            sample = new byte[mSampleSize];
+        while (mByteBuffer.remaining() / mHeader.getSampleSize() > 0) {
+            sample = new byte[mHeader.getSampleSize()];
             // get one data sample
             mByteBuffer.get(sample);
             extractDataFrame(sample);
@@ -159,7 +170,7 @@ public class SessionBuilder {
         double[] accel = new double[3];
         double baro = 0;
         double[] pressure = new double[3];
-        int timestamp;
+        long timestamp;
 
         if (isSensorEnabled(HardwareSensor.GYROSCOPE)) {
             // extract gyroscope data
@@ -191,14 +202,22 @@ public class SessionBuilder {
 
         timestamp = ((values[offset++] & 0xFF) << 24) | ((values[offset++] & 0xFF) << 16) | ((values[offset++] & 0xFF) << 8) | values[offset] & 0xFF;
 
-        InsoleSensor.InsoleDataFrame df = new InsoleSensor.InsoleDataFrame(mSensor, timestamp, accel, gyro, baro, pressure);
+        SensorDataFrame df;
+        if (mSensor instanceof InsoleSensor) {
+            df = new InsoleSensor.InsoleDataFrame(mSensor, timestamp, accel, gyro, baro, pressure);
+        } else {
+            df = new NilsPodSensor.NilsPodDataFrame(mSensor, timestamp, accel, gyro, baro);
+        }
 
-        //Log.d(TAG, df.toString());
-        //mDataRecorder.writeData(df);
+        Log.d(TAG, df.toString());
+        mRecorder.writeData(df);
     }
 
     public boolean isSensorEnabled(HardwareSensor sensor) {
-        return (mEnabledSensorsMap.get(sensor) != null) && mEnabledSensorsMap.get(sensor);
+        return (mHeader.getEnabledSensors().get(sensor) != null) && mHeader.getEnabledSensors().get(sensor);
     }
 
+    public void completeBuilder() {
+        mRecorder.completeRecorder();
+    }
 }

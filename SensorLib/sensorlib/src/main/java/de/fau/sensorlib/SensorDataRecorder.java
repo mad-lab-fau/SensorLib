@@ -66,16 +66,35 @@ public class SensorDataRecorder {
      * Creates a new data recorder instance
      */
     public SensorDataRecorder(AbstractSensor sensor, Context context) throws SensorException {
+        this(sensor, context, null, null, null);
+    }
+
+    /**
+     * Creates a new data recorder instance
+     */
+    public SensorDataRecorder(AbstractSensor sensor, Context context, String header, String subDir, Date date) throws SensorException {
         mContext = context;
         mSensor = sensor;
 
-        String currTime = new SimpleDateFormat("yyyyMMdd_HHmm", Locale.getDefault()).format(new Date());
+        String time;
+        if (date == null) {
+            date = new Date();
+        }
+        time = new SimpleDateFormat("yyyyMMdd_HHmm", Locale.getDefault()).format(date);
+
         // Filename consists of sensor device name and start time of data recording
-        mFilename = mSensor.getDeviceName() + "_" + currTime + ".csv";
+        mFilename = mSensor.getDeviceName() + "_" + time + ".csv";
 
         StringBuilder headerBuilder = new StringBuilder();
-        // TODO add further sensor information (-> make adding custom header possible)
-        headerBuilder.append("samplingrate" + SEPARATOR).append(sensor.getSamplingRate()).append(DELIMITER);
+        if (header == null) {
+            headerBuilder.append("samplingrate" + SEPARATOR).append(sensor.getSamplingRate()).append(DELIMITER);
+        } else {
+            headerBuilder.append(header).append(DELIMITER);
+        }
+
+        if (subDir != null) {
+            mDirName += ("/" + subDir);
+        }
 
         headerBuilder.append("timestamp").append(SEPARATOR);
 
