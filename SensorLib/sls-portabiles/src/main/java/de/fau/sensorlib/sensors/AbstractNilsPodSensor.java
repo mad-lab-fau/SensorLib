@@ -38,6 +38,11 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
      * UUID for Configuration Service of NilsPod Sensor
      */
     protected static final UUID NILS_POD_CONFIGURATION_SERVICE = UUID.fromString("98ff0000-770d-4a83-9e9b-ce6bbd75e472");
+
+    /**
+     * UUID for Secure DFU (Device Firmware Update) Service of NilsPod Sensor
+     */
+    protected static final UUID NILS_POD_SECURE_DFU_SERVICE = UUID.fromString("0000fe59-0000-1000-8000-00805f9b34fb");
     /**
      * UUID for Config Characteristic (write) of NilsPod Sensor
      */
@@ -70,6 +75,10 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
      * UUID for Firmware Version Characteristic (read) of NilsPod Sensor
      */
     protected static final UUID NILS_POD_FIRMWARE_VERSION = UUID.fromString("98ff0f0f-770d-4a83-9e9b-ce6bbd75e472");
+    /**
+     * UUID for Buffonless DFU Characteristic (write) of NilsPod Sensor
+     */
+    protected static final UUID NILS_POD_BUTTONLESS_DFU = UUID.fromString("8ec90003-f315-4f60-9fb8-838830daea50");
 
     /**
      * Default packet size: 12 Byte IMU + 2 Byte Counter
@@ -273,6 +282,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     static {
         BleGattAttributes.addService(NILS_POD_STREAMING_SERVICE, "NilsPod Streaming Service");
         BleGattAttributes.addService(NILS_POD_CONFIGURATION_SERVICE, "NilsPod Configuration Service");
+        BleGattAttributes.addService(NILS_POD_SECURE_DFU_SERVICE, "NilsPod Secure DFU Service");
         BleGattAttributes.addCharacteristic(NILS_POD_COMMANDS, "NilsPod Sensor Commands");
         BleGattAttributes.addCharacteristic(NILS_POD_STREAMING, "NilsPod Streaming");
         BleGattAttributes.addCharacteristic(NILS_POD_SYSTEM_STATE, "NilsPod System State");
@@ -281,6 +291,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         BleGattAttributes.addCharacteristic(NILS_POD_METADATA_CONFIG, "NilsPod Metadata Configuration");
         BleGattAttributes.addCharacteristic(NILS_POD_DATE_TIME_CONFIG, "NilsPod Date Time Configuration");
         BleGattAttributes.addCharacteristic(NILS_POD_FIRMWARE_VERSION, "NilsPod Firmware Version");
+        BleGattAttributes.addCharacteristic(NILS_POD_BUTTONLESS_DFU, "NilsPod Buttonless DFU");
     }
 
 
