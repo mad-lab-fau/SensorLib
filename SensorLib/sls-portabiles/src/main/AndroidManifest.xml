@@ -7,7 +7,7 @@
         android:supportsRtl="true">
 
         <provider
-            android:name="de.fau.sensorlib.sensors.logging.GenericFileProvider"
+            android:name="de.fau.sensorlib.widgets.GenericFileProvider"
             android:authorities="${applicationId}.de.fau.sensorlib.sensors.logging.provider"
             android:exported="false"
             android:grantUriPermissions="true">

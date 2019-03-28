@@ -128,6 +128,9 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     public static final String KEY_SENSOR_ENABLE = "sensors_enable";
 
 
+    private SensorRecorderListener mSensorRecorderListener;
+
+
     /**
      * Sensor commands for communication with NilsPod Sensor. Used with the Sensor Config Characteristic
      */
@@ -316,9 +319,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         super.stopStreaming();
         // send STOP_STREAMING command to sensor
         if (send(NilsPodSensorCommand.STOP_STREAMING)) {
-            if (mDataRecorder != null) {
-                mDataRecorder.completeRecorder();
-            }
+            disableRecorder();
         } else {
             Log.e(TAG, "stopStreaming failed!");
         }
@@ -411,6 +412,10 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         }
 
         return writeCharacteristic(characteristic, data);
+    }
+
+    public void setSensorRecorderListener(SensorRecorderListener listener) {
+        mSensorRecorderListener = listener;
     }
 
     @Override
@@ -753,12 +758,24 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         try {
             if (mRecordingEnabled) {
                 mDataRecorder = new SensorDataRecorder(this, mContext);
+                if (mSensorRecorderListener != null) {
+                    mSensorRecorderListener.onSensorRecordingStarted(mDataRecorder);
+                }
             }
         } catch (SensorException e) {
             switch (e.getExceptionType()) {
                 case permissionsMissing:
                     Toast.makeText(mContext, "Permissions to write external storage needed!", Toast.LENGTH_SHORT).show();
                     break;
+            }
+        }
+    }
+
+    private void disableRecorder() {
+        if (mDataRecorder != null) {
+            mDataRecorder.completeRecorder();
+            if (mSensorRecorderListener != null) {
+                mSensorRecorderListener.onSensorRecordingFinished(mDataRecorder);
             }
         }
     }

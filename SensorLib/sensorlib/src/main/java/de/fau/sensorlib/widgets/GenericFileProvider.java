@@ -6,7 +6,7 @@
  * this code you have to keep or cite this comment.
  */
 
-package de.fau.sensorlib.sensors.logging;
+package de.fau.sensorlib.widgets;
 
 import android.support.v4.content.FileProvider;
 
