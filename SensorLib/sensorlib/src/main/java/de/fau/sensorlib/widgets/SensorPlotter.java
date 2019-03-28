@@ -31,7 +31,6 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
-import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -63,9 +62,6 @@ public class SensorPlotter extends CardView implements SensorEventListener {
     private int mRefreshRate;
     private long lastTimestamp = System.currentTimeMillis();
 
-    private long offset = 0;
-    private long pauseOffset = 0;
-    private long oldPauseOffset = 0;
     private SensorState previousState = SensorState.UNDEFINED;
 
 
@@ -249,33 +245,14 @@ public class SensorPlotter extends CardView implements SensorEventListener {
     public void onSensorStateChange(AbstractSensor sensor, SensorState state) {
         switch (state) {
             case STREAMING:
-                /*if (sensor == null) {
-                    if (offset == 0) {
-                        offset = System.currentTimeMillis();
-                    }
-                    if (pauseOffset != 0) {
-                        if (pauseOffset < 0) {
-                            Log.e(TAG, "NEGATIVE 1!!!");
-                        }
-                        pauseOffset = (System.currentTimeMillis() - pauseOffset) + oldPauseOffset;
-                    }
-                    for (int i = 0; i < mSensorBundles.size(); i++) {
-                        mAdapter.setTouchEnabled(i, true);
-                    }
-                }*/
+                clearCharts();
                 break;
             case CONNECTED:
-                if (previousState == SensorState.STREAMING) {
-                    oldPauseOffset = pauseOffset;
-                    pauseOffset = System.currentTimeMillis();
-                    clearCharts();
-                } else if (previousState == SensorState.CONNECTING) {
+                if (previousState == SensorState.CONNECTING) {
                     resetCharts();
                 }
                 break;
             case DISCONNECTED:
-                offset = 0;
-                pauseOffset = 0;
                 break;
         }
         previousState = state;
@@ -425,9 +402,17 @@ public class SensorPlotter extends CardView implements SensorEventListener {
         private void clear(int position) {
             SensorPlotterViewHolder viewHolder = (SensorPlotterViewHolder) mRecyclerView.findViewHolderForAdapterPosition(position);
             if (viewHolder != null && viewHolder.mLineChart.getData().getEntryCount() != 0) {
-                //viewHolder.mLineChart.getData().notifyDataChanged();
-                for (ILineDataSet set : viewHolder.mLineChart.getLineData().getDataSets()) {
-                    set.clear();
+                try {
+                    final SensorBundle bundle = mSensorBundles.get(position);
+                    ArrayList<String> sensorIds = bundle.getSensorIds();
+                    final String[] columns;
+                    columns = (String[]) bundle.getHwSensor().getDataFrameClass().getDeclaredField("COLUMNS").get("null");
+                    viewHolder.mLineChart.clearValues();
+                    final LineDataSet[] dataSets = new LineDataSet[sensorIds.size() * columns.length];
+
+                    configureDataSets(mLineData.get(position), dataSets, bundle.getSensorNames(), PlotColorMap.getColors(bundle.getHwSensor()), columns);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }
