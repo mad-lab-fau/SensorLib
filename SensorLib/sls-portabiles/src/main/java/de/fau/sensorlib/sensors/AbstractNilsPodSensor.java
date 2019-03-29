@@ -101,6 +101,8 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
      */
     protected boolean mRecordingEnabled;
 
+    private boolean mShouldDisconnect;
+
     /**
      * Data logger
      */
@@ -327,8 +329,12 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
     @Override
     public void disconnect() {
-        disableGattNotifications();
-        super.disconnect();
+        if (getOperationState() == NilsPodOperationState.STREAMING) {
+            mShouldDisconnect = true;
+            stopStreaming();
+        } else {
+            super.disconnect();
+        }
     }
 
     @Override
@@ -339,12 +345,12 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
             if (getOperationState() == NilsPodOperationState.LOGGING) {
                 setState(SensorState.LOGGING);
             }
-        }
 
-        /*if (oldState == SensorState.CONNECTING && newState == SensorState.LOGGING) {
-            sendConnected();
-            enableGattNotifications();
-        }*/
+            if (oldState == SensorState.STREAMING && mShouldDisconnect) {
+                mShouldDisconnect = false;
+                disconnect();
+            }
+        }
     }
 
     protected void onOperationStateChanged(NilsPodOperationState oldState, NilsPodOperationState newState) {
@@ -366,7 +372,6 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
                 }
                 break;
         }
-
 
         sendNotification(SensorMessage.OPERATION_STATE_CHANGED);
     }
