@@ -31,6 +31,7 @@ import androidx.fragment.app.FragmentManager;
 import de.fau.sensorlib.Constants;
 import de.fau.sensorlib.R;
 import de.fau.sensorlib.sensors.AbstractSensor;
+import de.fau.sensorlib.sensors.Configurable;
 import de.fau.sensorlib.sensors.Erasable;
 import de.fau.sensorlib.sensors.Loggable;
 import de.fau.sensorlib.sensors.Resettable;
@@ -41,6 +42,7 @@ public class SensorActionDialog extends DialogFragment implements AdapterView.On
 
     public enum SensorAction {
         CONFIGURE,
+        DEFAULT_CONFIG,
         RESET,
         START_LOGGING,
         STOP_LOGGING,
@@ -96,6 +98,12 @@ public class SensorActionDialog extends DialogFragment implements AdapterView.On
                         break;
                 }
 
+                if (!(mSensor instanceof Configurable)) {
+                    for (SensorAction action : EnumSet.of(SensorAction.CONFIGURE, SensorAction.DEFAULT_CONFIG)) {
+                        mListView.getChildAt(action.ordinal()).setEnabled(false);
+                    }
+                }
+
                 if (!(mSensor instanceof Loggable)) {
                     for (SensorAction action : EnumSet.of(SensorAction.START_LOGGING, SensorAction.STOP_LOGGING, SensorAction.CLEAR_SESSIONS, SensorAction.FULL_ERASE)) {
                         mListView.getChildAt(action.ordinal()).setEnabled(false);
@@ -146,6 +154,13 @@ public class SensorActionDialog extends DialogFragment implements AdapterView.On
             case CONFIGURE:
                 dismiss();
                 return;
+            case DEFAULT_CONFIG:
+                if (mSensor instanceof Configurable) {
+                    ((Configurable) mSensor).setDefaultConfig();
+                } else {
+                    return;
+                }
+                break;
             case RESET:
                 if (mSensor instanceof Resettable) {
                     ((Resettable) mSensor).reset();
@@ -191,7 +206,6 @@ public class SensorActionDialog extends DialogFragment implements AdapterView.On
     }
 
     private void showSensorInfoDialog() {
-        Log.d(TAG, mSensor.toString());
         Bundle bundle = new Bundle();
         bundle.putSerializable(Constants.KEY_SENSOR, mSensor);
 

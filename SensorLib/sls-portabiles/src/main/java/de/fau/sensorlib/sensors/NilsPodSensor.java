@@ -31,7 +31,7 @@ import de.fau.sensorlib.sensors.logging.SessionHandler;
 /**
  * Represents a NilsPod Sensor device.
  */
-public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLoggable {
+public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLoggable, Configurable {
 
     private static final String TAG = NilsPodSensor.class.getSimpleName();
 
@@ -294,6 +294,11 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     @Override
     public void fullErase() {
         send(NilsPodSensorCommand.FLASH_FULL_ERASE);
+    }
+
+    @Override
+    public void setDefaultConfig() {
+        send(NilsPodSensorCommand.SET_DEFAULT_CONFIG);
     }
 
 
