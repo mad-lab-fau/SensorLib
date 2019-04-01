@@ -109,7 +109,7 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
         private ArrayList<AbstractSensor> mAttachedSensors;
         private ArrayList<String> mAdditionalInfos;
 
-        private boolean mSensorActionBarEnabled;
+        private boolean mSensorActionBarEnabled = true;
 
         private SensorInfoGridAdapter(Context context) {
             mContext = context;
@@ -170,7 +170,7 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
             if (!mSensorActionBarEnabled) {
                 return;
             }
-            
+
             AbstractSensor sensor = mAttachedSensors.get(position);
 
             Bundle bundle = new Bundle();
