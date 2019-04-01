@@ -591,14 +591,13 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         NilsPodRfGroup rfGroup;
 
         try {
-
             requestSamplingRateChange(inferSamplingRate(values[offset++]));
             syncRole = NilsPodSyncRole.values()[values[offset++]];
             syncDistance = values[offset++] * 100;
             rfGroup = NilsPodRfGroup.values()[values[offset]];
         } catch (Exception e) {
             e.printStackTrace();
-            throw new SensorException(SensorException.SensorExceptionType.readStateError);
+            throw new SensorException(SensorException.SensorExceptionType.readConfigError);
         }
 
         Log.d(TAG, ">>>> Timer Sampling State:");
@@ -623,7 +622,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
             sampleSize = values[offset];
         } catch (Exception e) {
             e.printStackTrace();
-            throw new SensorException(SensorException.SensorExceptionType.readStateError);
+            throw new SensorException(SensorException.SensorExceptionType.readConfigError);
         }
 
         Log.d(TAG, ">>>> Sensor Config:");
