@@ -60,6 +60,10 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
         setAdapter(mAdapter);
     }
 
+    public void setSensorActionBarEnabled(boolean enable) {
+        mAdapter.setSensorActionBarEnabled(enable);
+    }
+
     private AppCompatActivity getActivity() {
         Context context = getContext();
         while (context instanceof ContextWrapper) {
@@ -105,6 +109,8 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
         private ArrayList<AbstractSensor> mAttachedSensors;
         private ArrayList<String> mAdditionalInfos;
 
+        private boolean mSensorActionBarEnabled;
+
         private SensorInfoGridAdapter(Context context) {
             mContext = context;
             mAttachedSensors = new ArrayList<>();
@@ -141,6 +147,10 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
             notifyDataSetChanged();
         }
 
+        private void setSensorActionBarEnabled(boolean enable) {
+            mSensorActionBarEnabled = enable;
+        }
+
         @NonNull
         @Override
         public SensorInfoViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -157,6 +167,10 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
 
         @Override
         public void onItemClick(View view, int position) {
+            if (!mSensorActionBarEnabled) {
+                return;
+            }
+            
             AbstractSensor sensor = mAttachedSensors.get(position);
 
             Bundle bundle = new Bundle();

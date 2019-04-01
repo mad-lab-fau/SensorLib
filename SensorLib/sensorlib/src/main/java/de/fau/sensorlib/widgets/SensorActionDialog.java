@@ -88,6 +88,12 @@ public class SensorActionDialog extends DialogFragment implements AdapterView.On
                             mListView.getChildAt(action.ordinal()).setEnabled(false);
                         }
                         break;
+                    case STREAMING:
+                        // disable all Logging actions
+                        for (SensorAction action : EnumSet.of(SensorAction.CONFIGURE, SensorAction.STOP_LOGGING, SensorAction.START_LOGGING, SensorAction.CLEAR_SESSIONS, SensorAction.FULL_ERASE)) {
+                            mListView.getChildAt(action.ordinal()).setEnabled(false);
+                        }
+                        break;
                 }
 
                 if (!(mSensor instanceof Loggable)) {
@@ -124,6 +130,15 @@ public class SensorActionDialog extends DialogFragment implements AdapterView.On
                     }
                 }
                 break;
+            case STREAMING:
+                for (SensorAction action : EnumSet.of(SensorAction.CONFIGURE, SensorAction.STOP_LOGGING, SensorAction.START_LOGGING, SensorAction.CLEAR_SESSIONS, SensorAction.FULL_ERASE)) {
+                    if (position == action.ordinal()) {
+                        // TODO Toasts for Arne
+                        return;
+                    }
+                }
+                break;
+
         }
 
         SensorAction action = SensorAction.values()[position];
