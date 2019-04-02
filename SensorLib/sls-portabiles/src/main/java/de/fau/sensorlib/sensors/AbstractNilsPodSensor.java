@@ -64,9 +64,9 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
      */
     protected static final UUID NILS_POD_SENSOR_CONFIG = UUID.fromString("98ff0202-770d-4a83-9e9b-ce6bbd75e472");
     /**
-     * UUID for Metadata Characteristic (read/write) of NilsPod Sensor
+     * UUID for System Settings Characteristic (read/write) of NilsPod Sensor
      */
-    protected static final UUID NILS_POD_METADATA_CONFIG = UUID.fromString("98ff0303-770d-4a83-9e9b-ce6bbd75e472");
+    protected static final UUID NILS_POD_SYSTEM_SETTINGS_CONFIG = UUID.fromString("98ff0303-770d-4a83-9e9b-ce6bbd75e472");
     /**
      * UUID for Date Time Characteristic (write) of NilsPod Sensor
      */
@@ -125,6 +125,10 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     private HashMap<String, BaseConfigItem> mConfigMap = new HashMap<>();
 
     private NilsPodOperationState mOperationState = NilsPodOperationState.IDLE;
+
+    private boolean mMotionInterruptEnabled = false;
+
+    private NilsPodSpecialFunction mSpecialFunction = NilsPodSpecialFunction.NORMAL_MODE;
 
 
     public static final String KEY_SENSOR_ENABLE = "sensors_enable";
@@ -282,6 +286,15 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         }
     }
 
+    protected enum NilsPodMotionInterrupt {
+        MOTION_INTERRUPT_ENABLED,
+        MOTION_INTERRUPT_DISABLED,
+    }
+
+    protected enum NilsPodSpecialFunction {
+        NORMAL_MODE,
+        HOME_MONITORING_MODE
+    }
 
     // Add custom NilsPod UUIDs to known UUID pool
     static {
@@ -293,7 +306,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         BleGattAttributes.addCharacteristic(NILS_POD_SYSTEM_STATE, "NilsPod System State");
         BleGattAttributes.addCharacteristic(NILS_POD_TS_CONFIG, "NilsPod Timer Sampling Configuration");
         BleGattAttributes.addCharacteristic(NILS_POD_SENSOR_CONFIG, "NilsPod Sensor Configuration");
-        BleGattAttributes.addCharacteristic(NILS_POD_METADATA_CONFIG, "NilsPod Metadata Configuration");
+        BleGattAttributes.addCharacteristic(NILS_POD_SYSTEM_SETTINGS_CONFIG, "NilsPod Metadata Configuration");
         BleGattAttributes.addCharacteristic(NILS_POD_DATE_TIME_CONFIG, "NilsPod Date Time Configuration");
         BleGattAttributes.addCharacteristic(NILS_POD_FIRMWARE_VERSION, "NilsPod Firmware Version");
         BleGattAttributes.addCharacteristic(NILS_POD_BUTTONLESS_DFU, "NilsPod Buttonless DFU");
@@ -496,9 +509,9 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
                     handleSensorException(e);
                 }
                 return true;
-            } else if (NILS_POD_METADATA_CONFIG.equals(characteristic.getUuid())) {
+            } else if (NILS_POD_SYSTEM_SETTINGS_CONFIG.equals(characteristic.getUuid())) {
                 try {
-                    extractSensorPosition(characteristic);
+                    extractSystemSettings(characteristic);
                 } catch (SensorException e) {
                     handleSensorException(e);
                 }
@@ -637,16 +650,22 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         mConfigMap.put(KEY_SENSOR_ENABLE, item);*/
     }
 
-    protected synchronized void extractSensorPosition(BluetoothGattCharacteristic characteristic) throws SensorException {
+    protected synchronized void extractSystemSettings(BluetoothGattCharacteristic characteristic) throws SensorException {
+        int offset = 0;
         try {
-            mSensorPosition = NilsPodSensorPosition.values()[characteristic.getValue()[0]];
+            mSensorPosition = NilsPodSensorPosition.values()[characteristic.getValue()[offset++]];
+            mSpecialFunction = NilsPodSpecialFunction.values()[characteristic.getValue()[offset++]];
+            offset += 2;
+            mMotionInterruptEnabled = characteristic.getValue()[offset] == 0x01;
         } catch (Exception e) {
             e.printStackTrace();
             throw new SensorException(SensorException.SensorExceptionType.readStateError);
         }
 
-        Log.d(TAG, ">>>> Meta Data:");
+        Log.d(TAG, ">>>> System Settings:");
         Log.d(TAG, "\tSensor Position: " + mSensorPosition);
+        Log.d(TAG, "\tSpecial Function: " + mSpecialFunction);
+        Log.d(TAG, "\tMotion Interrupt Enabled: " + mMotionInterruptEnabled);
     }
 
 
