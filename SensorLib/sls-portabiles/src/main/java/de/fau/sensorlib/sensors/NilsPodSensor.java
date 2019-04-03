@@ -12,15 +12,22 @@ import android.content.Context;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
+import de.fau.sensorlib.BleGattAttributes;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorException;
 import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.BarometricPressureDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
 import de.fau.sensorlib.enums.SensorState;
+import de.fau.sensorlib.sensors.configs.ConfigItem;
+import de.fau.sensorlib.sensors.enums.NilsPodSyncGroup;
+import de.fau.sensorlib.sensors.enums.NilsPodSyncRole;
 import de.fau.sensorlib.sensors.logging.NilsPodLoggable;
 import de.fau.sensorlib.sensors.logging.NilsPodLoggingCallback;
 import de.fau.sensorlib.sensors.logging.Session;
@@ -37,7 +44,6 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
 
     protected ArrayList<NilsPodLoggingCallback> mCallbacks;
 
-
     /**
      * Global counter for incoming packages (local counter only has 15 bit)
      */
@@ -47,10 +53,13 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     private SessionHandler mSessionHandler;
     private SessionDownloader mSessionDownloader;
 
+    private ConcurrentLinkedQueue<BluetoothGattCharacteristic> mConfigWriteRequests = new ConcurrentLinkedQueue<>();
+
 
     public NilsPodSensor(Context context, SensorInfo info, SensorDataProcessor dataHandler) {
         super(context, info, dataHandler);
         mCallbacks = new ArrayList<>();
+        mConfigWriteRequests.clear();
     }
 
     @Override
@@ -185,7 +194,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     }
 
     @Override
-    protected void onOperationStateChanged(NilsPodOperationState oldState, NilsPodOperationState newState) {
+    protected void onOperationStateChanged(NilsPodOperationState oldState, NilsPodOperationState newState) throws SensorException {
         super.onOperationStateChanged(oldState, newState);
         switch (newState) {
             case IDLE:
@@ -207,6 +216,16 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
                         mSessionDownloader.completeDownload();
                         for (NilsPodLoggingCallback callback : mCallbacks) {
                             callback.onSessionDownloaded(this, mSessionDownloader.getSession());
+                        }
+                        break;
+                    case SAVING_CONFIG:
+                        // remove last written item
+                        mConfigWriteRequests.poll();
+                        if (!mConfigWriteRequests.isEmpty()) {
+                            BluetoothGattCharacteristic chara = mConfigWriteRequests.peek();
+                            if (!writeCharacteristic(chara, chara.getValue())) {
+                                throw new SensorException(SensorException.SensorExceptionType.configError);
+                            }
                         }
                         break;
                 }
@@ -262,10 +281,154 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         send(cmd);
     }
 
+    @Override
+    public void setConfigMap(HashMap<String, Object> configMap) {
+        double samplingRate = 0.0;
+        ArrayList<HardwareSensor> sensors = (ArrayList<HardwareSensor>) mCurrentConfigMap.get(KEY_HARDWARE_SENSORS);
+        NilsPodSensorPosition sensorPosition = (NilsPodSensorPosition) mCurrentConfigMap.get(KEY_SENSOR_POSITION);
+        NilsPodSyncGroup syncGroup = (NilsPodSyncGroup) mCurrentConfigMap.get(KEY_SYNC_GROUP);
+        NilsPodSyncRole syncRole = (NilsPodSyncRole) mCurrentConfigMap.get(KEY_SYNC_ROLE);
+        NilsPodSpecialFunction specialFunction = (NilsPodSpecialFunction) mCurrentConfigMap.get(KEY_SPECIAL_FUNCTION);
+        NilsPodMotionInterrupt interrupt = (NilsPodMotionInterrupt) mCurrentConfigMap.get(KEY_MOTION_INTERRUPT);
+
+        for (String key : configMap.keySet()) {
+            Log.d(TAG, "config map: " + key + ", " + configMap.get(key) + ", " + configMap.get(key).getClass());
+            switch (key) {
+                case KEY_SAMPLING_RATE:
+                    String sr = (String) configMap.get(key);
+                    samplingRate = sAvailableSamplingRates.get(sr);
+                    break;
+                case KEY_HARDWARE_SENSORS:
+                    sensors = (ArrayList<HardwareSensor>) configMap.get(key);
+                    break;
+                case KEY_SENSOR_POSITION:
+                    sensorPosition = (NilsPodSensorPosition) configMap.get(KEY_SENSOR_POSITION);
+                    break;
+                case KEY_SYNC_GROUP:
+                    syncGroup = (NilsPodSyncGroup) configMap.get(key);
+                    break;
+                case KEY_SYNC_ROLE:
+                    syncRole = (NilsPodSyncRole) configMap.get(key);
+                    break;
+                case KEY_SPECIAL_FUNCTION:
+                    specialFunction = (NilsPodSpecialFunction) configMap.get(key);
+                    break;
+                case KEY_MOTION_INTERRUPT:
+                    interrupt = (NilsPodMotionInterrupt) configMap.get(key);
+                    break;
+            }
+        }
+
+        try {
+            writeTsConfig(samplingRate, syncRole, syncGroup);
+            writeSensorConfig(sensors);
+            writeSystemSettingsConfig(sensorPosition, specialFunction, interrupt);
+        } catch (SensorException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public HashMap<String, ConfigItem> getConfigMap() {
+        return mConfigMap;
+    }
+
+    @Override
+    public HashMap<String, Object> getCurrentConfigMap() {
+        return mCurrentConfigMap;
+    }
+
 
     private void createDummySessions() {
         send(new byte[]{(byte) 0xAB});
     }
+
+
+    protected void writeNilsPodConfig(BluetoothGattCharacteristic configChara, byte[] oldValue, byte[] value) throws SensorException {
+        Log.e(TAG, "CONFIG: " + BleGattAttributes.lookupCharacteristic(configChara.getUuid()) + ", " + Arrays.toString(oldValue) + ", " + Arrays.toString(value));
+
+        if (Arrays.equals(oldValue, value)) {
+            return;
+        }
+
+        configChara.setValue(value);
+        configChara.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
+        mConfigWriteRequests.add(configChara);
+
+        if (mConfigWriteRequests.size() == 1) {
+            BluetoothGattCharacteristic chara = mConfigWriteRequests.peek();
+            if (!writeCharacteristic(chara, chara.getValue())) {
+                throw new SensorException(SensorException.SensorExceptionType.configError);
+            }
+        }
+    }
+
+
+    protected void writeTsConfig(double samplingRate, NilsPodSyncRole syncRole, NilsPodSyncGroup syncGroup) throws SensorException {
+        BluetoothGattCharacteristic config = getConfigurationService().getCharacteristic(AbstractNilsPodSensor.NILS_POD_TS_CONFIG);
+        byte[] oldValue = config.getValue();
+        byte[] value = oldValue.clone();
+
+        int command = -1;
+
+        for (int i = 0; i < mSamplingRateCommands.size(); i++) {
+            if (mSamplingRateCommands.valueAt(i) == samplingRate) {
+                command = mSamplingRateCommands.keyAt(i);
+                break;
+            }
+        }
+
+        if (command == -1) {
+            throw new SensorException(SensorException.SensorExceptionType.configError);
+        }
+
+        int offset = 0;
+        value[offset++] = (byte) command;
+        value[offset++] = (byte) syncRole.ordinal();
+        // TODO currently skips sync distance (not implemented yet)
+        offset++;
+        value[offset] = (byte) syncGroup.ordinal();
+
+        writeNilsPodConfig(config, oldValue, value);
+    }
+
+    protected void writeSensorConfig(ArrayList<HardwareSensor> sensors) throws SensorException {
+        BluetoothGattCharacteristic config = getConfigurationService().getCharacteristic(AbstractNilsPodSensor.NILS_POD_SENSOR_CONFIG);
+        byte[] oldValue = config.getValue();
+
+        byte[] value = new byte[1];
+        int sensorField = 0;
+        for (HardwareSensor sensor : sensors) {
+            switch (sensor) {
+                case GYROSCOPE:
+                    sensorField = (sensorField | (0x01));
+                    break;
+                case BAROMETER:
+                    sensorField = (sensorField | (0x04));
+                    break;
+            }
+        }
+
+        value[0] = (byte) sensorField;
+
+        writeNilsPodConfig(config, new byte[]{oldValue[0]}, value);
+    }
+
+    protected void writeSystemSettingsConfig(NilsPodSensorPosition sensorPosition, NilsPodSpecialFunction specialFunction, NilsPodMotionInterrupt motionInterrupt) throws SensorException {
+        BluetoothGattCharacteristic config = getConfigurationService().getCharacteristic(AbstractNilsPodSensor.NILS_POD_SYSTEM_SETTINGS_CONFIG);
+        byte[] oldValue = config.getValue();
+        byte[] value = oldValue.clone();
+
+        int offset = 0;
+
+        value[offset++] = (byte) sensorPosition.getPosition();
+        value[offset++] = (byte) specialFunction.ordinal();
+        offset += 2;
+        value[offset] = (byte) motionInterrupt.ordinal();
+
+        writeNilsPodConfig(config, oldValue, value);
+    }
+
 
     /**
      * Updates the current date time stamp of the external temperature compensated RTC module.
