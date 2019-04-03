@@ -389,6 +389,10 @@ public class GenericBleSensor extends AbstractSensor {
         mStateMachineMode = stateMachineMode;
     }
 
+    public GenericBleSensor(Context context, String deviceName, String deviceAddress, SensorDataProcessor dataHandler, BleConnectionMode stateMachineMode) {
+        this(context, deviceName, deviceAddress, dataHandler, -1, stateMachineMode);
+    }
+
     @Override
     public boolean connect() throws Exception {
         if (!super.connect()) {
@@ -584,7 +588,7 @@ public class GenericBleSensor extends AbstractSensor {
 
     protected void readCharacteristic(BluetoothGattCharacteristic c) {
         mCharacteristicsReadRequests.add(c);
-        if (mGatt != null) {
+        if (mGatt != null && mCharacteristicsReadRequests.size() == 1) {
             mGatt.readCharacteristic(mCharacteristicsReadRequests.peek());
         }
         /*if (mCharacteristicsReadRequests.size() == 1) {
@@ -597,7 +601,7 @@ public class GenericBleSensor extends AbstractSensor {
         c.setWriteType(BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE);
         mCharacteristicsWriteRequests.add(c);
 
-        if (mGatt != null) {
+        if (mGatt != null && mCharacteristicsWriteRequests.size() == 1) {
             mGatt.writeCharacteristic(mCharacteristicsWriteRequests.peek());
         }
         /*if (mCharacteristicsWriteRequests.size() == 1) {

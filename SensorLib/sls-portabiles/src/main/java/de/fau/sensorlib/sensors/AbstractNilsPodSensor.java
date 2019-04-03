@@ -393,7 +393,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         return mOperationState;
     }
 
-    protected void setOperationState(NilsPodOperationState operationState) {
+    protected void setOperationState(NilsPodOperationState operationState) throws SensorException {
         NilsPodOperationState oldState = mOperationState;
         mOperationState = operationState;
         onOperationStateChanged(oldState, mOperationState);

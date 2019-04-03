@@ -11,6 +11,8 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import de.fau.sensorlib.enums.KnownSensor;
 import de.fau.sensorlib.enums.SensorState;
@@ -26,6 +28,9 @@ public class SensorInfo implements Serializable {
      * The state the sensor is currently in.
      */
     private SensorState mSensorState = SensorState.UNDEFINED;
+
+
+    protected static HashMap<String, Double> sAvailableSamplingRates = new LinkedHashMap<>();
 
     /**
      * The descriptive name of this sensor. Should be Human-readable and Human-understandable.
@@ -103,6 +108,14 @@ public class SensorInfo implements Serializable {
 
     protected void onStateChange(SensorState oldState, SensorState newState) {
         Log.d(TAG, "<" + mDeviceName + "> " + oldState + " --> " + newState);
+    }
+
+    public static HashMap<String, Double> getAvailableSamplingRates() {
+        return sAvailableSamplingRates;
+    }
+
+    public static boolean checkSamplingRateAvailable(double samplingRate) {
+        return sAvailableSamplingRates.containsValue(samplingRate);
     }
 
     /**

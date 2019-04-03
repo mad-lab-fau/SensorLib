@@ -14,6 +14,7 @@ import android.util.Log;
 import java.util.Arrays;
 
 import de.fau.sensorlib.SensorDataProcessor;
+import de.fau.sensorlib.SensorException;
 import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.enums.SensorState;
 
@@ -37,13 +38,17 @@ public class HoopSensor extends AbstractNilsPodSensor {
     @Override
     protected void onStateChange(SensorState oldState, SensorState newState) {
         super.onStateChange(oldState, newState);
-        switch (newState) {
-            case STREAMING:
-                setOperationState(NilsPodOperationState.STREAMING);
-                break;
-            default:
-                setOperationState(NilsPodOperationState.IDLE);
-                break;
+        try {
+            switch (newState) {
+                case STREAMING:
+                    setOperationState(NilsPodOperationState.STREAMING);
+                    break;
+                default:
+                    setOperationState(NilsPodOperationState.IDLE);
+                    break;
+            }
+        } catch (SensorException e) {
+            e.printStackTrace();
         }
     }
 
