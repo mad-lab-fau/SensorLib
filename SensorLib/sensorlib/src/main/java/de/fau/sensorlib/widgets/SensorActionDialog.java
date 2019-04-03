@@ -21,6 +21,7 @@ import android.widget.Toast;
 import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.Objects;
 
 import androidx.annotation.NonNull;
@@ -36,7 +37,7 @@ import de.fau.sensorlib.sensors.Erasable;
 import de.fau.sensorlib.sensors.Loggable;
 import de.fau.sensorlib.sensors.Resettable;
 
-public class SensorActionDialog extends DialogFragment implements AdapterView.OnItemClickListener {
+public class SensorActionDialog extends DialogFragment implements AdapterView.OnItemClickListener, SensorConfigListener {
 
     private static final String TAG = SensorActionDialog.class.getSimpleName();
 
@@ -152,7 +153,9 @@ public class SensorActionDialog extends DialogFragment implements AdapterView.On
         SensorAction action = SensorAction.values()[position];
         switch (action) {
             case CONFIGURE:
-                dismiss();
+                if (mSensor instanceof Configurable) {
+                    showSensorConfigDialog();
+                }
                 return;
             case DEFAULT_CONFIG:
                 if (mSensor instanceof Configurable) {
@@ -204,6 +207,35 @@ public class SensorActionDialog extends DialogFragment implements AdapterView.On
         Toast.makeText(getActivity(), SensorAction.values()[position] + " on " + mSensor.getDeviceName(), Toast.LENGTH_SHORT).show();
         dismiss();
     }
+
+
+    @Override
+    public void onSensorConfigSelected(HashMap<String, Object> configMap) {
+        Log.d(TAG, "onSensorConfigSelected: " + configMap);
+        if (mSensor instanceof Configurable) {
+            ((Configurable) mSensor).setConfigMap(configMap);
+        }
+    }
+
+
+    private void showSensorConfigDialog() {
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(Constants.KEY_SENSOR_CONFIG, ((Configurable) mSensor).getConfigMap());
+        bundle.putSerializable(Constants.KEY_SENSOR_CONFIG_DEFAULT, ((Configurable) mSensor).getCurrentConfigMap());
+
+        SensorConfigDialog dialog = new SensorConfigDialog();
+        dialog.setSensorConfigListener(this);
+        dialog.setArguments(bundle);
+
+        FragmentActivity activity = getActivity();
+        if (activity != null) {
+            FragmentManager fm = activity.getSupportFragmentManager();
+            if (fm != null) {
+                dialog.show(fm, "sensor_config");
+            }
+        }
+    }
+
 
     private void showSensorInfoDialog() {
         Bundle bundle = new Bundle();

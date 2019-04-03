@@ -7,11 +7,22 @@
  */
 package de.fau.sensorlib.sensors;
 
+import java.util.HashMap;
+
+import de.fau.sensorlib.sensors.configs.ConfigItem;
+
 public interface Configurable {
 
     /**
      * Sets the sensor to the default configuration.
      */
     void setDefaultConfig();
+
+    void setConfigMap(HashMap<String, Object> configMap);
+
+    HashMap<String, ConfigItem> getConfigMap();
+
+    HashMap<String, Object> getCurrentConfigMap();
+
 
 }
