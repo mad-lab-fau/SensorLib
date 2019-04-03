@@ -116,12 +116,14 @@ public class SensorConfigDialog extends DialogFragment implements View.OnClickLi
 
     public static class SensorConfigViewHolder extends RecyclerView.ViewHolder {
 
+        private Context mContext;
         private String mKey;
         private TextView mTitleTextView;
         private FrameLayout mConfigView;
 
         public SensorConfigViewHolder(Context context, View itemView) {
             super(itemView);
+            mContext = context;
             mTitleTextView = itemView.findViewById(R.id.tv_config_title);
             mConfigView = itemView.findViewById(R.id.config_container);
         }
