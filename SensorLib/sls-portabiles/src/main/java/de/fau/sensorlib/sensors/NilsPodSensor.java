@@ -16,9 +16,9 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import de.fau.sensorlib.BleGattAttributes;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorException;
 import de.fau.sensorlib.SensorInfo;
@@ -288,6 +288,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         NilsPodSensorPosition sensorPosition = (NilsPodSensorPosition) mCurrentConfigMap.get(KEY_SENSOR_POSITION);
         NilsPodSyncGroup syncGroup = (NilsPodSyncGroup) mCurrentConfigMap.get(KEY_SYNC_GROUP);
         NilsPodSyncRole syncRole = (NilsPodSyncRole) mCurrentConfigMap.get(KEY_SYNC_ROLE);
+        String syncDistance = (String) mCurrentConfigMap.get(KEY_SYNC_DISTANCE);
         NilsPodSpecialFunction specialFunction = (NilsPodSpecialFunction) mCurrentConfigMap.get(KEY_SPECIAL_FUNCTION);
         NilsPodMotionInterrupt interrupt = (NilsPodMotionInterrupt) mCurrentConfigMap.get(KEY_MOTION_INTERRUPT);
 
@@ -302,13 +303,16 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
                     sensors = (ArrayList<HardwareSensor>) configMap.get(key);
                     break;
                 case KEY_SENSOR_POSITION:
-                    sensorPosition = (NilsPodSensorPosition) configMap.get(KEY_SENSOR_POSITION);
+                    sensorPosition = (NilsPodSensorPosition) configMap.get(key);
                     break;
                 case KEY_SYNC_GROUP:
                     syncGroup = (NilsPodSyncGroup) configMap.get(key);
                     break;
                 case KEY_SYNC_ROLE:
                     syncRole = (NilsPodSyncRole) configMap.get(key);
+                    break;
+                case KEY_SYNC_DISTANCE:
+                    syncDistance = (String) configMap.get(key);
                     break;
                 case KEY_SPECIAL_FUNCTION:
                     specialFunction = (NilsPodSpecialFunction) configMap.get(key);
@@ -320,7 +324,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         }
 
         try {
-            writeTsConfig(samplingRate, syncRole, syncGroup);
+            writeTsConfig(samplingRate, syncRole, syncGroup, syncDistance);
             writeSensorConfig(sensors);
             writeSystemSettingsConfig(sensorPosition, specialFunction, interrupt);
         } catch (SensorException e) {
@@ -345,8 +349,6 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
 
 
     protected void writeNilsPodConfig(BluetoothGattCharacteristic configChara, byte[] oldValue, byte[] value) throws SensorException {
-        Log.e(TAG, "CONFIG: " + BleGattAttributes.lookupCharacteristic(configChara.getUuid()) + ", " + Arrays.toString(oldValue) + ", " + Arrays.toString(value));
-
         if (Arrays.equals(oldValue, value)) {
             return;
         }
@@ -364,7 +366,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     }
 
 
-    protected void writeTsConfig(double samplingRate, NilsPodSyncRole syncRole, NilsPodSyncGroup syncGroup) throws SensorException {
+    protected void writeTsConfig(double samplingRate, NilsPodSyncRole syncRole, NilsPodSyncGroup syncGroup, String syncDistance) throws SensorException {
         BluetoothGattCharacteristic config = getConfigurationService().getCharacteristic(AbstractNilsPodSensor.NILS_POD_TS_CONFIG);
         byte[] oldValue = config.getValue();
         byte[] value = oldValue.clone();
@@ -378,6 +380,14 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             }
         }
 
+        int syncDistanceCommand = 0;
+        for (Map.Entry<Integer, String> entry : sSyncDistanceCommands.entrySet()) {
+            if (entry.getValue().equals(syncDistance)) {
+                syncDistanceCommand = entry.getKey();
+                break;
+            }
+        }
+
         if (command == -1) {
             throw new SensorException(SensorException.SensorExceptionType.configError);
         }
@@ -385,8 +395,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         int offset = 0;
         value[offset++] = (byte) command;
         value[offset++] = (byte) syncRole.ordinal();
-        // TODO currently skips sync distance (not implemented yet)
-        offset++;
+        value[offset++] = (byte) syncDistanceCommand;
         value[offset] = (byte) syncGroup.ordinal();
 
         writeNilsPodConfig(config, oldValue, value);

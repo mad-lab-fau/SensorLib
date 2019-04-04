@@ -134,6 +134,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     public static final String KEY_MOTION_INTERRUPT = "motion_interrupt";
     public static final String KEY_SYNC_ROLE = "sync_role";
     public static final String KEY_SYNC_GROUP = "sync_group";
+    public static final String KEY_SYNC_DISTANCE = "sync_distance";
     public static final String KEY_SENSOR_POSITION = "sensor_position";
     public static final String KEY_SPECIAL_FUNCTION = "special_function";
 
@@ -155,6 +156,19 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         mSamplingRateCommands.put(4, 256.0);
         mSamplingRateCommands.put(5, 204.8);
         mSamplingRateCommands.put(10, 102.4);
+    }
+
+    protected static HashMap<Integer, String> sSyncDistanceCommands = new LinkedHashMap<>();
+
+    static {
+        sSyncDistanceCommands.put(1, "100 ms");
+        sSyncDistanceCommands.put(2, "200 ms");
+        sSyncDistanceCommands.put(3, "300 ms");
+        sSyncDistanceCommands.put(10, "1 s");
+        sSyncDistanceCommands.put(20, "2 s");
+        sSyncDistanceCommands.put(50, "5 s");
+        sSyncDistanceCommands.put(100, "10 s");
+        sSyncDistanceCommands.put(200, "20 s");
     }
 
 
@@ -183,6 +197,11 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
             new ArrayList<Object>(Arrays.asList(NilsPodSyncGroup.values())),
             ConfigItem.UiType.TYPE_DROPDOWN
     );
+    protected static ConfigItem mSyncDistanceConfig = new ConfigItem(
+            "Sync Distance",
+            new ArrayList<Object>(sSyncDistanceCommands.values()),
+            ConfigItem.UiType.TYPE_DROPDOWN
+    );
     protected static ConfigItem mSpecialFunctionConfig = new ConfigItem(
             "Special Function",
             new ArrayList<Object>(Arrays.asList(NilsPodSpecialFunction.values())),
@@ -201,6 +220,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         mConfigMap.put(KEY_SENSOR_POSITION, mSensorPositionConfig);
         mConfigMap.put(KEY_SYNC_ROLE, mSyncRoleConfig);
         mConfigMap.put(KEY_SYNC_GROUP, mSyncGroupConfig);
+        mConfigMap.put(KEY_SYNC_DISTANCE, mSyncDistanceConfig);
         mConfigMap.put(KEY_SPECIAL_FUNCTION, mSpecialFunctionConfig);
     }
 
@@ -708,7 +728,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
             double samplingRate = inferSamplingRate(values[offset++]);
             requestSamplingRateChange(samplingRate);
             syncRole = NilsPodSyncRole.values()[values[offset++]];
-            syncDistance = values[offset++] * 100;
+            syncDistance = values[offset++];
             syncGroup = NilsPodSyncGroup.values()[values[offset]];
         } catch (Exception e) {
             e.printStackTrace();
@@ -718,12 +738,13 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         Log.d(TAG, ">>>> Timer Sampling State:");
         Log.d(TAG, "\tSampling Rate: " + mSamplingRate);
         Log.d(TAG, "\tSync Role: " + syncRole);
-        Log.d(TAG, "\tSync Distance: " + syncDistance);
+        Log.d(TAG, "\tSync Distance: " + syncDistance * 100);
         Log.d(TAG, "\tSync Group: " + syncGroup);
 
         mCurrentConfigMap.put(KEY_SAMPLING_RATE, getSamplingRateString(mSamplingRate));
         mCurrentConfigMap.put(KEY_SYNC_ROLE, syncRole);
         mCurrentConfigMap.put(KEY_SYNC_GROUP, syncGroup);
+        mCurrentConfigMap.put(KEY_SYNC_DISTANCE, sSyncDistanceCommands.get(syncDistance));
     }
 
     protected synchronized void extractSensorConfig(BluetoothGattCharacteristic characteristic) throws SensorException {
