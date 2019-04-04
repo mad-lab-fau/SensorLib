@@ -8,14 +8,13 @@
 
 package de.fau.sensorlib.widgets;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.apache.commons.lang3.text.WordUtils;
@@ -29,6 +28,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import de.fau.sensorlib.Constants;
 import de.fau.sensorlib.R;
 import de.fau.sensorlib.sensors.AbstractSensor;
@@ -37,7 +38,7 @@ import de.fau.sensorlib.sensors.Erasable;
 import de.fau.sensorlib.sensors.Loggable;
 import de.fau.sensorlib.sensors.Resettable;
 
-public class SensorActionDialog extends DialogFragment implements AdapterView.OnItemClickListener, SensorConfigListener {
+public class SensorActionDialog extends DialogFragment implements SensorConfigListener {
 
     private static final String TAG = SensorActionDialog.class.getSimpleName();
 
@@ -57,63 +58,200 @@ public class SensorActionDialog extends DialogFragment implements AdapterView.On
         }
     }
 
-    private ListView mListView;
+    private Context mContext;
+    private RecyclerView mRecyclerView;
     private AbstractSensor mSensor;
+
+    public static class SensorActionViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+
+        private TextView mActionTextView;
+        private ItemClickListener mListener;
+
+        public SensorActionViewHolder(View itemView, ItemClickListener listener) {
+            super(itemView);
+            mActionTextView = itemView.findViewById(R.id.tv_sensor_action);
+            mListener = listener;
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            mListener.onItemClick(v, getAdapterPosition());
+        }
+
+        interface ItemClickListener {
+            void onItemClick(View view, int position);
+        }
+    }
+
+
+    public class SensorActionAdapter extends RecyclerView.Adapter<SensorActionViewHolder> implements SensorActionViewHolder.ItemClickListener {
+
+        private SensorActionAdapter(Context context) {
+            mContext = context;
+        }
+
+        @NonNull
+        @Override
+        public SensorActionViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View layout = LayoutInflater.from(mContext).inflate(R.layout.item_sensor_action, parent, false);
+            return new SensorActionViewHolder(layout, this);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull SensorActionViewHolder holder, int position) {
+            holder.mActionTextView.setText(SensorAction.values()[position].toString());
+        }
+
+        @Override
+        public int getItemCount() {
+            return SensorAction.values().length;
+        }
+
+        @Override
+        public void onItemClick(View view, int position) {
+            switch (mSensor.getState()) {
+                case CONNECTED:
+                    for (SensorAction action : EnumSet.of(SensorAction.STOP_LOGGING)) {
+                        if (position == action.ordinal()) {
+                            return;
+                        }
+                    }
+                    break;
+                case LOGGING:
+                    for (SensorAction action : EnumSet.of(SensorAction.CONFIGURE, SensorAction.START_LOGGING, SensorAction.CLEAR_SESSIONS, SensorAction.FULL_ERASE, SensorAction.RESET)) {
+                        if (position == action.ordinal()) {
+                            return;
+                        }
+                    }
+                    break;
+                case STREAMING:
+                    for (SensorAction action : EnumSet.of(SensorAction.CONFIGURE, SensorAction.STOP_LOGGING, SensorAction.START_LOGGING, SensorAction.CLEAR_SESSIONS, SensorAction.FULL_ERASE)) {
+                        if (position == action.ordinal()) {
+                            // TODO Toasts for Arne
+                            return;
+                        }
+                    }
+                    break;
+
+            }
+
+            SensorAction action = SensorAction.values()[position];
+            switch (action) {
+                case CONFIGURE:
+                    if (mSensor instanceof Configurable) {
+                        showSensorConfigDialog();
+                    }
+                    return;
+                case DEFAULT_CONFIG:
+                    if (mSensor instanceof Configurable) {
+                        ((Configurable) mSensor).setDefaultConfig();
+                    } else {
+                        return;
+                    }
+                    break;
+                case RESET:
+                    if (mSensor instanceof Resettable) {
+                        ((Resettable) mSensor).reset();
+                    } else {
+                        return;
+                    }
+                    break;
+                case START_LOGGING:
+                    if (mSensor instanceof Loggable) {
+                        ((Loggable) mSensor).startLogging();
+                    } else {
+                        return;
+                    }
+                    break;
+                case STOP_LOGGING:
+                    if (mSensor instanceof Loggable) {
+                        ((Loggable) mSensor).stopLogging();
+                    } else {
+                        return;
+                    }
+                    break;
+                case CLEAR_SESSIONS:
+                    if (mSensor instanceof Erasable) {
+                        ((Erasable) mSensor).clearData();
+                    } else {
+                        return;
+                    }
+                    break;
+                case FULL_ERASE:
+                    if (mSensor instanceof Erasable) {
+                        ((Erasable) mSensor).fullErase();
+                    } else {
+                        return;
+                    }
+                    break;
+                case SENSOR_INFO:
+                    showSensorInfoDialog();
+                    dismiss();
+                    return;
+            }
+            Toast.makeText(getActivity(), SensorAction.values()[position] + " on " + mSensor.getDeviceName(), Toast.LENGTH_SHORT).show();
+            dismiss();
+        }
+    }
+
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.widget_sensor_action_dialog, container);
 
-        mListView = rootView.findViewById(R.id.list_view);
+        mContext = getContext();
 
-        mListView.setAdapter(new ArrayAdapter<>(Objects.requireNonNull(getActivity()), android.R.layout.simple_expandable_list_item_1, SensorAction.values()));
-        mListView.setOnItemClickListener(this);
+        mRecyclerView = rootView.findViewById(R.id.recycler_view);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+        mRecyclerView.setAdapter(new SensorActionAdapter(mContext));
 
         Bundle bundle = getArguments();
         if (bundle != null) {
             mSensor = (AbstractSensor) bundle.getSerializable(Constants.KEY_SENSOR);
         }
 
-        mListView.post(new Runnable() {
+        mRecyclerView.post(new Runnable() {
             @Override
             public void run() {
                 switch (Objects.requireNonNull(mSensor).getState()) {
                     case LOGGING:
                         // disable Configure Start Logging and Clear Flash
                         for (SensorAction action : EnumSet.of(SensorAction.CONFIGURE, SensorAction.START_LOGGING, SensorAction.CLEAR_SESSIONS, SensorAction.FULL_ERASE)) {
-                            mListView.getChildAt(action.ordinal()).setEnabled(false);
+                            mRecyclerView.getChildAt(action.ordinal()).setEnabled(false);
                         }
                         break;
                     case CONNECTED:
                         // disable Stop Logging
                         for (SensorAction action : EnumSet.of(SensorAction.STOP_LOGGING)) {
-                            mListView.getChildAt(action.ordinal()).setEnabled(false);
+                            mRecyclerView.getChildAt(action.ordinal()).setEnabled(false);
+                            setItemDisabled(mRecyclerView.getChildAt(action.ordinal()));
                         }
                         break;
                     case STREAMING:
                         // disable all Logging actions
                         for (SensorAction action : EnumSet.of(SensorAction.CONFIGURE, SensorAction.STOP_LOGGING, SensorAction.START_LOGGING, SensorAction.CLEAR_SESSIONS, SensorAction.FULL_ERASE)) {
-                            mListView.getChildAt(action.ordinal()).setEnabled(false);
+                            setItemDisabled(mRecyclerView.getChildAt(action.ordinal()));
                         }
                         break;
                 }
 
                 if (!(mSensor instanceof Configurable)) {
                     for (SensorAction action : EnumSet.of(SensorAction.CONFIGURE, SensorAction.DEFAULT_CONFIG)) {
-                        mListView.getChildAt(action.ordinal()).setEnabled(false);
+                        setItemDisabled(mRecyclerView.getChildAt(action.ordinal()));
                     }
                 }
 
                 if (!(mSensor instanceof Loggable)) {
                     for (SensorAction action : EnumSet.of(SensorAction.START_LOGGING, SensorAction.STOP_LOGGING, SensorAction.CLEAR_SESSIONS, SensorAction.FULL_ERASE)) {
-                        mListView.getChildAt(action.ordinal()).setEnabled(false);
+                        setItemDisabled(mRecyclerView.getChildAt(action.ordinal()));
                     }
                 }
 
                 if (!(mSensor instanceof Resettable)) {
                     for (SensorAction action : EnumSet.of(SensorAction.RESET)) {
-                        mListView.getChildAt(action.ordinal()).setEnabled(false);
+                        setItemDisabled(mRecyclerView.getChildAt(action.ordinal()));
                     }
                 }
             }
@@ -122,90 +260,8 @@ public class SensorActionDialog extends DialogFragment implements AdapterView.On
         return rootView;
     }
 
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        switch (mSensor.getState()) {
-            case CONNECTED:
-                for (SensorAction action : EnumSet.of(SensorAction.STOP_LOGGING)) {
-                    if (position == action.ordinal()) {
-                        return;
-                    }
-                }
-                break;
-            case LOGGING:
-                for (SensorAction action : EnumSet.of(SensorAction.CONFIGURE, SensorAction.START_LOGGING, SensorAction.CLEAR_SESSIONS, SensorAction.FULL_ERASE, SensorAction.RESET)) {
-                    if (position == action.ordinal()) {
-                        return;
-                    }
-                }
-                break;
-            case STREAMING:
-                for (SensorAction action : EnumSet.of(SensorAction.CONFIGURE, SensorAction.STOP_LOGGING, SensorAction.START_LOGGING, SensorAction.CLEAR_SESSIONS, SensorAction.FULL_ERASE)) {
-                    if (position == action.ordinal()) {
-                        // TODO Toasts for Arne
-                        return;
-                    }
-                }
-                break;
-
-        }
-
-        SensorAction action = SensorAction.values()[position];
-        switch (action) {
-            case CONFIGURE:
-                if (mSensor instanceof Configurable) {
-                    showSensorConfigDialog();
-                }
-                return;
-            case DEFAULT_CONFIG:
-                if (mSensor instanceof Configurable) {
-                    ((Configurable) mSensor).setDefaultConfig();
-                } else {
-                    return;
-                }
-                break;
-            case RESET:
-                if (mSensor instanceof Resettable) {
-                    ((Resettable) mSensor).reset();
-                } else {
-                    return;
-                }
-                break;
-            case START_LOGGING:
-                if (mSensor instanceof Loggable) {
-                    ((Loggable) mSensor).startLogging();
-                } else {
-                    return;
-                }
-                break;
-            case STOP_LOGGING:
-                if (mSensor instanceof Loggable) {
-                    ((Loggable) mSensor).stopLogging();
-                } else {
-                    return;
-                }
-                break;
-            case CLEAR_SESSIONS:
-                if (mSensor instanceof Erasable) {
-                    ((Erasable) mSensor).clearData();
-                } else {
-                    return;
-                }
-                break;
-            case FULL_ERASE:
-                if (mSensor instanceof Erasable) {
-                    ((Erasable) mSensor).fullErase();
-                } else {
-                    return;
-                }
-                break;
-            case SENSOR_INFO:
-                showSensorInfoDialog();
-                dismiss();
-                return;
-        }
-        Toast.makeText(getActivity(), SensorAction.values()[position] + " on " + mSensor.getDeviceName(), Toast.LENGTH_SHORT).show();
-        dismiss();
+    public void setItemDisabled(View view) {
+        view.findViewById(R.id.tv_sensor_action).setEnabled(false);
     }
 
 
