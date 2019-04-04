@@ -23,7 +23,7 @@ import de.fau.sensorlib.enums.HardwareSensor;
 import de.fau.sensorlib.enums.SensorMessage;
 import de.fau.sensorlib.enums.SensorState;
 import de.fau.sensorlib.sensors.configs.BaseConfigItem;
-import de.fau.sensorlib.sensors.enums.NilsPodRfGroup;
+import de.fau.sensorlib.sensors.enums.NilsPodSyncGroup;
 import de.fau.sensorlib.sensors.enums.NilsPodSyncRole;
 
 public abstract class AbstractNilsPodSensor extends GenericBleSensor implements Recordable, Resettable {
@@ -601,13 +601,13 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         byte[] values = characteristic.getValue();
         NilsPodSyncRole syncRole;
         int syncDistance;
-        NilsPodRfGroup rfGroup;
+        NilsPodSyncGroup syncGroup;
 
         try {
             requestSamplingRateChange(inferSamplingRate(values[offset++]));
             syncRole = NilsPodSyncRole.values()[values[offset++]];
             syncDistance = values[offset++] * 100;
-            rfGroup = NilsPodRfGroup.values()[values[offset]];
+            syncGroup = NilsPodSyncGroup.values()[values[offset]];
         } catch (Exception e) {
             e.printStackTrace();
             throw new SensorException(SensorException.SensorExceptionType.readConfigError);
@@ -617,7 +617,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         Log.d(TAG, "\tSampling Rate: " + mSamplingRate);
         Log.d(TAG, "\tSync Role: " + syncRole);
         Log.d(TAG, "\tSync Distance: " + syncDistance);
-        Log.d(TAG, "\tRF Group: " + rfGroup);
+        Log.d(TAG, "\tRF Group: " + syncGroup);
     }
 
     protected synchronized void extractSensorConfig(BluetoothGattCharacteristic characteristic) throws SensorException {

@@ -21,7 +21,7 @@ import de.fau.sensorlib.enums.HardwareSensor;
 import de.fau.sensorlib.sensors.AbstractSensor;
 import de.fau.sensorlib.sensors.InsoleSensor;
 import de.fau.sensorlib.sensors.NilsPodSensor;
-import de.fau.sensorlib.sensors.enums.NilsPodRfGroup;
+import de.fau.sensorlib.sensors.enums.NilsPodSyncGroup;
 import de.fau.sensorlib.sensors.enums.NilsPodSyncRole;
 import de.fau.sensorlib.sensors.enums.NilsPodTerminationSource;
 
@@ -85,7 +85,7 @@ public class SessionBuilder {
 
         NilsPodSyncRole syncRole = NilsPodSyncRole.values()[values[offset++]];
         int syncDistance = values[offset++] * 100;
-        NilsPodRfGroup rfGroup = NilsPodRfGroup.values()[values[offset++]];
+        NilsPodSyncGroup syncGroup = NilsPodSyncGroup.values()[values[offset++]];
 
         int accRange = values[offset++];
         int gyroRange = values[offset++];
@@ -117,7 +117,7 @@ public class SessionBuilder {
                 "termination source: " + terminationSource + "\n" +
                 "sync role: " + syncRole + "\n" +
                 "sync distance: " + syncDistance + "\n" +
-                "rf group: " + rfGroup + "\n" +
+                "rf group: " + syncGroup + "\n" +
                 "acc range: " + accRange + "\n" +
                 "gyro range: " + gyroRange + "\n" +
                 "sensor position: " + sensorPosition + "\n" +
