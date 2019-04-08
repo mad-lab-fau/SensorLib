@@ -143,7 +143,6 @@ public class StreamingFooter extends RelativeLayout implements View.OnClickListe
             mStartStopButton.startAnimation(mAnimLeftOpen);
             mDisconnectButton.startAnimation(mAnimRightOpen);
             mFab.startAnimation(mAnimFabNotPressed);
-            mFab.setImageResource(R.drawable.ic_stop);
         }
         if (mListener != null) {
             mListener.onFabClicked(mFabOpen);
@@ -180,7 +179,6 @@ public class StreamingFooter extends RelativeLayout implements View.OnClickListe
      */
     public void reset() {
         mFab.performClick();
-        mFab.setImageResource(R.drawable.ic_play);
     }
 
     @Override
@@ -222,7 +220,6 @@ public class StreamingFooter extends RelativeLayout implements View.OnClickListe
                 mDisconnectButton.performClick();
                 break;
             case DISCONNECTED:
-                mFab.setImageResource(R.drawable.ic_play);
                 break;
         }
         mState = state;

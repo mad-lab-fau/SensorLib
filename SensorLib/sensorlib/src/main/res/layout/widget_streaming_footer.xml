@@ -47,7 +47,7 @@
         android:layout_gravity="bottom|center"
         android:layout_margin="8dp"
         android:contentDescription="@string/string_fab"
-        android:src="@drawable/ic_play"
+        android:src="@drawable/ic_mad_launcher"
         app:backgroundTint="@color/accent"
         app:elevation="@dimen/elevation_fab"
         app:fabSize="normal"
