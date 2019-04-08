@@ -219,7 +219,7 @@ public class SensorActionDialog extends DialogFragment implements SensorConfigLi
                     case LOGGING:
                         // disable Configure Start Logging and Clear Flash
                         for (SensorAction action : EnumSet.of(SensorAction.CONFIGURE, SensorAction.START_LOGGING, SensorAction.CLEAR_SESSIONS, SensorAction.FULL_ERASE)) {
-                            mRecyclerView.getChildAt(action.ordinal()).setEnabled(false);
+                            setItemDisabled(mRecyclerView.getChildAt(action.ordinal()));
                         }
                         break;
                     case CONNECTED:
