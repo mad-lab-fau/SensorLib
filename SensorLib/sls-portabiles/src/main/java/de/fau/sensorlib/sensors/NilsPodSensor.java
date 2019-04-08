@@ -255,8 +255,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     @Override
     public void downloadSession(Session session) throws SensorException {
         mSessionDownloader = new SessionDownloader(this, session);
-        mSessionDownloader.setSessionWriter();
-        mSessionDownloader.setSessionBuilder();
+        mSessionDownloader.enableCsvExport();
         int sessionId = session.getSessionNumber();
         byte[] cmd = NilsPodSensorCommand.FLASH_TRANSMIT_SESSION.getByteCmd();
         cmd[1] = (byte) sessionId;

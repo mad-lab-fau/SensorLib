@@ -44,13 +44,15 @@ public class SessionDownloader {
 
     private DecimalFormat mDf = new DecimalFormat("##.##");
 
-    public SessionDownloader(AbstractSensor sensor, Session session) {
+    public SessionDownloader(AbstractSensor sensor, Session session) throws SensorException {
         mSensor = sensor;
         mSession = session;
         mProgress = 0;
         mSessionSize = session.getSessionSize();
         mStartTime = System.currentTimeMillis();
         mLastTime = System.currentTimeMillis();
+
+        setSessionWriter();
     }
 
     public Session getSession() {
@@ -61,7 +63,7 @@ public class SessionDownloader {
         mSessionWriter = new SessionByteWriter(mSensor, mSession, mSensor.getContext());
     }
 
-    public void setSessionBuilder() {
+    public void enableCsvExport() {
         mSessionBuilder = new SessionBuilder(mSensor, mSession);
     }
 
