@@ -1,8 +1,6 @@
 package de.fau.sensorlib.widgets;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +10,8 @@ import android.widget.TextView;
 
 import java.util.Objects;
 
+import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
 import de.fau.sensorlib.Constants;
 import de.fau.sensorlib.R;
 import de.fau.sensorlib.sensors.AbstractSensor;

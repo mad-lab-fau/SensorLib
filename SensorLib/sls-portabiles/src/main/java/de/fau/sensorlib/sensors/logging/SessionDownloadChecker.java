@@ -12,7 +12,6 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Environment;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -21,6 +20,7 @@ import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import androidx.core.content.ContextCompat;
 import de.fau.sensorlib.SensorException;
 import de.fau.sensorlib.sensors.AbstractSensor;
 

@@ -12,11 +12,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AlertDialog;
 
 import java.io.File;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import de.fau.sensorlib.R;
 import de.fau.sensorlib.sensors.AbstractSensor;
 

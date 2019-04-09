@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Environment;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -20,6 +19,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import androidx.core.content.ContextCompat;
 import de.fau.sensorlib.dataframe.RealTimeTimestampDataFrame;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;

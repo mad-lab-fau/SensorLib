@@ -20,8 +20,6 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.ParcelUuid;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -29,6 +27,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import de.fau.sensorlib.SensorException.SensorExceptionType;
 import de.fau.sensorlib.enums.KnownSensor;
 import de.fau.sensorlib.sensors.InternalSensor;
