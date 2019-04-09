@@ -286,9 +286,7 @@ public class SensorActionDialog extends DialogFragment implements SensorConfigLi
         FragmentActivity activity = getActivity();
         if (activity != null) {
             FragmentManager fm = activity.getSupportFragmentManager();
-            if (fm != null) {
-                dialog.show(fm, "sensor_config");
-            }
+            dialog.show(fm, "sensor_config");
         }
     }
 
@@ -302,9 +300,7 @@ public class SensorActionDialog extends DialogFragment implements SensorConfigLi
         FragmentActivity activity = getActivity();
         if (activity != null) {
             FragmentManager fm = activity.getSupportFragmentManager();
-            if (fm != null) {
-                dialog.show(fm, "sensor_info");
-            }
+            dialog.show(fm, "sensor_info");
         }
     }
 }
