@@ -11,6 +11,7 @@ package de.fau.sensorlib.sensors;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
+import android.os.Build;
 import android.util.Log;
 import android.util.SparseArray;
 import android.widget.Toast;
@@ -35,14 +36,21 @@ import de.fau.sensorlib.dataframe.SensorDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
 import de.fau.sensorlib.enums.SensorMessage;
 import de.fau.sensorlib.enums.SensorState;
+import de.fau.sensorlib.sensors.configs.ConfigItem;
+import de.fau.sensorlib.sensors.dfu.NilsPodDfuService;
 import de.fau.sensorlib.sensors.enums.NilsPodMotionInterrupt;
 import de.fau.sensorlib.sensors.enums.NilsPodOperationMode;
 import de.fau.sensorlib.sensors.enums.NilsPodSensorPosition;
 import de.fau.sensorlib.sensors.enums.NilsPodSyncGroup;
 import de.fau.sensorlib.sensors.enums.NilsPodSyncRole;
-import de.fau.sensorlib.widgets.config.ConfigItem;
+import no.nordicsemi.android.dfu.DfuLogListener;
+import no.nordicsemi.android.dfu.DfuProgressListener;
+import no.nordicsemi.android.dfu.DfuProgressListenerAdapter;
+import no.nordicsemi.android.dfu.DfuServiceController;
+import no.nordicsemi.android.dfu.DfuServiceInitiator;
+import no.nordicsemi.android.dfu.DfuServiceListenerHelper;
 
-public abstract class AbstractNilsPodSensor extends GenericBleSensor implements Recordable, Resettable {
+public abstract class AbstractNilsPodSensor extends GenericBleSensor implements Recordable, Resettable, SupportsDfu {
 
     public static final String TAG = AbstractNilsPodSensor.class.getSimpleName();
 
@@ -892,6 +900,45 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     public NilsPodSensorPosition getSensorPosition() {
         return mSensorPosition;
     }
+
+
+    @Override
+    public void updateFirmware(String filePath) {
+        final DfuServiceInitiator starter = new DfuServiceInitiator(getDeviceAddress())
+                .setDeviceName(getDeviceName())
+                .setKeepBond(true);
+
+        starter.setZip(filePath);
+
+        final DfuServiceController controller = starter.start(getContext(), NilsPodDfuService.class);
+
+        DfuServiceListenerHelper.registerLogListener(getContext(), mDfuLogListener);
+        DfuServiceListenerHelper.registerProgressListener(getContext(), mDfuProgressListener);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            DfuServiceInitiator.createDfuNotificationChannel(getContext());
+        }
+    }
+
+    private final DfuProgressListener mDfuProgressListener = new DfuProgressListenerAdapter() {
+        @Override
+        public void onDeviceConnecting(final String deviceAddress) {
+            Log.e(TAG, deviceAddress + " DFU CONNECTING!");
+        }
+
+        @Override
+        public void onDfuProcessStarting(final String deviceAddress) {
+            Log.e(TAG, deviceAddress + " DFU PROCESS STARTING!");
+        }
+        ///...
+    };
+
+    private final DfuLogListener mDfuLogListener = new DfuLogListener() {
+        @Override
+        public void onLogEvent(String deviceAddress, int level, String message) {
+            Log.e(TAG, deviceAddress + "DFU LOG: " + message);
+        }
+    };
+
 
     /**
      * Data frame to store data received from the Hoop Sensor
