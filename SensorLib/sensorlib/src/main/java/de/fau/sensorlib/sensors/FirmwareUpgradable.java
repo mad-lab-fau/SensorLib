@@ -8,8 +8,8 @@
 
 package de.fau.sensorlib.sensors;
 
-public interface SupportsDfu {
+public interface FirmwareUpgradable {
 
-    void updateFirmware(String filePath);
+    void upgradeFirmware(String filePath);
 
 }

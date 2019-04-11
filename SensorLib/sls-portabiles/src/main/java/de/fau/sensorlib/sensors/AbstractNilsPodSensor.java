@@ -50,7 +50,7 @@ import no.nordicsemi.android.dfu.DfuServiceController;
 import no.nordicsemi.android.dfu.DfuServiceInitiator;
 import no.nordicsemi.android.dfu.DfuServiceListenerHelper;
 
-public abstract class AbstractNilsPodSensor extends GenericBleSensor implements Recordable, Resettable, SupportsDfu {
+public abstract class AbstractNilsPodSensor extends GenericBleSensor implements Recordable, Resettable, FirmwareUpgradable {
 
     public static final String TAG = AbstractNilsPodSensor.class.getSimpleName();
 
@@ -903,7 +903,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
 
     @Override
-    public void updateFirmware(String filePath) {
+    public void upgradeFirmware(String filePath) {
         final DfuServiceInitiator starter = new DfuServiceInitiator(getDeviceAddress())
                 .setDeviceName(getDeviceName())
                 .setKeepBond(true);
