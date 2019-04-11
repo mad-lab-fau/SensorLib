@@ -20,6 +20,7 @@
     <color name="status_bar_streaming">#4CAF50</color>
     <color name="status_bar_logging">#009688</color>
     <color name="status_bar_simulating">#03A9F4</color>
+    <color name="status_bar_upgrading_firmware">#673AB7</color>
 
     <!-- Streaming Footer -->
     <color name="button_start_stop_color">#FFC107</color>
