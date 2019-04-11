@@ -430,7 +430,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
 
         int offset = 0;
 
-        value[offset++] = (byte) sensorPosition.getPosition();
+        value[offset++] = (byte) sensorPosition.ordinal();
         value[offset++] = (byte) specialFunction.ordinal();
         offset += 2;
         value[offset] = (byte) motionInterrupt.ordinal();

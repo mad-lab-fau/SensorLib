@@ -349,38 +349,13 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
      * Enum describing the sensor position
      */
     protected enum NilsPodSensorPosition {
-        NO_POSITION_DEFINED(0x00),
-        LEFT_FOOT(0x01),
-        RIGHT_FOOT(0x02),
-        HIP(0x04),
-        UNUSED(0x08);
-
-        private int position;
-
-        NilsPodSensorPosition(int position) {
-            this.position = position;
-        }
-
-        public static NilsPodSensorPosition inferSensorPosition(int position) {
-            switch (position) {
-                case 0x01:
-                    return LEFT_FOOT;
-                case 0x02:
-                    return RIGHT_FOOT;
-                case 0x04:
-                    return HIP;
-                case 0x08:
-                    return UNUSED;
-                case 0x00:
-                    // fall through
-                default:
-                    return NO_POSITION_DEFINED;
-            }
-        }
-
-        public int getPosition() {
-            return position;
-        }
+        NO_POSITION_DEFINED,
+        LEFT_FOOT,
+        RIGHT_FOOT,
+        HIP,
+        LEFT_WRIST,
+        RIGHT_WRIST,
+        CHEST;
     }
 
     /**
@@ -782,7 +757,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     protected synchronized void extractSystemSettings(BluetoothGattCharacteristic characteristic) throws SensorException {
         int offset = 0;
         try {
-            mSensorPosition = NilsPodSensorPosition.inferSensorPosition(characteristic.getValue()[offset++]);
+            mSensorPosition = NilsPodSensorPosition.values()[characteristic.getValue()[offset++]];
             mSpecialFunction = NilsPodSpecialFunction.values()[characteristic.getValue()[offset++]];
             offset += 2;
             mMotionInterruptEnabled = characteristic.getValue()[offset] == 0x01;
