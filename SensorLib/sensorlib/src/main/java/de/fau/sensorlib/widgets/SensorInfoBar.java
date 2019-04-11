@@ -89,7 +89,14 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
             case CONNECTION_LOST:
                 // fall through
             case DISCONNECTED:
-                mAdapter.clear();
+                if (sensor == null) {
+                    mAdapter.clear();
+                } else {
+                    mAdapter.removeSensor(sensor);
+                }
+                break;
+            case UPGRADING_FIRMWARE:
+                mAdapter.updateAdditionalInfo(sensor, "FW_UPGRADE");
                 break;
         }
     }
@@ -140,6 +147,14 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
             if (!mAttachedSensors.contains(sensor)) {
                 mAttachedSensors.add(sensor);
                 mAdditionalInfos.add("");
+                notifyDataSetChanged();
+            }
+        }
+
+        private void removeSensor(AbstractSensor sensor) {
+            if (mAttachedSensors.contains(sensor)) {
+                mAdditionalInfos.remove(mAttachedSensors.indexOf(sensor));
+                mAttachedSensors.remove(sensor);
                 notifyDataSetChanged();
             }
         }
