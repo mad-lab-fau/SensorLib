@@ -191,7 +191,9 @@ public class GenericBleSensor extends AbstractSensor {
                 } else {
                     mGatt.close();
                     mGatt = null;
-                    sendConnectionLost();
+                    if (getState() != SensorState.UPGRADING_FIRMWARE) {
+                        sendConnectionLost();
+                    }
                 }
             }
         }
