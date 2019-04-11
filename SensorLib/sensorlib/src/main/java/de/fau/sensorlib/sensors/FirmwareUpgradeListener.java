@@ -8,10 +8,12 @@
 
 package de.fau.sensorlib.sensors;
 
-public interface FirmwareUpgradable {
+public interface FirmwareUpgradeListener {
 
-    void upgradeFirmware(String filePath);
+    void onFirmwareUpgradeStart(AbstractSensor sensor);
 
-    void setFirmwareUpgradeListener(FirmwareUpgradeListener listener);
+    void onFirmwareUpgradeProgress(AbstractSensor sensor, int progress);
+
+    void onFirmwareUpgradeFinished(AbstractSensor sensor);
 
 }

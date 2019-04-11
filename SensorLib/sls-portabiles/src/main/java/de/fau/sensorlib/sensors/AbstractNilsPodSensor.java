@@ -24,6 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import androidx.annotation.NonNull;
 import de.fau.sensorlib.BleGattAttributes;
 import de.fau.sensorlib.HwSensorNotAvailableException;
 import de.fau.sensorlib.SensorDataProcessor;
@@ -46,7 +47,6 @@ import de.fau.sensorlib.sensors.enums.NilsPodSyncRole;
 import no.nordicsemi.android.dfu.DfuLogListener;
 import no.nordicsemi.android.dfu.DfuProgressListener;
 import no.nordicsemi.android.dfu.DfuProgressListenerAdapter;
-import no.nordicsemi.android.dfu.DfuServiceController;
 import no.nordicsemi.android.dfu.DfuServiceInitiator;
 import no.nordicsemi.android.dfu.DfuServiceListenerHelper;
 
@@ -147,6 +147,8 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     private NilsPodOperationMode mOperationMode = NilsPodOperationMode.NORMAL_MODE;
 
     private SensorRecorderListener mSensorRecorderListener;
+
+    private FirmwareUpgradeListener mFirmwareUpgradeListener;
 
 
     public static final String KEY_SAMPLING_RATE = "sampling_rate";
@@ -401,6 +403,56 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         BleGattAttributes.addCharacteristic(NILS_POD_BUTTONLESS_DFU, "NilsPod Buttonless DFU");
     }
 
+    private final DfuProgressListener mDfuProgressListener = new DfuProgressListenerAdapter() {
+
+        @Override
+        public void onDeviceConnecting(@NonNull String deviceAddress) {
+            Log.d(TAG, getDeviceName() + " >> DFU Connecting!");
+        }
+
+
+        @Override
+        public void onDfuProcessStarting(@NonNull String deviceAddress) {
+            Log.d(TAG, getDeviceName() + " >> DFU Process Starting!");
+            setState(SensorState.UPGRADING_FIRMWARE);
+            if (mFirmwareUpgradeListener != null) {
+                mFirmwareUpgradeListener.onFirmwareUpgradeStart(AbstractNilsPodSensor.this);
+            } else {
+                Log.e(TAG, "No FirmwareUpgradeListener attached!");
+            }
+        }
+
+        @Override
+        public void onDfuCompleted(@NonNull String deviceAddress) {
+            Log.d(TAG, getDeviceName() + " >> DFU Completed!");
+            setState(SensorState.DISCONNECTED);
+            if (mFirmwareUpgradeListener != null) {
+                mFirmwareUpgradeListener.onFirmwareUpgradeFinished(AbstractNilsPodSensor.this);
+            } else {
+                Log.e(TAG, "No FirmwareUpgradeListener attached!");
+            }
+        }
+
+        @Override
+        public void onProgressChanged(@NonNull String deviceAddress, int percent, float speed, float avgSpeed, int currentPart, int partsTotal) {
+            Log.d(TAG, getDeviceName() + " >> DFU Progress: " + percent + "%");
+            if (mFirmwareUpgradeListener != null) {
+                mFirmwareUpgradeListener.onFirmwareUpgradeProgress(AbstractNilsPodSensor.this, percent);
+            } else {
+                Log.e(TAG, "No FirmwareUpgradeListener attached!");
+            }
+        }
+
+        ///...
+    };
+
+    private final DfuLogListener mDfuLogListener = new DfuLogListener() {
+        @Override
+        public void onLogEvent(String deviceAddress, int level, String message) {
+            Log.d(TAG, getDeviceName() + " >> " + message);
+        }
+    };
+
 
     public AbstractNilsPodSensor(Context context, SensorInfo info, SensorDataProcessor dataHandler) {
         // set sampling rate to default value
@@ -527,6 +579,11 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
     public void setSensorRecorderListener(SensorRecorderListener listener) {
         mSensorRecorderListener = listener;
+    }
+
+    @Override
+    public void setFirmwareUpgradeListener(FirmwareUpgradeListener listener) {
+        mFirmwareUpgradeListener = listener;
     }
 
     @Override
@@ -910,34 +967,16 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
         starter.setZip(filePath);
 
-        final DfuServiceController controller = starter.start(getContext(), NilsPodDfuService.class);
+        //final DfuServiceController controller =
+        starter.start(getContext(), NilsPodDfuService.class);
 
         DfuServiceListenerHelper.registerLogListener(getContext(), mDfuLogListener);
         DfuServiceListenerHelper.registerProgressListener(getContext(), mDfuProgressListener);
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             DfuServiceInitiator.createDfuNotificationChannel(getContext());
         }
     }
-
-    private final DfuProgressListener mDfuProgressListener = new DfuProgressListenerAdapter() {
-        @Override
-        public void onDeviceConnecting(final String deviceAddress) {
-            Log.e(TAG, deviceAddress + " DFU CONNECTING!");
-        }
-
-        @Override
-        public void onDfuProcessStarting(final String deviceAddress) {
-            Log.e(TAG, deviceAddress + " DFU PROCESS STARTING!");
-        }
-        ///...
-    };
-
-    private final DfuLogListener mDfuLogListener = new DfuLogListener() {
-        @Override
-        public void onLogEvent(String deviceAddress, int level, String message) {
-            Log.e(TAG, deviceAddress + "DFU LOG: " + message);
-        }
-    };
 
 
     /**
