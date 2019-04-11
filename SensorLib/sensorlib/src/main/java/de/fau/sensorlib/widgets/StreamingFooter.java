@@ -178,7 +178,9 @@ public class StreamingFooter extends RelativeLayout implements View.OnClickListe
      * Resets the streaming footer, i.e. closes it.
      */
     public void reset() {
-        mFab.performClick();
+        if (mFabOpen) {
+            mFab.performClick();
+        }
     }
 
     @Override
