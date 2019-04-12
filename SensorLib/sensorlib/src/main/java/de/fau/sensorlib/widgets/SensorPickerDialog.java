@@ -14,6 +14,7 @@ import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -85,7 +86,7 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
             dismiss();
         } else if (i == R.id.button_ok) {
             // Save selected sensors to Shared Preferences to display them at the top the next time
-            SharedPreferences sharedPreferences = mContext.getSharedPreferences(Constants.KEY_PREF_DEFAULT, Context.MODE_PRIVATE);
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
             List<String> sensorNames = new ArrayList<>();
             for (Bundle item : mSelectedSensors) {
                 KnownSensor sensor = (KnownSensor) item.getSerializable(Constants.KEY_KNOWN_SENSOR);
@@ -384,7 +385,7 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
         mProgressBar = rootView.findViewById(R.id.progress_bar);
         mProgressTextView = rootView.findViewById(R.id.tv_scanning);
 
-        Set<String> sensors = mContext.getSharedPreferences(Constants.KEY_PREF_DEFAULT, Context.MODE_PRIVATE).getStringSet(Constants.KEY_SENSOR_LIST, null);
+        Set<String> sensors = PreferenceManager.getDefaultSharedPreferences(getContext()).getStringSet(Constants.KEY_SENSOR_LIST, null);
         if (sensors != null) {
             mLastConnectedSensors.addAll(sensors);
         }
