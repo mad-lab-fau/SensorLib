@@ -16,7 +16,7 @@ import android.util.Log;
 
 import com.shimmerresearch.driver.FormatCluster;
 import com.shimmerresearch.driver.ObjectCluster;
-import com.shimmerresearch.driver.Shimmer;
+import com.shimmerresearch.android.Shimmer;
 
 import java.util.Collection;
 

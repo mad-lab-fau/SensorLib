@@ -25,6 +25,8 @@ dependencies {
     implementation project(path: ':sensorlib')
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.google.guava:guava:22.0'
+    implementation 'org.apache.commons:commons-math:2.2'
+
 }
 
 tasks.create(name: 'copyApk', type: Copy) {
