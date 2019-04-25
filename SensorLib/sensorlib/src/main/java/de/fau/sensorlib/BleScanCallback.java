@@ -9,7 +9,7 @@ package de.fau.sensorlib;
 
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
-import android.support.annotation.CallSuper;
+import androidx.annotation.CallSuper;
 import android.util.Log;
 import android.util.SparseArray;
 

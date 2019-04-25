@@ -10,7 +10,7 @@ package de.fau.sensorlib.sensors;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.CallSuper;
+import androidx.annotation.CallSuper;
 import android.util.Log;
 
 import java.util.ArrayList;

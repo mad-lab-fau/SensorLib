@@ -9,7 +9,7 @@ package de.fau.sensorlib.widgets;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.support.v4.content.ContextCompat;
+import androidx.core.content.ContextCompat;
 import android.util.AttributeSet;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
