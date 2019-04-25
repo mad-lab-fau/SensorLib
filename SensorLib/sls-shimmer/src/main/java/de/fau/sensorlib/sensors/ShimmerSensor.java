@@ -335,7 +335,7 @@ public class ShimmerSensor extends AbstractSensor {
     @Override
     public String getDeviceName() {
         if (shimmer == null)
-            return getDeviceName();
+            return mDeviceName;
         return shimmer.getDeviceName();
     }
 
