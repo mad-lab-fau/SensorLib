@@ -27,9 +27,9 @@ import de.fau.sensorlib.sensors.enums.NilsPodSyncGroup;
 import de.fau.sensorlib.sensors.enums.NilsPodSyncRole;
 import de.fau.sensorlib.sensors.enums.NilsPodTerminationSource;
 
-public class SessionBuilder {
+public class SessionCsvConverter {
 
-    private static final String TAG = SessionBuilder.class.getSimpleName();
+    private static final String TAG = SessionCsvConverter.class.getSimpleName();
 
 
     private boolean mFirstPacketRead;
@@ -43,7 +43,7 @@ public class SessionBuilder {
 
     private SensorDataRecorder mRecorder;
 
-    public SessionBuilder(AbstractSensor sensor, Session session) {
+    public SessionCsvConverter(AbstractSensor sensor, Session session) {
         mSensor = sensor;
         mSession = session;
     }

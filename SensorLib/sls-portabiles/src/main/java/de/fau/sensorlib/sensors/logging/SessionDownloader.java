@@ -24,7 +24,8 @@ public class SessionDownloader {
     private Session mSession;
 
     private SessionByteWriter mSessionWriter;
-    private SessionBuilder mSessionBuilder;
+    private boolean mCsvExportEnabled = false;
+    private SessionCsvConverter mSessionCsvConverter;
 
     // in Byte
     private int mProgress;
@@ -63,8 +64,11 @@ public class SessionDownloader {
         mSessionWriter = new SessionByteWriter(mSensor, mSession, mSensor.getContext());
     }
 
-    public void enableCsvExport() {
-        mSessionBuilder = new SessionBuilder(mSensor, mSession);
+    public void setCsvExportEnabled(boolean enable) {
+        mCsvExportEnabled = enable;
+        if (mCsvExportEnabled) {
+            mSessionCsvConverter = new SessionCsvConverter(mSensor, mSession);
+        }
     }
 
     public void onNewData(byte[] values) {
@@ -81,7 +85,9 @@ public class SessionDownloader {
         mEstimatedRemainingTime = (long) (remainingBytes / mDownloadRate) * 1000;
 
         mSessionWriter.writeData(values);
-        mSessionBuilder.nextPacket(values);
+        if (mCsvExportEnabled) {
+            mSessionCsvConverter.nextPacket(values);
+        }
     }
 
     public int getProgress() {
@@ -111,7 +117,9 @@ public class SessionDownloader {
     public void completeDownload() {
         mProgress = mSession.getSessionSize();
         mSessionWriter.completeWriter();
-        mSessionBuilder.completeBuilder();
+        if (mCsvExportEnabled) {
+            mSessionCsvConverter.completeBuilder();
+        }
         mElapsedTime = System.currentTimeMillis() - mStartTime;
         mDownloadRate = ((double) mSessionSize) / mElapsedTime;
     }
