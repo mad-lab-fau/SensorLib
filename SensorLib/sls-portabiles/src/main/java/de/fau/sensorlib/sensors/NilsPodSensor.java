@@ -289,7 +289,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         NilsPodSyncGroup syncGroup = (NilsPodSyncGroup) mCurrentConfigMap.get(KEY_SYNC_GROUP);
         NilsPodSyncRole syncRole = (NilsPodSyncRole) mCurrentConfigMap.get(KEY_SYNC_ROLE);
         String syncDistance = (String) mCurrentConfigMap.get(KEY_SYNC_DISTANCE);
-        NilsPodSpecialFunction specialFunction = (NilsPodSpecialFunction) mCurrentConfigMap.get(KEY_SPECIAL_FUNCTION);
+        NilsPodOperationMode operationMode = (NilsPodOperationMode) mCurrentConfigMap.get(KEY_OPERATION_MODE);
         NilsPodMotionInterrupt interrupt = (NilsPodMotionInterrupt) mCurrentConfigMap.get(KEY_MOTION_INTERRUPT);
 
         for (String key : configMap.keySet()) {
@@ -314,8 +314,8 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
                 case KEY_SYNC_DISTANCE:
                     syncDistance = (String) configMap.get(key);
                     break;
-                case KEY_SPECIAL_FUNCTION:
-                    specialFunction = (NilsPodSpecialFunction) configMap.get(key);
+                case KEY_OPERATION_MODE:
+                    operationMode = (NilsPodOperationMode) configMap.get(key);
                     break;
                 case KEY_MOTION_INTERRUPT:
                     interrupt = (NilsPodMotionInterrupt) configMap.get(key);
@@ -326,7 +326,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         try {
             writeTsConfig(samplingRate, syncRole, syncGroup, syncDistance);
             writeSensorConfig(sensors);
-            writeSystemSettingsConfig(sensorPosition, specialFunction, interrupt);
+            writeSystemSettingsConfig(sensorPosition, operationMode, interrupt);
         } catch (SensorException e) {
             e.printStackTrace();
         }
@@ -423,7 +423,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         writeNilsPodConfig(config, new byte[]{oldValue[0]}, value);
     }
 
-    protected void writeSystemSettingsConfig(NilsPodSensorPosition sensorPosition, NilsPodSpecialFunction specialFunction, NilsPodMotionInterrupt motionInterrupt) throws SensorException {
+    protected void writeSystemSettingsConfig(NilsPodSensorPosition sensorPosition, NilsPodOperationMode operationMode, NilsPodMotionInterrupt motionInterrupt) throws SensorException {
         BluetoothGattCharacteristic config = getConfigurationService().getCharacteristic(AbstractNilsPodSensor.NILS_POD_SYSTEM_SETTINGS_CONFIG);
         byte[] oldValue = config.getValue();
         byte[] value = oldValue.clone();
@@ -431,9 +431,16 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         int offset = 0;
 
         value[offset++] = (byte) sensorPosition.ordinal();
-        value[offset++] = (byte) specialFunction.ordinal();
-        offset += 2;
-        value[offset] = (byte) motionInterrupt.ordinal();
+
+        int byteVal = 0;
+        if (operationMode == NilsPodOperationMode.HOME_MONITORING_MODE) {
+            byteVal = byteVal | 0x40;
+        }
+        if (motionInterrupt == NilsPodMotionInterrupt.MOTION_INTERRUPT_ENABLED) {
+            byteVal = byteVal | 0x80;
+        }
+
+        value[offset] = (byte) byteVal;
 
         writeNilsPodConfig(config, oldValue, value);
     }

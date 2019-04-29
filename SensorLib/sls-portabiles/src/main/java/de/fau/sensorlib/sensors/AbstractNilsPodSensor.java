@@ -124,7 +124,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
     private boolean mMotionInterruptEnabled = false;
 
-    private NilsPodSpecialFunction mSpecialFunction = NilsPodSpecialFunction.NORMAL_MODE;
+    private NilsPodOperationMode mOperationMode = NilsPodOperationMode.NORMAL_MODE;
 
     private SensorRecorderListener mSensorRecorderListener;
 
@@ -136,7 +136,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     public static final String KEY_SYNC_GROUP = "sync_group";
     public static final String KEY_SYNC_DISTANCE = "sync_distance";
     public static final String KEY_SENSOR_POSITION = "sensor_position";
-    public static final String KEY_SPECIAL_FUNCTION = "special_function";
+    public static final String KEY_OPERATION_MODE = "operation_mode";
 
     protected static HashMap<String, ConfigItem> mConfigMap = new LinkedHashMap<>();
 
@@ -202,9 +202,9 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
             new ArrayList<Object>(sSyncDistanceCommands.values()),
             ConfigItem.UiType.TYPE_DROPDOWN
     );
-    protected static ConfigItem mSpecialFunctionConfig = new ConfigItem(
-            "Special Function",
-            new ArrayList<Object>(Arrays.asList(NilsPodSpecialFunction.values())),
+    protected static ConfigItem mOperationModeConfig = new ConfigItem(
+            "Operation Mode",
+            new ArrayList<Object>(Arrays.asList(NilsPodOperationMode.values())),
             ConfigItem.UiType.TYPE_SELECT
     );
     protected static ConfigItem mSensorPositionConfig = new ConfigItem(
@@ -221,7 +221,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         mConfigMap.put(KEY_SYNC_ROLE, mSyncRoleConfig);
         mConfigMap.put(KEY_SYNC_GROUP, mSyncGroupConfig);
         mConfigMap.put(KEY_SYNC_DISTANCE, mSyncDistanceConfig);
-        mConfigMap.put(KEY_SPECIAL_FUNCTION, mSpecialFunctionConfig);
+        mConfigMap.put(KEY_OPERATION_MODE, mOperationModeConfig);
     }
 
     protected HashMap<String, Object> mCurrentConfigMap = new LinkedHashMap<>();
@@ -383,9 +383,9 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         MOTION_INTERRUPT_ENABLED,
     }
 
-    protected enum NilsPodSpecialFunction {
+    protected enum NilsPodOperationMode {
         NORMAL_MODE,
-        HOME_MONITORING_MODE
+        HOME_MONITORING_MODE,
     }
 
     // Add custom NilsPod UUIDs to known UUID pool
@@ -760,10 +760,16 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     protected synchronized void extractSystemSettings(BluetoothGattCharacteristic characteristic) throws SensorException {
         int offset = 0;
         try {
-            mSensorPosition = NilsPodSensorPosition.values()[characteristic.getValue()[offset++]];
-            mSpecialFunction = NilsPodSpecialFunction.values()[characteristic.getValue()[offset++]];
-            offset += 2;
-            mMotionInterruptEnabled = characteristic.getValue()[offset] == 0x01;
+            int sensorPosition = characteristic.getValue()[offset++];
+            if (sensorPosition < NilsPodSensorPosition.values().length) {
+                mSensorPosition = NilsPodSensorPosition.values()[sensorPosition];
+            } else {
+                mSensorPosition = NilsPodSensorPosition.NO_POSITION_DEFINED;
+            }
+            int operationMode = characteristic.getValue()[offset];
+            mOperationMode = (operationMode & 0x40) == 0 ? NilsPodOperationMode.NORMAL_MODE : NilsPodOperationMode.HOME_MONITORING_MODE;
+            mMotionInterruptEnabled = (operationMode & 0x80) != 0;
+
         } catch (Exception e) {
             e.printStackTrace();
             throw new SensorException(SensorException.SensorExceptionType.readStateError);
@@ -771,11 +777,11 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
         Log.d(TAG, ">>>> System Settings:");
         Log.d(TAG, "\tSensor Position: " + mSensorPosition);
-        Log.d(TAG, "\tSpecial Function: " + mSpecialFunction);
+        Log.d(TAG, "\tOperation Mode: " + mOperationMode);
         Log.d(TAG, "\tMotion Interrupt Enabled: " + mMotionInterruptEnabled);
 
         mCurrentConfigMap.put(KEY_MOTION_INTERRUPT, mMotionInterruptEnabled ? NilsPodMotionInterrupt.MOTION_INTERRUPT_ENABLED : NilsPodMotionInterrupt.MOTION_INTERRUPT_DISABLED);
-        mCurrentConfigMap.put(KEY_SPECIAL_FUNCTION, mSpecialFunction);
+        mCurrentConfigMap.put(KEY_OPERATION_MODE, mOperationMode);
         mCurrentConfigMap.put(KEY_SENSOR_POSITION, mSensorPosition);
     }
 
