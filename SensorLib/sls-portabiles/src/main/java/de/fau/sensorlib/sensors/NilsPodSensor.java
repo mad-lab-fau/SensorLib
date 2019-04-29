@@ -47,7 +47,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     /**
      * Global counter for incoming packages (local counter only has 15 bit)
      */
-    private int globalCounter = 0;
+    protected int globalCounter = 0;
 
 
     private SessionHandler mSessionHandler;

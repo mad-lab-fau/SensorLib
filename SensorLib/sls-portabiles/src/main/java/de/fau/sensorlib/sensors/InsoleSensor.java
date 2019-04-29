@@ -26,11 +26,6 @@ public class InsoleSensor extends NilsPodSensor {
 
     private static final String TAG = NilsPodSensor.class.getSimpleName();
 
-    /**
-     * Global counter for incoming packages (local counter only has 15 bit)
-     */
-    private int globalCounter = 0;
-
     public InsoleSensor(Context context, SensorInfo info, SensorDataProcessor dataHandler) {
         super(context, info, dataHandler);
     }
