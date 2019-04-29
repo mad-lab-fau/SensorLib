@@ -733,16 +733,24 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
             sensors = values[offset++];
             if ((sensors & 0x01) != 0) {
                 mEnabledSensorList.add(HardwareSensor.ACCELEROMETER);
-                mEnabledSensorList.add(HardwareSensor.GYROSCOPE);
             }
             if ((sensors & 0x02) != 0) {
-                mEnabledSensorList.add(HardwareSensor.FSR);
+                mEnabledSensorList.add(HardwareSensor.GYROSCOPE);
             }
             if ((sensors & 0x04) != 0) {
+                mEnabledSensorList.add(HardwareSensor.MAGNETOMETER);
+            }
+            if ((sensors & 0x08) != 0) {
                 mEnabledSensorList.add(HardwareSensor.BAROMETER);
+            }
+            if ((sensors & 0x10) != 0) {
+                mEnabledSensorList.add(HardwareSensor.FSR);
             }
             if ((sensors & 0x20) != 0) {
                 mEnabledSensorList.add(HardwareSensor.ECG);
+            }
+            if ((sensors & 0x40) != 0) {
+                mEnabledSensorList.add(HardwareSensor.PPG);
             }
             sampleSize = values[offset];
         } catch (Exception e) {

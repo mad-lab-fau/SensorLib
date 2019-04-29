@@ -409,11 +409,26 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         int sensorField = 0;
         for (HardwareSensor sensor : sensors) {
             switch (sensor) {
-                case GYROSCOPE:
+                case ACCELEROMETER:
                     sensorField = (sensorField | (0x01));
                     break;
-                case BAROMETER:
+                case GYROSCOPE:
+                    sensorField = (sensorField | (0x02));
+                    break;
+                case MAGNETOMETER:
                     sensorField = (sensorField | (0x04));
+                    break;
+                case BAROMETER:
+                    sensorField = (sensorField | (0x08));
+                    break;
+                case FSR:
+                    sensorField = (sensorField | (0x10));
+                    break;
+                case ECG:
+                    sensorField = (sensorField | (0x20));
+                    break;
+                case PPG:
+                    sensorField = (sensorField | (0x40));
                     break;
             }
         }
