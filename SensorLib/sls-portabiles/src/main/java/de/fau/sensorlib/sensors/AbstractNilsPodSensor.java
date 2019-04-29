@@ -148,14 +148,14 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         sAvailableSamplingRates.put("1024.0 Hz", 1024.0);
     }
 
-    protected static SparseArray<Double> mSamplingRateCommands = new SparseArray<>();
+    protected static SparseArray<Double> sSamplingRateCommands = new SparseArray<>();
 
     static {
-        mSamplingRateCommands.put(1, 1024.0);
-        mSamplingRateCommands.put(2, 512.0);
-        mSamplingRateCommands.put(4, 256.0);
-        mSamplingRateCommands.put(5, 204.8);
-        mSamplingRateCommands.put(10, 102.4);
+        sSamplingRateCommands.put(1, 1024.0);
+        sSamplingRateCommands.put(2, 512.0);
+        sSamplingRateCommands.put(4, 256.0);
+        sSamplingRateCommands.put(5, 204.8);
+        sSamplingRateCommands.put(10, 102.4);
     }
 
     protected static HashMap<Integer, String> sSyncDistanceCommands = new LinkedHashMap<>();
@@ -172,56 +172,56 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     }
 
 
-    protected static ConfigItem mSamplingRateConfig = new ConfigItem(
+    protected static ConfigItem sSamplingRateConfig = new ConfigItem(
             "Sampling Rate",
             new ArrayList<Object>(sAvailableSamplingRates.keySet()),
             ConfigItem.UiType.TYPE_DROPDOWN
     );
-    protected static ConfigItem mSensorConfig = new ConfigItem(
+    protected static ConfigItem sSensorConfig = new ConfigItem(
             "Sensors",
             new ArrayList<Object>(EnumSet.of(HardwareSensor.ACCELEROMETER, HardwareSensor.GYROSCOPE, HardwareSensor.BAROMETER)),
             ConfigItem.UiType.TYPE_MULTI_SELECT
     );
-    protected static ConfigItem mMotionInterruptConfig = new ConfigItem(
+    protected static ConfigItem sMotionInterruptConfig = new ConfigItem(
             "Motion Interrupt",
             new ArrayList<Object>(Arrays.asList(NilsPodMotionInterrupt.values())),
             ConfigItem.UiType.TYPE_SELECT
     );
-    protected static ConfigItem mSyncRoleConfig = new ConfigItem(
+    protected static ConfigItem sSyncRoleConfig = new ConfigItem(
             "Sync Role",
             new ArrayList<Object>(Arrays.asList(NilsPodSyncRole.values())),
             ConfigItem.UiType.TYPE_SELECT
     );
-    protected static ConfigItem mSyncGroupConfig = new ConfigItem(
+    protected static ConfigItem sSyncGroupConfig = new ConfigItem(
             "Sync Group",
             new ArrayList<Object>(Arrays.asList(NilsPodSyncGroup.values())),
             ConfigItem.UiType.TYPE_DROPDOWN
     );
-    protected static ConfigItem mSyncDistanceConfig = new ConfigItem(
+    protected static ConfigItem sSyncDistanceConfig = new ConfigItem(
             "Sync Distance",
             new ArrayList<Object>(sSyncDistanceCommands.values()),
             ConfigItem.UiType.TYPE_DROPDOWN
     );
-    protected static ConfigItem mOperationModeConfig = new ConfigItem(
+    protected static ConfigItem sOperationModeConfig = new ConfigItem(
             "Operation Mode",
             new ArrayList<Object>(Arrays.asList(NilsPodOperationMode.values())),
             ConfigItem.UiType.TYPE_SELECT
     );
-    protected static ConfigItem mSensorPositionConfig = new ConfigItem(
+    protected static ConfigItem sSensorPositionConfig = new ConfigItem(
             "SensorPosition",
             new ArrayList<Object>(Arrays.asList(NilsPodSensorPosition.values())),
             ConfigItem.UiType.TYPE_DROPDOWN
     );
 
     static {
-        mConfigMap.put(KEY_SAMPLING_RATE, mSamplingRateConfig);
-        mConfigMap.put(KEY_HARDWARE_SENSORS, mSensorConfig);
-        mConfigMap.put(KEY_MOTION_INTERRUPT, mMotionInterruptConfig);
-        mConfigMap.put(KEY_SENSOR_POSITION, mSensorPositionConfig);
-        mConfigMap.put(KEY_SYNC_ROLE, mSyncRoleConfig);
-        mConfigMap.put(KEY_SYNC_GROUP, mSyncGroupConfig);
-        mConfigMap.put(KEY_SYNC_DISTANCE, mSyncDistanceConfig);
-        mConfigMap.put(KEY_OPERATION_MODE, mOperationModeConfig);
+        mConfigMap.put(KEY_SAMPLING_RATE, sSamplingRateConfig);
+        mConfigMap.put(KEY_HARDWARE_SENSORS, sSensorConfig);
+        mConfigMap.put(KEY_MOTION_INTERRUPT, sMotionInterruptConfig);
+        mConfigMap.put(KEY_SENSOR_POSITION, sSensorPositionConfig);
+        mConfigMap.put(KEY_SYNC_ROLE, sSyncRoleConfig);
+        mConfigMap.put(KEY_SYNC_GROUP, sSyncGroupConfig);
+        mConfigMap.put(KEY_SYNC_DISTANCE, sSyncDistanceConfig);
+        mConfigMap.put(KEY_OPERATION_MODE, sOperationModeConfig);
     }
 
     protected HashMap<String, Object> mCurrentConfigMap = new LinkedHashMap<>();
@@ -825,7 +825,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     }
 
     public static double inferSamplingRate(int value) {
-        return mSamplingRateCommands.get(value, 0.0);
+        return sSamplingRateCommands.get(value, 0.0);
     }
 
     public static String getSamplingRateString(double samplingRate) {

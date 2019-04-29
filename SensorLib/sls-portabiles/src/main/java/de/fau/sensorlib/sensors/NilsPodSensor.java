@@ -373,9 +373,9 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
 
         int command = -1;
 
-        for (int i = 0; i < mSamplingRateCommands.size(); i++) {
-            if (mSamplingRateCommands.valueAt(i) == samplingRate) {
-                command = mSamplingRateCommands.keyAt(i);
+        for (int i = 0; i < sSamplingRateCommands.size(); i++) {
+            if (sSamplingRateCommands.valueAt(i) == samplingRate) {
+                command = sSamplingRateCommands.keyAt(i);
                 break;
             }
         }
