@@ -135,10 +135,11 @@ public enum KnownSensor {
                     HardwareSensor.GYROSCOPE
             ), true, "HoopSensor"),
 
-    NILSPOD("NilsPod", new String[]{"NilsPod-", "NilsPodX", "FreeRTOS", "Free"},
+    NILSPOD("NilsPod", new String[]{"NilsPod-", "NilsPodX"},
             EnumSet.of(
                     HardwareSensor.ACCELEROMETER,
                     HardwareSensor.GYROSCOPE,
+                    HardwareSensor.MAGNETOMETER,
                     HardwareSensor.BAROMETER
             ), true, "NilsPodSensor"),
 
@@ -146,6 +147,7 @@ public enum KnownSensor {
             EnumSet.of(
                     HardwareSensor.ACCELEROMETER,
                     HardwareSensor.GYROSCOPE,
+                    HardwareSensor.MAGNETOMETER,
                     HardwareSensor.BAROMETER,
                     HardwareSensor.FSR
             ), true, "InsoleSensor"),
@@ -154,6 +156,7 @@ public enum KnownSensor {
             EnumSet.of(
                     HardwareSensor.ACCELEROMETER,
                     HardwareSensor.GYROSCOPE,
+                    HardwareSensor.MAGNETOMETER,
                     HardwareSensor.BAROMETER,
                     HardwareSensor.PPG
             ), true, "NilsPodPpgSensor"),
@@ -162,6 +165,7 @@ public enum KnownSensor {
             EnumSet.of(
                     HardwareSensor.ACCELEROMETER,
                     HardwareSensor.GYROSCOPE,
+                    HardwareSensor.MAGNETOMETER,
                     HardwareSensor.BAROMETER,
                     HardwareSensor.ECG
             ), true, "NilsPodEcgSensor");
