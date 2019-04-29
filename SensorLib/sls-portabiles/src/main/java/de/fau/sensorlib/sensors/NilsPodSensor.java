@@ -166,7 +166,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             }
 
             // extract packet counter (16 bit)
-            localCounter = (values[i + mPacketSize - 1] & 0xFF) | ((values[i + mPacketSize - 2] & 0xFF) << 8);
+            localCounter = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, i + mPacketSize - 2);
 
             // check if packets have been lost
             if (((localCounter - lastCounter) % (2 << 15)) > 1) {
