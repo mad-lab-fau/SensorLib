@@ -15,17 +15,17 @@ import java.util.Arrays;
 
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorInfo;
-import de.fau.sensorlib.dataframe.AccelDataFrame;
 import de.fau.sensorlib.dataframe.EcgDataFrame;
 import de.fau.sensorlib.dataframe.LabelDataFrame;
-import de.fau.sensorlib.dataframe.SensorDataFrame;
+import de.fau.sensorlib.enums.HardwareSensor;
 
 
 /**
  * Represents a NilsPod Sensor device for ECG measurement.
  */
-public class NilsPodEcgSensor extends AbstractNilsPodSensor {
+public class NilsPodEcgSensor extends NilsPodSensor {
 
+    private static final String TAG = NilsPodEcgSensor.class.getSimpleName();
 
     public NilsPodEcgSensor(Context context, SensorInfo info, SensorDataProcessor dataHandler) {
         super(context, info, dataHandler);
@@ -40,7 +40,6 @@ public class NilsPodEcgSensor extends AbstractNilsPodSensor {
     @Override
     protected void extractSensorData(BluetoothGattCharacteristic characteristic) {
         byte[] values = characteristic.getValue();
-        //Log.d(TAG, "data: " + Arrays.toString(values) + ", LENGTH: " + values.length);
 
         // one data packet always has size mPacketSize
         if (values.length % mPacketSize != 0) {
@@ -48,60 +47,78 @@ public class NilsPodEcgSensor extends AbstractNilsPodSensor {
             return;
         }
 
-
         // iterate over data packets
         for (int i = 0; i < values.length; i += mPacketSize) {
             int offset = i;
+            double[] gyro = new double[3];
             double[] accel = new double[3];
-            double[] ecg = new double[2];
-            char label;
-            long localCounter;
+            double baro = 0;
+            int ecg = 0;
+            double rr;
+            int localCounter;
 
-            // extract ECG data
-            for (int j = 0; j < 2; j++) {
-                int tmp = ((values[offset] & 0xFF) | ((values[offset + 1] & 0xFF) << 8) | ((values[offset + 2] & 0xFF) << 16));
-                tmp = tmp << 8;
-                // shift to fill 32 bit integer with sign bit
-                ecg[j] = tmp >> 8;
-                offset += 3;
+            // extract gyroscope data
+            if (isSensorEnabled(HardwareSensor.GYROSCOPE)) {
+                for (int j = 0; j < 3; j++) {
+                    gyro[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
+                    offset += 2;
+                }
+            }
+            // extract accelerometer data
+            if (isSensorEnabled(HardwareSensor.ACCELEROMETER)) {
+                for (int j = 0; j < 3; j++) {
+                    accel[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
+                    offset += 2;
+                }
             }
 
-            label = (char) values[offset];
-            offset++;
 
-            // extract accelerometer data
-            for (int j = 0; j < 3; j++) {
-                accel[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
+            if (isSensorEnabled(HardwareSensor.BAROMETER)) {
+                baro = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
+                baro = (baro + 101325.0) / 100.0;
                 offset += 2;
             }
 
-            // extract packet counter
-            localCounter = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, offset);
-
-            // check if packets have been lost
-            if (((localCounter - lastCounter) % ((long) 2 << 31)) > 1) {
-                Log.w(TAG, this + ": BLE Packet Loss!");
+            if (isSensorEnabled(HardwareSensor.ECG)) {
+                ecg = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT32, offset);
+                offset += 4;
+                /*rr = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset) * 7.8125;
+                double hr = (60 / (rr / 1000));
+                Log.d(TAG, "rr: " + rr + ", hr: " + hr);
+                */
             }
 
-            NilsPodEcgDataFrame df = new NilsPodEcgDataFrame(this, localCounter, accel, ecg, label);
+            // extract packet counter (16 bit)
+            localCounter = (values[i + mPacketSize - 1] & 0xFF) | ((values[i + mPacketSize - 2] & 0xFF) << 8);
+
+            // check if packets have been lost
+            if (((localCounter - lastCounter) % (2 << 15)) > 1) {
+                Log.w(TAG, this + ": BLE Packet Loss!");
+            }
+            // increment global counter if local counter overflows
+            if (localCounter < lastCounter) {
+                globalCounter++;
+            }
+
+            NilsPodDataFrame df = new NilsPodEcgDataFrame(this, globalCounter * (2 << 15) + localCounter, accel, gyro, baro, ecg);
+
+            //Log.d(TAG, df.toString());
+
             // send new data to the SensorDataProcessor
-            Log.d(TAG, df.toString());
-            lastCounter = localCounter;
             sendNewData(df);
+            lastCounter = localCounter;
             if (mRecordingEnabled) {
                 mDataRecorder.writeData(df);
             }
         }
     }
 
-
     /**
      * Data frame to store data received from the NilsPod Sensor
      */
-    public static class NilsPodEcgDataFrame extends SensorDataFrame implements AccelDataFrame, EcgDataFrame, LabelDataFrame {
+    public static class NilsPodEcgDataFrame extends NilsPodDataFrame implements EcgDataFrame, LabelDataFrame {
 
-        private double[] accel;
-        private double[] ecg;
+        protected int ecg;
         private char label;
 
         /**
@@ -112,8 +129,9 @@ public class NilsPodEcgSensor extends AbstractNilsPodSensor {
          * @param accel     array storing acceleration values
          * @param ecg       array storing ECG values
          */
-        public NilsPodEcgDataFrame(GenericBleSensor sensor, long timestamp, double[] accel, double[] ecg) {
-            this(sensor, timestamp, accel, ecg, (char) 0);
+        public NilsPodEcgDataFrame(GenericBleSensor sensor, long timestamp, double[] accel, double[] gyro, double baro, int ecg) {
+            super(sensor, timestamp, accel, gyro, baro);
+            this.ecg = ecg;
         }
 
         /**
@@ -124,12 +142,8 @@ public class NilsPodEcgSensor extends AbstractNilsPodSensor {
          * @param accel     array storing acceleration values
          * @param ecg       array storing ECG values
          */
-        public NilsPodEcgDataFrame(GenericBleSensor sensor, long timestamp, double[] accel, double[] ecg, char label) {
-            super(sensor, timestamp);
-            if (accel.length != 3) {
-                throw new IllegalArgumentException("Illegal array size for acceleration values! ");
-            }
-            this.accel = accel;
+        public NilsPodEcgDataFrame(GenericBleSensor sensor, long timestamp, double[] accel, double[] gyro, double baro, int ecg, char label) {
+            super(sensor, timestamp, accel, gyro, baro);
             this.ecg = ecg;
             this.label = label;
         }
@@ -152,12 +166,7 @@ public class NilsPodEcgSensor extends AbstractNilsPodSensor {
         @Override
         public double getEcgSample() {
             // TODO dynamically change based on ECG sensor configuration
-            return ecg[1];
-        }
-
-        @Override
-        public double getSecondaryEcgSample() {
-            return ecg[1];
+            return ecg;
         }
 
         @Override
@@ -167,7 +176,7 @@ public class NilsPodEcgSensor extends AbstractNilsPodSensor {
 
         @Override
         public String toString() {
-            return "<" + originatingSensor.getDeviceName() + ">\tctr=" + ((long) getTimestamp()) + ", accel: " + Arrays.toString(accel) + ", ecg: " + Arrays.toString(ecg) + ", label: " + (int) label;
+            return "<" + originatingSensor.getDeviceName() + ">\tctr=" + ((long) getTimestamp()) + ", accel: " + Arrays.toString(accel) + ", ecg: " + ecg + ", label: " + (int) label;
         }
     }
 }

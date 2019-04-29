@@ -12,7 +12,7 @@ package de.fau.sensorlib.dataframe;
  */
 public interface EcgDataFrame {
 
-    String[] COLUMNS = new String[]{"ecg_1", "ecg_2"};
+    String[] COLUMNS = new String[]{"ecg"};
 
     /**
      * Returns the ECG sample from the first channel.
@@ -20,11 +20,4 @@ public interface EcgDataFrame {
      * @return ECG value from first channel
      */
     double getEcgSample();
-
-    /**
-     * Returns the ECG sample from the second channel.
-     *
-     * @return ECG value from second channel
-     */
-    double getSecondaryEcgSample();
 }
