@@ -9,7 +9,7 @@ package de.fau.sensorlib.sensors;
 
 import java.util.HashMap;
 
-import de.fau.sensorlib.sensors.configs.ConfigItem;
+import de.fau.sensorlib.widgets.config.ConfigItem;
 
 public interface Configurable {
 

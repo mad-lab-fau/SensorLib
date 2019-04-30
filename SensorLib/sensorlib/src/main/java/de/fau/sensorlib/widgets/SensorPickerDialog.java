@@ -14,6 +14,7 @@ import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,12 +27,6 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -42,6 +37,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.Adapter;
 import androidx.recyclerview.widget.RecyclerView.ViewHolder;
+
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+
 import de.fau.sensorlib.BleSensorManager;
 import de.fau.sensorlib.Constants;
 import de.fau.sensorlib.R;
@@ -72,6 +74,8 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
     private ArrayList<String> mLastConnectedSensors = new ArrayList<>();
     private ArrayList<Bundle> mFoundSensors = new ArrayList<>();
     private ArrayList<Bundle> mSelectedSensors = new ArrayList<>();
+
+    private DialogInterface.OnDismissListener mDialogDismissCallback;
 
     @Override
     public void onClick(View view) {
@@ -397,14 +401,19 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
     @Override
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);
-        Activity activity = getActivity();
-        if (activity instanceof DialogInterface.OnDismissListener) {
-            ((DialogInterface.OnDismissListener) activity).onDismiss(dialog);
+        if (mDialogDismissCallback != null) {
+            mDialogDismissCallback.onDismiss(dialog);
+        } else {
+            Log.e(TAG, "No OnDismissListener attached to " + getClass().getSimpleName() + "!");
         }
     }
 
     public void setSensorFoundCallback(SensorFoundCallback callback) {
         mSensorFoundCallback = callback;
+    }
+
+    public void setDialogDismissCallback(DialogInterface.OnDismissListener callback) {
+        mDialogDismissCallback = callback;
     }
 
     public void setHardwareSensorFilter(EnumSet<HardwareSensor> filter) {

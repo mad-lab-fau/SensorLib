@@ -27,9 +27,9 @@ import de.fau.sensorlib.dataframe.SensorDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
 import de.fau.sensorlib.enums.SensorMessage;
 import de.fau.sensorlib.enums.SensorState;
-import de.fau.sensorlib.sensors.configs.ConfigItem;
 import de.fau.sensorlib.sensors.enums.NilsPodSyncGroup;
 import de.fau.sensorlib.sensors.enums.NilsPodSyncRole;
+import de.fau.sensorlib.widgets.config.ConfigItem;
 
 public abstract class AbstractNilsPodSensor extends GenericBleSensor implements Recordable, Resettable {
 

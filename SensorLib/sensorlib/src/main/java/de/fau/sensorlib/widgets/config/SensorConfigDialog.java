@@ -6,7 +6,7 @@
  * this code you have to keep or cite this comment.
  */
 
-package de.fau.sensorlib.widgets;
+package de.fau.sensorlib.widgets.config;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -31,7 +31,6 @@ import java.util.Objects;
 
 import de.fau.sensorlib.Constants;
 import de.fau.sensorlib.R;
-import de.fau.sensorlib.sensors.configs.ConfigItem;
 
 public class SensorConfigDialog extends DialogFragment implements View.OnClickListener, SensorConfigBuilder.OnSensorConfigSelectedListener {
 
@@ -49,7 +48,7 @@ public class SensorConfigDialog extends DialogFragment implements View.OnClickLi
     private HashMap<String, ConfigItem> mConfigItems = new HashMap<>();
 
     private SensorConfigBuilder mSensorConfigBuilder;
-    private SensorConfigListener mSensorConfigListener;
+    private OnSensorConfigChangedListener mSensorConfigListener;
 
     @Nullable
     @Override
@@ -105,7 +104,7 @@ public class SensorConfigDialog extends DialogFragment implements View.OnClickLi
         mSensorConfigBuilder = builder;
     }
 
-    public void setSensorConfigListener(SensorConfigListener listener) {
+    public void setSensorConfigListener(OnSensorConfigChangedListener listener) {
         mSensorConfigListener = listener;
     }
 

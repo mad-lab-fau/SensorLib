@@ -9,6 +9,7 @@
 package de.fau.sensorlib.widgets;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -38,8 +39,10 @@ import de.fau.sensorlib.sensors.Configurable;
 import de.fau.sensorlib.sensors.Erasable;
 import de.fau.sensorlib.sensors.Loggable;
 import de.fau.sensorlib.sensors.Resettable;
+import de.fau.sensorlib.widgets.config.OnSensorConfigChangedListener;
+import de.fau.sensorlib.widgets.config.SensorConfigDialog;
 
-public class SensorActionDialog extends DialogFragment implements SensorConfigListener {
+public class SensorActionDialog extends DialogFragment implements OnSensorConfigChangedListener {
 
     private static final String TAG = SensorActionDialog.class.getSimpleName();
 
@@ -62,6 +65,9 @@ public class SensorActionDialog extends DialogFragment implements SensorConfigLi
     private Context mContext;
     private RecyclerView mRecyclerView;
     private AbstractSensor mSensor;
+
+    private DialogInterface.OnDismissListener mDialogDismissCallback;
+
 
     public static class SensorActionViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
@@ -265,6 +271,9 @@ public class SensorActionDialog extends DialogFragment implements SensorConfigLi
         view.findViewById(R.id.tv_sensor_action).setEnabled(false);
     }
 
+    public void setDialogDismissCallback(DialogInterface.OnDismissListener callback) {
+        mDialogDismissCallback = callback;
+    }
 
     @Override
     public void onSensorConfigSelected(HashMap<String, Object> configMap) {
@@ -303,6 +312,16 @@ public class SensorActionDialog extends DialogFragment implements SensorConfigLi
         if (activity != null) {
             FragmentManager fm = activity.getSupportFragmentManager();
             dialog.show(fm, "sensor_info");
+        }
+    }
+
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        super.onDismiss(dialog);
+        if (mDialogDismissCallback != null) {
+            mDialogDismissCallback.onDismiss(dialog);
+        } else {
+            Log.e(TAG, "No OnDismissListener attached to " + getClass().getSimpleName() + "!");
         }
     }
 }

@@ -6,7 +6,7 @@
  * this code you have to keep or cite this comment.
  */
 
-package de.fau.sensorlib.widgets;
+package de.fau.sensorlib.widgets.config;
 
 import android.content.Context;
 import android.view.View;
@@ -26,13 +26,12 @@ import java.util.HashMap;
 import java.util.List;
 
 import de.fau.sensorlib.R;
-import de.fau.sensorlib.sensors.configs.ConfigItem;
 
 public class SensorConfigBuilder {
 
     private static final String TAG = SensorConfigBuilder.class.getSimpleName();
 
-    public interface OnSensorConfigSelectedListener {
+    interface OnSensorConfigSelectedListener {
         void onConfigItemSelected(String key, Object item);
     }
 

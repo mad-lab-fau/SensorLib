@@ -6,7 +6,7 @@
  * this code you have to keep or cite this comment.
  */
 
-package de.fau.sensorlib.sensors.configs;
+package de.fau.sensorlib.widgets.config;
 
 import java.util.ArrayList;
 

@@ -9,6 +9,7 @@ package de.fau.sensorlib.widgets;
 
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.DialogInterface;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.AttributeSet;
@@ -17,14 +18,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.widget.TextViewCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.ArrayList;
+
 import de.fau.sensorlib.Constants;
 import de.fau.sensorlib.R;
 import de.fau.sensorlib.SensorEventGenerator;
@@ -32,6 +34,7 @@ import de.fau.sensorlib.SensorEventListener;
 import de.fau.sensorlib.enums.SensorMessage;
 import de.fau.sensorlib.enums.SensorState;
 import de.fau.sensorlib.sensors.AbstractSensor;
+import de.fau.sensorlib.widgets.config.OnSensorConfigChangedListener;
 
 /**
  * Provides a grid layout that displays sensor information. This Widget implements the
@@ -177,14 +180,20 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
             bundle.putSerializable(Constants.KEY_SENSOR, sensor);
 
             SensorActionDialog dialog = new SensorActionDialog();
+            dialog.setDialogDismissCallback(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dialog) {
+                    if (getActivity() instanceof OnSensorConfigChangedListener) {
+                        ((OnSensorConfigChangedListener) getActivity()).onSensorConfigSelected(null);
+                    }
+                }
+            });
             dialog.setArguments(bundle);
 
             AppCompatActivity activity = getActivity();
             if (activity != null) {
                 FragmentManager fm = activity.getSupportFragmentManager();
-                if (fm != null) {
-                    dialog.show(fm, "sensor_action");
-                }
+                dialog.show(fm, "sensor_action");
             }
         }
 

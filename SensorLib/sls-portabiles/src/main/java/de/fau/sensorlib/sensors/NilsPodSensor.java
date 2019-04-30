@@ -28,7 +28,6 @@ import de.fau.sensorlib.dataframe.BarometricPressureDataFrame;
 import de.fau.sensorlib.dataframe.MagnetometerDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
 import de.fau.sensorlib.enums.SensorState;
-import de.fau.sensorlib.sensors.configs.ConfigItem;
 import de.fau.sensorlib.sensors.enums.NilsPodSyncGroup;
 import de.fau.sensorlib.sensors.enums.NilsPodSyncRole;
 import de.fau.sensorlib.sensors.logging.NilsPodLoggable;
@@ -36,6 +35,7 @@ import de.fau.sensorlib.sensors.logging.NilsPodLoggingCallback;
 import de.fau.sensorlib.sensors.logging.Session;
 import de.fau.sensorlib.sensors.logging.SessionDownloader;
 import de.fau.sensorlib.sensors.logging.SessionHandler;
+import de.fau.sensorlib.widgets.config.ConfigItem;
 
 
 /**
