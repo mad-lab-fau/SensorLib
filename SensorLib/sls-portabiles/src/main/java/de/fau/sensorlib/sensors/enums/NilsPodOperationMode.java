@@ -7,6 +7,9 @@
  */
 package de.fau.sensorlib.sensors.enums;
 
+/**
+ * Enum indicating the operation mode of NilsPod.
+ */
 public enum NilsPodOperationMode {
     NORMAL_MODE,
     HOME_MONITORING_MODE,

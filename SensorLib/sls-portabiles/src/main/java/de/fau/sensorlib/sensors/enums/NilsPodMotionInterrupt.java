@@ -7,6 +7,9 @@
  */
 package de.fau.sensorlib.sensors.enums;
 
+/**
+ * Enum indicating whether motion interrupt is enabled on NilsPod or not.
+ */
 public enum NilsPodMotionInterrupt {
     MOTION_INTERRUPT_DISABLED,
     MOTION_INTERRUPT_ENABLED,
