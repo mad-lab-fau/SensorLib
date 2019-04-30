@@ -17,12 +17,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.apache.commons.lang3.text.WordUtils;
-
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Objects;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
@@ -30,6 +24,13 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import org.apache.commons.lang3.text.WordUtils;
+
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Objects;
+
 import de.fau.sensorlib.Constants;
 import de.fau.sensorlib.R;
 import de.fau.sensorlib.sensors.AbstractSensor;
@@ -278,6 +279,7 @@ public class SensorActionDialog extends DialogFragment implements SensorConfigLi
         Bundle bundle = new Bundle();
         bundle.putSerializable(Constants.KEY_SENSOR_CONFIG, ((Configurable) mSensor).getConfigMap());
         bundle.putSerializable(Constants.KEY_SENSOR_CONFIG_DEFAULT, ((Configurable) mSensor).getCurrentConfigMap());
+        bundle.putString(Constants.KEY_SENSOR_NAME, mSensor.getDeviceName());
 
         SensorConfigDialog dialog = new SensorConfigDialog();
         dialog.setSensorConfigListener(this);

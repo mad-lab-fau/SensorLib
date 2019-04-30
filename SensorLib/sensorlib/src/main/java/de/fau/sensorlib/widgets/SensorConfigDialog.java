@@ -18,16 +18,17 @@ import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Objects;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Objects;
+
 import de.fau.sensorlib.Constants;
 import de.fau.sensorlib.R;
 import de.fau.sensorlib.sensors.configs.ConfigItem;
@@ -59,6 +60,9 @@ public class SensorConfigDialog extends DialogFragment implements View.OnClickLi
         mConfigItems = (LinkedHashMap<String, ConfigItem>) getArguments().getSerializable(Constants.KEY_SENSOR_CONFIG);
         mDefaultConfigValues = (LinkedHashMap<String, Object>) getArguments().getSerializable(Constants.KEY_SENSOR_CONFIG_DEFAULT);
         mSelectedConfigValues = (HashMap<String, Object>) mDefaultConfigValues.clone();
+        String sensorName = getArguments().getString(Constants.KEY_SENSOR_NAME, "n/a");
+        TextView textView = rootView.findViewById(R.id.tv_header);
+        textView.setText(getString(R.string.sensor_config, sensorName));
 
         if (mSensorConfigBuilder == null) {
             mSensorConfigBuilder = new SensorConfigBuilder(mContext);

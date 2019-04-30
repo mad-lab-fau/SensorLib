@@ -32,4 +32,5 @@
     <string name="string_manufacturer">Manufacturer: &lt;b>%1$s&lt;/b></string>
     <string name="string_model_number">Model Number: &lt;b>%1$s&lt;/b></string>
     <string name="string_firmware_revision">Firmware Revision: &lt;b>%1$s&lt;/b></string>
+    <string name="sensor_config">Sensor Config: %1$s</string>
 </resources>

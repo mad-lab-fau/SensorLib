@@ -5,13 +5,13 @@
     android:layout_gravity="center_horizontal">
 
     <TextView
-        android:id="@+id/header"
+        android:id="@+id/tv_header"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_alignParentTop="true"
         android:layout_marginStart="8dp"
         android:gravity="center_vertical"
-        android:text="Sensor Config"
+        android:text="@string/sensor_config"
         android:textSize="20sp" />
 
     <androidx.recyclerview.widget.RecyclerView
@@ -19,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/footer"
-        android:layout_below="@id/header"
+        android:layout_below="@id/tv_header"
         android:layout_marginTop="8dp"
         android:orientation="vertical" />
 
