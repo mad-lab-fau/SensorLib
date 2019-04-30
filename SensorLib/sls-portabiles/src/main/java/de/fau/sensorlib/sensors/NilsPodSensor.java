@@ -19,10 +19,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import de.fau.sensorlib.HwSensorNotAvailableException;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorException;
 import de.fau.sensorlib.SensorInfo;
+import de.fau.sensorlib.dataframe.AnalogDataFrame;
 import de.fau.sensorlib.dataframe.BarometricPressureDataFrame;
+import de.fau.sensorlib.dataframe.MagnetometerDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
 import de.fau.sensorlib.enums.SensorState;
 import de.fau.sensorlib.sensors.configs.ConfigItem;
@@ -140,13 +143,16 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         // iterate over data packets
         for (int i = 0; i < values.length; i += mPacketSize) {
             int offset = i;
-            double[] gyro = new double[3];
-            double[] accel = new double[3];
-            double baro = 0;
+            double[] gyro = null;
+            double[] accel = null;
+            double[] mag = null;
+            double[] analog = null;
+            double baro = Double.MIN_VALUE;
             int localCounter;
 
             // extract gyroscope data
             if (isSensorEnabled(HardwareSensor.GYROSCOPE)) {
+                gyro = new double[3];
                 for (int j = 0; j < 3; j++) {
                     gyro[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
                     offset += 2;
@@ -154,8 +160,19 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             }
             // extract accelerometer data
             if (isSensorEnabled(HardwareSensor.ACCELEROMETER)) {
+                accel = new double[3];
                 for (int j = 0; j < 3; j++) {
                     accel[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
+                    offset += 2;
+                }
+            }
+
+            // extract magnetometer data
+            // TODO check!
+            if (isSensorEnabled(HardwareSensor.MAGNETOMETER)) {
+                mag = new double[3];
+                for (int j = 0; j < 3; j++) {
+                    mag[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
                     offset += 2;
                 }
             }
@@ -163,6 +180,14 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             if (isSensorEnabled(HardwareSensor.BAROMETER)) {
                 baro = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
                 baro = (baro + 101325.0) / 100.0;
+                offset += 2;
+            }
+
+            if (isSensorEnabled(HardwareSensor.ANALOG)) {
+                analog = new double[3];
+                for (int j = 0; j < 3; j++) {
+                    analog[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset++);
+                }
             }
 
             // extract packet counter (16 bit)
@@ -177,7 +202,16 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
                 globalCounter++;
             }
 
-            NilsPodDataFrame df = new NilsPodDataFrame(this, globalCounter * (2 << 15) + localCounter, accel, gyro, baro);
+
+            long timestamp = globalCounter * (2 << 15) + localCounter;
+            NilsPodDataFrame df;
+            if (isSensorEnabled(HardwareSensor.ANALOG)) {
+                df = new NilsPodAnalogDataFrame(this, timestamp, accel, gyro, baro, analog);
+            } else if (isSensorEnabled(HardwareSensor.MAGNETOMETER)) {
+                df = new NilsPodMagDataFrame(this, timestamp, accel, gyro, baro, mag);
+            } else {
+                df = new NilsPodDataFrame(this, timestamp, accel, gyro, baro);
+            }
 
             // send new data to the SensorDataProcessor
             sendNewData(df);
@@ -421,7 +455,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
                 case BAROMETER:
                     sensorField = (sensorField | (0x08));
                     break;
-                case FSR:
+                case ANALOG:
                     sensorField = (sensorField | (0x10));
                     break;
                 case ECG:
@@ -499,6 +533,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     public static class NilsPodDataFrame extends GenericNilsPodDataFrame implements BarometricPressureDataFrame {
 
         protected double baro;
+        protected boolean hasBaro;
 
         /**
          * Creates a new data frame for sensor data
@@ -509,9 +544,9 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
          * @param gyro      array storing gyroscope values
          */
         public NilsPodDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro) {
-            this(sensor, timestamp, accel, gyro, 0);
+            super(sensor, timestamp, accel, gyro);
+            hasBaro = false;
         }
-
 
         /**
          * Creates a new data frame for sensor data
@@ -522,18 +557,157 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
          * @param gyro      array storing gyroscope values
          */
         public NilsPodDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro, double baro) {
-            super(sensor, timestamp, accel, gyro);
-            this.baro = baro;
+            this(sensor, timestamp, accel, gyro);
+            if (baro != Double.MIN_VALUE) {
+                this.baro = baro;
+                hasBaro = true;
+            }
         }
 
         @Override
         public double getBarometricPressure() {
-            return baro;
+            if (hasBaro) {
+                return baro;
+            } else {
+                throw new HwSensorNotAvailableException(HardwareSensor.BAROMETER);
+            }
         }
 
         @Override
         public String toString() {
-            return super.toString() + ", baro: " + baro;
+            String str = super.toString();
+
+            if (hasBaro) {
+                str += ", baro: " + getBarometricPressure();
+            }
+            return str;
+        }
+    }
+
+
+    public static class NilsPodMagDataFrame extends NilsPodDataFrame implements MagnetometerDataFrame {
+
+        protected double[] mag;
+        protected boolean hasMag;
+
+
+        public NilsPodMagDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro, double baro, double[] mag) {
+            super(sensor, timestamp, accel, gyro, baro);
+
+            if (mag != null) {
+                this.mag = mag;
+                if (mag.length != 3) {
+                    throw new IllegalArgumentException("Illegal array size for magnetometer values!");
+                }
+                hasMag = true;
+            }
+        }
+
+        public NilsPodMagDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro, double[] mag) {
+            this(sensor, timestamp, accel, gyro, Double.MIN_VALUE, mag);
+        }
+
+        @Override
+        public double getMagX() {
+            if (hasMag) {
+                return mag[0];
+            } else {
+                throw new HwSensorNotAvailableException(HardwareSensor.MAGNETOMETER);
+            }
+        }
+
+        @Override
+        public double getMagY() {
+            if (hasMag) {
+                return mag[1];
+            } else {
+                throw new HwSensorNotAvailableException(HardwareSensor.MAGNETOMETER);
+            }
+        }
+
+        @Override
+        public double getMagZ() {
+            if (hasMag) {
+                return mag[2];
+            } else {
+                throw new HwSensorNotAvailableException(HardwareSensor.MAGNETOMETER);
+            }
+        }
+
+        @Override
+        public String toString() {
+            String str = super.toString();
+
+            if (hasMag) {
+                str += ", mag: " + Arrays.toString(mag);
+            }
+
+            return str;
+        }
+    }
+
+
+    public static class NilsPodAnalogDataFrame extends NilsPodMagDataFrame implements AnalogDataFrame {
+
+        protected double[] analog;
+        protected boolean hasAnalog;
+
+        public NilsPodAnalogDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro, double baro, double[] mag, double[] analog) {
+            super(sensor, timestamp, accel, gyro, baro, mag);
+
+            if (analog != null) {
+                this.analog = analog;
+                if (analog.length != 3) {
+                    throw new IllegalArgumentException("Illegal array size for analog channel values!");
+                }
+                hasAnalog = true;
+            }
+        }
+
+        public NilsPodAnalogDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro, double[] analog) {
+            this(sensor, timestamp, accel, gyro, Double.MIN_VALUE, null, analog);
+        }
+
+        public NilsPodAnalogDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro, double baro, double[] analog) {
+            this(sensor, timestamp, accel, gyro, baro, null, analog);
+        }
+
+        @Override
+        public double getFirstAnalogSample() {
+            if (hasAnalog) {
+                return analog[0];
+            } else {
+                throw new HwSensorNotAvailableException(HardwareSensor.ANALOG);
+            }
+        }
+
+        @Override
+        public double getSecondAnalogSample() {
+            if (hasAnalog) {
+                return analog[1];
+            } else {
+                throw new HwSensorNotAvailableException(HardwareSensor.ANALOG);
+            }
+        }
+
+        @Override
+        public double getThirdAnalogSample() {
+            if (hasAnalog) {
+                return analog[2];
+            } else {
+                throw new HwSensorNotAvailableException(HardwareSensor.ANALOG);
+            }
+        }
+
+        @Override
+        public String toString() {
+            String str = super.toString();
+
+            if (hasAnalog) {
+                str += ", analog: " + Arrays.toString(analog);
+            }
+
+            return str;
         }
     }
 }

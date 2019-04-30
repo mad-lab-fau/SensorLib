@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import de.fau.sensorlib.BleGattAttributes;
+import de.fau.sensorlib.HwSensorNotAvailableException;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorDataRecorder;
 import de.fau.sensorlib.SensorException;
@@ -909,6 +910,9 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         protected double[] accel;
         protected double[] gyro;
 
+        protected boolean hasAccel;
+        protected boolean hasGyro;
+
         /**
          * Creates a new data frame for sensor data
          *
@@ -919,46 +923,87 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
          */
         public GenericNilsPodDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro) {
             super(sensor, timestamp);
-            if (accel.length != 3 || gyro.length != 3) {
-                throw new IllegalArgumentException("Illegal array size for " + ((accel.length != 3) ? "acceleration" : "gyroscope") + " values! ");
+            if (accel != null) {
+                this.accel = accel;
+                if (accel.length != 3) {
+                    throw new IllegalArgumentException("Illegal array size for acceleration values!");
+                }
+                hasAccel = true;
             }
-            this.accel = accel;
-            this.gyro = gyro;
+            if (gyro != null) {
+                this.gyro = gyro;
+                if (gyro.length != 3) {
+                    throw new IllegalArgumentException("Illegal array size for gyroscope values!");
+                }
+                hasGyro = true;
+            }
+
         }
 
         @Override
         public double getGyroX() {
-            return gyro[0];
+            if (hasGyro) {
+                return gyro[0];
+            } else {
+                throw new HwSensorNotAvailableException(HardwareSensor.GYROSCOPE);
+            }
         }
 
         @Override
         public double getGyroY() {
-            return gyro[1];
+            if (hasGyro) {
+                return gyro[1];
+            } else {
+                throw new HwSensorNotAvailableException(HardwareSensor.GYROSCOPE);
+            }
         }
 
         @Override
         public double getGyroZ() {
-            return gyro[2];
+            if (hasGyro) {
+                return gyro[2];
+            } else {
+                throw new HwSensorNotAvailableException(HardwareSensor.GYROSCOPE);
+            }
         }
 
         @Override
         public double getAccelX() {
-            return accel[0];
+            if (hasAccel) {
+                return accel[0];
+            } else {
+                throw new HwSensorNotAvailableException(HardwareSensor.ACCELEROMETER);
+            }
         }
 
         @Override
         public double getAccelY() {
-            return accel[1];
+            if (hasAccel) {
+                return accel[1];
+            } else {
+                throw new HwSensorNotAvailableException(HardwareSensor.ACCELEROMETER);
+            }
         }
 
         @Override
         public double getAccelZ() {
-            return accel[2];
+            if (hasAccel) {
+                return accel[2];
+            } else {
+                throw new HwSensorNotAvailableException(HardwareSensor.ACCELEROMETER);
+            }
         }
 
         @Override
         public String toString() {
-            return "<" + originatingSensor.getDeviceName() + ">\tctr=" + ((long) getTimestamp()) + ", accel: " + Arrays.toString(accel) + ", gyro: " + Arrays.toString(gyro);
+            String str = "<" + originatingSensor.getDeviceName() + ">\tctr=" + ((long) getTimestamp()) + ", ";
+            if (hasAccel) {
+                str += "accel: " + Arrays.toString(accel);
+            }
+            if (hasGyro) {
+                str += "gyro: " + Arrays.toString(gyro);
+            }
+            return str;
         }
     }
 }
