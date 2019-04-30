@@ -11,11 +11,10 @@ package de.fau.sensorlib.sensors.logging;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import java.util.Date;
-import java.util.HashMap;
+import java.util.ArrayList;
 
 import de.fau.sensorlib.enums.HardwareSensor;
-import de.fau.sensorlib.sensors.enums.NilsPodSyncGroup;
+import de.fau.sensorlib.sensors.enums.NilsPodSensorPosition;
 import de.fau.sensorlib.sensors.enums.NilsPodSyncRole;
 import de.fau.sensorlib.sensors.enums.NilsPodTerminationSource;
 
@@ -23,151 +22,214 @@ public class SessionHeader {
 
     private static final String TAG = SessionHeader.class.getSimpleName();
 
-    private String sensorName = "n/a";
-    private String firmwareVersion = "0.0.0";
-    private String modelNumber = "n/a";
-    private int sampleSize;
-    private double samplingRate;
-    private HashMap<HardwareSensor, Boolean> enabledSensors = new HashMap<>();
-    private NilsPodTerminationSource terminationSource =
-            NilsPodTerminationSource.BLE;
-    private NilsPodSyncRole syncRole = NilsPodSyncRole.SYNC_ROLE_SLAVE;
-    private int syncDistance;
-    private NilsPodSyncGroup syncGroup = NilsPodSyncGroup.SYNC_GROUP_0;
-    private int accRange;
-    private int gyroRange;
-    private int sensorPosition;
-    private int specialFunction;
-    private String startDate = new Date(0).toString();
-    private String endDate = new Date(0).toString();
-    private int sessionSize;
+    private ArrayList<HardwareSensor> enabled_sensors = new ArrayList<>();
+
+    private boolean motion_interrupt_enabled;
+    private boolean dock_mode_enabled;
+    private NilsPodSensorPosition sensor_position;
+    private NilsPodTerminationSource session_termination = NilsPodTerminationSource.BLE;
+    private int sample_size;
+
+    private double sampling_rate_hz;
+    private int acc_range_g;
+    private int gyro_range_dps;
+
+    private NilsPodSyncRole sync_role = NilsPodSyncRole.SYNC_ROLE_SLAVE;
+    private int sync_distance_ms;
+    private int sync_group;
+    private String sync_address = "n/a";
+    private int sync_channel;
+    private int sync_index_start;
+    private int sync_index_end;
+
+    private String version_firmware = "n/a";
+    private String version_hardware = "n/a";
+    private String mac_address = "n/a";
+
+    private int utc_start;
+    private int utc_stop;
+
+    private byte[] custom_meta_data;
+
+    private int num_samples;
+
 
     public int getSampleSize() {
-        return sampleSize;
+        return sample_size;
     }
 
     public void setSampleSize(int sampleSize) {
-        this.sampleSize = sampleSize;
+        this.sample_size = sampleSize;
     }
 
-    public HashMap<HardwareSensor, Boolean> getEnabledSensors() {
-        return enabledSensors;
+    public ArrayList<HardwareSensor> getEnabledSensors() {
+        return enabled_sensors;
     }
 
-    public void setEnabledSensors(HashMap<HardwareSensor, Boolean> enabledSensors) {
-        this.enabledSensors = enabledSensors;
+    public void setEnabledSensors(ArrayList<HardwareSensor> enabledSensors) {
+        this.enabled_sensors = enabledSensors;
     }
 
     public double getSamplingRate() {
-        return samplingRate;
+        return sampling_rate_hz;
     }
 
     public void setSamplingRate(double samplingRate) {
-        this.samplingRate = samplingRate;
+        this.sampling_rate_hz = samplingRate;
     }
 
     public NilsPodTerminationSource getTerminationSource() {
-        return terminationSource;
+        return session_termination;
     }
 
     public void setTerminationSource(NilsPodTerminationSource terminationSource) {
-        this.terminationSource = terminationSource;
+        this.session_termination = terminationSource;
     }
 
     public NilsPodSyncRole getSyncRole() {
-        return syncRole;
+        return sync_role;
     }
 
     public void setSyncRole(NilsPodSyncRole syncRole) {
-        this.syncRole = syncRole;
+        this.sync_role = syncRole;
     }
 
     public int getSyncDistance() {
-        return syncDistance;
+        return sync_distance_ms;
     }
 
     public void setSyncDistance(int syncDistance) {
-        this.syncDistance = syncDistance;
+        this.sync_distance_ms = syncDistance;
     }
 
-    public NilsPodSyncGroup getRfGroup() {
-        return syncGroup;
+    public int getRfGroup() {
+        return sync_group;
     }
 
-    public void setSyncGroup(NilsPodSyncGroup syncGroup) {
-        this.syncGroup = syncGroup;
+    public void setSyncGroup(int syncGroup) {
+        this.sync_group = syncGroup;
+    }
+
+    public void setSyncIndex(int syncIndexStart, int syncIndexEnd) {
+        this.sync_index_start = syncIndexStart;
+        this.sync_index_end = syncIndexEnd;
+    }
+
+    public int getSyncIndexStart() {
+        return sync_index_start;
+    }
+
+    public int getSyncIndexEnd() {
+        return sync_index_end;
+    }
+
+    public void setSyncAddress(String syncAddress, int syncChannel) {
+        this.sync_address = syncAddress;
+        this.sync_channel = syncChannel;
+    }
+
+    public String getSyncAddress() {
+        return sync_address;
+    }
+
+    public int getSyncChannel() {
+        return sync_channel;
+    }
+
+    public void setCustomMetaData(byte[] customMetaData) {
+        this.custom_meta_data = customMetaData;
+    }
+
+    public byte[] getCustomMetaData() {
+        return custom_meta_data;
     }
 
     public int getAccRange() {
-        return accRange;
+        return acc_range_g;
     }
 
     public void setAccRange(int accRange) {
-        this.accRange = accRange;
+        this.acc_range_g = accRange;
     }
 
     public int getGyroRange() {
-        return gyroRange;
+        return gyro_range_dps;
     }
 
     public void setGyroRange(int gyroRange) {
-        this.gyroRange = gyroRange;
+        this.gyro_range_dps = gyroRange;
     }
 
-    public int getSensorPosition() {
-        return sensorPosition;
+    public NilsPodSensorPosition getSensorPosition() {
+        return sensor_position;
     }
 
-    public void setSensorPosition(int sensorPosition) {
-        this.sensorPosition = sensorPosition;
+    public void setSensorPosition(NilsPodSensorPosition sensorPosition) {
+        this.sensor_position = sensorPosition;
     }
 
-    public int getSpecialFunction() {
-        return specialFunction;
+    public boolean getDockModeEnabled() {
+        return dock_mode_enabled;
     }
 
-    public void setSpecialFunction(int specialFunction) {
-        this.specialFunction = specialFunction;
+    public void setDockModeEnabled(boolean enabled) {
+        this.dock_mode_enabled = enabled;
     }
 
-    public String getStartDate() {
-        return startDate;
+    public void setMotionInterruptEnabled(boolean enabled) {
+        this.motion_interrupt_enabled = enabled;
     }
 
-    public void setStartDate(String startDate) {
-        this.startDate = startDate;
+    public boolean wasMotionInterruptEnabled() {
+        return motion_interrupt_enabled;
     }
 
-    public String getEndDate() {
-        return endDate;
+    public int getStartDate() {
+        return utc_start;
     }
 
-    public void setEndDate(String endDate) {
-        this.endDate = endDate;
+    public void setStartTime(int startDate) {
+        this.utc_start = startDate;
+    }
+
+    public int getEndDate() {
+        return utc_stop;
+    }
+
+    public void setEndTime(int endDate) {
+        this.utc_stop = endDate;
     }
 
     public int getSessionSize() {
-        return sessionSize;
+        return num_samples;
     }
 
     public void setSessionSize(int sessionSize) {
-        this.sessionSize = sessionSize;
-    }
-
-    public String getSensorName() {
-        return sensorName;
-    }
-
-    public void setSensorName(String sensorName) {
-        this.sensorName = sensorName;
+        this.num_samples = sessionSize;
     }
 
     public String getFirmwareVersion() {
-        return firmwareVersion;
+        return version_firmware;
     }
 
     public void setFirmwareVersion(String firmwareVersion) {
-        this.firmwareVersion = firmwareVersion;
+        this.version_firmware = firmwareVersion;
+    }
+
+    public void setHardwareVersion(String hardwareVersion) {
+        this.version_hardware = hardwareVersion;
+    }
+
+    public String getHardwareVersion() {
+        return version_hardware;
+    }
+
+    public void setMacAddress(String macAddress) {
+        this.mac_address = macAddress;
+    }
+
+    public String getMacAddress() {
+        return mac_address;
     }
 
     public String toJson() {
@@ -178,13 +240,5 @@ public class SessionHeader {
     @Override
     public String toString() {
         return new GsonBuilder().setPrettyPrinting().create().toJson(this);
-    }
-
-    public String getModelNumber() {
-        return modelNumber;
-    }
-
-    public void setModelNumber(String modelNumber) {
-        this.modelNumber = modelNumber;
     }
 }

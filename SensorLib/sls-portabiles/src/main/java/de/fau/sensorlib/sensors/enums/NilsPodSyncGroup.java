@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2019 Machine Learning and Data Analytics Lab, Friedrich-Alexander-Universität Erlangen-Nürnberg (FAU).
+ * <p>
+ * This file is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. If you reuse
+ * this code you have to keep or cite this comment.
+ */
+
 package de.fau.sensorlib.sensors.enums;
 
 import java.util.Arrays;
@@ -12,7 +20,8 @@ public enum NilsPodSyncGroup {
     SYNC_GROUP_6(6, 37, new byte[]{(byte) 0x72, (byte) 0xB4, (byte) 0x5A, (byte) 0xCC, (byte) 0x62}),
     SYNC_GROUP_7(7, 39, new byte[]{(byte) 0xFE, (byte) 0x47, (byte) 0xA2, (byte) 0xD4, (byte) 0x1C}),
     SYNC_GROUP_8(8, 41, new byte[]{(byte) 0x3D, (byte) 0xFC, (byte) 0xD0, (byte) 0x3C, (byte) 0xE7}),
-    SYNC_GROUP_9(9, 43, new byte[]{(byte) 0x7C, (byte) 0x6F, (byte) 0xE0, (byte) 0x2B, (byte) 0x9F});
+    SYNC_GROUP_9(9, 43, new byte[]{(byte) 0x7C, (byte) 0x6F, (byte) 0xE0, (byte) 0x2B, (byte) 0x9F}),
+    SYNC_GROUP_UNKNOWN(-1, -1, new byte[]{0x00, 0x00, 0x00, 0x00});
 
     private int syncGroup;
     private int rfChannel;
@@ -22,6 +31,14 @@ public enum NilsPodSyncGroup {
         this.syncGroup = syncGroup;
         this.rfChannel = rfChannel;
         this.rfAddress = rfAddress;
+    }
+
+    public static NilsPodSyncGroup inferSyncGroup(int syncGroup) {
+        if (syncGroup < values().length - 1) {
+            return values()[syncGroup];
+        } else {
+            return SYNC_GROUP_UNKNOWN;
+        }
     }
 
 

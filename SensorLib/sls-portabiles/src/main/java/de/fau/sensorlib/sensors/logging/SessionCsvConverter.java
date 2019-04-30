@@ -13,17 +13,14 @@ import android.util.Log;
 
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
-import java.util.Date;
-import java.util.HashMap;
+import java.util.ArrayList;
 
 import de.fau.sensorlib.SensorDataRecorder;
 import de.fau.sensorlib.SensorException;
-import de.fau.sensorlib.dataframe.SensorDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
 import de.fau.sensorlib.sensors.AbstractSensor;
-import de.fau.sensorlib.sensors.InsoleSensor;
 import de.fau.sensorlib.sensors.NilsPodSensor;
-import de.fau.sensorlib.sensors.enums.NilsPodSyncGroup;
+import de.fau.sensorlib.sensors.enums.NilsPodSensorPosition;
 import de.fau.sensorlib.sensors.enums.NilsPodSyncRole;
 import de.fau.sensorlib.sensors.enums.NilsPodTerminationSource;
 
@@ -60,6 +57,7 @@ public class SessionCsvConverter {
                 extractHeader(header);
             } catch (SensorException e) {
                 e.printStackTrace();
+                return;
             }
             onNewData(data);
         } else {
@@ -73,66 +71,152 @@ public class SessionCsvConverter {
 
         mHeader = new SessionHeader();
 
-        int offset = 1;
-        int sampleSize = values[offset++];
+        try {
+            int offset = 1;
+            // Byte 1
+            int sampleSize = values[offset++];
 
-        mByteBuffer = ByteBuffer.allocate(sampleSize * 1000);
+            mByteBuffer = ByteBuffer.allocate(sampleSize * 1000);
 
-        int sensors = values[offset++];
-        HashMap<HardwareSensor, Boolean> enabledSensorsMap = new HashMap<>();
-        enabledSensorsMap.put(HardwareSensor.ACCELEROMETER, ((sensors & 0x01) != 0));
-        enabledSensorsMap.put(HardwareSensor.GYROSCOPE, ((sensors & 0x01) != 0));
-        enabledSensorsMap.put(HardwareSensor.ANALOG, ((sensors & 0x02) != 0));
-        enabledSensorsMap.put(HardwareSensor.BAROMETER, ((sensors & 0x04) != 0));
+            // Byte 2
+            ArrayList<HardwareSensor> enabledSensorList = new ArrayList<>();
+            int sensors = values[offset++];
+            if ((sensors & 0x01) != 0) {
+                enabledSensorList.add(HardwareSensor.ACCELEROMETER);
+            }
+            if ((sensors & 0x02) != 0) {
+                enabledSensorList.add(HardwareSensor.GYROSCOPE);
+            }
+            if ((sensors & 0x04) != 0) {
+                enabledSensorList.add(HardwareSensor.MAGNETOMETER);
+            }
+            if ((sensors & 0x08) != 0) {
+                enabledSensorList.add(HardwareSensor.BAROMETER);
+            }
+            if ((sensors & 0x10) != 0) {
+                enabledSensorList.add(HardwareSensor.ANALOG);
+            }
+            if ((sensors & 0x20) != 0) {
+                enabledSensorList.add(HardwareSensor.ECG);
+            }
+            if ((sensors & 0x40) != 0) {
+                enabledSensorList.add(HardwareSensor.PPG);
+            }
+
+            // Byte 3
+            double samplingRate = NilsPodSensor.inferSamplingRate(values[offset++]);
+
+            // Byte 4
+            NilsPodTerminationSource terminationSource = NilsPodTerminationSource.inferTerminationSource(values[offset++]);
+
+            // Byte 5
+            NilsPodSyncRole syncRole = NilsPodSyncRole.values()[values[offset++]];
+
+            // Byte 6
+            int syncDistance = values[offset++] * 100; // in ms
+
+            // Byte 7
+            int syncGroup = values[offset++];
+
+            // Byte 8
+            int accRange = values[offset++]; // in g
+
+            // Byte 9
+            int gyroRange = values[offset++] * 125; // in dps
 
 
-        double samplingRate = NilsPodSensor.inferSamplingRate(values[offset] & 0x0F);
-        NilsPodTerminationSource terminationSource = NilsPodTerminationSource.inferTerminationSource(values[offset++] & 0xF0);
+            // Bytes 10-14: System Settings
+            // Byte 10: Sensor Position
+            NilsPodSensorPosition sensorPosition = NilsPodSensorPosition.values()[values[offset++]];
 
-        NilsPodSyncRole syncRole = NilsPodSyncRole.values()[values[offset++]];
-        int syncDistance = values[offset++] * 100;
-        NilsPodSyncGroup syncGroup = NilsPodSyncGroup.values()[values[offset++]];
+            // Byte 11: Operation Modes (Motion Interrupt, Home Monitoring, etc.)
+            boolean dockMode = (values[offset] & 0x40) != 0;
+            boolean motionInterrupt = (values[offset++] & 0x80) != 0;
 
-        int accRange = values[offset++];
-        int gyroRange = values[offset++];
+            // Bytes 12-14: Custom Meta Data
+            byte[] customMetaData = new byte[3];
+            System.arraycopy(values, offset, customMetaData, 0, 3);
+            offset += 3;
 
-        // metadata
-        int sensorPosition = values[offset++];
-        int specialFunction = values[offset++];
-        offset += 3;
+            // Bytes 15-18
+            int startTime = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, offset);
+            offset += 4;
 
+            // Bytes 19-22
+            int endTime = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, offset);
+            offset += 4;
 
-        int tmpTime = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, offset);
-        Date startTime = new Date(((long) tmpTime) * 1000);
-        offset += 4;
+            // Bytes 23-26: Session Size (number of samples)
+            int sessionSize = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, offset);
+            offset += 4;
 
-        tmpTime = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, offset);
-        // little endian
-        Date endTime = new Date(((long) tmpTime) * 1000);
-        offset += 4;
+            // Bytes 27-30
+            int syncIndexStart = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, offset);
+            offset += 4;
+            // Bytes 31-34
+            int syncIndexEnd = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, offset);
+            offset += 4;
 
-        int sessionSize = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, offset);
-        offset += 4;
-        String firmwareVersion = values[offset++] + "." + values[offset++] + "." + values[offset];
+            // Bytes 35-40: 6 Byte MAC Address
+            StringBuilder sb = new StringBuilder();
+            for (int i = 5; i >= 0; i--) {
+                byte val = values[offset + i];
+                sb.append(String.format("%02x", val).toUpperCase());
+                if (i != 0) {
+                    sb.append(":");
+                }
+            }
+            String macAddress = sb.toString();
+            offset += 6;
 
-        mHeader.setSensorName(mSensor.getDeviceName());
-        mHeader.setFirmwareVersion(mSensor.getFirmwareRevision());
-        mHeader.setModelNumber(mSensor.getModelNumber());
-        mHeader.setSampleSize(sampleSize);
-        mHeader.setSamplingRate(samplingRate);
-        mHeader.setEnabledSensors(enabledSensorsMap);
-        mHeader.setTerminationSource(terminationSource);
-        mHeader.setSyncRole(syncRole);
-        mHeader.setSyncDistance(syncDistance);
-        mHeader.setSyncGroup(syncGroup);
-        mHeader.setAccRange(accRange);
-        mHeader.setGyroRange(gyroRange);
-        mHeader.setSensorPosition(sensorPosition);
-        mHeader.setSpecialFunction(specialFunction);
-        mHeader.setStartDate(startTime.toString());
-        mHeader.setEndDate(endTime.toString());
-        mHeader.setSessionSize(sessionSize);
-        mHeader.setFirmwareVersion(firmwareVersion);
+            // Bytes 41-45: 5 Byte RF Address used for synchronization packages
+            sb = new StringBuilder();
+            for (int i = 4; i >= 0; i--) {
+                byte val = values[offset + i];
+                sb.append("0x").append(String.format("%02x", val).toUpperCase());
+                if (i != 0) {
+                    sb.append(" ");
+                }
+            }
+            String rfSyncAddress = sb.toString();
+            offset += 5;
+
+            // Byte 46
+            int rfSyncChannel = values[offset++];
+
+            // Bytes 47-48
+            String hardwareVersion = Integer.toString(characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset));
+            offset += 2;
+
+            // Bytes 49-51
+            String firmwareVersion = "v" + values[offset++] + "." + values[offset++] + "." + values[offset];
+
+            mHeader.setSampleSize(sampleSize);
+            mHeader.setSamplingRate(samplingRate);
+            mHeader.setEnabledSensors(enabledSensorList);
+            mHeader.setTerminationSource(terminationSource);
+            mHeader.setSyncRole(syncRole);
+            mHeader.setSyncDistance(syncDistance);
+            mHeader.setSyncGroup(syncGroup);
+            mHeader.setSyncIndex(syncIndexStart, syncIndexEnd);
+            mHeader.setSyncAddress(rfSyncAddress, rfSyncChannel);
+            mHeader.setAccRange(accRange);
+            mHeader.setGyroRange(gyroRange);
+            mHeader.setSensorPosition(sensorPosition);
+            mHeader.setDockModeEnabled(dockMode);
+            mHeader.setMotionInterruptEnabled(motionInterrupt);
+            mHeader.setCustomMetaData(customMetaData);
+            mHeader.setStartTime(startTime);
+            mHeader.setEndTime(endTime);
+            mHeader.setSessionSize(sessionSize);
+            mHeader.setHardwareVersion(hardwareVersion);
+            mHeader.setMacAddress(macAddress);
+            mHeader.setFirmwareVersion(firmwareVersion);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new SensorException(SensorException.SensorExceptionType.readHeaderError);
+        }
 
         Log.d(TAG, mHeader.toString());
 
@@ -161,19 +245,20 @@ public class SessionCsvConverter {
         mByteBuffer.compact();
     }
 
-
-    private void extractDataFrame(byte[] values) {
+    protected void extractDataFrame(byte[] values) {
         BluetoothGattCharacteristic characteristic = new BluetoothGattCharacteristic(null, 0, 0);
         characteristic.setValue(values);
         int offset = 0;
-        double[] gyro = new double[3];
-        double[] accel = new double[3];
-        double baro = 0;
-        double[] pressure = new double[3];
-        long timestamp;
 
+        double[] gyro = null;
+        double[] accel = null;
+        double[] mag = null;
+        double[] analog = null;
+        double baro = Double.MIN_VALUE;
+
+        // extract gyroscope data
         if (isSensorEnabled(HardwareSensor.GYROSCOPE)) {
-            // extract gyroscope data
+            gyro = new double[3];
             for (int j = 0; j < 3; j++) {
                 gyro[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
                 offset += 2;
@@ -181,8 +266,19 @@ public class SessionCsvConverter {
         }
         // extract accelerometer data
         if (isSensorEnabled(HardwareSensor.ACCELEROMETER)) {
+            accel = new double[3];
             for (int j = 0; j < 3; j++) {
                 accel[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
+                offset += 2;
+            }
+        }
+
+        // extract magnetometer data
+        // TODO check!
+        if (isSensorEnabled(HardwareSensor.MAGNETOMETER)) {
+            mag = new double[3];
+            for (int j = 0; j < 3; j++) {
+                mag[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
                 offset += 2;
             }
         }
@@ -194,27 +290,30 @@ public class SessionCsvConverter {
         }
 
         if (isSensorEnabled(HardwareSensor.ANALOG)) {
+            analog = new double[3];
             for (int j = 0; j < 3; j++) {
-                pressure[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset);
-                offset++;
+                analog[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset++);
             }
         }
 
-        timestamp = ((values[offset++] & 0xFF) << 24) | ((values[offset++] & 0xFF) << 16) | ((values[offset++] & 0xFF) << 8) | values[offset] & 0xFF;
+        long timestamp = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, mHeader.getSampleSize() - 4);
 
-        SensorDataFrame df;
-        if (mSensor instanceof InsoleSensor) {
-            df = new InsoleSensor.InsoleDataFrame(mSensor, timestamp, accel, gyro, baro, pressure);
+        NilsPodSensor.NilsPodDataFrame df;
+        if (isSensorEnabled(HardwareSensor.ANALOG)) {
+            df = new NilsPodSensor.NilsPodAnalogDataFrame(mSensor, timestamp, accel, gyro, baro, analog);
+        } else if (isSensorEnabled(HardwareSensor.MAGNETOMETER)) {
+            df = new NilsPodSensor.NilsPodMagDataFrame(mSensor, timestamp, accel, gyro, baro, mag);
         } else {
             df = new NilsPodSensor.NilsPodDataFrame(mSensor, timestamp, accel, gyro, baro);
         }
 
         Log.d(TAG, df.toString());
         mRecorder.writeData(df);
+
     }
 
     public boolean isSensorEnabled(HardwareSensor sensor) {
-        return (mHeader.getEnabledSensors().get(sensor) != null) && mHeader.getEnabledSensors().get(sensor);
+        return mHeader.getEnabledSensors().contains(sensor);
     }
 
     public void completeBuilder() {

@@ -5,10 +5,11 @@ public enum NilsPodTerminationSource {
     NO_MEMORY,
     BLE,
     DOCK,
-    LOW_VOLTAGE;
+    LOW_VOLTAGE,
+    UNKNOWN;
 
-    public static NilsPodTerminationSource inferTerminationSource(int termState) {
-        switch (termState) {
+    public static NilsPodTerminationSource inferTerminationSource(int termSource) {
+        switch (termSource) {
             case 0x10:
                 return NO_MEMORY;
             case 0x20:
@@ -18,7 +19,7 @@ public enum NilsPodTerminationSource {
             case 0x80:
                 return LOW_VOLTAGE;
             default:
-                return null;
+                return UNKNOWN;
         }
     }
 }

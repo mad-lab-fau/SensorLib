@@ -1,3 +1,11 @@
+/*
+ * Copyright (C) 2019 Machine Learning and Data Analytics Lab, Friedrich-Alexander-Universität Erlangen-Nürnberg (FAU).
+ * <p>
+ * This file is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. If you reuse
+ * this code you have to keep or cite this comment.
+ */
+
 package de.fau.sensorlib.sensors;
 
 import android.bluetooth.BluetoothGattCharacteristic;
@@ -27,6 +35,9 @@ import de.fau.sensorlib.dataframe.SensorDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
 import de.fau.sensorlib.enums.SensorMessage;
 import de.fau.sensorlib.enums.SensorState;
+import de.fau.sensorlib.sensors.enums.NilsPodMotionInterrupt;
+import de.fau.sensorlib.sensors.enums.NilsPodOperationMode;
+import de.fau.sensorlib.sensors.enums.NilsPodSensorPosition;
 import de.fau.sensorlib.sensors.enums.NilsPodSyncGroup;
 import de.fau.sensorlib.sensors.enums.NilsPodSyncRole;
 import de.fau.sensorlib.widgets.config.ConfigItem;
@@ -347,19 +358,6 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
 
     /**
-     * Enum describing the sensor position
-     */
-    protected enum NilsPodSensorPosition {
-        NO_POSITION_DEFINED,
-        LEFT_FOOT,
-        RIGHT_FOOT,
-        HIP,
-        LEFT_WRIST,
-        RIGHT_WRIST,
-        CHEST;
-    }
-
-    /**
      * Enum describing the sensor error codes read in the NILS_POD_SYSTEM_STATE characteristic.
      */
     protected enum NilsPodSensorError {
@@ -377,16 +375,6 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         public int getErrorCode() {
             return errorCode;
         }
-    }
-
-    protected enum NilsPodMotionInterrupt {
-        MOTION_INTERRUPT_DISABLED,
-        MOTION_INTERRUPT_ENABLED,
-    }
-
-    protected enum NilsPodOperationMode {
-        NORMAL_MODE,
-        HOME_MONITORING_MODE,
     }
 
     // Add custom NilsPod UUIDs to known UUID pool

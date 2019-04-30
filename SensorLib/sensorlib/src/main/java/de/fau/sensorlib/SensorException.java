@@ -18,6 +18,7 @@ public class SensorException extends Exception {
     public enum SensorExceptionType {
         readStateError("Error reading sensor state."),
         readConfigError("Error reading sensor config."),
+        readHeaderError("Error reading session header."),
         hardwareSensorError("Error during hardware sensor initialization."),
         permissionsMissing("The app does not have sufficient Android permissions to list available BLE devices."),
         bleScannerError("BLE scanner unavailable."),

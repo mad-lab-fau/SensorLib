@@ -28,6 +28,9 @@ import de.fau.sensorlib.dataframe.BarometricPressureDataFrame;
 import de.fau.sensorlib.dataframe.MagnetometerDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
 import de.fau.sensorlib.enums.SensorState;
+import de.fau.sensorlib.sensors.enums.NilsPodMotionInterrupt;
+import de.fau.sensorlib.sensors.enums.NilsPodOperationMode;
+import de.fau.sensorlib.sensors.enums.NilsPodSensorPosition;
 import de.fau.sensorlib.sensors.enums.NilsPodSyncGroup;
 import de.fau.sensorlib.sensors.enums.NilsPodSyncRole;
 import de.fau.sensorlib.sensors.logging.NilsPodLoggable;
@@ -311,7 +314,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     @Override
     public void downloadSession(Session session) throws SensorException {
         mSessionDownloader = new SessionDownloader(this, session);
-        mSessionDownloader.setCsvExportEnabled(false);
+        mSessionDownloader.setCsvExportEnabled(true);
         int sessionId = session.getSessionNumber();
         byte[] cmd = NilsPodSensorCommand.FLASH_TRANSMIT_SESSION.getByteCmd();
         cmd[1] = (byte) sessionId;

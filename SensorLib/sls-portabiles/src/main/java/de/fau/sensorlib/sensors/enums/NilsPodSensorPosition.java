@@ -5,13 +5,18 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. If you reuse
  * this code you have to keep or cite this comment.
  */
+
 package de.fau.sensorlib.sensors.enums;
 
 /**
- * Enum describing the synchronization role of the NilsPod sensor
+ * Enum describing the sensor position
  */
-public enum NilsPodSyncRole {
-    SYNC_ROLE_DISABLED,
-    SYNC_ROLE_SLAVE,
-    SYNC_ROLE_MASTER;
+public enum NilsPodSensorPosition {
+    NO_POSITION_DEFINED,
+    LEFT_FOOT,
+    RIGHT_FOOT,
+    HIP,
+    LEFT_WRIST,
+    RIGHT_WRIST,
+    CHEST;
 }
