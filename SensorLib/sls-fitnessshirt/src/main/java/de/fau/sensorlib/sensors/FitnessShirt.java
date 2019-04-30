@@ -64,11 +64,6 @@ public class FitnessShirt extends AbstractSensor {
         }
 
         @Override
-        public double getSecondaryEcgSample() {
-            return 0;
-        }
-
-        @Override
         public double getHeartRate() {
             return heartRate;
         }

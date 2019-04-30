@@ -20,7 +20,7 @@ import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.AccelDataFrame;
 import de.fau.sensorlib.dataframe.AmbientDataFrame;
 import de.fau.sensorlib.dataframe.GyroDataFrame;
-import de.fau.sensorlib.dataframe.MagDataFrame;
+import de.fau.sensorlib.dataframe.MagnetometerDataFrame;
 import de.fau.sensorlib.dataframe.QuaternionDataFrame;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
 
@@ -68,7 +68,7 @@ public class TekSensor extends GenericBleSensor {
     /**
      * The TEK data frame containing IMU data.
      */
-    public class TekImuDataFrame extends TekDataFrame implements AccelDataFrame, GyroDataFrame, MagDataFrame {
+    public class TekImuDataFrame extends TekDataFrame implements AccelDataFrame, GyroDataFrame, MagnetometerDataFrame {
 
         protected double mAx, mAy, mAz;
         protected double mGx, mGy, mGz;

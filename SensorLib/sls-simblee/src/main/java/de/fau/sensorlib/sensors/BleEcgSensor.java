@@ -198,11 +198,6 @@ public class BleEcgSensor extends AbstractSensor {
             return ecg;
         }
 
-        @Override
-        public double getSecondaryEcgSample() {
-            return 0;
-        }
-
         public char getLabel() {
             return label;
         }

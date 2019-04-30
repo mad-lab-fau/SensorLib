@@ -129,11 +129,6 @@ public class SimbleeSensor extends GenericBleSensor {
         public double getEcgSample() {
             return ecg[0];
         }
-
-        @Override
-        public double getSecondaryEcgSample() {
-            return ecg[1];
-        }
     }
 
     public SimbleeSensor(Context context, SensorInfo knownSensor, SensorDataProcessor dataHandler) {

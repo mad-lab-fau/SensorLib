@@ -7,11 +7,12 @@
  */
 package de.fau.sensorlib.sensors;
 
+import androidx.annotation.NonNull;
+
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
-import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.shimmerresearch.driver.FormatCluster;
@@ -66,14 +67,6 @@ public class ShimmerSensor extends AbstractSensor {
                 return ecgRA;
             }
             return ecg;
-        }
-
-        @Override
-        public double getSecondaryEcgSample() {
-            if (isTwoChannelEcg) {
-                return ecgLA;
-            }
-            return 0;
         }
 
         @Override

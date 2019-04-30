@@ -19,7 +19,7 @@ import com.google.android.gms.wearable.Wearable;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.dataframe.AccelDataFrame;
 import de.fau.sensorlib.dataframe.GyroDataFrame;
-import de.fau.sensorlib.dataframe.MagDataFrame;
+import de.fau.sensorlib.dataframe.MagnetometerDataFrame;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
 
 
@@ -32,7 +32,7 @@ public class SmartWatch extends AbstractSensor {
     /**
      * Combine all possible single data frames into one sensor specific data frame
      */
-    public static class SmartWatchSensorDataFrame extends SensorDataFrame implements AccelDataFrame, GyroDataFrame, MagDataFrame {
+    public static class SmartWatchSensorDataFrame extends SensorDataFrame implements AccelDataFrame, GyroDataFrame, MagnetometerDataFrame {
 
         public double ax, ay, az;
         public double gx, gy, gz;
