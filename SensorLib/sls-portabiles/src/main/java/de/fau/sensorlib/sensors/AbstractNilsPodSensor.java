@@ -761,6 +761,9 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
         Log.d(TAG, ">>>> Sensor Config:");
         Log.d(TAG, "\tEnabled Sensors: " + mEnabledSensorList);
+        EnumSet<HardwareSensor> set = EnumSet.noneOf(HardwareSensor.class);
+        set.addAll(mEnabledSensorList);
+        useHardwareSensors(set);
         Log.d(TAG, "\tSample Size: " + sampleSize);
         mPacketSize = sampleSize;
         mCurrentConfigMap.put(KEY_HARDWARE_SENSORS, mEnabledSensorList);
