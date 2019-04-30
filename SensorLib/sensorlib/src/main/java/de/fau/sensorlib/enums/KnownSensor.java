@@ -149,7 +149,7 @@ public enum KnownSensor {
                     HardwareSensor.GYROSCOPE,
                     HardwareSensor.MAGNETOMETER,
                     HardwareSensor.BAROMETER,
-                    HardwareSensor.FSR
+                    HardwareSensor.ANALOG
             ), true, "InsoleSensor"),
 
     NILSPOD_PPG("NilsPod_PPG", new String[]{"NilsPod_PPG"},

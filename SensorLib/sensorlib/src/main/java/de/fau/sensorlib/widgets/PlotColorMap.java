@@ -20,7 +20,7 @@ public class PlotColorMap {
         sColorMap.put(HardwareSensor.ORIENTATION, new int[]{R.color.roll, R.color.pitch, R.color.yaw});
         sColorMap.put(HardwareSensor.ECG, new int[]{R.color.ecg_1, R.color.ecg_2});
         sColorMap.put(HardwareSensor.PPG, new int[]{R.color.ppg_1, R.color.ppg_2});
-        sColorMap.put(HardwareSensor.FSR, new int[]{R.color.press_1, R.color.press_2, R.color.press_3});
+        sColorMap.put(HardwareSensor.ANALOG, new int[]{R.color.press_1, R.color.press_2, R.color.press_3});
         sColorMap.put(HardwareSensor.BAROMETER, new int[]{R.color.baro});
         sColorMap.put(HardwareSensor.LIGHT, new int[]{R.color.light});
         sColorMap.put(HardwareSensor.HUMIDITY, new int[]{R.color.humidity});

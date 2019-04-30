@@ -10,7 +10,7 @@ package de.fau.sensorlib.dataframe;
 /**
  * Magnetometer data frame.
  */
-public interface MagDataFrame {
+public interface MagnetometerDataFrame {
 
     String[] COLUMNS = new String[]{"mag_x", "mag_y", "mag_z"};
 

@@ -8,6 +8,7 @@
 package de.fau.sensorlib.enums;
 
 import de.fau.sensorlib.dataframe.AccelDataFrame;
+import de.fau.sensorlib.dataframe.AnalogDataFrame;
 import de.fau.sensorlib.dataframe.BarometricPressureDataFrame;
 import de.fau.sensorlib.dataframe.BloodPressureDataFrame;
 import de.fau.sensorlib.dataframe.BloodVolumePulseDataFrame;
@@ -18,9 +19,8 @@ import de.fau.sensorlib.dataframe.GestureDataFrame;
 import de.fau.sensorlib.dataframe.GyroDataFrame;
 import de.fau.sensorlib.dataframe.HeartRateDataFrame;
 import de.fau.sensorlib.dataframe.HumidityDataFrame;
-import de.fau.sensorlib.dataframe.InsolePressureDataFrame;
 import de.fau.sensorlib.dataframe.LightDataFrame;
-import de.fau.sensorlib.dataframe.MagDataFrame;
+import de.fau.sensorlib.dataframe.MagnetometerDataFrame;
 import de.fau.sensorlib.dataframe.NoiseDataFrame;
 import de.fau.sensorlib.dataframe.OrientationDataFrame;
 import de.fau.sensorlib.dataframe.PpgDataFrame;
@@ -36,11 +36,11 @@ public enum HardwareSensor {
 
     ACCELEROMETER("ACC", AccelDataFrame.class),
     GYROSCOPE("GYR", GyroDataFrame.class),
-    MAGNETOMETER("MAG", MagDataFrame.class),
+    MAGNETOMETER("MAG", MagnetometerDataFrame.class),
     LIGHT("LUX", LightDataFrame.class),
     PRESSURE("PRES", PressureDataFrame.class),
     BAROMETER("BARO", BarometricPressureDataFrame.class),
-    FSR("FSR", InsolePressureDataFrame.class),
+    ANALOG("ANA", AnalogDataFrame.class),
     TEMPERATURE("TEMP", TemperatureDataFrame.class),
     ECG("ECG", EcgDataFrame.class),
     EMG("EMG", EmgDataFrame.class),

@@ -82,7 +82,7 @@ public class SessionCsvConverter {
         HashMap<HardwareSensor, Boolean> enabledSensorsMap = new HashMap<>();
         enabledSensorsMap.put(HardwareSensor.ACCELEROMETER, ((sensors & 0x01) != 0));
         enabledSensorsMap.put(HardwareSensor.GYROSCOPE, ((sensors & 0x01) != 0));
-        enabledSensorsMap.put(HardwareSensor.FSR, ((sensors & 0x02) != 0));
+        enabledSensorsMap.put(HardwareSensor.ANALOG, ((sensors & 0x02) != 0));
         enabledSensorsMap.put(HardwareSensor.BAROMETER, ((sensors & 0x04) != 0));
 
 
@@ -193,7 +193,7 @@ public class SessionCsvConverter {
             offset += 2;
         }
 
-        if (isSensorEnabled(HardwareSensor.FSR)) {
+        if (isSensorEnabled(HardwareSensor.ANALOG)) {
             for (int j = 0; j < 3; j++) {
                 pressure[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset);
                 offset++;

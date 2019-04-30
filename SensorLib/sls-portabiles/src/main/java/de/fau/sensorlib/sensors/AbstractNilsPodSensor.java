@@ -179,7 +179,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     );
     protected static ConfigItem sSensorConfig = new ConfigItem(
             "Sensors",
-            new ArrayList<Object>(EnumSet.of(HardwareSensor.ACCELEROMETER, HardwareSensor.GYROSCOPE, HardwareSensor.MAGNETOMETER, HardwareSensor.BAROMETER, HardwareSensor.FSR, HardwareSensor.ECG, HardwareSensor.PPG)),
+            new ArrayList<Object>(EnumSet.of(HardwareSensor.ACCELEROMETER, HardwareSensor.GYROSCOPE, HardwareSensor.MAGNETOMETER, HardwareSensor.BAROMETER, HardwareSensor.ANALOG, HardwareSensor.ECG, HardwareSensor.PPG)),
             ConfigItem.UiType.TYPE_MULTI_SELECT
     );
     protected static ConfigItem sMotionInterruptConfig = new ConfigItem(
@@ -744,7 +744,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
                 mEnabledSensorList.add(HardwareSensor.BAROMETER);
             }
             if ((sensors & 0x10) != 0) {
-                mEnabledSensorList.add(HardwareSensor.FSR);
+                mEnabledSensorList.add(HardwareSensor.ANALOG);
             }
             if ((sensors & 0x20) != 0) {
                 mEnabledSensorList.add(HardwareSensor.ECG);

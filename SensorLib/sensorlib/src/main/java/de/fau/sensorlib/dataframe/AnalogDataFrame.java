@@ -8,15 +8,15 @@
 package de.fau.sensorlib.dataframe;
 
 /**
- * Insole pressure data frame.
+ * Analog data data frame, e.g. data read from the FSR sensors in the NilsPod Insole.
  */
-public interface InsolePressureDataFrame {
+public interface AnalogDataFrame {
 
-    String[] COLUMNS = new String[] {"pres_1", "pres_2", "pres_3"};
+    String[] COLUMNS = new String[]{"ana_1", "ana_2", "ana_3"};
 
-    double getFirstPressureSample();
+    double getFirstAnalogSample();
 
-    double getSecondPressureSample();
+    double getSecondAnalogSample();
 
-    double getThirdPressureSample();
+    double getThirdAnalogSample();
 }

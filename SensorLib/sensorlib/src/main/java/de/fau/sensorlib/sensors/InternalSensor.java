@@ -31,7 +31,7 @@ import de.fau.sensorlib.dataframe.BarometricPressureDataFrame;
 import de.fau.sensorlib.dataframe.GyroDataFrame;
 import de.fau.sensorlib.dataframe.HumidityDataFrame;
 import de.fau.sensorlib.dataframe.LightDataFrame;
-import de.fau.sensorlib.dataframe.MagDataFrame;
+import de.fau.sensorlib.dataframe.MagnetometerDataFrame;
 import de.fau.sensorlib.dataframe.OrientationDataFrame;
 import de.fau.sensorlib.dataframe.RealTimeTimestampDataFrame;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
@@ -167,7 +167,7 @@ public class InternalSensor extends AbstractSensor implements SensorEventListene
     /**
      * Data frame to store magnetometer data received from the Internal Sensor
      */
-    public static class InternalMagDataFrame extends SensorDataFrame implements MagDataFrame, RealTimeTimestampDataFrame {
+    public static class InternalMagDataFrame extends SensorDataFrame implements MagnetometerDataFrame, RealTimeTimestampDataFrame {
 
         private double[] mag;
         private double realTimeTimestamp;

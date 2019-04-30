@@ -15,7 +15,7 @@ import java.util.Arrays;
 
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorInfo;
-import de.fau.sensorlib.dataframe.InsolePressureDataFrame;
+import de.fau.sensorlib.dataframe.AnalogDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
 
 
@@ -77,7 +77,7 @@ public class InsoleSensor extends NilsPodSensor {
                 offset += 2;
             }
 
-            if (isSensorEnabled(HardwareSensor.FSR)) {
+            if (isSensorEnabled(HardwareSensor.ANALOG)) {
                 for (int j = 0; j < 3; j++) {
                     pressure[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset);
                     offset++;
@@ -111,7 +111,7 @@ public class InsoleSensor extends NilsPodSensor {
     /**
      * Data frame to store data received from the Insole
      */
-    public static class InsoleDataFrame extends NilsPodDataFrame implements InsolePressureDataFrame {
+    public static class InsoleDataFrame extends NilsPodDataFrame implements AnalogDataFrame {
 
         protected double[] pressure;
 
@@ -123,7 +123,7 @@ public class InsoleSensor extends NilsPodSensor {
          * @param accel     Array storing acceleration values
          * @param gyro      Array storing gyroscope values
          * @param baro      Atmospheric pressure from barometer
-         * @param pressure  Array storing FSR pressure values
+         * @param pressure  Array storing ANALOG pressure values
          */
         public InsoleDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro, double baro, double[] pressure) {
             super(sensor, timestamp, accel, gyro, baro);
@@ -131,18 +131,18 @@ public class InsoleSensor extends NilsPodSensor {
         }
 
         @Override
-        public double getFirstPressureSample() {
+        public double getFirstAnalogSample() {
             return pressure[0];
 
         }
 
         @Override
-        public double getSecondPressureSample() {
+        public double getSecondAnalogSample() {
             return pressure[1];
         }
 
         @Override
-        public double getThirdPressureSample() {
+        public double getThirdAnalogSample() {
             return pressure[2];
         }
 
