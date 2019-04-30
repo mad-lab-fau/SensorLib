@@ -999,12 +999,12 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
         @Override
         public String toString() {
-            String str = "<" + originatingSensor.getDeviceName() + ">\tctr=" + ((long) getTimestamp()) + ", ";
+            String str = "<" + originatingSensor.getDeviceName() + ">\tctr=" + ((long) getTimestamp());
             if (hasAccel) {
-                str += "accel: " + Arrays.toString(accel);
+                str += ", accel: " + Arrays.toString(accel);
             }
             if (hasGyro) {
-                str += "gyro: " + Arrays.toString(gyro);
+                str += ", gyro: " + Arrays.toString(gyro);
             }
             return str;
         }

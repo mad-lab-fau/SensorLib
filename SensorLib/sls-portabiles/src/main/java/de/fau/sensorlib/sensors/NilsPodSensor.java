@@ -215,6 +215,9 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
 
             // send new data to the SensorDataProcessor
             sendNewData(df);
+
+            Log.d(TAG, df.toString());
+
             lastCounter = localCounter;
             if (mRecordingEnabled) {
                 mDataRecorder.writeData(df);
