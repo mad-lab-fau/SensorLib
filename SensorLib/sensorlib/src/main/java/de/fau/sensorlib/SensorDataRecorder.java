@@ -7,6 +7,8 @@ import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.core.content.ContextCompat;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -19,7 +21,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import androidx.core.content.ContextCompat;
 import de.fau.sensorlib.dataframe.RealTimeTimestampDataFrame;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
@@ -101,13 +102,13 @@ public class SensorDataRecorder {
         List<String> mColumnList = new ArrayList<>();
         mMethodList = new ArrayList<>();
 
-        for (HardwareSensor hwSensor : mSensor.getDeviceClass().getAvailableSensors()) {
+        for (HardwareSensor hwSensor : mSensor.getSelectedSensors()) {
             try {
                 String[] cols = (String[]) hwSensor.getDataFrameClass().getDeclaredField("COLUMNS").get("null");
                 mColumnList.addAll(Arrays.asList(cols));
                 mMethodList.addAll(Arrays.asList(hwSensor.getDataFrameClass().getDeclaredMethods()));
-            } catch (Exception ignored) {
-
+            } catch (Exception e) {
+                //e.printStackTrace();
             }
         }
 

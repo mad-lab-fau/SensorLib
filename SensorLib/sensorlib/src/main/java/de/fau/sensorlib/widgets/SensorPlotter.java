@@ -16,6 +16,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.ColorUtils;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView.ViewHolder;
+
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.XAxis;
@@ -29,14 +38,6 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.cardview.widget.CardView;
-import androidx.core.content.ContextCompat;
-import androidx.core.graphics.ColorUtils;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 import de.fau.sensorlib.R;
 import de.fau.sensorlib.SensorEventListener;
 import de.fau.sensorlib.SensorInfo;
@@ -123,7 +124,7 @@ public class SensorPlotter extends CardView implements SensorEventListener {
             // TODO: change to combine some HardwareSensors to one single plot
             SensorBundle sensorBundle = new SensorBundle(hwSensor);
             for (AbstractSensor sensor : sensorList) {
-                if (sensor.getSelectedSensors().contains(hwSensor)) {
+                if (sensor.shouldUseHardwareSensor(hwSensor)) {
                     sensorBundle.addSensor(sensor);
                     sensorBundle.setSamplingRate(sensor.getSamplingRate());
                 }
