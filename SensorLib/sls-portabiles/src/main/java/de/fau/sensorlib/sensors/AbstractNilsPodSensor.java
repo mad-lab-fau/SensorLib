@@ -16,6 +16,8 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -24,7 +26,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import androidx.annotation.NonNull;
 import de.fau.sensorlib.BleGattAttributes;
 import de.fau.sensorlib.HwSensorNotAvailableException;
 import de.fau.sensorlib.SensorDataProcessor;
@@ -37,13 +38,13 @@ import de.fau.sensorlib.dataframe.SensorDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
 import de.fau.sensorlib.enums.SensorMessage;
 import de.fau.sensorlib.enums.SensorState;
-import de.fau.sensorlib.sensors.configs.ConfigItem;
 import de.fau.sensorlib.sensors.dfu.NilsPodDfuService;
 import de.fau.sensorlib.sensors.enums.NilsPodMotionInterrupt;
 import de.fau.sensorlib.sensors.enums.NilsPodOperationMode;
 import de.fau.sensorlib.sensors.enums.NilsPodSensorPosition;
 import de.fau.sensorlib.sensors.enums.NilsPodSyncGroup;
 import de.fau.sensorlib.sensors.enums.NilsPodSyncRole;
+import de.fau.sensorlib.widgets.config.ConfigItem;
 import no.nordicsemi.android.dfu.DfuLogListener;
 import no.nordicsemi.android.dfu.DfuProgressListener;
 import no.nordicsemi.android.dfu.DfuProgressListenerAdapter;
