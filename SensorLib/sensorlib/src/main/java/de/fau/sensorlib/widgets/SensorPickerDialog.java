@@ -70,6 +70,8 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
     private SensorPickerRecyclerAdapter mAdapter;
     private SensorFoundCallback mSensorFoundCallback;
 
+    private boolean mAddByRssi = true;
+
     private EnumSet<HardwareSensor> mHwSensorFilter = EnumSet.noneOf(HardwareSensor.class);
     private EnumSet<KnownSensor> mSensorFilter = EnumSet.noneOf(KnownSensor.class);
     private ArrayList<String> mLastConnectedSensors = new ArrayList<>();
@@ -195,6 +197,25 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
          */
         public void add(Bundle element) {
             addAt(mFoundSensors.size(), element);
+        }
+
+        public void addByRssi(Bundle element) {
+            int rssi = element.getInt(Constants.KEY_SENSOR_RSSI);
+            // skip first sensor (internal sensor)
+            for (int i = 1; i < mFoundSensors.size(); i++) {
+                // skip "last connected" sensors because they should be at the front
+                if (mLastConnectedSensors.contains(mFoundSensors.get(i).getString(Constants.KEY_SENSOR_NAME))) {
+                    continue;
+                }
+                int rssiTmp = mFoundSensors.get(i).getInt(Constants.KEY_SENSOR_RSSI);
+                if (rssi > rssiTmp) {
+                    // add at right position
+                    addAt(i, element);
+                    break;
+                }
+            }
+            // add at end
+            add(element);
         }
 
 
@@ -481,7 +502,11 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
                                     // add after internal sensor
                                     mAdapter.addAt(1, bundle);
                                 } else {
-                                    mAdapter.add(bundle);
+                                    if (mAddByRssi) {
+                                        mAdapter.addByRssi(bundle);
+                                    } else {
+                                        mAdapter.add(bundle);
+                                    }
                                 }
                             }
                             return true;
