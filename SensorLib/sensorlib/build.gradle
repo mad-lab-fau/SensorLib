@@ -7,31 +7,6 @@ group = 'com.github.mad-lab-fau'
 android {
     compileSdkVersion 28
 
-    def versionPropsFile = file('version.properties')
-    def versionBuild
-    /*Setting default value for versionBuild which is the last incremented value stored in the file */
-    if (versionPropsFile.canRead()) {
-        def Properties versionProps = new Properties()
-        versionProps.load(new FileInputStream(versionPropsFile))
-        versionBuild = versionProps['VERSION_BUILD'].toInteger()
-    } else {
-        throw new FileNotFoundException("Could not read version.properties!")
-    }
-
-    /*Wrapping inside a method avoids auto incrementing on every gradle task run. Now it runs only when we build apk*/
-    ext.autoIncrementBuildNumber = {
-
-        if (versionPropsFile.canRead()) {
-            def Properties versionProps = new Properties()
-            versionProps.load(new FileInputStream(versionPropsFile))
-            versionBuild = versionProps['VERSION_BUILD'].toInteger() + 1
-            versionProps['VERSION_BUILD'] = versionBuild.toString()
-            versionProps.store(versionPropsFile.newWriter(), null)
-        } else {
-            throw new FileNotFoundException("Could not read version.properties!")
-        }
-    }
-
     def getGitHash = { ->
         def stdout = new ByteArrayOutputStream()
         exec {
@@ -63,7 +38,7 @@ android {
         def versionPatch = 1
 
         versionCode versionMajor * 10000 + versionMinor * 100 + versionPatch
-        versionName "${versionMajor}.${versionMinor}.${versionPatch}." + versionBuild + "_" + getGitDate() + "-" + getGitHash()
+        versionName "${versionMajor}.${versionMinor}.${versionPatch}" + "_" + getGitDate() + "-" + getGitHash()
     }
     buildTypes {
         release {
@@ -72,15 +47,6 @@ android {
         }
     }
 
-    // Hook to check if the release/debug task is among the tasks to be executed.
-    //Let's make use of it
-    gradle.taskGraph.whenReady { taskGraph ->
-        if (taskGraph.hasTask(assembleDebug)) {  /* when run debug task */
-            autoIncrementBuildNumber()
-        } else if (taskGraph.hasTask(assembleRelease)) { /* when run release task */
-            autoIncrementBuildNumber()
-        }
-    }
 }
 
 dependencies {

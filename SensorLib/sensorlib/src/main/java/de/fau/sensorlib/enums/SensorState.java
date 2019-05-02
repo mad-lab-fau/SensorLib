@@ -47,5 +47,9 @@ public enum SensorState {
     /**
      * Virtual sensor simulating a real sensor
      */
-    SIMULATING
+    SIMULATING,
+    /**
+     * Sensor is currently upgrading firmware
+     */
+    UPGRADING_FIRMWARE
 }
