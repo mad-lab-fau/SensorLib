@@ -120,7 +120,7 @@ public class SensorConfigDialog extends DialogFragment implements View.OnClickLi
         private TextView mTitleTextView;
         private FrameLayout mConfigView;
 
-        public SensorConfigViewHolder(Context context, View itemView) {
+        public SensorConfigViewHolder(View itemView) {
             super(itemView);
             mTitleTextView = itemView.findViewById(R.id.tv_config_title);
             mConfigView = itemView.findViewById(R.id.config_container);
@@ -160,7 +160,7 @@ public class SensorConfigDialog extends DialogFragment implements View.OnClickLi
         @Override
         public SensorConfigViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View layout = LayoutInflater.from(mContext).inflate(R.layout.item_sensor_config, parent, false);
-            return new SensorConfigViewHolder(mContext, layout);
+            return new SensorConfigViewHolder(layout);
         }
 
         @Override

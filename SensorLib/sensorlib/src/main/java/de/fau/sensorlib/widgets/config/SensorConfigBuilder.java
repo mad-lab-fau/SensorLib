@@ -100,7 +100,7 @@ public class SensorConfigBuilder {
         @Override
         public void onCheckedChanged(RadioGroup group, int checkedId) {
             RadioButton radioButton = group.findViewById(checkedId);
-            int idx = mConfigValuesString.indexOf(radioButton.getText());
+            int idx = mConfigValuesString.indexOf(radioButton.getText().toString());
             mListener.onConfigItemSelected(mKey, mConfigItem.getConfigValues().get(idx));
         }
     }
@@ -132,7 +132,7 @@ public class SensorConfigBuilder {
                 checkBoxMap.put(checkBox, value);
             }
 
-            CheckBoxGroup<Object> checkBoxGroup = new CheckBoxGroup<>(checkBoxMap, new CheckBoxGroup.CheckedChangeListener<Object>() {
+            new CheckBoxGroup<>(checkBoxMap, new CheckBoxGroup.CheckedChangeListener<Object>() {
                 @Override
                 public void onCheckedChange(ArrayList<Object> values) {
                     mListener.onConfigItemSelected(mKey, values);
