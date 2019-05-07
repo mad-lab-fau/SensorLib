@@ -130,7 +130,7 @@ public class SessionDownloader {
 
     @Override
     public String toString() {
-        return "DOWNLOADING <Session #" + mSession.getSessionNumber() + ">: " + mDf.format(toKiloByte(getProgress())) + "/" +
+        return "DOWNLOADING <Session #" + mSession.getSessionId() + ">: " + mDf.format(toKiloByte(getProgress())) + "/" +
                 mDf.format(toKiloByte(mSessionSize)) + " kByte (" + mDf.format(getProgressPercent()) + "%), download rate: " +
                 getDownloadRatekB() + " kByte/s, ETA: " + getEstimatedRemainingTimeSeconds() + " s";
     }

@@ -16,6 +16,6 @@ public interface NilsPodLoggable extends Loggable, Erasable {
 
     void readSessionList();
 
-    void downloadSession(Session session) throws SensorException;
+    void downloadSession(int sessionId) throws SensorException;
 
 }

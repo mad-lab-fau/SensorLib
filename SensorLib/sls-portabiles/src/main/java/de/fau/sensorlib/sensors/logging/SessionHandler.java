@@ -35,13 +35,17 @@ public class SessionHandler {
     }
 
     public void addSession(Session session) {
-        session.setSessionNumber(mSessionList.size() + 1);
+        session.setSessionId(mSessionList.size() + 1);
         mSessionList.add(session);
     }
 
 
     public List<Session> getSessionList() {
         return mSessionList;
+    }
+
+    public Session getSessionById(int sessionId) {
+        return mSessionList.get(sessionId);
     }
 
     public int getSessionCount() {

@@ -25,7 +25,7 @@ public class Session {
      */
     private static final int PAGE_SIZE = 2048;
 
-    private int mSessionNumber;
+    private int mSessionId;
 
     private int mSessionSize;
 
@@ -61,12 +61,12 @@ public class Session {
         mDuration = (long) (((double) getSessionSize()) / getSampleSize() / getSamplingRate());
     }
 
-    public void setSessionNumber(int sessionNumber) {
-        mSessionNumber = sessionNumber;
+    public void setSessionId(int sessionId) {
+        mSessionId = sessionId;
     }
 
-    public int getSessionNumber() {
-        return mSessionNumber;
+    public int getSessionId() {
+        return mSessionId;
     }
 
     public Date getStartDate() {
@@ -110,17 +110,17 @@ public class Session {
 
     @Override
     public String toString() {
-        return "<Session #" + getSessionNumber() + ">: " + getStartTime() + " [" + getDurationString() + "]";
+        return "<Session #" + getSessionId() + ">: " + getStartTime() + " [" + getDurationString() + "]";
     }
 
     public String toDebugString() {
-        return "<Session #" + getSessionNumber() + "> [" + mStartPage + "-" + mEndPage + "] @ " +
+        return "<Session #" + getSessionId() + "> [" + mStartPage + "-" + mEndPage + "] @ " +
                 getStartTime() + " | fs=" + getSamplingRate() + " Hz, duration: " + getDurationString() +
                 " (" + getSessionSize() + " Byte)";
     }
 
     @Override
     public boolean equals(Object obj) {
-        return (obj instanceof Session) && (getSessionNumber() == ((Session) obj).getSessionNumber());
+        return (obj instanceof Session) && (getSessionId() == ((Session) obj).getSessionId());
     }
 }
