@@ -18,6 +18,7 @@
                 android:resource="@xml/provider_paths" />
         </provider>
 
+        <service android:name="de.fau.sensorlib.sensors.logging.SessionDownloadService" />
 
         <service android:name="de.fau.sensorlib.sensors.dfu.NilsPodDfuService" />
 
