@@ -16,6 +16,7 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -36,6 +37,7 @@ import de.fau.sensorlib.enums.SensorState;
 import de.fau.sensorlib.sensors.AbstractSensor;
 import de.fau.sensorlib.widgets.config.OnSensorConfigChangedListener;
 
+
 /**
  * Provides a grid layout that displays sensor information. This Widget implements the
  * {@link SensorEventListener}, so it can subscribe to the {@link SensorEventGenerator}.
@@ -45,6 +47,8 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
     private static final String TAG = SensorInfoBar.class.getSimpleName();
 
     private SensorInfoGridAdapter mAdapter;
+
+    private boolean mConfigCheckWarning;
 
     public SensorInfoBar(Context context) {
         this(context, null);
@@ -61,6 +65,7 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
         setBackgroundColor(getResources().getColor(R.color.transparent));
         mAdapter = new SensorInfoGridAdapter(context);
         setAdapter(mAdapter);
+
     }
 
     public void setSensorActionBarEnabled(boolean enable) {
@@ -110,6 +115,22 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
                 mAdapter.updateSensor(sensor);
                 break;
         }
+    }
+
+    public void onConfigChanged() {
+        ImageView configCheckView = findViewById(R.id.tv_config_check);
+        if (mConfigCheckWarning) {
+            configCheckView.setVisibility(VISIBLE);
+        } else {
+            configCheckView.setVisibility(INVISIBLE);
+        }
+
+        mAdapter.notifyDataSetChanged();
+    }
+
+    public void setConfigCheckWarning(boolean configCheckWarning) {
+        mConfigCheckWarning = configCheckWarning;
+        onConfigChanged();
     }
 
 
@@ -165,14 +186,26 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
             notifyDataSetChanged();
         }
 
+
         private void setSensorActionBarEnabled(boolean enable) {
             mSensorActionBarEnabled = enable;
         }
+
 
         @NonNull
         @Override
         public SensorInfoViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View layout = LayoutInflater.from(mContext).inflate(R.layout.item_sensor_info_bar, parent, false);
+
+
+            if (mConfigCheckWarning) {
+                ImageView configCheck = layout.findViewById(R.id.tv_config_check);
+                configCheck.setVisibility(View.VISIBLE);
+            } else {
+                ImageView configCheck = layout.findViewById(R.id.tv_config_check);
+                configCheck.setVisibility(View.INVISIBLE);
+            }
+
             return new SensorInfoViewHolder(mContext, layout, this);
         }
 
@@ -181,6 +214,7 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
             holder.setSensorName(mAttachedSensors.get(position).getDeviceName());
             holder.updateBatteryLevel(mAttachedSensors.get(position).getBatteryLevel());
             holder.updateAdditionalInfo(mAdditionalInfos.get(position));
+            holder.setConfigCheckWarning(mConfigCheckWarning);
         }
 
         @Override
@@ -225,6 +259,7 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
         private TextView mSensorNameTextView;
         private TextView mBatteryLevelTextView;
         private TextView mAdditionalInfoTextView;
+        private ImageView mConfigCheckWarningImageView;
         private ItemClickListener mItemClickListener;
 
         private SensorInfoViewHolder(Context context, View itemView, ItemClickListener listener) {
@@ -233,6 +268,7 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
             mSensorNameTextView = itemView.findViewById(R.id.tv_sensor_name);
             mBatteryLevelTextView = itemView.findViewById(R.id.tv_battery_level);
             mAdditionalInfoTextView = itemView.findViewById(R.id.tv_additional_info);
+            mConfigCheckWarningImageView = itemView.findViewById(R.id.tv_config_check);
             mItemClickListener = listener;
             itemView.setOnClickListener(this);
         }
@@ -250,6 +286,16 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
             mAdditionalInfoTextView.setText(message);
             TextViewCompat.setAutoSizeTextTypeUniformWithPresetSizes(mAdditionalInfoTextView, new int[]{8, 10, 12}, TextViewCompat.AUTO_SIZE_TEXT_TYPE_UNIFORM);
         }
+
+        public void setConfigCheckWarning(boolean configCheck) {
+            if (configCheck) {
+                mConfigCheckWarningImageView.setVisibility(View.VISIBLE);
+            } else {
+                mConfigCheckWarningImageView.setVisibility(View.INVISIBLE);
+            }
+
+        }
+
 
         @Override
         public void onClick(View v) {
