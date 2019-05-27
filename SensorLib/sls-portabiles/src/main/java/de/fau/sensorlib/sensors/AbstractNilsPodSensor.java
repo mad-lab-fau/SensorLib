@@ -202,7 +202,16 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     );
     protected static ConfigItem sSensorConfig = new ConfigItem(
             "Sensors",
-            new ArrayList<Object>(EnumSet.of(HardwareSensor.ACCELEROMETER, HardwareSensor.GYROSCOPE, HardwareSensor.MAGNETOMETER, HardwareSensor.BAROMETER, HardwareSensor.ANALOG, HardwareSensor.ECG, HardwareSensor.PPG)),
+            new ArrayList<Object>(
+                    EnumSet.of(HardwareSensor.ACCELEROMETER,
+                            HardwareSensor.GYROSCOPE,
+                            HardwareSensor.MAGNETOMETER,
+                            HardwareSensor.BAROMETER,
+                            HardwareSensor.TEMPERATURE,
+                            HardwareSensor.ANALOG,
+                            HardwareSensor.ECG,
+                            HardwareSensor.PPG)
+            ),
             ConfigItem.UiType.TYPE_MULTI_SELECT
     );
     protected static ConfigItem sMotionInterruptConfig = new ConfigItem(
@@ -785,27 +794,31 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         mEnabledSensorList = new ArrayList<>();
 
         try {
-            sensors = values[offset++];
-            if ((sensors & 0x01) != 0) {
+            sensors = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
+            offset += 2;
+            if ((sensors & 0x0001) != 0) {
                 mEnabledSensorList.add(HardwareSensor.ACCELEROMETER);
             }
-            if ((sensors & 0x02) != 0) {
+            if ((sensors & 0x0002) != 0) {
                 mEnabledSensorList.add(HardwareSensor.GYROSCOPE);
             }
-            if ((sensors & 0x04) != 0) {
+            if ((sensors & 0x0004) != 0) {
                 mEnabledSensorList.add(HardwareSensor.MAGNETOMETER);
             }
-            if ((sensors & 0x08) != 0) {
+            if ((sensors & 0x0008) != 0) {
                 mEnabledSensorList.add(HardwareSensor.BAROMETER);
             }
-            if ((sensors & 0x10) != 0) {
+            if ((sensors & 0x0010) != 0) {
                 mEnabledSensorList.add(HardwareSensor.ANALOG);
             }
-            if ((sensors & 0x20) != 0) {
+            if ((sensors & 0x0020) != 0) {
                 mEnabledSensorList.add(HardwareSensor.ECG);
             }
-            if ((sensors & 0x40) != 0) {
+            if ((sensors & 0x0040) != 0) {
                 mEnabledSensorList.add(HardwareSensor.PPG);
+            }
+            if ((sensors & 0x0080) != 0) {
+                mEnabledSensorList.add(HardwareSensor.TEMPERATURE);
             }
             sampleSize = values[offset];
         } catch (Exception e) {

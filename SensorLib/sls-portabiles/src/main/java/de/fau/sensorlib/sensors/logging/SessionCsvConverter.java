@@ -78,29 +78,33 @@ public class SessionCsvConverter {
 
             mByteBuffer = ByteBuffer.allocate(sampleSize * 1000);
 
-            // Byte 2
+            // Byte 2-3
             ArrayList<HardwareSensor> enabledSensorList = new ArrayList<>();
-            int sensors = values[offset++];
-            if ((sensors & 0x01) != 0) {
+            int sensors = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
+            offset += 2;
+            if ((sensors & 0x0001) != 0) {
                 enabledSensorList.add(HardwareSensor.ACCELEROMETER);
             }
-            if ((sensors & 0x02) != 0) {
+            if ((sensors & 0x0002) != 0) {
                 enabledSensorList.add(HardwareSensor.GYROSCOPE);
             }
-            if ((sensors & 0x04) != 0) {
+            if ((sensors & 0x0004) != 0) {
                 enabledSensorList.add(HardwareSensor.MAGNETOMETER);
             }
-            if ((sensors & 0x08) != 0) {
+            if ((sensors & 0x0008) != 0) {
                 enabledSensorList.add(HardwareSensor.BAROMETER);
             }
-            if ((sensors & 0x10) != 0) {
+            if ((sensors & 0x0010) != 0) {
                 enabledSensorList.add(HardwareSensor.ANALOG);
             }
-            if ((sensors & 0x20) != 0) {
+            if ((sensors & 0x0020) != 0) {
                 enabledSensorList.add(HardwareSensor.ECG);
             }
-            if ((sensors & 0x40) != 0) {
+            if ((sensors & 0x0040) != 0) {
                 enabledSensorList.add(HardwareSensor.PPG);
+            }
+            if ((sensors & 0x0080) != 0) {
+                enabledSensorList.add(HardwareSensor.TEMPERATURE);
             }
 
             // Byte 3
@@ -255,6 +259,7 @@ public class SessionCsvConverter {
         double[] mag = null;
         double[] analog = null;
         double baro = Double.MIN_VALUE;
+        double temp = Double.MIN_VALUE;
 
         // extract gyroscope data
         if (isSensorEnabled(HardwareSensor.GYROSCOPE)) {
@@ -296,13 +301,21 @@ public class SessionCsvConverter {
             }
         }
 
+        if (isSensorEnabled(HardwareSensor.TEMPERATURE)) {
+            temp = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
+            temp = temp * (1.0 / 512) + 23;
+            offset += 2;
+        }
+
         long timestamp = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, mHeader.getSampleSize() - 4);
 
         NilsPodSensor.NilsPodDataFrame df;
         if (isSensorEnabled(HardwareSensor.ANALOG)) {
-            df = new NilsPodSensor.NilsPodAnalogDataFrame(mSensor, timestamp, accel, gyro, baro, analog);
+            df = new NilsPodSensor.NilsPodAnalogDataFrame(mSensor, timestamp, accel, gyro, baro, temp, mag, analog);
         } else if (isSensorEnabled(HardwareSensor.MAGNETOMETER)) {
-            df = new NilsPodSensor.NilsPodMagDataFrame(mSensor, timestamp, accel, gyro, baro, mag);
+            df = new NilsPodSensor.NilsPodMagDataFrame(mSensor, timestamp, accel, gyro, baro, temp, mag);
+        } else if (isSensorEnabled(HardwareSensor.TEMPERATURE)) {
+            df = new NilsPodSensor.NilsPodTempDataFrame(mSensor, timestamp, accel, gyro, baro, temp);
         } else {
             df = new NilsPodSensor.NilsPodDataFrame(mSensor, timestamp, accel, gyro, baro);
         }

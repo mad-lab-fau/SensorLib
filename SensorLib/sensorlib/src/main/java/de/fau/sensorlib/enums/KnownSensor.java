@@ -140,7 +140,8 @@ public enum KnownSensor {
                     HardwareSensor.ACCELEROMETER,
                     HardwareSensor.GYROSCOPE,
                     HardwareSensor.MAGNETOMETER,
-                    HardwareSensor.BAROMETER
+                    HardwareSensor.BAROMETER,
+                    HardwareSensor.TEMPERATURE
             ), true, "NilsPodSensor"),
 
     INSOLE("Insole", new String[]{"Insole"},
@@ -149,7 +150,8 @@ public enum KnownSensor {
                     HardwareSensor.GYROSCOPE,
                     HardwareSensor.MAGNETOMETER,
                     HardwareSensor.BAROMETER,
-                    HardwareSensor.ANALOG
+                    HardwareSensor.ANALOG,
+                    HardwareSensor.TEMPERATURE
             ), true, "InsoleSensor"),
 
     NILSPOD_PPG("NilsPod_PPG", new String[]{"NilsPod_PPG"},
@@ -158,7 +160,8 @@ public enum KnownSensor {
                     HardwareSensor.GYROSCOPE,
                     HardwareSensor.MAGNETOMETER,
                     HardwareSensor.BAROMETER,
-                    HardwareSensor.PPG
+                    HardwareSensor.PPG,
+                    HardwareSensor.TEMPERATURE
             ), true, "NilsPodPpgSensor"),
 
     NILSPOD_ECG("NilsPod_ECGX", new String[]{"NilsPod_ECGX"},
@@ -167,7 +170,8 @@ public enum KnownSensor {
                     HardwareSensor.GYROSCOPE,
                     HardwareSensor.MAGNETOMETER,
                     HardwareSensor.BAROMETER,
-                    HardwareSensor.ECG
+                    HardwareSensor.ECG,
+                    HardwareSensor.TEMPERATURE
             ), true, "NilsPodEcgSensor");
 
     // =============================================================================================

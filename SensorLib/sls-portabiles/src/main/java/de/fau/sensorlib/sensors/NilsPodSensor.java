@@ -11,12 +11,12 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.content.Context;
 import android.util.Log;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import de.fau.sensorlib.HwSensorNotAvailableException;
@@ -26,6 +26,7 @@ import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.AnalogDataFrame;
 import de.fau.sensorlib.dataframe.BarometricPressureDataFrame;
 import de.fau.sensorlib.dataframe.MagnetometerDataFrame;
+import de.fau.sensorlib.dataframe.TemperatureDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
 import de.fau.sensorlib.enums.SensorState;
 import de.fau.sensorlib.sensors.enums.NilsPodMotionInterrupt;
@@ -151,6 +152,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             double[] mag = null;
             double[] analog = null;
             double baro = Double.MIN_VALUE;
+            double temp = Double.MIN_VALUE;
             int localCounter;
 
             // extract gyroscope data
@@ -193,6 +195,12 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
                 }
             }
 
+            if (isSensorEnabled(HardwareSensor.TEMPERATURE)) {
+                temp = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
+                temp = temp * (1.0 / 512) + 23;
+                offset += 2;
+            }
+
             // extract packet counter (16 bit)
             localCounter = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, i + mPacketSize - 2);
 
@@ -209,9 +217,11 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             long timestamp = globalCounter * (2 << 15) + localCounter;
             NilsPodDataFrame df;
             if (isSensorEnabled(HardwareSensor.ANALOG)) {
-                df = new NilsPodAnalogDataFrame(this, timestamp, accel, gyro, baro, analog);
+                df = new NilsPodAnalogDataFrame(this, timestamp, accel, gyro, baro, temp, mag, analog);
             } else if (isSensorEnabled(HardwareSensor.MAGNETOMETER)) {
-                df = new NilsPodMagDataFrame(this, timestamp, accel, gyro, baro, mag);
+                df = new NilsPodMagDataFrame(this, timestamp, accel, gyro, baro, temp, mag);
+            } else if (isSensorEnabled(HardwareSensor.TEMPERATURE)) {
+                df = new NilsPodTempDataFrame(this, timestamp, accel, gyro, baro, temp);
             } else {
                 df = new NilsPodDataFrame(this, timestamp, accel, gyro, baro);
             }
@@ -444,37 +454,41 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         BluetoothGattCharacteristic config = getConfigurationService().getCharacteristic(AbstractNilsPodSensor.NILS_POD_SENSOR_CONFIG);
         byte[] oldValue = config.getValue();
 
-        byte[] value = new byte[1];
+        byte[] value = new byte[2];
         int sensorField = 0;
         for (HardwareSensor sensor : sensors) {
             switch (sensor) {
                 case ACCELEROMETER:
-                    sensorField = (sensorField | (0x01));
+                    sensorField = (sensorField | (0x0001));
                     break;
                 case GYROSCOPE:
-                    sensorField = (sensorField | (0x02));
+                    sensorField = (sensorField | (0x0002));
                     break;
                 case MAGNETOMETER:
-                    sensorField = (sensorField | (0x04));
+                    sensorField = (sensorField | (0x0004));
                     break;
                 case BAROMETER:
-                    sensorField = (sensorField | (0x08));
+                    sensorField = (sensorField | (0x0008));
                     break;
                 case ANALOG:
-                    sensorField = (sensorField | (0x10));
+                    sensorField = (sensorField | (0x0010));
                     break;
                 case ECG:
-                    sensorField = (sensorField | (0x20));
+                    sensorField = (sensorField | (0x0020));
                     break;
                 case PPG:
-                    sensorField = (sensorField | (0x40));
+                    sensorField = (sensorField | (0x0040));
+                    break;
+                case TEMPERATURE:
+                    sensorField = (sensorField | (0x0080));
                     break;
             }
         }
 
-        value[0] = (byte) sensorField;
+        value[0] = (byte) (sensorField & 0xFF);
+        value[1] = (byte) ((sensorField >> 8) & 0xFF);
 
-        writeNilsPodConfig(config, new byte[]{oldValue[0]}, value);
+        writeNilsPodConfig(config, new byte[]{oldValue[0], oldValue[1]}, value);
     }
 
     protected void writeSystemSettingsConfig(NilsPodSensorPosition sensorPosition, NilsPodOperationMode operationMode, NilsPodMotionInterrupt motionInterrupt) throws SensorException {
@@ -583,33 +597,87 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             String str = super.toString();
 
             if (hasBaro) {
-                str += ", baro: " + getBarometricPressure();
+                str += ", baro: " + getBarometricPressure() + " mBar";
+            }
+            return str;
+        }
+    }
+
+    public static class NilsPodTempDataFrame extends NilsPodDataFrame implements TemperatureDataFrame {
+
+        protected double temp;
+        protected boolean hasTemp;
+
+        /**
+         * Creates a new data frame for sensor data
+         *
+         * @param sensor    Originating sensor
+         * @param timestamp Incremental counter for each data frame
+         * @param accel     array storing acceleration values
+         * @param gyro      array storing gyroscope values
+         */
+        public NilsPodTempDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro, double baro, double temp) {
+            this(sensor, timestamp, accel, gyro, baro);
+            if (temp != Double.MIN_VALUE) {
+                this.temp = temp;
+                hasTemp = true;
+            }
+        }
+
+        /**
+         * Creates a new data frame for sensor data
+         *
+         * @param sensor    Originating sensor
+         * @param timestamp Incremental counter for each data frame
+         * @param accel     array storing acceleration values
+         * @param gyro      array storing gyroscope values
+         */
+        public NilsPodTempDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro, double baro) {
+            super(sensor, timestamp, accel, gyro, baro);
+            hasTemp = false;
+        }
+
+        @Override
+        public double getTemperature() {
+            if (hasTemp) {
+                return temp;
+            } else {
+                throw new HwSensorNotAvailableException(HardwareSensor.TEMPERATURE);
+            }
+        }
+
+        @Override
+        public String toString() {
+            String str = super.toString();
+
+            if (hasTemp) {
+                str += ", temp: " + new DecimalFormat("#.00").format(getTemperature()) + " °C";
             }
             return str;
         }
     }
 
 
-    public static class NilsPodMagDataFrame extends NilsPodDataFrame implements MagnetometerDataFrame {
+    public static class NilsPodMagDataFrame extends NilsPodTempDataFrame implements MagnetometerDataFrame {
 
         protected double[] mag;
         protected boolean hasMag;
 
 
-        public NilsPodMagDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro, double baro, double[] mag) {
-            super(sensor, timestamp, accel, gyro, baro);
+        public NilsPodMagDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro, double baro, double temp, double[] mag) {
+            super(sensor, timestamp, accel, gyro, baro, temp);
 
             if (mag != null) {
-                this.mag = mag;
                 if (mag.length != 3) {
                     throw new IllegalArgumentException("Illegal array size for magnetometer values!");
                 }
+                this.mag = mag;
                 hasMag = true;
             }
         }
 
         public NilsPodMagDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro, double[] mag) {
-            this(sensor, timestamp, accel, gyro, Double.MIN_VALUE, mag);
+            this(sensor, timestamp, accel, gyro, Double.MIN_VALUE, Double.MIN_VALUE, mag);
         }
 
         @Override
@@ -657,24 +725,28 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         protected double[] analog;
         protected boolean hasAnalog;
 
-        public NilsPodAnalogDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro, double baro, double[] mag, double[] analog) {
-            super(sensor, timestamp, accel, gyro, baro, mag);
+        public NilsPodAnalogDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro, double baro, double temp, double[] mag, double[] analog) {
+            super(sensor, timestamp, accel, gyro, baro, temp, mag);
 
             if (analog != null) {
-                this.analog = analog;
                 if (analog.length != 3) {
                     throw new IllegalArgumentException("Illegal array size for analog channel values!");
                 }
+                this.analog = analog;
                 hasAnalog = true;
             }
         }
 
-        public NilsPodAnalogDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro, double[] analog) {
-            this(sensor, timestamp, accel, gyro, Double.MIN_VALUE, null, analog);
+        public NilsPodAnalogDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro, double baro, double[] analog) {
+            this(sensor, timestamp, accel, gyro, baro, Double.MIN_VALUE, null, analog);
         }
 
-        public NilsPodAnalogDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro, double baro, double[] analog) {
-            this(sensor, timestamp, accel, gyro, baro, null, analog);
+        public NilsPodAnalogDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro, double baro, double[] mag, double[] analog) {
+            this(sensor, timestamp, accel, gyro, baro, Double.MIN_VALUE, mag, analog);
+        }
+
+        public NilsPodAnalogDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro, double[] analog) {
+            this(sensor, timestamp, accel, gyro, Double.MIN_VALUE, Double.MIN_VALUE, null, analog);
         }
 
         @Override
