@@ -45,7 +45,7 @@ public class SessionHandler {
     }
 
     public Session getSessionById(int sessionId) {
-        return mSessionList.get(sessionId);
+        return mSessionList.get(sessionId - 1);
     }
 
     public int getSessionCount() {
