@@ -107,20 +107,17 @@ public class SessionCsvConverter {
                 enabledSensorList.add(HardwareSensor.TEMPERATURE);
             }
 
-            // Byte 3
+            // Byte 4
             double samplingRate = NilsPodSensor.inferSamplingRate(values[offset++]);
 
-            // Byte 4
+            // Byte 5
             NilsPodTerminationSource terminationSource = NilsPodTerminationSource.inferTerminationSource(values[offset++]);
 
-            // Byte 5
+            // Byte 6
             NilsPodSyncRole syncRole = NilsPodSyncRole.values()[values[offset++]];
 
-            // Byte 6
-            int syncDistance = values[offset++] * 100; // in ms
-
             // Byte 7
-            int syncGroup = values[offset++];
+            int syncDistance = values[offset++] * 100; // in ms
 
             // Byte 8
             int accRange = values[offset++]; // in g
@@ -182,18 +179,18 @@ public class SessionCsvConverter {
                     sb.append(" ");
                 }
             }
-            String rfSyncAddress = sb.toString();
+            String syncAddress = sb.toString();
             offset += 5;
 
             // Byte 46
-            int rfSyncChannel = values[offset++];
+            int syncChannel = values[offset++];
 
             // Bytes 47-48
             String hardwareVersion = Integer.toString(characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset));
             offset += 2;
 
             // Bytes 49-51
-            String firmwareVersion = "v" + values[offset++] + "." + values[offset++] + "." + values[offset];
+            String firmwareVersion = "v" + characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset++) + "." + characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset++) + "." + characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset);
 
             mHeader.setSampleSize(sampleSize);
             mHeader.setSamplingRate(samplingRate);
@@ -201,9 +198,8 @@ public class SessionCsvConverter {
             mHeader.setTerminationSource(terminationSource);
             mHeader.setSyncRole(syncRole);
             mHeader.setSyncDistance(syncDistance);
-            mHeader.setSyncGroup(syncGroup);
             mHeader.setSyncIndex(syncIndexStart, syncIndexEnd);
-            mHeader.setSyncAddress(rfSyncAddress, rfSyncChannel);
+            mHeader.setSyncAddress(syncAddress, syncChannel);
             mHeader.setAccRange(accRange);
             mHeader.setGyroRange(gyroRange);
             mHeader.setSensorPosition(sensorPosition);

@@ -81,9 +81,9 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
      */
     protected static final UUID NILS_POD_SYSTEM_STATE = UUID.fromString("98ff0a0a-770d-4a83-9e9b-ce6bbd75e472");
     /**
-     * UUID for Timer Sampling Config Characteristic (read/write) of NilsPod Sensor
+     * UUID for Sync Config Characteristic (read/write) of NilsPod Sensor
      */
-    protected static final UUID NILS_POD_TS_CONFIG = UUID.fromString("98ff0101-770d-4a83-9e9b-ce6bbd75e472");
+    protected static final UUID NILS_POD_SYNC_CONFIG = UUID.fromString("98ff0101-770d-4a83-9e9b-ce6bbd75e472");
     /**
      * UUID for Sensor Config Characteristic (read/write) of NilsPod Sensor
      */
@@ -96,6 +96,10 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
      * UUID for Date Time Characteristic (write) of NilsPod Sensor
      */
     protected static final UUID NILS_POD_DATE_TIME_CONFIG = UUID.fromString("98ff0404-770d-4a83-9e9b-ce6bbd75e472");
+    /**
+     * UUID for Sampling Rate Characteristic (read/write) of NilsPod Sensor
+     */
+    protected static final UUID NILS_POD_SAMPLING_RATE_CONFIG = UUID.fromString("98ff0505-770d-4a83-9e9b-ce6bbd75e472");
     /**
      * UUID for Firmware Version Characteristic (read) of NilsPod Sensor
      */
@@ -157,19 +161,10 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     public static final String KEY_MOTION_INTERRUPT = "motion_interrupt";
     public static final String KEY_SYNC_ROLE = "sync_role";
     public static final String KEY_SYNC_GROUP = "sync_group";
-    public static final String KEY_SYNC_DISTANCE = "sync_distance";
     public static final String KEY_SENSOR_POSITION = "sensor_position";
     public static final String KEY_OPERATION_MODE = "operation_mode";
 
     protected static HashMap<String, ConfigItem> mConfigMap = new LinkedHashMap<>();
-
-    static {
-        sAvailableSamplingRates.put("102.4 Hz", 102.4);
-        sAvailableSamplingRates.put("204.8 Hz", 204.8);
-        sAvailableSamplingRates.put("256.0 Hz", 256.0);
-        sAvailableSamplingRates.put("512.0 Hz", 512.0);
-        sAvailableSamplingRates.put("1024.0 Hz", 1024.0);
-    }
 
     protected static SparseArray<Double> sSamplingRateCommands = new SparseArray<>();
 
@@ -179,19 +174,18 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         sSamplingRateCommands.put(4, 256.0);
         sSamplingRateCommands.put(5, 204.8);
         sSamplingRateCommands.put(10, 102.4);
+        sSamplingRateCommands.put(20, 51.2);
+        sSamplingRateCommands.put(40, 25.6);
+        sSamplingRateCommands.put(80, 12.8);
+        sSamplingRateCommands.put(160, 6.4);
     }
 
-    protected static HashMap<Integer, String> sSyncDistanceCommands = new LinkedHashMap<>();
-
     static {
-        sSyncDistanceCommands.put(1, "100 ms");
-        sSyncDistanceCommands.put(2, "200 ms");
-        sSyncDistanceCommands.put(3, "300 ms");
-        sSyncDistanceCommands.put(10, "1 s");
-        sSyncDistanceCommands.put(20, "2 s");
-        sSyncDistanceCommands.put(50, "5 s");
-        sSyncDistanceCommands.put(100, "10 s");
-        sSyncDistanceCommands.put(200, "20 s");
+        for (int i = 0; i < sSamplingRateCommands.size(); i++) {
+            int key = sSamplingRateCommands.keyAt(i);
+            double value = sSamplingRateCommands.get(key);
+            sAvailableSamplingRates.put(value + " Hz", value);
+        }
     }
 
 
@@ -229,11 +223,6 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
             new ArrayList<Object>(Arrays.asList(NilsPodSyncGroup.values())),
             ConfigItem.UiType.TYPE_DROPDOWN
     );
-    protected static ConfigItem sSyncDistanceConfig = new ConfigItem(
-            "Sync Distance",
-            new ArrayList<Object>(sSyncDistanceCommands.values()),
-            ConfigItem.UiType.TYPE_DROPDOWN
-    );
     protected static ConfigItem sOperationModeConfig = new ConfigItem(
             "Operation Mode",
             new ArrayList<Object>(Arrays.asList(NilsPodOperationMode.values())),
@@ -252,7 +241,6 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         mConfigMap.put(KEY_SENSOR_POSITION, sSensorPositionConfig);
         mConfigMap.put(KEY_SYNC_ROLE, sSyncRoleConfig);
         mConfigMap.put(KEY_SYNC_GROUP, sSyncGroupConfig);
-        mConfigMap.put(KEY_SYNC_DISTANCE, sSyncDistanceConfig);
         mConfigMap.put(KEY_OPERATION_MODE, sOperationModeConfig);
     }
 
@@ -405,7 +393,8 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         BleGattAttributes.addCharacteristic(NILS_POD_COMMANDS, "NilsPod Sensor Commands");
         BleGattAttributes.addCharacteristic(NILS_POD_STREAMING, "NilsPod Streaming");
         BleGattAttributes.addCharacteristic(NILS_POD_SYSTEM_STATE, "NilsPod System State");
-        BleGattAttributes.addCharacteristic(NILS_POD_TS_CONFIG, "NilsPod Timer Sampling Configuration");
+        BleGattAttributes.addCharacteristic(NILS_POD_SYNC_CONFIG, "NilsPod Sychronization Configuration");
+        BleGattAttributes.addCharacteristic(NILS_POD_SAMPLING_RATE_CONFIG, "NilsPod Sampling Rate Configuration");
         BleGattAttributes.addCharacteristic(NILS_POD_SENSOR_CONFIG, "NilsPod Sensor Configuration");
         BleGattAttributes.addCharacteristic(NILS_POD_SYSTEM_SETTINGS_CONFIG, "NilsPod System Settings Configuration");
         BleGattAttributes.addCharacteristic(NILS_POD_DATE_TIME_CONFIG, "NilsPod Date Time Configuration");
@@ -651,9 +640,9 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
                     handleSensorException(e);
                 }
                 return true;
-            } else if (NILS_POD_TS_CONFIG.equals(characteristic.getUuid())) {
+            } else if (NILS_POD_SYNC_CONFIG.equals(characteristic.getUuid())) {
                 try {
-                    extractTsConfig(characteristic);
+                    extractSyncConfig(characteristic);
                 } catch (SensorException e) {
                     handleSensorException(e);
                 }
@@ -672,6 +661,12 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
                     handleSensorException(e);
                 }
                 return true;
+            } else if (NILS_POD_SAMPLING_RATE_CONFIG.equals(characteristic.getUuid())) {
+                try {
+                    extractSamplingRate(characteristic);
+                } catch (SensorException e) {
+                    handleSensorException(e);
+                }
             }
         }
         return false;
@@ -683,7 +678,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         if (NILS_POD_SENSOR_CONFIG.equals(characteristic.getUuid())) {
             // sensor config was changed from app side => read characteristic to update
             readSensorConfig();
-        } else if (NILS_POD_TS_CONFIG.equals(characteristic.getUuid())) {
+        } else if (NILS_POD_SYNC_CONFIG.equals(characteristic.getUuid())) {
             readTsConfig();
         } else if (NILS_POD_SYSTEM_SETTINGS_CONFIG.equals(characteristic.getUuid())) {
             readSystemSettings();
@@ -756,34 +751,30 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     }
 
 
-    protected synchronized void extractTsConfig(BluetoothGattCharacteristic characteristic) throws SensorException {
+    protected synchronized void extractSyncConfig(BluetoothGattCharacteristic characteristic) throws SensorException {
+
+
         int offset = 0;
         byte[] values = characteristic.getValue();
         NilsPodSyncRole syncRole;
-        int syncDistance;
         NilsPodSyncGroup syncGroup;
 
+        Log.e(TAG, Arrays.toString(values));
+
         try {
-            double samplingRate = inferSamplingRate(values[offset++]);
-            requestSamplingRateChange(samplingRate);
             syncRole = NilsPodSyncRole.values()[values[offset++]];
-            syncDistance = values[offset++];
-            syncGroup = NilsPodSyncGroup.values()[values[offset]];
+            syncGroup = NilsPodSyncGroup.inferSyncGroup(values[offset]);
         } catch (Exception e) {
             e.printStackTrace();
             throw new SensorException(SensorException.SensorExceptionType.readConfigError);
         }
 
-        Log.d(TAG, ">>>> Timer Sampling State:");
-        Log.d(TAG, "\tSampling Rate: " + mSamplingRate);
+        Log.d(TAG, ">>>> Sync Config:");
         Log.d(TAG, "\tSync Role: " + syncRole);
-        Log.d(TAG, "\tSync Distance: " + syncDistance * 100);
         Log.d(TAG, "\tSync Group: " + syncGroup);
 
-        mCurrentConfigMap.put(KEY_SAMPLING_RATE, getSamplingRateString(mSamplingRate));
         mCurrentConfigMap.put(KEY_SYNC_ROLE, syncRole);
         mCurrentConfigMap.put(KEY_SYNC_GROUP, syncGroup);
-        mCurrentConfigMap.put(KEY_SYNC_DISTANCE, sSyncDistanceCommands.get(syncDistance));
     }
 
     protected synchronized void extractSensorConfig(BluetoothGattCharacteristic characteristic) throws SensorException {
@@ -864,6 +855,15 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         mCurrentConfigMap.put(KEY_SENSOR_POSITION, mSensorPosition);
     }
 
+    protected synchronized void extractSamplingRate(BluetoothGattCharacteristic characteristic) throws SensorException {
+        double samplingRate = inferSamplingRate(characteristic.getValue()[0]);
+        requestSamplingRateChange(samplingRate);
+
+        Log.d(TAG, ">>>> Sampling Rate:");
+        Log.d(TAG, "\tSampling Rate: " + mSamplingRate);
+        mCurrentConfigMap.put(KEY_SAMPLING_RATE, getSamplingRateString(mSamplingRate));
+    }
+
 
     public boolean isSensorEnabled(HardwareSensor sensor) {
         return mEnabledSensorList.contains(sensor);
@@ -881,7 +881,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
     public void readTsConfig() {
         if (getConfigurationService() != null) {
-            BluetoothGattCharacteristic configChara = getConfigurationService().getCharacteristic(NILS_POD_TS_CONFIG);
+            BluetoothGattCharacteristic configChara = getConfigurationService().getCharacteristic(NILS_POD_SYNC_CONFIG);
             readCharacteristic(configChara);
         }
     }

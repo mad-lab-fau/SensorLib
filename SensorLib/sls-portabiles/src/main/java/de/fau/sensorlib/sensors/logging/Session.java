@@ -8,6 +8,8 @@
 
 package de.fau.sensorlib.sensors.logging;
 
+import android.bluetooth.BluetoothGattCharacteristic;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -32,13 +34,12 @@ public class Session {
     private long mDuration;
 
     private int mStartPage;
-    private int mEndPage;
 
     private double mSamplingRate;
     private NilsPodTerminationSource mTerminationSource;
 
     private Date mStartTime;
-    private int mSampleSize;
+    private Date mStopTime;
 
     private SimpleDateFormat mStartTimeFormat = new SimpleDateFormat("EEE, dd.MM.yyyy HH:mm", Locale.getDefault());
     private SimpleDateFormat mSessionTimeFormat = new SimpleDateFormat("yyyyMMdd_HHmm", Locale.getDefault());
@@ -46,19 +47,31 @@ public class Session {
 
     public Session(byte[] sessionPacket) {
         int offset = 0;
-        mStartPage = ((sessionPacket[offset++] & 0xFF) << 16) | ((sessionPacket[offset++] & 0xFF) << 8) | (sessionPacket[offset++] & 0xFF);
-        mEndPage = ((sessionPacket[offset++] & 0xFF) << 16) | ((sessionPacket[offset++] & 0xFF) << 8) | (sessionPacket[offset++] & 0xFF);
+        BluetoothGattCharacteristic chara = new BluetoothGattCharacteristic(null, 0, 0);
+        chara.setValue(sessionPacket);
 
-        mSamplingRate = AbstractNilsPodSensor.inferSamplingRate(sessionPacket[offset] & 0x0F);
-        mTerminationSource = NilsPodTerminationSource.inferTerminationSource(sessionPacket[offset++] & 0xF0);
+        // Bytes 0-3
+        mStartPage = chara.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, offset);
+        offset += 4;
 
-        int tmpTime = ((sessionPacket[offset++] & 0xFF) << 24) | ((sessionPacket[offset++] & 0xFF) << 16) | ((sessionPacket[offset++] & 0xFF) << 8) | (sessionPacket[offset++] & 0xFF);
+        // Bytes 4-7
+        int tmpTime = chara.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, offset);
         mStartTime = new Date(((long) tmpTime) * 1000);
+        offset += 4;
 
-        mSampleSize = (sessionPacket[offset] & 0xFF);
+        // Bytes 8-11
+        tmpTime = chara.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, offset);
+        offset += 4;
+        mStopTime = new Date(((long) tmpTime) * 1000);
 
-        mSessionSize = (mEndPage - mStartPage + 1) * PAGE_SIZE;
-        mDuration = (long) (((double) getSessionSize()) / getSampleSize() / getSamplingRate());
+        // Bytes 12-15
+        mSessionSize = chara.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, offset);
+        offset += 4;
+
+        mSamplingRate = AbstractNilsPodSensor.inferSamplingRate(sessionPacket[offset++]);
+        mTerminationSource = NilsPodTerminationSource.inferTerminationSource(sessionPacket[offset]);
+
+        mDuration = mStopTime.getTime() - mStartTime.getTime();
     }
 
     public void setSessionId(int sessionId) {
@@ -82,14 +95,10 @@ public class Session {
     }
 
     public String getDurationString() {
-        long hours = TimeUnit.SECONDS.toHours(mDuration);
-        long minutes = TimeUnit.SECONDS.toMinutes(mDuration) - TimeUnit.HOURS.toMinutes(hours);
-        long seconds = TimeUnit.SECONDS.toSeconds(mDuration) - TimeUnit.MINUTES.toSeconds(minutes) - TimeUnit.HOURS.toSeconds(hours);
+        long hours = TimeUnit.MILLISECONDS.toHours(mDuration);
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(mDuration) - TimeUnit.HOURS.toMinutes(hours);
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(mDuration) - TimeUnit.MINUTES.toSeconds(minutes) - TimeUnit.HOURS.toSeconds(hours);
         return String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, seconds);
-    }
-
-    public int getSampleSize() {
-        return mSampleSize;
     }
 
     public NilsPodTerminationSource getTerminationSource() {
@@ -114,7 +123,7 @@ public class Session {
     }
 
     public String toDebugString() {
-        return "<Session #" + getSessionId() + "> [" + mStartPage + "-" + mEndPage + "] @ " +
+        return "<Session #" + getSessionId() + "> [" + mStartPage + "-" + (mStartPage + (mSessionSize / PAGE_SIZE)) + "] @ " +
                 getStartTime() + " | fs=" + getSamplingRate() + " Hz, duration: " + getDurationString() +
                 " (" + getSessionSize() + " Byte)";
     }

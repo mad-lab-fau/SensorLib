@@ -36,7 +36,6 @@ public class SessionHeader {
 
     private NilsPodSyncRole sync_role = NilsPodSyncRole.SYNC_ROLE_SLAVE;
     private int sync_distance_ms;
-    private int sync_group;
     private String sync_address = "n/a";
     private int sync_channel;
     private int sync_index_start;
@@ -100,14 +99,6 @@ public class SessionHeader {
 
     public void setSyncDistance(int syncDistance) {
         this.sync_distance_ms = syncDistance;
-    }
-
-    public int getRfGroup() {
-        return sync_group;
-    }
-
-    public void setSyncGroup(int syncGroup) {
-        this.sync_group = syncGroup;
     }
 
     public void setSyncIndex(int syncIndexStart, int syncIndexEnd) {

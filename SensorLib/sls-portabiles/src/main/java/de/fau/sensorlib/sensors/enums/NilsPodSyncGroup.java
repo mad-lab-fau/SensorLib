@@ -21,29 +21,38 @@ public enum NilsPodSyncGroup {
     SYNC_GROUP_7(7, 39, new byte[]{(byte) 0xFE, (byte) 0x47, (byte) 0xA2, (byte) 0xD4, (byte) 0x1C}),
     SYNC_GROUP_8(8, 41, new byte[]{(byte) 0x3D, (byte) 0xFC, (byte) 0xD0, (byte) 0x3C, (byte) 0xE7}),
     SYNC_GROUP_9(9, 43, new byte[]{(byte) 0x7C, (byte) 0x6F, (byte) 0xE0, (byte) 0x2B, (byte) 0x9F}),
-    SYNC_GROUP_UNKNOWN(-1, -1, new byte[]{0x00, 0x00, 0x00, 0x00});
+    SYNC_GROUP_UNKNOWN(-1, -1, new byte[]{0x00, 0x00, 0x00, 0x00, 0x00});
 
     private int syncGroup;
-    private int rfChannel;
-    private byte[] rfAddress;
+    private int syncChannel;
+    private byte[] syncAddress;
 
-    NilsPodSyncGroup(int syncGroup, int rfChannel, byte[] rfAddress) {
+    NilsPodSyncGroup(int syncGroup, int syncChannel, byte[] syncAddress) {
         this.syncGroup = syncGroup;
-        this.rfChannel = rfChannel;
-        this.rfAddress = rfAddress;
+        this.syncChannel = syncChannel;
+        this.syncAddress = syncAddress;
     }
 
-    public static NilsPodSyncGroup inferSyncGroup(int syncGroup) {
-        if (syncGroup < values().length - 1) {
-            return values()[syncGroup];
-        } else {
-            return SYNC_GROUP_UNKNOWN;
+    public static NilsPodSyncGroup inferSyncGroup(int syncChannel) {
+        for (NilsPodSyncGroup syncGroup : values()) {
+            if (syncGroup.getSyncChannel() == syncChannel) {
+                return syncGroup;
+            }
         }
+        return SYNC_GROUP_UNKNOWN;
+    }
+
+    public int getSyncChannel() {
+        return syncChannel;
+    }
+
+    public byte[] getSyncAddress() {
+        return syncAddress;
     }
 
 
     @Override
     public String toString() {
-        return "[" + syncGroup + "]: Channel " + rfChannel + " @ " + Arrays.toString(rfAddress);
+        return "[" + syncGroup + "]: Channel " + syncChannel + " @ " + Arrays.toString(syncAddress);
     }
 }
