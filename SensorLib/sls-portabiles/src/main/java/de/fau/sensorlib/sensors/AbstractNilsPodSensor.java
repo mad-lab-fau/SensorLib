@@ -667,6 +667,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
                 } catch (SensorException e) {
                     handleSensorException(e);
                 }
+                return true;
             }
         }
         return false;
@@ -675,13 +676,9 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     @Override
     protected void onNewCharacteristicWrite(BluetoothGattCharacteristic characteristic, int status) {
         super.onNewCharacteristicWrite(characteristic, status);
-        if (NILS_POD_SENSOR_CONFIG.equals(characteristic.getUuid())) {
+        if (NILS_POD_SENSOR_CONFIG.equals(characteristic.getUuid()) || NILS_POD_SYNC_CONFIG.equals(characteristic.getUuid()) || NILS_POD_SYSTEM_SETTINGS_CONFIG.equals(characteristic.getUuid()) || NILS_POD_SAMPLING_RATE_CONFIG.equals(characteristic.getUuid())) {
             // sensor config was changed from app side => read characteristic to update
-            readSensorConfig();
-        } else if (NILS_POD_SYNC_CONFIG.equals(characteristic.getUuid())) {
-            readTsConfig();
-        } else if (NILS_POD_SYSTEM_SETTINGS_CONFIG.equals(characteristic.getUuid())) {
-            readSystemSettings();
+            readConfigCharacteristic(characteristic.getUuid());
         }
     }
 
@@ -869,37 +866,16 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         return mEnabledSensorList.contains(sensor);
     }
 
-    /**
-     * Sends a read request to the sensor to check which HardwareSensors are currently enabled.
-     */
-    public void readSensorConfig() {
-        if (getConfigurationService() != null) {
-            BluetoothGattCharacteristic configChara = getConfigurationService().getCharacteristic(NILS_POD_SENSOR_CONFIG);
-            readCharacteristic(configChara);
-        }
-    }
-
-    public void readTsConfig() {
-        if (getConfigurationService() != null) {
-            BluetoothGattCharacteristic configChara = getConfigurationService().getCharacteristic(NILS_POD_SYNC_CONFIG);
-            readCharacteristic(configChara);
-        }
-    }
-
-    public void readSystemSettings() {
-        if (getConfigurationService() != null) {
-            BluetoothGattCharacteristic configChara = getConfigurationService().getCharacteristic(NILS_POD_SYSTEM_SETTINGS_CONFIG);
-            readCharacteristic(configChara);
-        }
-    }
 
     /**
-     * Sends a read request to the sensor to read the current system state.
+     * Sends a read request to the sensor to read the specified characteristic.
      */
-    public void readSystemState() {
+    public void readConfigCharacteristic(UUID uuid) {
         if (getConfigurationService() != null) {
-            BluetoothGattCharacteristic systemStateChara = getConfigurationService().getCharacteristic(NILS_POD_SYSTEM_STATE);
-            readCharacteristic(systemStateChara);
+            BluetoothGattCharacteristic configChara = getConfigurationService().getCharacteristic(uuid);
+            if (configChara != null) {
+                readCharacteristic(configChara);
+            }
         }
     }
 
