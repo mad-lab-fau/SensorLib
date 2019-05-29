@@ -78,7 +78,7 @@ public abstract class AbstractSensor extends SensorInfo implements Serializable 
     /**
      * The default internal handler class used if no custom class is implemented.
      */
-    protected static class InternalHandler extends Handler implements Serializable{
+    protected static class InternalHandler extends Handler implements Serializable {
         private AbstractSensor mSensor;
 
         public InternalHandler(AbstractSensor sensor) {

@@ -144,7 +144,7 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
         onConfigChanged();
     }
 
-    public void addSensor(AbstractSensor sensor){
+    public void addSensor(AbstractSensor sensor) {
         mAdapter.addSensor(sensor);
     }
 
