@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -51,7 +52,7 @@ import no.nordicsemi.android.dfu.DfuProgressListenerAdapter;
 import no.nordicsemi.android.dfu.DfuServiceInitiator;
 import no.nordicsemi.android.dfu.DfuServiceListenerHelper;
 
-public abstract class AbstractNilsPodSensor extends GenericBleSensor implements Recordable, Resettable, FirmwareUpgradable {
+public abstract class AbstractNilsPodSensor extends GenericBleSensor implements Recordable, Resettable, FirmwareUpgradable, Serializable {
 
     public static final String TAG = AbstractNilsPodSensor.class.getSimpleName();
 
@@ -972,7 +973,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     /**
      * Data frame to store data received from the Hoop Sensor
      */
-    public static class GenericNilsPodDataFrame extends SensorDataFrame implements AccelDataFrame, GyroDataFrame {
+    public static class GenericNilsPodDataFrame extends SensorDataFrame implements AccelDataFrame, GyroDataFrame, Serializable {
 
         protected double[] accel;
         protected double[] gyro;

@@ -117,6 +117,17 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
         }
     }
 
+    /*public void onConfigChanged() {
+        ImageView configCheckView = findViewById(R.id.tv_config_check);
+        if (mConfigCheckWarning) {
+            configCheckView.setVisibility(VISIBLE);
+        } else {
+            configCheckView.setVisibility(INVISIBLE);
+        }
+
+        mAdapter.notifyDataSetChanged();
+    }*/
+
     public void onConfigChanged() {
         ImageView configCheckView = findViewById(R.id.tv_config_check);
         if (mConfigCheckWarning) {
@@ -132,6 +143,16 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
         mConfigCheckWarning = configCheckWarning;
         onConfigChanged();
     }
+
+    public void addSensor(AbstractSensor sensor){
+        mAdapter.addSensor(sensor);
+    }
+
+    /*public void setConfigCheckWarning(boolean[] configCheckWarning) {
+        mConfigCheckWarning = configCheckWarning;
+        //onConfigChanged();
+        mAdapter.notifyDataSetChanged();
+    }*/
 
 
     private class SensorInfoGridAdapter extends Adapter<SensorInfoViewHolder> implements SensorInfoViewHolder.ItemClickListener {
@@ -198,13 +219,13 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
             View layout = LayoutInflater.from(mContext).inflate(R.layout.item_sensor_info_bar, parent, false);
 
 
-            if (mConfigCheckWarning) {
+            /*if (mConfigCheckWarning) {
                 ImageView configCheck = layout.findViewById(R.id.tv_config_check);
                 configCheck.setVisibility(View.VISIBLE);
             } else {
                 ImageView configCheck = layout.findViewById(R.id.tv_config_check);
                 configCheck.setVisibility(View.INVISIBLE);
-            }
+            }*/
 
             return new SensorInfoViewHolder(mContext, layout, this);
         }
@@ -215,6 +236,7 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
             holder.updateBatteryLevel(mAttachedSensors.get(position).getBatteryLevel());
             holder.updateAdditionalInfo(mAdditionalInfos.get(position));
             holder.setConfigCheckWarning(mConfigCheckWarning);
+            //holder.updateConfigCheckWarning(mConfigCheckWarning[position]);
         }
 
         @Override
@@ -295,6 +317,14 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
             }
 
         }
+
+        /*public void updateConfigCheckWarning(boolean configCheck){
+            if (configCheck) {
+                mConfigCheckWarningImageView.setVisibility(View.VISIBLE);
+            } else {
+                mConfigCheckWarningImageView.setVisibility(View.INVISIBLE);
+            }
+        }*/
 
 
         @Override

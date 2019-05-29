@@ -8,9 +8,10 @@
 
 package de.fau.sensorlib.widgets.config;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class ConfigItem {
+public class ConfigItem implements Serializable {
 
     // TODO find better name
     public enum UiType {
