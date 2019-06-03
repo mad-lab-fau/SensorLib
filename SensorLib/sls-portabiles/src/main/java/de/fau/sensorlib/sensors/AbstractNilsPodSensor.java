@@ -750,14 +750,10 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
 
     protected synchronized void extractSyncConfig(BluetoothGattCharacteristic characteristic) throws SensorException {
-
-
         int offset = 0;
         byte[] values = characteristic.getValue();
         NilsPodSyncRole syncRole;
         NilsPodSyncGroup syncGroup;
-
-        Log.e(TAG, Arrays.toString(values));
 
         try {
             syncRole = NilsPodSyncRole.values()[values[offset++]];
