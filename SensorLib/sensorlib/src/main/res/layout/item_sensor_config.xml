@@ -2,51 +2,51 @@
 
 
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-                                   xmlns:card_view="http://schemas.android.com/apk/res-auto"
-                                   android:layout_width="match_parent"
-                                   android:layout_height="wrap_content"
-                                   android:layout_weight="9"
-                                   android:layout_margin="10dp"
-                                   card_view:cardCornerRadius="@dimen/cardview_default_radius"
-                                   card_view:cardElevation="@dimen/cardview_default_elevation">
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="10dp"
+    android:layout_weight="9"
+    card_view:cardCornerRadius="@dimen/cardview_default_radius"
+    card_view:cardElevation="@dimen/cardview_default_elevation">
 
     <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_margin="8dp">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="8dp">
 
         <TextView
-                android:id="@+id/tv_config_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentTop="true"
-                android:textSize="20sp"
-                android:textStyle="bold"/>
+            android:id="@+id/tv_config_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
         <ImageView
-                android:id="@+id/tv_config_check"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_alignParentEnd="true"
-                android:layout_below="@+id/check"
-                android:visibility="invisible"
-                android:src="@drawable/caution"/>
-        <CheckBox
-                android:id="@+id/check"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentTop="true"
-                android:visibility="invisible"
-                android:layout_width="24dp"
-                android:layout_height="24dp"/>
+            android:id="@+id/tv_config_check"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_below="@+id/check"
+            android:layout_alignParentEnd="true"
+            android:src="@drawable/caution"
+            android:visibility="invisible" />
 
+        <CheckBox
+            android:id="@+id/check"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:visibility="invisible" />
 
         <FrameLayout
-                android:id="@+id/config_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/tv_config_title"
-                android:layout_centerHorizontal="true"/>
+            android:id="@+id/config_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tv_config_title"
+            android:layout_centerHorizontal="true" />
 
     </RelativeLayout>
 
