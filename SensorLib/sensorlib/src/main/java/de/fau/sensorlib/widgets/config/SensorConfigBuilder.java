@@ -9,6 +9,7 @@
 package de.fau.sensorlib.widgets.config;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -31,11 +32,20 @@ public class SensorConfigBuilder {
 
     private static final String TAG = SensorConfigBuilder.class.getSimpleName();
 
-    interface OnSensorConfigSelectedListener {
+    public interface OnSensorConfigSelectedListener {
         void onConfigItemSelected(String key, Object item);
     }
 
-    public class DropdownConfig extends RelativeLayout implements AdapterView.OnItemSelectedListener {
+    public abstract class BaseConfig extends RelativeLayout {
+
+        public BaseConfig(Context context) {
+            super(context);
+        }
+
+        public abstract void setConfig(String key, ConfigItem configItem, Object defaultConfig);
+    }
+
+    public class DropdownConfig extends BaseConfig implements AdapterView.OnItemSelectedListener {
 
         private String mKey;
         private Spinner mSpinner;
@@ -49,13 +59,13 @@ public class SensorConfigBuilder {
             mSpinner.setOnItemSelectedListener(this);
         }
 
+        @Override
         public void setConfig(String key, ConfigItem configItem, Object defaultConfig) {
             mKey = key;
             mConfigItem = configItem;
             mDefaultConfig = defaultConfig;
             mSpinner.setAdapter(new ArrayAdapter<>(getContext(), R.layout.item_dropdown, configItem.getConfigValues()));
             mSpinner.setSelection(configItem.getConfigValues().indexOf(defaultConfig));
-
         }
 
         @Override
@@ -69,7 +79,7 @@ public class SensorConfigBuilder {
         }
     }
 
-    public class SelectConfig extends RelativeLayout implements RadioGroup.OnCheckedChangeListener {
+    public class SelectConfig extends BaseConfig implements RadioGroup.OnCheckedChangeListener {
 
         private String mKey;
         private RadioGroup mRadioGroup;
@@ -83,6 +93,7 @@ public class SensorConfigBuilder {
             mRadioGroup.setOnCheckedChangeListener(this);
         }
 
+        @Override
         public void setConfig(String key, ConfigItem configItem, Object defaultConfig) {
             mKey = key;
             mConfigItem = configItem;
@@ -99,13 +110,14 @@ public class SensorConfigBuilder {
 
         @Override
         public void onCheckedChanged(RadioGroup group, int checkedId) {
+            Log.e(TAG, "ON CHECKED CHANGED");
             RadioButton radioButton = group.findViewById(checkedId);
             int idx = mConfigValuesString.indexOf(radioButton.getText().toString());
             mListener.onConfigItemSelected(mKey, mConfigItem.getConfigValues().get(idx));
         }
     }
 
-    public class MultiSelectConfig extends RelativeLayout {
+    public class MultiSelectConfig extends BaseConfig {
 
         private String mKey;
         private LinearLayout mCheckboxContainer;
@@ -118,6 +130,7 @@ public class SensorConfigBuilder {
             mCheckboxContainer = findViewById(R.id.checkbox_container);
         }
 
+        @Override
         public void setConfig(String key, ConfigItem configItem, Object defaultConfig) {
             mKey = key;
             List<Object> defaultConfigList = (List<Object>) defaultConfig;
@@ -154,24 +167,24 @@ public class SensorConfigBuilder {
     }
 
 
-    public void buildConfigView(SensorConfigDialog.SensorConfigViewHolder viewHolder, ConfigItem item, Object defaultConfig) {
-        viewHolder.setTitle(item.getTitle());
+    public BaseConfig buildConfigView(String key, ConfigItem item, Object defaultConfig) {
+        BaseConfig config = null;
+
         switch (item.getType()) {
             case TYPE_DROPDOWN:
-                DropdownConfig dropdownConfig = new DropdownConfig(mContext);
-                dropdownConfig.setConfig(viewHolder.getKey(), item, defaultConfig);
-                viewHolder.setConfigLayout(dropdownConfig);
+                config = new DropdownConfig(mContext);
+                config.setConfig(key, item, defaultConfig);
                 break;
             case TYPE_SELECT:
-                SelectConfig selectConfig = new SelectConfig(mContext);
-                selectConfig.setConfig(viewHolder.getKey(), item, defaultConfig);
-                viewHolder.setConfigLayout(selectConfig);
+                config = new SelectConfig(mContext);
+                config.setConfig(key, item, defaultConfig);
                 break;
             case TYPE_MULTI_SELECT:
-                MultiSelectConfig multiSelectConfig = new MultiSelectConfig(mContext);
-                multiSelectConfig.setConfig(viewHolder.getKey(), item, defaultConfig);
-                viewHolder.setConfigLayout(multiSelectConfig);
+                config = new MultiSelectConfig(mContext);
+                config.setConfig(key, item, defaultConfig);
                 break;
         }
+        return config;
     }
+
 }

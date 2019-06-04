@@ -15,12 +15,20 @@
         android:layout_height="match_parent"
         android:layout_margin="8dp">
 
+        <CheckBox
+            android:id="@+id/check"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@id/tv_config_title"
+            android:layout_centerVertical="true"
+            android:visibility="gone" />
+
         <TextView
             android:id="@+id/tv_config_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
+            android:layout_toEndOf="@id/check"
             android:textSize="20sp"
             android:textStyle="bold" />
 
@@ -28,25 +36,19 @@
             android:id="@+id/tv_config_check"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_below="@+id/check"
-            android:layout_alignParentEnd="true"
-            android:src="@drawable/caution"
-            android:visibility="invisible" />
-
-        <CheckBox
-            android:id="@+id/check"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
             android:layout_alignParentTop="true"
             android:layout_alignParentEnd="true"
-            android:visibility="invisible" />
+            android:layout_marginTop="8dp"
+            android:src="@drawable/caution"
+            android:visibility="gone" />
 
         <FrameLayout
             android:id="@+id/config_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/tv_config_title"
-            android:layout_centerHorizontal="true" />
+            android:layout_centerHorizontal="true"
+            android:layout_toEndOf="@id/check" />
 
     </RelativeLayout>
 
