@@ -167,6 +167,7 @@ public class SensorConfigDialog extends DialogFragment implements View.OnClickLi
         public void onBindViewHolder(@NonNull SensorConfigViewHolder holder, int position) {
             holder.setKey(mConfigKeys.get(position));
             ConfigItem item = mConfigItems.get(position);
+            holder.setTitle(item.getTitle());
             holder.setConfigLayout(mSensorConfigBuilder.buildConfigView(holder.getKey(), item, mDefaultConfigValues.get(mConfigKeys.get(position))));
         }
 
