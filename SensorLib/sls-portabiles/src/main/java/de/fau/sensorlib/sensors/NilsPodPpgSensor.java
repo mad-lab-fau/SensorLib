@@ -16,6 +16,7 @@ import java.util.Arrays;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.PpgDataFrame;
+import de.fau.sensorlib.enums.HardwareSensor;
 
 
 /**
@@ -47,40 +48,58 @@ public class NilsPodPpgSensor extends NilsPodSensor {
         // iterate over data packets
         for (int i = 0; i < values.length; i += mPacketSize) {
             int offset = i;
-            double[] gyro = new double[3];
-            double[] accel = new double[3];
-            double baro;
-            double[] ppg = new double[2];
+            double[] gyro = null;
+            double[] accel = null;
+            double baro = Double.MIN_VALUE;
+            //double[] ppg = new double[2];
+            double ppg = Double.MIN_VALUE;
             long localCounter;
 
-            // extract gyroscope data
-            for (int j = 0; j < 3; j++) {
-                gyro[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
-                offset += 2;
+            if (isSensorEnabled(HardwareSensor.GYROSCOPE)) {
+                // extract gyroscope data
+                gyro = new double[3];
+                for (int j = 0; j < 3; j++) {
+                    gyro[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
+                    offset += 2;
+                }
             }
-            // extract accelerometer data
-            for (int j = 0; j < 3; j++) {
-                accel[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
+
+            if (isSensorEnabled(HardwareSensor.ACCELEROMETER)) {
+                // extract accelerometer data
+                accel = new double[3];
+                for (int j = 0; j < 3; j++) {
+                    accel[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
+                    offset += 2;
+                }
+            }
+
+            if (isSensorEnabled(HardwareSensor.BAROMETER)) {
+                baro = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
+                baro = (baro + 101325.0) / 100.0;
                 offset += 2;
             }
 
-            baro = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
-            baro = (baro + 101325.0) / 100.0;
-            offset += 2;
-
-            for (int j = 0; j < 2; j++) {
-                ppg[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
-                offset += 2;
+            //for (int j = 0; j < 2; j++) {
+            if (isSensorEnabled(HardwareSensor.PPG)) {
+                ppg = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT32, offset);
+                offset += 4;
+                //}
             }
 
-            localCounter = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, offset);
+            localCounter = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, i + mPacketSize - 2);
 
             // check if packets have been lost
             if ((localCounter - lastCounter) > 1) {
                 Log.w(TAG, this + ": BLE Packet Loss!");
             }
-            
-            NilsPodPpgDataFrame df = new NilsPodPpgDataFrame(this, localCounter, accel, gyro, baro, ppg);
+
+            long timestamp = globalCounter * (2 << 15) + localCounter;
+            NilsPodDataFrame df;
+            if (isSensorEnabled(HardwareSensor.PPG)) {
+                df = new NilsPodPpgDataFrame(this, timestamp, accel, gyro, baro, new double[]{ppg, ppg});
+            } else {
+                df = new NilsPodDataFrame(this, timestamp, accel, gyro, baro);
+            }
 
             Log.d(TAG, df.toString());
             // send new data to the SensorDataProcessor
