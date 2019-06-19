@@ -64,11 +64,11 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
      * UUID for Configuration Service of NilsPod Sensor
      */
     protected static final UUID NILS_POD_CONFIGURATION_SERVICE = UUID.fromString("98ff0000-770d-4a83-9e9b-ce6bbd75e472");
-
     /**
      * UUID for Secure DFU (Device Firmware Update) Service of NilsPod Sensor
      */
     protected static final UUID NILS_POD_SECURE_DFU_SERVICE = UUID.fromString("0000fe59-0000-1000-8000-00805f9b34fb");
+
     /**
      * UUID for Config Characteristic (write) of NilsPod Sensor
      */
@@ -713,12 +713,10 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     protected synchronized void extractSystemState(BluetoothGattCharacteristic characteristic) throws SensorException {
         int offset = 0;
         byte[] values = characteristic.getValue();
-        boolean connectionState;
-        NilsPodOperationState operationState;
-        NilsPodPowerState powerState;
-        int errorFlags;
-        // no longer in latest firmware version
-        //int activityLabel;
+        boolean connectionState = false;
+        NilsPodOperationState operationState = NilsPodOperationState.IDLE;
+        NilsPodPowerState powerState = NilsPodPowerState.NO_POWER;
+        int errorFlags = 0;
 
         try {
             connectionState = values[offset++] == 1;
@@ -729,31 +727,34 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
             // call callback
             onOperationStateChanged(oldState, mOperationState);
             powerState = NilsPodPowerState.inferPowerState(values[offset++]);
-            errorFlags = values[offset++];
+            errorFlags = values[offset++] & 0xFF;
             mBatteryLevel = values[offset];
-            //activityLabel = values[offset];
         } catch (Exception e) {
             e.printStackTrace();
             throw new SensorException(SensorException.SensorExceptionType.readStateError);
+        } finally {
+            Log.d(TAG, ">>>> System State:");
+            Log.d(TAG, "\tConnection State: " + connectionState);
+            Log.d(TAG, "\tOperation State: " + operationState);
+            Log.d(TAG, "\tWireless Power State: " + powerState);
+            Log.d(TAG, "\tError Flags: " + Integer.toBinaryString(errorFlags));
+            Log.d(TAG, "\tBattery Level: " + mBatteryLevel);
         }
+
         if (errorFlags > 0) {
+            if ((errorFlags & (0x01 << 7)) != 0) {
+                throw new SensorException(SensorException.SensorExceptionType.powerLossWarning, errorFlags);
+            }
             throw new SensorException(SensorException.SensorExceptionType.hardwareSensorError, errorFlags);
         }
-        Log.d(TAG, ">>>> System State:");
-        Log.d(TAG, "\tConnection State: " + connectionState);
-        Log.d(TAG, "\tOperation State: " + operationState);
-        Log.d(TAG, "\tWireless Power State: " + powerState);
-        Log.d(TAG, "\tError Flags: " + Integer.toBinaryString(errorFlags));
-        Log.d(TAG, "\tBattery Level: " + mBatteryLevel);
-        //Log.d(TAG, "\tActivity Label: " + activityLabel);
     }
 
 
     protected synchronized void extractSyncConfig(BluetoothGattCharacteristic characteristic) throws SensorException {
         int offset = 0;
         byte[] values = characteristic.getValue();
-        NilsPodSyncRole syncRole;
-        NilsPodSyncGroup syncGroup;
+        NilsPodSyncRole syncRole = NilsPodSyncRole.SYNC_ROLE_DISABLED;
+        NilsPodSyncGroup syncGroup = NilsPodSyncGroup.SYNC_GROUP_UNKNOWN;
 
         try {
             syncRole = NilsPodSyncRole.values()[values[offset++]];
@@ -761,11 +762,11 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         } catch (Exception e) {
             e.printStackTrace();
             throw new SensorException(SensorException.SensorExceptionType.readConfigError);
+        } finally {
+            Log.d(TAG, ">>>> Sync Config:");
+            Log.d(TAG, "\tSync Role: " + syncRole);
+            Log.d(TAG, "\tSync Group: " + syncGroup);
         }
-
-        Log.d(TAG, ">>>> Sync Config:");
-        Log.d(TAG, "\tSync Role: " + syncRole);
-        Log.d(TAG, "\tSync Group: " + syncGroup);
 
         mCurrentConfigMap.put(KEY_SYNC_ROLE, syncRole);
         mCurrentConfigMap.put(KEY_SYNC_GROUP, syncGroup);
@@ -775,7 +776,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         int offset = 0;
         byte[] values = characteristic.getValue();
         int sensors;
-        int sampleSize;
+        int sampleSize = -1;
         mEnabledSensorList = new ArrayList<>();
 
         try {
@@ -809,14 +810,15 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         } catch (Exception e) {
             e.printStackTrace();
             throw new SensorException(SensorException.SensorExceptionType.readConfigError);
+        } finally {
+            Log.d(TAG, ">>>> Sensor Config:");
+            Log.d(TAG, "\tEnabled Sensors: " + mEnabledSensorList);
+            Log.d(TAG, "\tSample Size: " + sampleSize);
         }
 
-        Log.d(TAG, ">>>> Sensor Config:");
-        Log.d(TAG, "\tEnabled Sensors: " + mEnabledSensorList);
         EnumSet<HardwareSensor> set = EnumSet.noneOf(HardwareSensor.class);
         set.addAll(mEnabledSensorList);
         useHardwareSensors(set);
-        Log.d(TAG, "\tSample Size: " + sampleSize);
         mPacketSize = sampleSize;
         mCurrentConfigMap.put(KEY_HARDWARE_SENSORS, mEnabledSensorList);
     }
@@ -837,12 +839,12 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         } catch (Exception e) {
             e.printStackTrace();
             throw new SensorException(SensorException.SensorExceptionType.readStateError);
+        } finally {
+            Log.d(TAG, ">>>> System Settings:");
+            Log.d(TAG, "\tSensor Position: " + mSensorPosition);
+            Log.d(TAG, "\tOperation Mode: " + mOperationMode);
+            Log.d(TAG, "\tMotion Interrupt Enabled: " + mMotionInterruptEnabled);
         }
-
-        Log.d(TAG, ">>>> System Settings:");
-        Log.d(TAG, "\tSensor Position: " + mSensorPosition);
-        Log.d(TAG, "\tOperation Mode: " + mOperationMode);
-        Log.d(TAG, "\tMotion Interrupt Enabled: " + mMotionInterruptEnabled);
 
         mCurrentConfigMap.put(KEY_MOTION_INTERRUPT, mMotionInterruptEnabled ? NilsPodMotionInterrupt.MOTION_INTERRUPT_ENABLED : NilsPodMotionInterrupt.MOTION_INTERRUPT_DISABLED);
         mCurrentConfigMap.put(KEY_OPERATION_MODE, mOperationMode);
@@ -850,11 +852,15 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     }
 
     protected synchronized void extractSamplingRate(BluetoothGattCharacteristic characteristic) throws SensorException {
-        double samplingRate = inferSamplingRate(characteristic.getValue()[0]);
-        requestSamplingRateChange(samplingRate);
+        double samplingRate;
+        try {
+            samplingRate = inferSamplingRate(characteristic.getValue()[0]);
+            requestSamplingRateChange(samplingRate);
+        } finally {
+            Log.d(TAG, ">>>> Sampling Rate:");
+            Log.d(TAG, "\tSampling Rate: " + mSamplingRate);
+        }
 
-        Log.d(TAG, ">>>> Sampling Rate:");
-        Log.d(TAG, "\tSampling Rate: " + mSamplingRate);
         mCurrentConfigMap.put(KEY_SAMPLING_RATE, getSamplingRateString(mSamplingRate));
     }
 
