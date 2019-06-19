@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.Objects;
@@ -54,6 +55,10 @@ public class SensorInfoDialog extends DialogFragment implements View.OnClickList
                 firmwareRevision = sensor.getFirmwareRevision();
             }
         }
+        /*if (true){
+            ImageView configCheck = rootView.findViewById(R.id.iv_config_check);
+            configCheck.setVisibility(View.VISIBLE);
+        }*/
 
         mSensorNameTextView.setText(Html.fromHtml(getResources().getString(R.string.string_sensor_name, sensorName)));
         mSensorAddressTextView.setText(Html.fromHtml(getResources().getString(R.string.string_sensor_address, sensorAddress)));

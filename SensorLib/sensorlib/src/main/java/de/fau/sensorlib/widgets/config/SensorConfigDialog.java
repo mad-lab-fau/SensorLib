@@ -15,7 +15,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -130,8 +129,9 @@ public class SensorConfigDialog extends DialogFragment implements View.OnClickLi
             mTitleTextView.setText(title);
         }
 
-        public void setConfigLayout(RelativeLayout configLayout) {
-            mConfigView.addView(configLayout);
+        public void setConfigLayout(SensorConfigBuilder.BaseConfig configItem) {
+            mConfigView.removeAllViews();
+            mConfigView.addView(configItem);
         }
 
         public void setKey(String key) {
@@ -167,7 +167,8 @@ public class SensorConfigDialog extends DialogFragment implements View.OnClickLi
         public void onBindViewHolder(@NonNull SensorConfigViewHolder holder, int position) {
             holder.setKey(mConfigKeys.get(position));
             ConfigItem item = mConfigItems.get(position);
-            mSensorConfigBuilder.buildConfigView(holder, item, mDefaultConfigValues.get(mConfigKeys.get(position)));
+            holder.setTitle(item.getTitle());
+            holder.setConfigLayout(mSensorConfigBuilder.buildConfigView(holder.getKey(), item, mDefaultConfigValues.get(mConfigKeys.get(position))));
         }
 
         @Override

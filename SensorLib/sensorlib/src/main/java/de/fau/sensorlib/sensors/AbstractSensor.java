@@ -12,10 +12,11 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import androidx.annotation.CallSuper;
+
 import java.util.ArrayList;
 import java.util.EnumSet;
 
-import androidx.annotation.CallSuper;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorException;
 import de.fau.sensorlib.SensorInfo;

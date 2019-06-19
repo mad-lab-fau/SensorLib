@@ -135,7 +135,7 @@ public enum KnownSensor {
                     HardwareSensor.GYROSCOPE
             ), true, "HoopSensor"),
 
-    NILSPOD("NilsPod", new String[]{"NilsPod-", "NilsPodX"},
+    NILSPOD("NilsPod", new String[]{"NilsPod-", "NilsPodX", "DfuTarg"},
             EnumSet.of(
                     HardwareSensor.ACCELEROMETER,
                     HardwareSensor.GYROSCOPE,

@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,7 +43,7 @@ import de.fau.sensorlib.sensors.Resettable;
 import de.fau.sensorlib.widgets.config.OnSensorConfigChangedListener;
 import de.fau.sensorlib.widgets.config.SensorConfigDialog;
 
-public class SensorActionDialog extends DialogFragment implements OnSensorConfigChangedListener {
+public class SensorActionDialog extends DialogFragment implements OnSensorConfigChangedListener, View.OnClickListener {
 
     private static final String TAG = SensorActionDialog.class.getSimpleName();
 
@@ -64,6 +65,7 @@ public class SensorActionDialog extends DialogFragment implements OnSensorConfig
 
     private Context mContext;
     private RecyclerView mRecyclerView;
+    private Button mOkButton;
     private AbstractSensor mSensor;
 
     private DialogInterface.OnDismissListener mDialogDismissCallback;
@@ -214,6 +216,9 @@ public class SensorActionDialog extends DialogFragment implements OnSensorConfig
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
         mRecyclerView.setAdapter(new SensorActionAdapter(mContext));
 
+        mOkButton = rootView.findViewById(R.id.button_ok);
+        mOkButton.setOnClickListener(this);
+
         Bundle bundle = getArguments();
         if (bundle != null) {
             mSensor = (AbstractSensor) bundle.getSerializable(Constants.KEY_SENSOR);
@@ -265,6 +270,13 @@ public class SensorActionDialog extends DialogFragment implements OnSensorConfig
         });
 
         return rootView;
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (v.getId() == R.id.button_ok) {
+            dismiss();
+        }
     }
 
     public void setItemDisabled(View view) {
