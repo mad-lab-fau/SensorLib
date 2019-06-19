@@ -22,6 +22,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.widget.TextViewCompat;
+import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -242,6 +243,17 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
         @Override
         public void onItemClick(View view, int position) {
             if (!mSensorActionBarEnabled) {
+                // show only Sensor Info when Action Disabled
+                Bundle bundle = new Bundle();
+                bundle.putSerializable(Constants.KEY_SENSOR, mAttachedSensors.get(position));
+
+                SensorInfoDialog dialog = new SensorInfoDialog();
+                dialog.setArguments(bundle);
+                FragmentActivity activity = getActivity();
+                if (activity != null) {
+                    FragmentManager fm = activity.getSupportFragmentManager();
+                    dialog.show(fm, "sensor_info");
+                }
                 return;
             }
 
