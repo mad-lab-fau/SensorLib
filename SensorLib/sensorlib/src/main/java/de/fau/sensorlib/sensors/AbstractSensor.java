@@ -12,11 +12,11 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
-import java.io.Serializable;
+import androidx.annotation.CallSuper;
+
 import java.util.ArrayList;
 import java.util.EnumSet;
 
-import androidx.annotation.CallSuper;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorException;
 import de.fau.sensorlib.SensorInfo;
@@ -27,7 +27,7 @@ import de.fau.sensorlib.enums.SensorState;
 /**
  * Base class for all sensor-implementations in the sensor lib.
  */
-public abstract class AbstractSensor extends SensorInfo implements Serializable {
+public abstract class AbstractSensor extends SensorInfo {
 
     protected static final String TAG = AbstractSensor.class.getSimpleName();
 
@@ -78,7 +78,7 @@ public abstract class AbstractSensor extends SensorInfo implements Serializable 
     /**
      * The default internal handler class used if no custom class is implemented.
      */
-    protected static class InternalHandler extends Handler implements Serializable {
+    protected static class InternalHandler extends Handler {
         private AbstractSensor mSensor;
 
         public InternalHandler(AbstractSensor sensor) {
