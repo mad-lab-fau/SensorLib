@@ -8,6 +8,7 @@
 
 package de.fau.sensorlib.widgets;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -21,6 +22,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
@@ -118,7 +120,7 @@ public class SensorActionDialog extends DialogFragment implements OnSensorConfig
         }
 
         @Override
-        public void onItemClick(View view, int position) {
+        public void onItemClick(View view, final int position) {
             switch (mSensor.getState()) {
                 case CONNECTED:
                     for (SensorAction action : EnumSet.of(SensorAction.STOP_LOGGING)) {
@@ -146,22 +148,38 @@ public class SensorActionDialog extends DialogFragment implements OnSensorConfig
             }
 
             SensorAction action = SensorAction.values()[position];
+            // needs to be declared, otherwise app will crash when trying to call getActivity() in
+            // OnClickListener of AlertDialog (SensorActionDialog has already been dismissed by then)
+            final Activity activity = getActivity();
             switch (action) {
                 case CONFIGURE:
                     if (mSensor instanceof Configurable) {
                         showSensorConfigDialog();
                     }
-                    return;
+                    break;
                 case DEFAULT_CONFIG:
                     if (mSensor instanceof Configurable) {
-                        ((Configurable) mSensor).setDefaultConfig();
+                        createAlertDialog("Setting default config of " + mSensor.getDeviceName() + "?",
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        ((Configurable) mSensor).setDefaultConfig();
+                                        Toast.makeText(activity, SensorAction.values()[position] + " on " + mSensor.getDeviceName(), Toast.LENGTH_SHORT).show();
+                                    }
+                                });
                     } else {
                         return;
                     }
                     break;
                 case RESET:
                     if (mSensor instanceof Resettable) {
-                        ((Resettable) mSensor).reset();
+                        createAlertDialog("Resetting " + mSensor.getDeviceName() + "?", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                ((Resettable) mSensor).reset();
+                                Toast.makeText(activity, SensorAction.values()[position] + " on " + mSensor.getDeviceName(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
                     } else {
                         return;
                     }
@@ -169,6 +187,7 @@ public class SensorActionDialog extends DialogFragment implements OnSensorConfig
                 case START_LOGGING:
                     if (mSensor instanceof Loggable) {
                         ((Loggable) mSensor).startLogging();
+                        Toast.makeText(activity, SensorAction.values()[position] + " on " + mSensor.getDeviceName(), Toast.LENGTH_SHORT).show();
                     } else {
                         return;
                     }
@@ -176,30 +195,43 @@ public class SensorActionDialog extends DialogFragment implements OnSensorConfig
                 case STOP_LOGGING:
                     if (mSensor instanceof Loggable) {
                         ((Loggable) mSensor).stopLogging();
+                        Toast.makeText(activity, SensorAction.values()[position] + " on " + mSensor.getDeviceName(), Toast.LENGTH_SHORT).show();
                     } else {
                         return;
                     }
                     break;
                 case CLEAR_SESSIONS:
                     if (mSensor instanceof Erasable) {
-                        ((Erasable) mSensor).clearData();
+                        createAlertDialog("Clearing sessions of " + mSensor.getDeviceName() + "?",
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        ((Erasable) mSensor).clearData();
+                                        Toast.makeText(activity, SensorAction.values()[position] + " on " + mSensor.getDeviceName(), Toast.LENGTH_SHORT).show();
+                                    }
+                                });
                     } else {
                         return;
                     }
                     break;
                 case FULL_ERASE:
                     if (mSensor instanceof Erasable) {
-                        ((Erasable) mSensor).fullErase();
+                        createAlertDialog("Erasing full storage of " + mSensor.getDeviceName() + "?",
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        ((Erasable) mSensor).fullErase();
+                                        Toast.makeText(activity, SensorAction.values()[position] + " on " + mSensor.getDeviceName(), Toast.LENGTH_SHORT).show();
+                                    }
+                                });
                     } else {
                         return;
                     }
                     break;
                 case SENSOR_INFO:
                     showSensorInfoDialog();
-                    dismiss();
-                    return;
+                    break;
             }
-            Toast.makeText(getActivity(), SensorAction.values()[position] + " on " + mSensor.getDeviceName(), Toast.LENGTH_SHORT).show();
             dismiss();
         }
     }
@@ -293,6 +325,27 @@ public class SensorActionDialog extends DialogFragment implements OnSensorConfig
         if (mSensor instanceof Configurable) {
             ((Configurable) mSensor).setConfigMap(configMap);
         }
+    }
+
+    private void createAlertDialog(String message, DialogInterface.OnClickListener okListener, DialogInterface.OnClickListener cancelListener) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext)
+                .setMessage(message)
+                .setPositiveButton(getString(R.string.ok), okListener);
+        if (cancelListener != null) {
+            builder.setNegativeButton(getString(R.string.cancel), cancelListener);
+        } else {
+            builder.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dismiss();
+                }
+            });
+        }
+        builder.show();
+    }
+
+    private void createAlertDialog(String message, DialogInterface.OnClickListener okListener) {
+        createAlertDialog(message, okListener, null);
     }
 
 
