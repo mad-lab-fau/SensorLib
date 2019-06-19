@@ -20,6 +20,7 @@ public class SensorException extends Exception {
         readConfigError("Error reading sensor config."),
         readHeaderError("Error reading session header."),
         hardwareSensorError("Error during hardware sensor initialization."),
+        powerLossWarning("Sensor was terminated by power loss. Consider resetting the sensor before using."),
         permissionsMissing("The app does not have sufficient Android permissions to list available BLE devices."),
         bleScannerError("BLE scanner unavailable."),
         btNotSupported("Bluetooth not supported on this device."),
