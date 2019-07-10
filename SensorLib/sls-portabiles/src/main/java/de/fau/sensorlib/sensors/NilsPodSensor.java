@@ -25,7 +25,9 @@ import de.fau.sensorlib.SensorException;
 import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.AnalogDataFrame;
 import de.fau.sensorlib.dataframe.BarometricPressureDataFrame;
+import de.fau.sensorlib.dataframe.EcgDataFrame;
 import de.fau.sensorlib.dataframe.MagnetometerDataFrame;
+import de.fau.sensorlib.dataframe.PpgDataFrame;
 import de.fau.sensorlib.dataframe.TemperatureDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
 import de.fau.sensorlib.enums.SensorState;
@@ -153,6 +155,8 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             double[] analog = null;
             double baro = Double.MIN_VALUE;
             double temp = Double.MIN_VALUE;
+            double ecg = Double.MIN_VALUE;
+            double ppg = Double.MIN_VALUE;
             int localCounter;
 
             // extract gyroscope data
@@ -195,6 +199,16 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
                 }
             }
 
+            if (isSensorEnabled(HardwareSensor.ECG)) {
+                ecg = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT32, offset);
+                offset += 4;
+            }
+
+            if (isSensorEnabled(HardwareSensor.PPG)) {
+                ppg = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT32, offset);
+                offset += 4;
+            }
+
             if (isSensorEnabled(HardwareSensor.TEMPERATURE)) {
                 temp = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
                 temp = temp * (1.0 / 512) + 23;
@@ -218,6 +232,10 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             NilsPodDataFrame df;
             if (isSensorEnabled(HardwareSensor.ANALOG)) {
                 df = new NilsPodAnalogDataFrame(this, timestamp, accel, gyro, baro, temp, mag, analog);
+            } else if (isSensorEnabled(HardwareSensor.ECG)) {
+                df = new NilsPodEcgDataFrame(this, timestamp, accel, gyro, baro, temp, mag, ecg);
+            } else if (isSensorEnabled(HardwareSensor.PPG)) {
+                df = new NilsPodPpgDataFrame(this, timestamp, accel, gyro, baro, temp, mag, ppg);
             } else if (isSensorEnabled(HardwareSensor.MAGNETOMETER)) {
                 df = new NilsPodMagDataFrame(this, timestamp, accel, gyro, baro, temp, mag);
             } else if (isSensorEnabled(HardwareSensor.TEMPERATURE)) {
@@ -780,6 +798,132 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
 
             if (hasAnalog) {
                 str += ", analog: " + Arrays.toString(analog);
+            }
+
+            return str;
+        }
+    }
+
+
+    /**
+     * Data frame to store data received from the NilsPod Sensor
+     */
+    public static class NilsPodEcgDataFrame extends NilsPodMagDataFrame implements EcgDataFrame {
+
+        protected double ecg;
+        protected boolean hasEcg;
+
+        /**
+         * Creates a new data frame for sensor data
+         *
+         * @param sensor    Originating sensor
+         * @param timestamp Incremental counter for each data frame
+         * @param accel     array storing acceleration values
+         * @param gyro      array storing gyroscope values
+         * @param baro      barometer value
+         * @param temp      temperature value
+         * @param mag       array storing magnetometer values
+         * @param ecg       ECG value
+         */
+        public NilsPodEcgDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro, double baro, double temp, double[] mag, double ecg) {
+            super(sensor, timestamp, accel, gyro, baro, temp, mag);
+            if (ecg != Double.MIN_VALUE) {
+                this.ecg = ecg;
+                hasEcg = true;
+            }
+        }
+
+        /**
+         * Creates a new data frame for sensor data
+         *
+         * @param sensor    Originating sensor
+         * @param timestamp Incremental counter for each data frame
+         * @param accel     array storing acceleration values
+         * @param gyro      array storing gyroscope values
+         * @param baro      barometer value
+         * @param ecg       ECG value
+         */
+        public NilsPodEcgDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro, double baro, double ecg) {
+            this(sensor, timestamp, accel, gyro, baro, Double.MIN_VALUE, null, ecg);
+        }
+
+        @Override
+        public double getEcgSample() {
+            if (hasEcg) {
+                return ecg;
+            } else {
+                throw new HwSensorNotAvailableException(HardwareSensor.ECG);
+            }
+        }
+
+        @Override
+        public String toString() {
+            String str = super.toString();
+
+            if (hasEcg) {
+                str += ", ecg: " + ecg;
+            }
+
+            return str;
+        }
+    }
+
+
+    /**
+     * Data frame to store data received from the NilsPod Sensor
+     */
+    public static class NilsPodPpgDataFrame extends NilsPodMagDataFrame implements PpgDataFrame {
+
+        protected double ppg;
+        protected boolean hasPpg;
+
+        /**
+         * Creates a new data frame for sensor data
+         *
+         * @param sensor    Originating sensor
+         * @param timestamp Incremental counter for each data frame
+         * @param accel     array storing acceleration values
+         * @param gyro      array storing gyroscope values
+         * @param baro      barometer value
+         * @param temp      temperature value
+         * @param mag       array storing magnetometer values
+         * @param ppg       PPG value
+         */
+        public NilsPodPpgDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro, double baro, double temp, double[] mag, double ppg) {
+            super(sensor, timestamp, accel, gyro, baro, temp, mag);
+            if (ppg != Double.MIN_VALUE) {
+                this.ppg = ppg;
+                hasPpg = true;
+            }
+        }
+
+        /**
+         * Creates a new data frame for sensor data
+         *
+         * @param sensor    Originating sensor
+         * @param timestamp Incremental counter for each data frame
+         * @param accel     array storing acceleration values
+         * @param ppg       PPG value
+         */
+        public NilsPodPpgDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro, double baro, double ppg) {
+            this(sensor, timestamp, accel, gyro, baro, Double.MIN_VALUE, null, ppg);
+        }
+
+        @Override
+        public double getPpgSample() {
+            if (hasPpg) {
+                return ppg;
+            } else {
+                throw new HwSensorNotAvailableException(HardwareSensor.PPG);
+            }
+        }
+
+        @Override
+        public String toString() {
+            String str = super.toString();
+
+            if (hasBaro) {
+                str += ", ppg: " + ppg;
             }
 
             return str;
