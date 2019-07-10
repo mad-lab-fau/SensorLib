@@ -41,14 +41,14 @@ public class InsoleSensor extends NilsPodSensor {
 
         byte[] values = characteristic.getValue();
 
-        // one data packet always has size mPacketSize
-        if (values.length % mPacketSize != 0) {
-            Log.e(TAG, "Wrong BLE Packet Size! " + values.length + ", " + mPacketSize);
+        // one data packet always has size mSampleSize
+        if (values.length % mSampleSize != 0) {
+            Log.e(TAG, "Wrong BLE Packet Size! " + values.length + ", " + mSampleSize);
             return;
         }
 
         // iterate over data packets
-        for (int i = 0; i < values.length; i += mPacketSize) {
+        for (int i = 0; i < values.length; i += mSampleSize) {
             int offset = i;
             double[] gyro = new double[3];
             double[] accel = new double[3];
@@ -85,7 +85,7 @@ public class InsoleSensor extends NilsPodSensor {
             }
 
             // extract packet counter (16 bit)
-            localCounter = (values[i + mPacketSize - 1] & 0xFF) | ((values[i + mPacketSize - 2] & 0xFF) << 8);
+            localCounter = (values[i + mSampleSize - 1] & 0xFF) | ((values[i + mSampleSize - 2] & 0xFF) << 8);
 
             // check if packets have been lost
             if (((localCounter - lastCounter) % (2 << 15)) > 1) {

@@ -17,7 +17,9 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
 
 import de.fau.sensorlib.HwSensorNotAvailableException;
 import de.fau.sensorlib.SensorDataProcessor;
@@ -57,6 +59,11 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
      * Global counter for incoming packages (local counter only has 15 bit)
      */
     protected int globalCounter = 0;
+
+    private double mTotalFlashSize = 0;
+    private double mRemainingFlashSize = 0;
+    private double mRemainingCapacity = 0;
+    private String mRemainingRuntime = "n/a";
 
 
     private SessionHandler mSessionHandler;
@@ -115,6 +122,9 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
 
         if (mSessionHandler.allSessionsRead()) {
             Log.d(TAG, "All Sessions read!");
+            computeRemainingCapacity();
+            computeRemainingRuntime();
+
             if (mCallbacks != null) {
                 for (NilsPodLoggingCallback callback : mCallbacks) {
                     callback.onSessionListRead(this, mSessionHandler.getSessionList());
@@ -140,14 +150,14 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     protected void extractSensorData(BluetoothGattCharacteristic characteristic) {
         byte[] values = characteristic.getValue();
 
-        // one data packet always has size mPacketSize
-        if (values.length % mPacketSize != 0) {
+        // one data packet always has size mSampleSize
+        if (values.length % mSampleSize != 0) {
             Log.e(TAG, "Wrong BLE Packet Size!");
             return;
         }
 
         // iterate over data packets
-        for (int i = 0; i < values.length; i += mPacketSize) {
+        for (int i = 0; i < values.length; i += mSampleSize) {
             int offset = i;
             double[] gyro = null;
             double[] accel = null;
@@ -216,7 +226,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             }
 
             // extract packet counter (16 bit)
-            localCounter = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, i + mPacketSize - 2);
+            localCounter = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, i + mSampleSize - 2);
 
             // check if packets have been lost
             if (((localCounter - lastCounter) % (2 << 15)) > 1) {
@@ -266,6 +276,15 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         super.onOperationStateChanged(oldState, newState);
         switch (newState) {
             case IDLE:
+                if (mModelNumber != null) {
+                    // extract flash size from model number
+                    int flashType = mModelNumber.charAt(mModelNumber.length() - 1) == '4' ? 4 : 2;
+                    // convert from Gigabit to Byte
+                    mTotalFlashSize = ((double) flashType * 1e9) / 8;
+                    computeRemainingCapacity();
+                    computeRemainingRuntime();
+                }
+
                 switch (oldState) {
                     case LOGGING:
                         //readSessionList();
@@ -406,9 +425,53 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         return mCurrentConfigMap;
     }
 
+    /**
+     * Returns the remaining storage capacity.
+     *
+     * @return Remaining storage capacity in %
+     */
+    public double getRemainingCapacity() {
+        return mRemainingCapacity;
+    }
 
-    private void createDummySessions() {
-        send(new byte[]{(byte) 0xAB});
+    private void computeRemainingCapacity() {
+        mRemainingFlashSize = mTotalFlashSize;
+
+        int occupiedStorage = 0;
+
+        if (mSessionHandler == null) {
+            return;
+        }
+
+        for (Session session : mSessionHandler.getSessionList()) {
+            occupiedStorage += session.getSessionSize();
+        }
+
+        mRemainingFlashSize -= occupiedStorage;
+
+        if (mTotalFlashSize != 0) {
+            mRemainingCapacity = (mRemainingFlashSize / mTotalFlashSize) * 100.0;
+        } else {
+            mRemainingCapacity = 100.0;
+        }
+    }
+
+    /**
+     * Returns the (estimated) remaining logging runtime.
+     *
+     * @return Remaining runtime in format hh:mm
+     */
+    public String getRemainingRuntime() {
+        return mRemainingRuntime;
+    }
+
+    private void computeRemainingRuntime() {
+        long runtimeSeconds = (long) ((mRemainingFlashSize / mSampleSize) / getSamplingRate());
+
+        long hours = TimeUnit.SECONDS.toHours(runtimeSeconds);
+        long minutes = TimeUnit.SECONDS.toMinutes(runtimeSeconds) - TimeUnit.HOURS.toMinutes(hours);
+
+        mRemainingRuntime = String.format(Locale.getDefault(), "%02d:%02d", hours, minutes);
     }
 
 
@@ -439,6 +502,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         for (int i = 0; i < sSamplingRateCommands.size(); i++) {
             if (sSamplingRateCommands.valueAt(i) == samplingRate) {
                 command = sSamplingRateCommands.keyAt(i);
+                Log.e(TAG, "COMMAND: " + command);
                 break;
             }
         }

@@ -111,14 +111,15 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     protected static final UUID NILS_POD_BUTTONLESS_DFU = UUID.fromString("8ec90003-f315-4f60-9fb8-838830daea50");
 
     /**
-     * Default packet size: 12 Byte IMU + 2 Byte Counter
+     * Size of one sensor data sample. Default packet size: 12 Byte IMU + 2 Byte Counter
      */
-    protected int mPacketSize = 14;
+    protected int mSampleSize = 14;
 
     /**
      * Local counter for incoming packages
      */
     protected long lastCounter = 0;
+
 
     /**
      * Flag indicating whether data should be logged
@@ -819,7 +820,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         EnumSet<HardwareSensor> set = EnumSet.noneOf(HardwareSensor.class);
         set.addAll(mEnabledSensorList);
         useHardwareSensors(set);
-        mPacketSize = sampleSize;
+        mSampleSize = sampleSize;
         mCurrentConfigMap.put(KEY_HARDWARE_SENSORS, mEnabledSensorList);
     }
 
@@ -854,7 +855,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     protected synchronized void extractSamplingRate(BluetoothGattCharacteristic characteristic) throws SensorException {
         double samplingRate;
         try {
-            samplingRate = inferSamplingRate(characteristic.getValue()[0]);
+            samplingRate = inferSamplingRate((characteristic.getValue()[0] & 0xFF));
             requestSamplingRateChange(samplingRate);
         } finally {
             Log.d(TAG, ">>>> Sampling Rate:");
@@ -883,6 +884,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     }
 
     public static double inferSamplingRate(int value) {
+        Log.e(TAG, "value: " + value);
         return sSamplingRateCommands.get(value, 0.0);
     }
 
