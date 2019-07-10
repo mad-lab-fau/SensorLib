@@ -42,7 +42,7 @@ public class Session {
     private Date mStopTime;
 
     private SimpleDateFormat mStartTimeFormat = new SimpleDateFormat("EEE, dd.MM.yyyy HH:mm", Locale.getDefault());
-    private SimpleDateFormat mSessionTimeFormat = new SimpleDateFormat("yyyyMMdd_HHmm", Locale.getDefault());
+    private SimpleDateFormat mSessionTimeFormat = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault());
 
 
     public Session(BluetoothGattCharacteristic chara) {
