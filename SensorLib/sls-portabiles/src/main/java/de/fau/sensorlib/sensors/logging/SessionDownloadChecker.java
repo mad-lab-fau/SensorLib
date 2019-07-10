@@ -183,7 +183,7 @@ public class SessionDownloadChecker {
         mAlreadyDownloadedList.clear();
     }
 
-    public SessionDownloadFlag checkSessionAlreadyDownloaded(Session session) {
+    public SessionDownloadFlag getSessionDownloadStatus(Session session) {
         return mAlreadyDownloadedList.get(mSessionList.indexOf(session));
     }
 
@@ -210,7 +210,7 @@ public class SessionDownloadChecker {
         // reload file list
         listFiles();
 
-        if (checkSessionAlreadyDownloaded(session) == SessionDownloadFlag.DOWNLOAD_SUCCESS) {
+        if (getSessionDownloadStatus(session) == SessionDownloadFlag.DOWNLOAD_SUCCESS) {
             for (String filename : mFileList) {
                 if (filename.contains(session.getSessionStartString())) {
                     return filename;
