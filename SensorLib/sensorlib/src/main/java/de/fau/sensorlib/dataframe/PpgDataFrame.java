@@ -12,19 +12,12 @@ package de.fau.sensorlib.dataframe;
  */
 public interface PpgDataFrame {
 
-    String[] COLUMNS = new String[]{"ppg_red", "ppg_ir"};
+    String[] COLUMNS = new String[]{"ppg"};
 
     /**
-     * Returns the red channel of the PPG signal.
+     * Returns the PPG sample.
      *
-     * @return Red channel of PPG signal
+     * @return PPG sample
      */
-    double getPpgRedSample();
-
-    /**
-     * Returns the infra-red channel of the PPG signal.
-     *
-     * @return IR channel of PPG signal
-     */
-    double getPpgIrSample();
+    double getPpgSample();
 }
