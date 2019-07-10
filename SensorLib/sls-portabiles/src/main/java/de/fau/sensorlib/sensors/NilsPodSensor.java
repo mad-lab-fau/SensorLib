@@ -108,7 +108,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         if (!mSessionHandler.firstPacketRead()) {
             mSessionHandler.setSessionCount(values[0]);
         } else {
-            Session session = new Session(values);
+            Session session = new Session(characteristic);
             mSessionHandler.addSession(session);
             Log.d(TAG, session.toDebugString());
         }
