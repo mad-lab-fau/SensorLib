@@ -303,9 +303,8 @@ public class SessionCsvConverter {
             offset += 4;
         }
 
-
         if (isSensorEnabled(HardwareSensor.PPG)) {
-            ecg = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT32, offset);
+            ppg = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT32, offset);
             offset += 4;
         }
 

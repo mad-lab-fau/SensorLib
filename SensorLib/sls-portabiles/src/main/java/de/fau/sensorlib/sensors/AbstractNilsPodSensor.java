@@ -444,7 +444,6 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
             }
         }
 
-        ///...
     };
 
     private final DfuLogListener mDfuLogListener = new DfuLogListener() {
@@ -884,7 +883,6 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     }
 
     public static double inferSamplingRate(int value) {
-        Log.e(TAG, "value: " + value);
         return sSamplingRateCommands.get(value, 0.0);
     }
 

@@ -986,7 +986,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         public String toString() {
             String str = super.toString();
 
-            if (hasBaro) {
+            if (hasPpg) {
                 str += ", ppg: " + ppg;
             }
 
