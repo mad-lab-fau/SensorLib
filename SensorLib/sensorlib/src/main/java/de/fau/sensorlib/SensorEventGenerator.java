@@ -18,6 +18,8 @@ import de.fau.sensorlib.sensors.AbstractSensor;
  */
 public class SensorEventGenerator {
 
+    private static final String TAG = SensorEventGenerator.class.getSimpleName();
+
     private ArrayList<SensorEventListener> mEventListener;
 
     private SensorState mState;
