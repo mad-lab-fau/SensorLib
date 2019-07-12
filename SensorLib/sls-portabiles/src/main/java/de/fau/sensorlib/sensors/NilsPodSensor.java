@@ -68,6 +68,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
 
     private SessionHandler mSessionHandler;
     private SessionDownloader mSessionDownloader;
+    private boolean mCsvExportEnabled = false;
 
     private ConcurrentLinkedQueue<BluetoothGattCharacteristic> mConfigWriteRequests = new ConcurrentLinkedQueue<>();
 
@@ -361,7 +362,8 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     @Override
     public void downloadSession(int sessionId) throws SensorException {
         mSessionDownloader = new SessionDownloader(this, mSessionHandler.getSessionById(sessionId));
-        mSessionDownloader.setCsvExportEnabled(true);
+        mSessionDownloader.setCsvExportEnabled(mCsvExportEnabled);
+
         byte[] cmd = NilsPodSensorCommand.FLASH_TRANSMIT_SESSION.getByteCmd();
         cmd[1] = (byte) sessionId;
         send(cmd);
@@ -472,6 +474,13 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         long minutes = TimeUnit.SECONDS.toMinutes(runtimeSeconds) - TimeUnit.HOURS.toMinutes(hours);
 
         mRemainingRuntime = String.format(Locale.getDefault(), "%02d:%02d", hours, minutes);
+    }
+
+    public void setCsvExportEnabled(boolean enabled) {
+        mCsvExportEnabled = enabled;
+        if (mSessionDownloader != null) {
+            mSessionDownloader.setCsvExportEnabled(enabled);
+        }
     }
 
 
