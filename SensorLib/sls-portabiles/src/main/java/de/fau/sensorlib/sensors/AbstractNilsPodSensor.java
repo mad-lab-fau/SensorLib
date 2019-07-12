@@ -408,7 +408,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         BleGattAttributes.addCharacteristic(NILS_POD_COMMANDS, "NilsPod Sensor Commands");
         BleGattAttributes.addCharacteristic(NILS_POD_STREAMING, "NilsPod Streaming");
         BleGattAttributes.addCharacteristic(NILS_POD_SYSTEM_STATE, "NilsPod System State");
-        BleGattAttributes.addCharacteristic(NILS_POD_SYNC_CONFIG, "NilsPod Sychronization Configuration");
+        BleGattAttributes.addCharacteristic(NILS_POD_SYNC_CONFIG, "NilsPod Synchronization Configuration");
         BleGattAttributes.addCharacteristic(NILS_POD_SAMPLING_RATE_CONFIG, "NilsPod Sampling Rate Configuration");
         BleGattAttributes.addCharacteristic(NILS_POD_SENSOR_CONFIG, "NilsPod Sensor Configuration");
         BleGattAttributes.addCharacteristic(NILS_POD_SYSTEM_SETTINGS_CONFIG, "NilsPod System Settings Configuration");
