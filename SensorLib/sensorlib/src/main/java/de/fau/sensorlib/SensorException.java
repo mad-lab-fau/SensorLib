@@ -31,6 +31,7 @@ public class SensorException extends Exception {
         noSensorsSelected("No hardware sensors selected."),
         configError("Error configuring the sensor."),
         samplingRateError("Attempted to set negative or zero sampling rate."),
+        sessionDownloadError("Error during session download."),
         noMemory("Sensor Memory full!"),
         maxNumSessions("Maximum number of sessions reached."),
         unknown("");
