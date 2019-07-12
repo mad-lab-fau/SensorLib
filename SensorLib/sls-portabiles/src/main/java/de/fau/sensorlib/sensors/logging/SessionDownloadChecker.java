@@ -175,7 +175,12 @@ public class SessionDownloadChecker {
     }
 
     public void setSessionDownloaded(Session session) {
-        mAlreadyDownloadedList.set(mSessionList.indexOf(session), SessionDownloadFlag.DOWNLOAD_SUCCESS);
+        File f = new File(getAbsolutePathForSession(session));
+        if (f.length() == session.getSessionSize()) {
+            mAlreadyDownloadedList.set(mSessionList.indexOf(session), SessionDownloadFlag.DOWNLOAD_SUCCESS);
+        } else {
+            mAlreadyDownloadedList.set(mSessionList.indexOf(session), SessionDownloadFlag.DOWNLOAD_FAILED);
+        }
     }
 
     public void clear() {
