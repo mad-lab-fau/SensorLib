@@ -15,12 +15,13 @@ import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.core.content.ContextCompat;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import androidx.core.content.ContextCompat;
 import de.fau.sensorlib.SensorException;
 import de.fau.sensorlib.sensors.AbstractSensor;
 
@@ -158,7 +159,6 @@ public class SessionByteWriter {
 
 
     public void writeData(byte[] data) {
-        //Log.d(TAG, mBytes + "/" + mSession.getSessionSize() + " Bytes written!");
         try {
             mBufferedOutputStream.write(data);
         } catch (IOException e) {
@@ -198,5 +198,12 @@ public class SessionByteWriter {
 
     public String getFilename() {
         return mFilename;
+    }
+
+
+    public void checkFileSize() throws SensorException {
+        if (mSession.getSessionSize() != mFileHandler.length()) {
+            throw new SensorException(SensorException.SensorExceptionType.sessionDownloadError, "Downloaded size does not match session size!");
+        }
     }
 }
