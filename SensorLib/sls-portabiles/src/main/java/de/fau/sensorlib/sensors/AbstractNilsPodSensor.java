@@ -110,15 +110,35 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
      */
     protected static final UUID NILS_POD_BUTTONLESS_DFU = UUID.fromString("8ec90003-f315-4f60-9fb8-838830daea50");
 
+    // Add custom NilsPod UUIDs to known UUID pool
+    static {
+        BleGattAttributes.addService(NILS_POD_STREAMING_SERVICE, "NilsPod Streaming Service");
+        BleGattAttributes.addService(NILS_POD_CONFIGURATION_SERVICE, "NilsPod Configuration Service");
+        BleGattAttributes.addService(NILS_POD_SECURE_DFU_SERVICE, "NilsPod Secure DFU Service");
+        BleGattAttributes.addCharacteristic(NILS_POD_COMMANDS, "NilsPod Sensor Commands");
+        BleGattAttributes.addCharacteristic(NILS_POD_STREAMING, "NilsPod Streaming");
+        BleGattAttributes.addCharacteristic(NILS_POD_SYSTEM_STATE, "NilsPod System State");
+        BleGattAttributes.addCharacteristic(NILS_POD_SYNC_CONFIG, "NilsPod Synchronization Configuration");
+        BleGattAttributes.addCharacteristic(NILS_POD_SAMPLING_RATE_CONFIG, "NilsPod Sampling Rate Configuration");
+        BleGattAttributes.addCharacteristic(NILS_POD_SENSOR_CONFIG, "NilsPod Sensor Configuration");
+        BleGattAttributes.addCharacteristic(NILS_POD_SYSTEM_SETTINGS_CONFIG, "NilsPod System Settings Configuration");
+        BleGattAttributes.addCharacteristic(NILS_POD_DATE_TIME_CONFIG, "NilsPod Date Time Configuration");
+        BleGattAttributes.addCharacteristic(NILS_POD_FIRMWARE_VERSION, "NilsPod Firmware Version");
+        BleGattAttributes.addCharacteristic(NILS_POD_BUTTONLESS_DFU, "NilsPod Buttonless DFU");
+    }
+
+
+
     /**
-     * Default packet size: 12 Byte IMU + 2 Byte Counter
+     * Size of one sensor data sample. Default packet size: 12 Byte IMU + 2 Byte Counter
      */
-    protected int mPacketSize = 14;
+    protected int mSampleSize = 14;
 
     /**
      * Local counter for incoming packages
      */
     protected long lastCounter = 0;
+
 
     /**
      * Flag indicating whether data should be logged
@@ -365,6 +385,17 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         }
     }
 
+    /**
+     * Enum describing different error codes returned by the NilsPod.
+     */
+    protected enum NilsPodErrorCode {
+        SUCCESS,
+        UNKNOWN_COMMAND,
+        INVALID_STATE,
+        INVALID_ARGUMENT,
+        NO_MEMORY,
+        MAX_NUM_SESSIONS
+    }
 
     /**
      * Enum describing the sensor error codes read in the NILS_POD_SYSTEM_STATE characteristic.
@@ -373,7 +404,9 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         ERROR_BMI_160(0x01),
         ERROR_BMP_280(0x02),
         ERROR_NAND_FLASH(0x04),
-        ERROR_RTC(0x08);
+        ERROR_RTC(0x08),
+        ERROR_ECG(0x10),
+        ERROR_PPG(0x20);
 
         private int errorCode;
 
@@ -384,23 +417,6 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         public int getErrorCode() {
             return errorCode;
         }
-    }
-
-    // Add custom NilsPod UUIDs to known UUID pool
-    static {
-        BleGattAttributes.addService(NILS_POD_STREAMING_SERVICE, "NilsPod Streaming Service");
-        BleGattAttributes.addService(NILS_POD_CONFIGURATION_SERVICE, "NilsPod Configuration Service");
-        BleGattAttributes.addService(NILS_POD_SECURE_DFU_SERVICE, "NilsPod Secure DFU Service");
-        BleGattAttributes.addCharacteristic(NILS_POD_COMMANDS, "NilsPod Sensor Commands");
-        BleGattAttributes.addCharacteristic(NILS_POD_STREAMING, "NilsPod Streaming");
-        BleGattAttributes.addCharacteristic(NILS_POD_SYSTEM_STATE, "NilsPod System State");
-        BleGattAttributes.addCharacteristic(NILS_POD_SYNC_CONFIG, "NilsPod Sychronization Configuration");
-        BleGattAttributes.addCharacteristic(NILS_POD_SAMPLING_RATE_CONFIG, "NilsPod Sampling Rate Configuration");
-        BleGattAttributes.addCharacteristic(NILS_POD_SENSOR_CONFIG, "NilsPod Sensor Configuration");
-        BleGattAttributes.addCharacteristic(NILS_POD_SYSTEM_SETTINGS_CONFIG, "NilsPod System Settings Configuration");
-        BleGattAttributes.addCharacteristic(NILS_POD_DATE_TIME_CONFIG, "NilsPod Date Time Configuration");
-        BleGattAttributes.addCharacteristic(NILS_POD_FIRMWARE_VERSION, "NilsPod Firmware Version");
-        BleGattAttributes.addCharacteristic(NILS_POD_BUTTONLESS_DFU, "NilsPod Buttonless DFU");
     }
 
     private final DfuProgressListener mDfuProgressListener = new DfuProgressListenerAdapter() {
@@ -443,7 +459,6 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
             }
         }
 
-        ///...
     };
 
     private final DfuLogListener mDfuLogListener = new DfuLogListener() {
@@ -713,13 +728,13 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     protected synchronized void extractSystemState(BluetoothGattCharacteristic characteristic) throws SensorException {
         int offset = 0;
         byte[] values = characteristic.getValue();
-        boolean connectionState = false;
+        NilsPodErrorCode errorCode = NilsPodErrorCode.SUCCESS;
         NilsPodOperationState operationState = NilsPodOperationState.IDLE;
         NilsPodPowerState powerState = NilsPodPowerState.NO_POWER;
         int errorFlags = 0;
 
         try {
-            connectionState = values[offset++] == 1;
+            errorCode = NilsPodErrorCode.values()[offset++];
             operationState = NilsPodOperationState.values()[values[offset++]];
             NilsPodOperationState oldState = mOperationState;
             // set new state
@@ -734,11 +749,22 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
             throw new SensorException(SensorException.SensorExceptionType.readStateError);
         } finally {
             Log.d(TAG, ">>>> System State:");
-            Log.d(TAG, "\tConnection State: " + connectionState);
+            Log.d(TAG, "\tError Code: " + errorCode);
             Log.d(TAG, "\tOperation State: " + operationState);
             Log.d(TAG, "\tWireless Power State: " + powerState);
             Log.d(TAG, "\tError Flags: " + Integer.toBinaryString(errorFlags));
             Log.d(TAG, "\tBattery Level: " + mBatteryLevel);
+        }
+
+        switch (errorCode) {
+            case NO_MEMORY:
+                throw new SensorException(SensorException.SensorExceptionType.noMemory);
+            case MAX_NUM_SESSIONS:
+                throw new SensorException(SensorException.SensorExceptionType.maxNumSessions);
+            case UNKNOWN_COMMAND:
+            case INVALID_ARGUMENT:
+            case INVALID_STATE:
+                throw new SensorException(SensorException.SensorExceptionType.sensorStateError, errorCode.toString());
         }
 
         if (errorFlags > 0) {
@@ -819,7 +845,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         EnumSet<HardwareSensor> set = EnumSet.noneOf(HardwareSensor.class);
         set.addAll(mEnabledSensorList);
         useHardwareSensors(set);
-        mPacketSize = sampleSize;
+        mSampleSize = sampleSize;
         mCurrentConfigMap.put(KEY_HARDWARE_SENSORS, mEnabledSensorList);
     }
 
@@ -854,7 +880,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     protected synchronized void extractSamplingRate(BluetoothGattCharacteristic characteristic) throws SensorException {
         double samplingRate;
         try {
-            samplingRate = inferSamplingRate(characteristic.getValue()[0]);
+            samplingRate = inferSamplingRate((characteristic.getValue()[0] & 0xFF));
             requestSamplingRateChange(samplingRate);
         } finally {
             Log.d(TAG, ">>>> Sampling Rate:");
@@ -897,10 +923,9 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
 
     private void handleSensorException(SensorException e) {
-        String msg = e.getExceptionType().getMessage();
+        String msg = "";
         switch (e.getExceptionType()) {
             case hardwareSensorError:
-                msg += "\n";
                 int errCode = e.getErrorCode();
                 if ((errCode & NilsPodSensorError.ERROR_BMI_160.errorCode) != 0) {
                     msg += "BMI160 initialization failed.\n";
@@ -913,6 +938,12 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
                 }
                 if ((errCode & NilsPodSensorError.ERROR_RTC.errorCode) != 0) {
                     msg += "RTC initialization failed.\n";
+                }
+                if ((errCode & NilsPodSensorError.ERROR_ECG.errorCode) != 0) {
+                    msg += "ECG initialization failed.\n";
+                }
+                if ((errCode & NilsPodSensorError.ERROR_PPG.errorCode) != 0) {
+                    msg += "PPG initialization failed.\n";
                 }
                 e = new SensorException(SensorException.SensorExceptionType.hardwareSensorError, msg);
                 break;

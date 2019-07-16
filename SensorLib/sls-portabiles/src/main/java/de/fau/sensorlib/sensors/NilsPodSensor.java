@@ -17,7 +17,9 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
 
 import de.fau.sensorlib.HwSensorNotAvailableException;
 import de.fau.sensorlib.SensorDataProcessor;
@@ -25,7 +27,9 @@ import de.fau.sensorlib.SensorException;
 import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.AnalogDataFrame;
 import de.fau.sensorlib.dataframe.BarometricPressureDataFrame;
+import de.fau.sensorlib.dataframe.EcgDataFrame;
 import de.fau.sensorlib.dataframe.MagnetometerDataFrame;
+import de.fau.sensorlib.dataframe.PpgDataFrame;
 import de.fau.sensorlib.dataframe.TemperatureDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
 import de.fau.sensorlib.enums.SensorState;
@@ -56,9 +60,15 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
      */
     protected int globalCounter = 0;
 
+    private double mTotalFlashSize = 0;
+    private double mRemainingFlashSize = 0;
+    private double mRemainingCapacity = 0;
+    private String mRemainingRuntime = "n/a";
+
 
     private SessionHandler mSessionHandler;
     private SessionDownloader mSessionDownloader;
+    private boolean mCsvExportEnabled = false;
 
     private ConcurrentLinkedQueue<BluetoothGattCharacteristic> mConfigWriteRequests = new ConcurrentLinkedQueue<>();
 
@@ -106,13 +116,16 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         if (!mSessionHandler.firstPacketRead()) {
             mSessionHandler.setSessionCount(values[0]);
         } else {
-            Session session = new Session(values);
+            Session session = new Session(characteristic);
             mSessionHandler.addSession(session);
             Log.d(TAG, session.toDebugString());
         }
 
         if (mSessionHandler.allSessionsRead()) {
             Log.d(TAG, "All Sessions read!");
+            computeRemainingCapacity();
+            computeRemainingRuntime();
+
             if (mCallbacks != null) {
                 for (NilsPodLoggingCallback callback : mCallbacks) {
                     callback.onSessionListRead(this, mSessionHandler.getSessionList());
@@ -138,14 +151,14 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     protected void extractSensorData(BluetoothGattCharacteristic characteristic) {
         byte[] values = characteristic.getValue();
 
-        // one data packet always has size mPacketSize
-        if (values.length % mPacketSize != 0) {
+        // one data packet always has size mSampleSize
+        if (values.length % mSampleSize != 0) {
             Log.e(TAG, "Wrong BLE Packet Size!");
             return;
         }
 
         // iterate over data packets
-        for (int i = 0; i < values.length; i += mPacketSize) {
+        for (int i = 0; i < values.length; i += mSampleSize) {
             int offset = i;
             double[] gyro = null;
             double[] accel = null;
@@ -153,6 +166,8 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             double[] analog = null;
             double baro = Double.MIN_VALUE;
             double temp = Double.MIN_VALUE;
+            double ecg = Double.MIN_VALUE;
+            double ppg = Double.MIN_VALUE;
             int localCounter;
 
             // extract gyroscope data
@@ -195,6 +210,16 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
                 }
             }
 
+            if (isSensorEnabled(HardwareSensor.ECG)) {
+                ecg = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT32, offset);
+                offset += 4;
+            }
+
+            if (isSensorEnabled(HardwareSensor.PPG)) {
+                ppg = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT32, offset);
+                offset += 4;
+            }
+
             if (isSensorEnabled(HardwareSensor.TEMPERATURE)) {
                 temp = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
                 temp = temp * (1.0 / 512) + 23;
@@ -202,7 +227,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             }
 
             // extract packet counter (16 bit)
-            localCounter = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, i + mPacketSize - 2);
+            localCounter = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, i + mSampleSize - 2);
 
             // check if packets have been lost
             if (((localCounter - lastCounter) % (2 << 15)) > 1) {
@@ -218,6 +243,10 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             NilsPodDataFrame df;
             if (isSensorEnabled(HardwareSensor.ANALOG)) {
                 df = new NilsPodAnalogDataFrame(this, timestamp, accel, gyro, baro, temp, mag, analog);
+            } else if (isSensorEnabled(HardwareSensor.ECG)) {
+                df = new NilsPodEcgDataFrame(this, timestamp, accel, gyro, baro, temp, mag, ecg);
+            } else if (isSensorEnabled(HardwareSensor.PPG)) {
+                df = new NilsPodPpgDataFrame(this, timestamp, accel, gyro, baro, temp, mag, ppg);
             } else if (isSensorEnabled(HardwareSensor.MAGNETOMETER)) {
                 df = new NilsPodMagDataFrame(this, timestamp, accel, gyro, baro, temp, mag);
             } else if (isSensorEnabled(HardwareSensor.TEMPERATURE)) {
@@ -248,6 +277,15 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         super.onOperationStateChanged(oldState, newState);
         switch (newState) {
             case IDLE:
+                if (mModelNumber.length() > 0) {
+                    // extract flash size from model number
+                    int flashType = mModelNumber.charAt(mModelNumber.length() - 1) == '4' ? 4 : 2;
+                    // convert from Gigabit to Byte
+                    mTotalFlashSize = ((double) flashType * 1e9) / 8;
+                    computeRemainingCapacity();
+                    computeRemainingRuntime();
+                }
+
                 switch (oldState) {
                     case LOGGING:
                         //readSessionList();
@@ -324,7 +362,8 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     @Override
     public void downloadSession(int sessionId) throws SensorException {
         mSessionDownloader = new SessionDownloader(this, mSessionHandler.getSessionById(sessionId));
-        mSessionDownloader.setCsvExportEnabled(true);
+        mSessionDownloader.setCsvExportEnabled(mCsvExportEnabled);
+
         byte[] cmd = NilsPodSensorCommand.FLASH_TRANSMIT_SESSION.getByteCmd();
         cmd[1] = (byte) sessionId;
         send(cmd);
@@ -388,9 +427,60 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         return mCurrentConfigMap;
     }
 
+    /**
+     * Returns the remaining storage capacity.
+     *
+     * @return Remaining storage capacity in %
+     */
+    public double getRemainingCapacity() {
+        return mRemainingCapacity;
+    }
 
-    private void createDummySessions() {
-        send(new byte[]{(byte) 0xAB});
+    private void computeRemainingCapacity() {
+        mRemainingFlashSize = mTotalFlashSize;
+
+        int occupiedStorage = 0;
+
+        if (mSessionHandler == null) {
+            return;
+        }
+
+        for (Session session : mSessionHandler.getSessionList()) {
+            occupiedStorage += session.getSessionSize();
+        }
+
+        mRemainingFlashSize -= occupiedStorage;
+
+        if (mTotalFlashSize != 0) {
+            mRemainingCapacity = (mRemainingFlashSize / mTotalFlashSize) * 100.0;
+        } else {
+            mRemainingCapacity = 100.0;
+        }
+    }
+
+    /**
+     * Returns the (estimated) remaining logging runtime.
+     *
+     * @return Remaining runtime in format hh:mm
+     */
+    public String getRemainingRuntime() {
+        return mRemainingRuntime;
+    }
+
+    private void computeRemainingRuntime() {
+        long runtimeSeconds = (long) ((mRemainingFlashSize / mSampleSize) / getSamplingRate());
+
+        long hours = TimeUnit.SECONDS.toHours(runtimeSeconds);
+        long minutes = TimeUnit.SECONDS.toMinutes(runtimeSeconds) - TimeUnit.HOURS.toMinutes(hours);
+
+        mRemainingRuntime = String.format(Locale.getDefault(), "%02d:%02d", hours, minutes);
+    }
+
+    public void setCsvExportEnabled(boolean enabled) {
+        mCsvExportEnabled = enabled;
+        if (mSessionDownloader != null) {
+            mSessionDownloader.setCsvExportEnabled(enabled);
+        }
     }
 
 
@@ -421,6 +511,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         for (int i = 0; i < sSamplingRateCommands.size(); i++) {
             if (sSamplingRateCommands.valueAt(i) == samplingRate) {
                 command = sSamplingRateCommands.keyAt(i);
+                Log.e(TAG, "COMMAND: " + command);
                 break;
             }
         }
@@ -780,6 +871,132 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
 
             if (hasAnalog) {
                 str += ", analog: " + Arrays.toString(analog);
+            }
+
+            return str;
+        }
+    }
+
+
+    /**
+     * Data frame to store data received from the NilsPod Sensor
+     */
+    public static class NilsPodEcgDataFrame extends NilsPodMagDataFrame implements EcgDataFrame {
+
+        protected double ecg;
+        protected boolean hasEcg;
+
+        /**
+         * Creates a new data frame for sensor data
+         *
+         * @param sensor    Originating sensor
+         * @param timestamp Incremental counter for each data frame
+         * @param accel     array storing acceleration values
+         * @param gyro      array storing gyroscope values
+         * @param baro      barometer value
+         * @param temp      temperature value
+         * @param mag       array storing magnetometer values
+         * @param ecg       ECG value
+         */
+        public NilsPodEcgDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro, double baro, double temp, double[] mag, double ecg) {
+            super(sensor, timestamp, accel, gyro, baro, temp, mag);
+            if (ecg != Double.MIN_VALUE) {
+                this.ecg = ecg;
+                hasEcg = true;
+            }
+        }
+
+        /**
+         * Creates a new data frame for sensor data
+         *
+         * @param sensor    Originating sensor
+         * @param timestamp Incremental counter for each data frame
+         * @param accel     array storing acceleration values
+         * @param gyro      array storing gyroscope values
+         * @param baro      barometer value
+         * @param ecg       ECG value
+         */
+        public NilsPodEcgDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro, double baro, double ecg) {
+            this(sensor, timestamp, accel, gyro, baro, Double.MIN_VALUE, null, ecg);
+        }
+
+        @Override
+        public double getEcgSample() {
+            if (hasEcg) {
+                return ecg;
+            } else {
+                throw new HwSensorNotAvailableException(HardwareSensor.ECG);
+            }
+        }
+
+        @Override
+        public String toString() {
+            String str = super.toString();
+
+            if (hasEcg) {
+                str += ", ecg: " + ecg;
+            }
+
+            return str;
+        }
+    }
+
+
+    /**
+     * Data frame to store data received from the NilsPod Sensor
+     */
+    public static class NilsPodPpgDataFrame extends NilsPodMagDataFrame implements PpgDataFrame {
+
+        protected double ppg;
+        protected boolean hasPpg;
+
+        /**
+         * Creates a new data frame for sensor data
+         *
+         * @param sensor    Originating sensor
+         * @param timestamp Incremental counter for each data frame
+         * @param accel     array storing acceleration values
+         * @param gyro      array storing gyroscope values
+         * @param baro      barometer value
+         * @param temp      temperature value
+         * @param mag       array storing magnetometer values
+         * @param ppg       PPG value
+         */
+        public NilsPodPpgDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro, double baro, double temp, double[] mag, double ppg) {
+            super(sensor, timestamp, accel, gyro, baro, temp, mag);
+            if (ppg != Double.MIN_VALUE) {
+                this.ppg = ppg;
+                hasPpg = true;
+            }
+        }
+
+        /**
+         * Creates a new data frame for sensor data
+         *
+         * @param sensor    Originating sensor
+         * @param timestamp Incremental counter for each data frame
+         * @param accel     array storing acceleration values
+         * @param ppg       PPG value
+         */
+        public NilsPodPpgDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro, double baro, double ppg) {
+            this(sensor, timestamp, accel, gyro, baro, Double.MIN_VALUE, null, ppg);
+        }
+
+        @Override
+        public double getPpgSample() {
+            if (hasPpg) {
+                return ppg;
+            } else {
+                throw new HwSensorNotAvailableException(HardwareSensor.PPG);
+            }
+        }
+
+        @Override
+        public String toString() {
+            String str = super.toString();
+
+            if (hasPpg) {
+                str += ", ppg: " + ppg;
             }
 
             return str;

@@ -42,13 +42,12 @@ public class Session {
     private Date mStopTime;
 
     private SimpleDateFormat mStartTimeFormat = new SimpleDateFormat("EEE, dd.MM.yyyy HH:mm", Locale.getDefault());
-    private SimpleDateFormat mSessionTimeFormat = new SimpleDateFormat("yyyyMMdd_HHmm", Locale.getDefault());
+    private SimpleDateFormat mSessionTimeFormat = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault());
 
 
-    public Session(byte[] sessionPacket) {
+    public Session(BluetoothGattCharacteristic chara) {
+
         int offset = 0;
-        BluetoothGattCharacteristic chara = new BluetoothGattCharacteristic(null, 0, 0);
-        chara.setValue(sessionPacket);
 
         // Bytes 0-3
         mStartPage = chara.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, offset);
@@ -68,8 +67,8 @@ public class Session {
         mSessionSize = chara.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, offset);
         offset += 4;
 
-        mSamplingRate = AbstractNilsPodSensor.inferSamplingRate(sessionPacket[offset++]);
-        mTerminationSource = NilsPodTerminationSource.inferTerminationSource(sessionPacket[offset]);
+        mSamplingRate = AbstractNilsPodSensor.inferSamplingRate(chara.getValue()[offset++]);
+        mTerminationSource = NilsPodTerminationSource.inferTerminationSource(chara.getValue()[offset]);
 
         mDuration = mStopTime.getTime() - mStartTime.getTime();
     }

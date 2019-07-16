@@ -10,6 +10,8 @@ package de.fau.sensorlib.sensors.logging;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import java.text.DecimalFormat;
 
 import de.fau.sensorlib.SensorException;
@@ -114,9 +116,12 @@ public class SessionDownloader {
         return (int) (getEstimatedRemainingTime() / 1000);
     }
 
-    public void completeDownload() {
+    public void completeDownload() throws SensorException {
         mProgress = mSession.getSessionSize();
+
         mSessionWriter.completeWriter();
+        mSessionWriter.checkFileSize();
+
         if (mCsvExportEnabled) {
             mSessionCsvConverter.completeBuilder();
         }
@@ -128,6 +133,7 @@ public class SessionDownloader {
         return valueByte / 1024.0;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "DOWNLOADING <Session #" + mSession.getSessionId() + ">: " + mDf.format(toKiloByte(getProgress())) + "/" +

@@ -9,7 +9,6 @@
 package de.fau.sensorlib.widgets.config;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -110,7 +109,6 @@ public class SensorConfigBuilder {
 
         @Override
         public void onCheckedChanged(RadioGroup group, int checkedId) {
-            Log.e(TAG, "ON CHECKED CHANGED");
             RadioButton radioButton = group.findViewById(checkedId);
             int idx = mConfigValuesString.indexOf(radioButton.getText().toString());
             mListener.onConfigItemSelected(mKey, mConfigItem.getConfigValues().get(idx));

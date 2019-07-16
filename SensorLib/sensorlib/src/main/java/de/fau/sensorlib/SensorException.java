@@ -16,6 +16,7 @@ public class SensorException extends Exception {
     private int mErrorCode = 0;
 
     public enum SensorExceptionType {
+        sensorStateError("Sensor state error."),
         readStateError("Error reading sensor state."),
         readConfigError("Error reading sensor config."),
         readHeaderError("Error reading session header."),
@@ -30,6 +31,9 @@ public class SensorException extends Exception {
         noSensorsSelected("No hardware sensors selected."),
         configError("Error configuring the sensor."),
         samplingRateError("Attempted to set negative or zero sampling rate."),
+        sessionDownloadError("Error during session download."),
+        noMemory("Sensor Memory full!"),
+        maxNumSessions("Maximum number of sessions reached."),
         unknown("");
 
         private String msg;
@@ -55,7 +59,7 @@ public class SensorException extends Exception {
     }
 
     public SensorException(SensorExceptionType type, String message) {
-        super(message);
+        super(type.getMessage() + "\n" + message);
         mType = type;
     }
 

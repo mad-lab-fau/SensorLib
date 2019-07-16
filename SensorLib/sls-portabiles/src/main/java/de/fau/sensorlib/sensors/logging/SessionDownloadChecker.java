@@ -15,16 +15,23 @@ import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.core.content.ContextCompat;
+
 import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import androidx.core.content.ContextCompat;
 import de.fau.sensorlib.SensorException;
 import de.fau.sensorlib.sensors.AbstractSensor;
 
 public class SessionDownloadChecker {
+
+    public enum SessionDownloadFlag {
+        DOWNLOAD_SUCCESS,
+        NOT_DOWNLOADED,
+        DOWNLOAD_FAILED
+    }
 
     private static final String TAG = SessionDownloadChecker.class.getSimpleName();
 
@@ -42,7 +49,7 @@ public class SessionDownloadChecker {
 
     private AbstractSensor mSensor;
     private ArrayList<Session> mSessionList;
-    private ArrayList<Boolean> mAlreadyDownloadedList;
+    private ArrayList<SessionDownloadFlag> mAlreadyDownloadedList;
     private ArrayList<String> mFileList;
 
     public SessionDownloadChecker(Context context, AbstractSensor sensor) throws SensorException {
@@ -152,10 +159,15 @@ public class SessionDownloadChecker {
         listFiles();
 
         for (Session session : mSessionList) {
-            mAlreadyDownloadedList.add(false);
+            mAlreadyDownloadedList.add(SessionDownloadFlag.NOT_DOWNLOADED);
             for (String filename : mFileList) {
                 if (filename.contains(session.getSessionStartString())) {
-                    mAlreadyDownloadedList.set(mSessionList.indexOf(session), true);
+                    File f = new File(getAbsolutePathForSession(session));
+                    if (f.length() != session.getSessionSize()) {
+                        mAlreadyDownloadedList.set(mSessionList.indexOf(session), SessionDownloadFlag.DOWNLOAD_FAILED);
+                    } else {
+                        mAlreadyDownloadedList.set(mSessionList.indexOf(session), SessionDownloadFlag.DOWNLOAD_SUCCESS);
+                    }
                     break;
                 }
             }
@@ -163,7 +175,12 @@ public class SessionDownloadChecker {
     }
 
     public void setSessionDownloaded(Session session) {
-        mAlreadyDownloadedList.set(mSessionList.indexOf(session), true);
+        File f = new File(getAbsolutePathForSession(session));
+        if (f.length() == session.getSessionSize()) {
+            mAlreadyDownloadedList.set(mSessionList.indexOf(session), SessionDownloadFlag.DOWNLOAD_SUCCESS);
+        } else {
+            mAlreadyDownloadedList.set(mSessionList.indexOf(session), SessionDownloadFlag.DOWNLOAD_FAILED);
+        }
     }
 
     public void clear() {
@@ -171,7 +188,7 @@ public class SessionDownloadChecker {
         mAlreadyDownloadedList.clear();
     }
 
-    public boolean checkSessionAlreadyDownloaded(Session session) {
+    public SessionDownloadFlag getSessionDownloadStatus(Session session) {
         return mAlreadyDownloadedList.get(mSessionList.indexOf(session));
     }
 
@@ -184,15 +201,13 @@ public class SessionDownloadChecker {
         // reload file list
         listFiles();
 
-        if (checkSessionAlreadyDownloaded(session)) {
-            for (String filename : mFileList) {
-                if (filename.contains(session.getSessionStartString())) {
-                    return getFullDirectoryPath() + "/" + filename;
-                }
+        for (String filename : mFileList) {
+            if (filename.contains(session.getSessionStartString())) {
+                return getFullDirectoryPath() + "/" + filename;
             }
         }
-        // this should never happen
-        throw new IllegalArgumentException("Session " + session + " not downloaded yet!");
+
+        return null;
     }
 
 
@@ -200,7 +215,7 @@ public class SessionDownloadChecker {
         // reload file list
         listFiles();
 
-        if (checkSessionAlreadyDownloaded(session)) {
+        if (getSessionDownloadStatus(session) == SessionDownloadFlag.DOWNLOAD_SUCCESS) {
             for (String filename : mFileList) {
                 if (filename.contains(session.getSessionStartString())) {
                     return filename;

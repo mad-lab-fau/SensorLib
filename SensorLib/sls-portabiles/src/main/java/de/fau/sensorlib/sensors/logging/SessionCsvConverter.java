@@ -19,7 +19,6 @@ import de.fau.sensorlib.SensorDataRecorder;
 import de.fau.sensorlib.SensorException;
 import de.fau.sensorlib.enums.HardwareSensor;
 import de.fau.sensorlib.sensors.AbstractSensor;
-import de.fau.sensorlib.sensors.NilsPodEcgSensor;
 import de.fau.sensorlib.sensors.NilsPodSensor;
 import de.fau.sensorlib.sensors.enums.NilsPodSensorPosition;
 import de.fau.sensorlib.sensors.enums.NilsPodSyncRole;
@@ -257,7 +256,7 @@ public class SessionCsvConverter {
         double[] analog = null;
         double baro = Double.MIN_VALUE;
         double ecg = Double.MIN_VALUE;
-        double[] ppg = null;
+        double ppg = Double.MIN_VALUE;
         double temp = Double.MIN_VALUE;
 
         // extract gyroscope data
@@ -304,13 +303,9 @@ public class SessionCsvConverter {
             offset += 4;
         }
 
-
         if (isSensorEnabled(HardwareSensor.PPG)) {
-            ppg = new double[2];
-            for (int j = 0; j < 2; j++) {
-                ppg[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
-                offset += 2;
-            }
+            ppg = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT32, offset);
+            offset += 4;
         }
 
         if (isSensorEnabled(HardwareSensor.TEMPERATURE)) {
@@ -322,10 +317,12 @@ public class SessionCsvConverter {
         long timestamp = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT32, mHeader.getSampleSize() - 4);
 
         NilsPodSensor.NilsPodDataFrame df;
-        if (isSensorEnabled(HardwareSensor.ECG)) {
-            df = new NilsPodEcgSensor.NilsPodEcgDataFrame(mSensor, timestamp, accel, gyro, baro, ecg);
-        } else if (isSensorEnabled(HardwareSensor.ANALOG)) {
+        if (isSensorEnabled(HardwareSensor.ANALOG)) {
             df = new NilsPodSensor.NilsPodAnalogDataFrame(mSensor, timestamp, accel, gyro, baro, temp, mag, analog);
+        } else if (isSensorEnabled(HardwareSensor.ECG)) {
+            df = new NilsPodSensor.NilsPodEcgDataFrame(mSensor, timestamp, accel, gyro, baro, temp, mag, ecg);
+        } else if (isSensorEnabled(HardwareSensor.PPG)) {
+            df = new NilsPodSensor.NilsPodPpgDataFrame(mSensor, timestamp, accel, gyro, baro, temp, mag, ppg);
         } else if (isSensorEnabled(HardwareSensor.MAGNETOMETER)) {
             df = new NilsPodSensor.NilsPodMagDataFrame(mSensor, timestamp, accel, gyro, baro, temp, mag);
         } else if (isSensorEnabled(HardwareSensor.TEMPERATURE)) {
