@@ -110,6 +110,25 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
      */
     protected static final UUID NILS_POD_BUTTONLESS_DFU = UUID.fromString("8ec90003-f315-4f60-9fb8-838830daea50");
 
+    // Add custom NilsPod UUIDs to known UUID pool
+    static {
+        BleGattAttributes.addService(NILS_POD_STREAMING_SERVICE, "NilsPod Streaming Service");
+        BleGattAttributes.addService(NILS_POD_CONFIGURATION_SERVICE, "NilsPod Configuration Service");
+        BleGattAttributes.addService(NILS_POD_SECURE_DFU_SERVICE, "NilsPod Secure DFU Service");
+        BleGattAttributes.addCharacteristic(NILS_POD_COMMANDS, "NilsPod Sensor Commands");
+        BleGattAttributes.addCharacteristic(NILS_POD_STREAMING, "NilsPod Streaming");
+        BleGattAttributes.addCharacteristic(NILS_POD_SYSTEM_STATE, "NilsPod System State");
+        BleGattAttributes.addCharacteristic(NILS_POD_SYNC_CONFIG, "NilsPod Synchronization Configuration");
+        BleGattAttributes.addCharacteristic(NILS_POD_SAMPLING_RATE_CONFIG, "NilsPod Sampling Rate Configuration");
+        BleGattAttributes.addCharacteristic(NILS_POD_SENSOR_CONFIG, "NilsPod Sensor Configuration");
+        BleGattAttributes.addCharacteristic(NILS_POD_SYSTEM_SETTINGS_CONFIG, "NilsPod System Settings Configuration");
+        BleGattAttributes.addCharacteristic(NILS_POD_DATE_TIME_CONFIG, "NilsPod Date Time Configuration");
+        BleGattAttributes.addCharacteristic(NILS_POD_FIRMWARE_VERSION, "NilsPod Firmware Version");
+        BleGattAttributes.addCharacteristic(NILS_POD_BUTTONLESS_DFU, "NilsPod Buttonless DFU");
+    }
+
+
+
     /**
      * Size of one sensor data sample. Default packet size: 12 Byte IMU + 2 Byte Counter
      */
@@ -398,23 +417,6 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         public int getErrorCode() {
             return errorCode;
         }
-    }
-
-    // Add custom NilsPod UUIDs to known UUID pool
-    static {
-        BleGattAttributes.addService(NILS_POD_STREAMING_SERVICE, "NilsPod Streaming Service");
-        BleGattAttributes.addService(NILS_POD_CONFIGURATION_SERVICE, "NilsPod Configuration Service");
-        BleGattAttributes.addService(NILS_POD_SECURE_DFU_SERVICE, "NilsPod Secure DFU Service");
-        BleGattAttributes.addCharacteristic(NILS_POD_COMMANDS, "NilsPod Sensor Commands");
-        BleGattAttributes.addCharacteristic(NILS_POD_STREAMING, "NilsPod Streaming");
-        BleGattAttributes.addCharacteristic(NILS_POD_SYSTEM_STATE, "NilsPod System State");
-        BleGattAttributes.addCharacteristic(NILS_POD_SYNC_CONFIG, "NilsPod Synchronization Configuration");
-        BleGattAttributes.addCharacteristic(NILS_POD_SAMPLING_RATE_CONFIG, "NilsPod Sampling Rate Configuration");
-        BleGattAttributes.addCharacteristic(NILS_POD_SENSOR_CONFIG, "NilsPod Sensor Configuration");
-        BleGattAttributes.addCharacteristic(NILS_POD_SYSTEM_SETTINGS_CONFIG, "NilsPod System Settings Configuration");
-        BleGattAttributes.addCharacteristic(NILS_POD_DATE_TIME_CONFIG, "NilsPod Date Time Configuration");
-        BleGattAttributes.addCharacteristic(NILS_POD_FIRMWARE_VERSION, "NilsPod Firmware Version");
-        BleGattAttributes.addCharacteristic(NILS_POD_BUTTONLESS_DFU, "NilsPod Buttonless DFU");
     }
 
     private final DfuProgressListener mDfuProgressListener = new DfuProgressListenerAdapter() {
