@@ -16,7 +16,7 @@
         android:layout_margin="8dp">
 
         <CheckBox
-            android:id="@+id/check"
+            android:id="@+id/check_box"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignTop="@id/tv_config_title"
@@ -28,7 +28,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:layout_toEndOf="@id/check"
+            android:layout_toEndOf="@id/check_box"
             android:textSize="20sp"
             android:textStyle="bold" />
 
@@ -48,7 +48,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/tv_config_title"
             android:layout_centerHorizontal="true"
-            android:layout_toEndOf="@id/check" />
+            android:layout_toEndOf="@id/check_box" />
 
     </RelativeLayout>
 
