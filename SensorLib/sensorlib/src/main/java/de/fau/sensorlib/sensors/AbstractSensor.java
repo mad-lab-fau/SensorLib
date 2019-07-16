@@ -68,11 +68,11 @@ public abstract class AbstractSensor extends SensorInfo {
      */
     protected int mBatteryLevel;
 
-    protected String mSerialNumber;
-    protected String mManufacturer;
-    protected String mModelNumber;
-    protected String mFirmwareRevision;
-    protected String mSoftwareRevision;
+    protected String mSerialNumber = "";
+    protected String mManufacturer = "";
+    protected String mModelNumber = "";
+    protected String mFirmwareRevision = "";
+    protected String mSoftwareRevision = "";
     protected long mSensorSystemID;
 
     /**

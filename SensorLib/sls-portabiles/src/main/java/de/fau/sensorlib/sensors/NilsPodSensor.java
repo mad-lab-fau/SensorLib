@@ -277,7 +277,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         super.onOperationStateChanged(oldState, newState);
         switch (newState) {
             case IDLE:
-                if (mModelNumber != null) {
+                if (mModelNumber.length() > 0) {
                     // extract flash size from model number
                     int flashType = mModelNumber.charAt(mModelNumber.length() - 1) == '4' ? 4 : 2;
                     // convert from Gigabit to Byte
