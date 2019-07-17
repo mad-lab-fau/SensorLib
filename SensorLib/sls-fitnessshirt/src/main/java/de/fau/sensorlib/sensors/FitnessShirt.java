@@ -100,27 +100,6 @@ public class FitnessShirt extends AbstractSensor {
         }
     }
 
-    @Override
-    protected void dispatchNewData(SensorDataFrame data) {
-        if (!(data instanceof FitnessShirtDataFrame))
-            return;
-
-        FitnessShirtDataFrame fsdf = (FitnessShirtDataFrame) data;
-
-        // each data frame contains 16 consecutive ecg samples, we reuse the same dataframe to send them separately
-        for (int i = 0; i < fsdf.ecgSamples.length; i++) {
-            FitnessShirtDataFrame fdf = new FitnessShirtDataFrame(this, fsdf.getTimestamp() + i * samplingIntervalMillis);
-            fdf.ecg = fsdf.ecgSamples[i];
-            fdf.respiration = fsdf.respiration;
-
-            super.dispatchNewData(fdf);
-
-            //fsdf.ecg = fsdf.ecgSamples[i];
-            //fsdf.setTimestamp( fsdf.getTimestamp() + samplingIntervalMillis );
-            //mExternalHandler.onNewData( fsdf );
-        }
-    }
-
     public FitnessShirt(Context context, BluetoothDevice btDevice, SensorDataProcessor dataHandler) {
         this(context, btDevice.getName(), btDevice.getAddress(), dataHandler);
     }
@@ -285,7 +264,22 @@ public class FitnessShirt extends AbstractSensor {
                     if (df == null)
                         continue;
 
-                    sendNewData(df);
+                    for (int i = 0; i < df.ecgSamples.length; i++) {
+                        FitnessShirtDataFrame fdf = new FitnessShirtDataFrame(FitnessShirt.this, df.getTimestamp() + i * samplingIntervalMillis);
+                        fdf.ax = df.ax;
+                        fdf.ay = df.ay;
+                        fdf.az = df.az;
+                        fdf.ecg = df.ecgSamples[i];
+                        fdf.respiration = df.respiration;
+                        fdf.respirationRate = df.respirationRate;
+                        fdf.heartRate = df.heartRate;
+
+                        sendNewData(fdf);
+
+                        //fsdf.ecg = fsdf.ecgSamples[i];
+                        //fsdf.setTimestamp( fsdf.getTimestamp() + samplingIntervalMillis );
+                        //mExternalHandler.onNewData( fsdf );
+                    }
 
 /*
                     // dispatch message with data to UI
