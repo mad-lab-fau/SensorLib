@@ -8,16 +8,18 @@
 package de.fau.sensorlib.dataframe;
 
 /**
- * Respiration data frame.
+ * Heart rate data frame.
  */
-public interface RespirationDataFrame {
+public interface HeartRateIbiDataFrame extends HeartRateDataFrame {
 
-    String[] COLUMNS = new String[]{"resp_sample"};
+    String[] COLUMNS = new String[]{"hr", "ibi"};
 
     /**
-     * Returns the current respiration sample, e.g. from bioimpedance measurement.
+     * Returns the interbeat interval (RR interval) in milliseconds.
      *
-     * @return respiration sample
+     * @return RR interval in milliseconds
      */
-    double getRespirationSample();
+    default double getInterbeatInterval() {
+        return 0.0;
+    }
 }

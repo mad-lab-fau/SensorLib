@@ -8,7 +8,7 @@
 package de.fau.sensorlib.dataframe;
 
 /**
- * Photoplethysmography (PPG) data frame
+ * Photoplethysmography (PPG) data frame for multiple channels.
  */
 public interface PpgMultiDataFrame {
 
@@ -19,19 +19,25 @@ public interface PpgMultiDataFrame {
      *
      * @return Red channel of PPG signal
      */
-    double getPpgRedSample();
+    default double getRedPpgSample() {
+        return 0.0;
+    }
 
     /**
      * Returns the infra-red channel of the PPG signal.
      *
      * @return IR channel of PPG signal
      */
-    double getPpgIrSample();
+    default double getIrPpgSample() {
+        return 0.0;
+    }
 
     /**
      * Returns the green channel of the PPG signal.
      *
      * @return Green channel of PPG signal
      */
-    double getPpgGreenSample();
+    default double getGreenPpgSample() {
+        return 0.0;
+    }
 }

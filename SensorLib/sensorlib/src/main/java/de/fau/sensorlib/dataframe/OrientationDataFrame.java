@@ -14,10 +14,24 @@ public interface OrientationDataFrame {
 
     String[] COLUMNS = new String[]{"roll", "pitch", "yaw"};
 
-
+    /**
+     * Returns the roll angle of the current orientation sample.
+     *
+     * @return roll value
+     */
     double getRoll();
 
+    /**
+     * Returns the pitch angle of the current orientation sample.
+     *
+     * @return pitch value
+     */
     double getPitch();
 
+    /**
+     * Returns the yaw angle of the current orientation sample.
+     *
+     * @return yaw value
+     */
     double getYaw();
 }

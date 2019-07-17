@@ -19,5 +19,5 @@ public interface EdaDataFrame {
      *
      * @return EDA value
      */
-    double getElectrodermalActivity();
+    double getEdaSample();
 }

@@ -9,7 +9,7 @@
 package de.fau.sensorlib.dataframe;
 
 /**
- * Light data frame
+ * Light data frame.
  */
 public interface LightDataFrame {
 

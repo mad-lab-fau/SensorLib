@@ -23,8 +23,9 @@ import de.fau.sensorlib.BleSensorManager;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.dataframe.AccelDataFrame;
 import de.fau.sensorlib.dataframe.EcgDataFrame;
-import de.fau.sensorlib.dataframe.HeartRateDataFrame;
+import de.fau.sensorlib.dataframe.HeartRateIbiDataFrame;
 import de.fau.sensorlib.dataframe.RespirationDataFrame;
+import de.fau.sensorlib.dataframe.RespirationRateDataFrame;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
 
 /**
@@ -46,7 +47,7 @@ public class FitnessShirt extends AbstractSensor {
     private long startStreamingTimestamp = 0;
 
 
-    public static class FitnessShirtDataFrame extends SensorDataFrame implements EcgDataFrame, AccelDataFrame, RespirationDataFrame, HeartRateDataFrame {
+    public static class FitnessShirtDataFrame extends SensorDataFrame implements EcgDataFrame, AccelDataFrame, RespirationDataFrame, RespirationRateDataFrame, HeartRateIbiDataFrame {
         double[] ecgSamples = new double[16];
         double ecg;
         long respiration;

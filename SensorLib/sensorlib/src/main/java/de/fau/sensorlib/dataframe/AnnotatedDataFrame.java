@@ -8,7 +8,7 @@
 package de.fau.sensorlib.dataframe;
 
 /**
- * Annotation (label) data frame.
+ * Data frame for annotations.
  */
 public interface AnnotatedDataFrame {
 
@@ -19,12 +19,16 @@ public interface AnnotatedDataFrame {
      *
      * @return Annotation label as char
      */
-    char getAnnotationChar();
+    default char getAnnotationChar() {
+        return Character.MIN_VALUE;
+    }
 
     /**
      * Returns the annotation String
      *
      * @return Annotation String
      */
-    String getAnnotationString();
+    default String getAnnotationString() {
+        return "";
+    }
 }

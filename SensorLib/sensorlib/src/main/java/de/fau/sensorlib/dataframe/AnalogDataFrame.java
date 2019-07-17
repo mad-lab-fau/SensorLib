@@ -8,7 +8,7 @@
 package de.fau.sensorlib.dataframe;
 
 /**
- * Analog data data frame, e.g. data read from the FSR sensors in the NilsPod Insole.
+ * Data frame for analog data samples, e.g. data read from FSR sensors via ADC.
  */
 public interface AnalogDataFrame {
 

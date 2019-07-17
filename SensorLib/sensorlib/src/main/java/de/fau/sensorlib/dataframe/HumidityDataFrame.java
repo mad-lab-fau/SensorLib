@@ -9,7 +9,7 @@
 package de.fau.sensorlib.dataframe;
 
 /**
- * Humidity data frame
+ * Humidity data frame.
  */
 public interface HumidityDataFrame {
 
