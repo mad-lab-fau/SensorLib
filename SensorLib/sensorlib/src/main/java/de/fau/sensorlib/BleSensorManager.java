@@ -354,14 +354,11 @@ public class BleSensorManager {
         sBleScanner.startScan(filterList, settings, sScanCallback);
 
         // post a delayed runnable to stop the BLE scan after SCAN_PERIOD.
-        sBleScanHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Log.d(TAG, "...Stopping BLE scan.");
-                if (sScanCallback != null) {
-                    sIsScanning = false;
-                    sBleScanner.stopScan(sScanCallback);
-                }
+        sBleScanHandler.postDelayed(() -> {
+            Log.d(TAG, "...Stopping BLE scan.");
+            if (sScanCallback != null) {
+                sIsScanning = false;
+                sBleScanner.stopScan(sScanCallback);
             }
         }, SCAN_PERIOD);
     }
