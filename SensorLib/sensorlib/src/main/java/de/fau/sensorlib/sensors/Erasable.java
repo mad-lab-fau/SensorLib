@@ -11,7 +11,8 @@ package de.fau.sensorlib.sensors;
 public interface Erasable {
 
     /**
-     * Deletes the data currently stored on the sensor, but does not perform a full erase (see {@link Erasable#fullErase()} for that).
+     * Deletes the data currently stored on the sensor, but does <b>not</b> perform a full erase
+     * (see {@link Erasable#fullErase()} for that).
      */
     void clearData();
 
