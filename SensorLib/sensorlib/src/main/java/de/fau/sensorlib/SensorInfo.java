@@ -10,6 +10,8 @@ package de.fau.sensorlib;
 import android.util.Log;
 import android.util.SparseArray;
 
+import androidx.annotation.NonNull;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -203,6 +205,7 @@ public class SensorInfo implements Serializable {
         return obj instanceof SensorInfo && mDeviceAddress.equals(((SensorInfo) obj).getDeviceAddress());
     }
 
+    @NonNull
     @Override
     public String toString() {
         return getDeviceName() + ": <" + getState() + ">";

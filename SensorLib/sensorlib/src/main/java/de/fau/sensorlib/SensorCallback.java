@@ -7,6 +7,8 @@
  */
 package de.fau.sensorlib;
 
+import android.util.Log;
+
 import de.fau.sensorlib.dataframe.SensorDataFrame;
 import de.fau.sensorlib.sensors.AbstractSensor;
 
@@ -14,6 +16,8 @@ import de.fau.sensorlib.sensors.AbstractSensor;
  * Callback for communication Service -> Activity
  */
 public interface SensorCallback {
+
+    String TAG = SensorCallback.class.getSimpleName();
 
     void onScanResult(boolean sensorFound);
 

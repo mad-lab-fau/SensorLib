@@ -991,7 +991,6 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
         starter.setZip(filePath);
 
-        //final DfuServiceController controller =
         starter.start(getContext(), NilsPodDfuService.class);
 
         DfuServiceListenerHelper.registerLogListener(getContext(), mDfuLogListener);
@@ -1095,6 +1094,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
             }
         }
 
+        @NonNull
         @Override
         public String toString() {
             String str = "<" + originatingSensor.getDeviceName() + ">\tctr=" + ((long) getTimestamp());
