@@ -77,4 +77,25 @@ public interface SensorCallback {
      */
     void onDataReceived(SensorDataFrame data);
 
+    /**
+     * Called when all attached sensors are disconnected.
+     */
+    default void onAllSensorsDisconnected() {
+        Log.d(TAG, "All sensors disconnected!");
+    }
+
+    /**
+     * Called when all attached sensors are connected.
+     */
+    default void onAllSensorsConnected() {
+        Log.d(TAG, "All sensors connected!");
+    }
+
+    /**
+     * Called when all attached sensors are streaming.
+     */
+    default void onAllSensorsStreaming() {
+        Log.d(TAG, "All sensors streaming!");
+    }
+
 }
