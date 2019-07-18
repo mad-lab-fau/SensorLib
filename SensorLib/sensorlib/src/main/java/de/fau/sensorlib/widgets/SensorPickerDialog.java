@@ -24,7 +24,6 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.GridView;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -127,11 +126,6 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
 
             holder.mSensorInformationTextView.setText(address);
             holder.mSensorRssi.setText(mContext.getString(R.string.placeholder_rssi, rssi));
-            // if battery measurement is available for sensor
-            if (sensor.hasBatteryMeasurement()) {
-                holder.mBatteryImageView.setImageResource(R.drawable.ic_battery_available);
-                holder.mBatteryImageView.setColorFilter(ContextCompat.getColor(mContext, R.color.sensor_available));
-            }
 
             // highlight last connected sensors
             if (mLastConnectedSensors.contains(mFoundSensors.get(position).getString(Constants.KEY_SENSOR_NAME))) {
@@ -294,7 +288,6 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
         private TextView mRecentlyConnectedTextView;
         private TextView mSensorInformationTextView;
         private TextView mSensorRssi;
-        private ImageView mBatteryImageView;
         private GridView mSensorGridView;
         private CheckBox mCheckBox;
         private HardwareSensorGridAdapter mGridAdapter;
@@ -307,7 +300,6 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
             mRecentlyConnectedTextView = itemView.findViewById(R.id.tv_recently);
             mSensorInformationTextView = itemView.findViewById(R.id.tv_sensor_address);
             mSensorRssi = itemView.findViewById(R.id.tv_sensor_rssi);
-            mBatteryImageView = itemView.findViewById(R.id.iv_battery);
             mCheckBox = itemView.findViewById(R.id.checkbox);
             mCheckBox.setOnClickListener(this);
             mSensorGridView = itemView.findViewById(R.id.gv_sensors);
