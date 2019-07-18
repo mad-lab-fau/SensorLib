@@ -110,7 +110,7 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
         @Override
         public SensorPickerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View layout = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_sensor_picker, parent, false);
-            return new SensorPickerViewHolder(getContext(), layout, this);
+            return new SensorPickerViewHolder(layout, this);
         }
 
         @Override
@@ -300,7 +300,7 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
         private HardwareSensorGridAdapter mGridAdapter;
         private ItemClickListener mItemClickListener;
 
-        private SensorPickerViewHolder(Context context, View itemView, ItemClickListener listener) {
+        private SensorPickerViewHolder(View itemView, ItemClickListener listener) {
             super(itemView);
 
             mSensorNameTextView = itemView.findViewById(R.id.tv_sensor_name);
