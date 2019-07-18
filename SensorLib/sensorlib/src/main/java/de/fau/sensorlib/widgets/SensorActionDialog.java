@@ -125,6 +125,7 @@ public class SensorActionDialog extends DialogFragment implements OnSensorConfig
                 case CONNECTED:
                     for (SensorAction action : EnumSet.of(SensorAction.STOP_LOGGING)) {
                         if (position == action.ordinal()) {
+                            Toast.makeText(getContext(), "Sensor is currently not logging.", Toast.LENGTH_SHORT).show();
                             return;
                         }
                     }
@@ -132,14 +133,15 @@ public class SensorActionDialog extends DialogFragment implements OnSensorConfig
                 case LOGGING:
                     for (SensorAction action : EnumSet.of(SensorAction.CONFIGURE, SensorAction.START_LOGGING, SensorAction.CLEAR_SESSIONS, SensorAction.FULL_ERASE, SensorAction.RESET)) {
                         if (position == action.ordinal()) {
+                            Toast.makeText(getContext(), "Sensor is currently logging. Stop logging first!", Toast.LENGTH_SHORT).show();
                             return;
                         }
                     }
                     break;
                 case STREAMING:
-                    for (SensorAction action : EnumSet.of(SensorAction.CONFIGURE, SensorAction.STOP_LOGGING, SensorAction.START_LOGGING, SensorAction.CLEAR_SESSIONS, SensorAction.FULL_ERASE)) {
+                    for (SensorAction action : EnumSet.of(SensorAction.CONFIGURE, SensorAction.START_LOGGING, SensorAction.STOP_LOGGING, SensorAction.CLEAR_SESSIONS, SensorAction.FULL_ERASE)) {
                         if (position == action.ordinal()) {
-                            // TODO Toasts for Arne
+                            Toast.makeText(getContext(), "Sensor is currently streaming. Stop streaming first!", Toast.LENGTH_SHORT).show();
                             return;
                         }
                     }
