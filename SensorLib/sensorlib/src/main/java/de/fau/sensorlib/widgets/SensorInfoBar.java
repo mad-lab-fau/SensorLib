@@ -35,7 +35,7 @@ import de.fau.sensorlib.SensorEventListener;
 import de.fau.sensorlib.enums.SensorMessage;
 import de.fau.sensorlib.enums.SensorState;
 import de.fau.sensorlib.sensors.AbstractSensor;
-import de.fau.sensorlib.widgets.config.OnSensorConfigChangedListener;
+import de.fau.sensorlib.widgets.config.SensorConfigSelectedListener;
 
 
 /**
@@ -236,8 +236,8 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
 
             SensorActionDialog dialog = new SensorActionDialog();
             dialog.setDialogDismissCallback(dialog1 -> {
-                if (getActivity() instanceof OnSensorConfigChangedListener) {
-                    ((OnSensorConfigChangedListener) getActivity()).onSensorConfigSelected(null);
+                if (getActivity() instanceof SensorConfigSelectedListener) {
+                    ((SensorConfigSelectedListener) getActivity()).onSensorConfigSelected(null);
                 }
             });
             dialog.setArguments(bundle);

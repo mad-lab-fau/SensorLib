@@ -42,10 +42,10 @@ import de.fau.sensorlib.sensors.Configurable;
 import de.fau.sensorlib.sensors.Erasable;
 import de.fau.sensorlib.sensors.Loggable;
 import de.fau.sensorlib.sensors.Resettable;
-import de.fau.sensorlib.widgets.config.OnSensorConfigChangedListener;
 import de.fau.sensorlib.widgets.config.SensorConfigDialog;
+import de.fau.sensorlib.widgets.config.SensorConfigSelectedListener;
 
-public class SensorActionDialog extends DialogFragment implements OnSensorConfigChangedListener, View.OnClickListener {
+public class SensorActionDialog extends DialogFragment implements SensorConfigSelectedListener, View.OnClickListener {
 
     private static final String TAG = SensorActionDialog.class.getSimpleName();
 

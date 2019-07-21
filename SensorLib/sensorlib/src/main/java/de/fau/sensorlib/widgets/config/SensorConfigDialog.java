@@ -39,7 +39,7 @@ public class SensorConfigDialog extends DialogFragment implements View.OnClickLi
     private HashMap<String, ConfigItem> mConfigItems = new HashMap<>();
 
     private SensorConfigBuilder mSensorConfigBuilder;
-    private OnSensorConfigChangedListener mSensorConfigListener;
+    private SensorConfigSelectedListener mSensorConfigListener;
 
     @Nullable
     @Override
@@ -109,7 +109,7 @@ public class SensorConfigDialog extends DialogFragment implements View.OnClickLi
         mSensorConfigBuilder = builder;
     }
 
-    public void setSensorConfigListener(OnSensorConfigChangedListener listener) {
+    public void setSensorConfigListener(SensorConfigSelectedListener listener) {
         mSensorConfigListener = listener;
     }
 

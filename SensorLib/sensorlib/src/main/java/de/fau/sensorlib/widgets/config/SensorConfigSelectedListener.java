@@ -10,7 +10,7 @@ package de.fau.sensorlib.widgets.config;
 
 import java.util.HashMap;
 
-public interface OnSensorConfigChangedListener {
+public interface SensorConfigSelectedListener {
 
     void onSensorConfigSelected(HashMap<String, Object> configMap);
 }

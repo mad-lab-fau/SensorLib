@@ -55,6 +55,8 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
 
     protected ArrayList<NilsPodLoggingCallback> mCallbacks;
 
+    protected OnSensorConfigChangedListener mConfigChangedListener;
+
     /**
      * Global counter for incoming packages (local counter only has 15 bit)
      */
@@ -89,6 +91,10 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
 
     public void addNilsPodLoggingCallback(NilsPodLoggingCallback callback) {
         mCallbacks.add(callback);
+    }
+
+    public void setOnConfigChangedListener(OnSensorConfigChangedListener listener) {
+        mConfigChangedListener = listener;
     }
 
     @Override
@@ -315,6 +321,9 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
                                 throw new SensorException(SensorException.SensorExceptionType.configError);
                             }
                         }
+                        if (mConfigChangedListener != null) {
+                            mConfigChangedListener.onSensorConfigChanged(this);
+                        }
                         break;
                 }
                 break;
@@ -511,7 +520,6 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         for (int i = 0; i < sSamplingRateCommands.size(); i++) {
             if (sSamplingRateCommands.valueAt(i) == samplingRate) {
                 command = sSamplingRateCommands.keyAt(i);
-                Log.e(TAG, "COMMAND: " + command);
                 break;
             }
         }
