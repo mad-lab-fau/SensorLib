@@ -41,7 +41,6 @@ import de.fau.sensorlib.SensorEventListener;
 import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
-import de.fau.sensorlib.enums.SensorMessage;
 import de.fau.sensorlib.enums.SensorState;
 import de.fau.sensorlib.sensors.AbstractSensor;
 
@@ -249,12 +248,6 @@ public class SensorPlotter extends CardView implements SensorEventListener {
         }
         previousState = state;
     }
-
-    @Override
-    public void onSensorMessage(AbstractSensor sensor, SensorMessage messageType, String message) {
-
-    }
-
 
     private static class SensorPlotterViewHolder extends ViewHolder {
 
