@@ -294,12 +294,10 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
 
                 switch (oldState) {
                     case LOGGING:
-                        //readSessionList();
                         setState(SensorState.CONNECTED);
                         sendStopLogging();
                         break;
                     case FLASH_ERASE:
-                        //readSessionList();
                         for (NilsPodLoggingCallback callback : mCallbacks) {
                             callback.onClearSessions(this);
                         }
