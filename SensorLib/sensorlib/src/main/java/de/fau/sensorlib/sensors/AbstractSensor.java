@@ -40,7 +40,9 @@ public abstract class AbstractSensor extends SensorInfo {
     protected static final int MESSAGE_CONNECTION_LOST = 1016;
     protected static final int MESSAGE_START_STREAMING = 1017;
     protected static final int MESSAGE_STOP_STREAMING = 1018;
-    protected static final int MESSAGE_SAMPLING_RATE_CHANGED = 1019;
+    protected static final int MESSAGE_START_LOGGING = 1019;
+    protected static final int MESSAGE_STOP_LOGGING = 1020;
+    protected static final int MESSAGE_SAMPLING_RATE_CHANGED = 1021;
 
     /**
      * Context this sensor is used in.
@@ -129,6 +131,16 @@ public abstract class AbstractSensor extends SensorInfo {
                     case AbstractSensor.MESSAGE_STOP_STREAMING:
                         getSensor().setState(SensorState.CONNECTED);
                         getSensor().dispatchStopStreaming();
+                        break;
+
+                    case AbstractSensor.MESSAGE_START_LOGGING:
+                        getSensor().setState(SensorState.LOGGING);
+                        getSensor().dispatchStartLogging();
+                        break;
+
+                    case AbstractSensor.MESSAGE_STOP_LOGGING:
+                        getSensor().setState(SensorState.CONNECTED);
+                        getSensor().dispatchStopLogging();
                         break;
 
                     case AbstractSensor.MESSAGE_DISCONNECTED:
@@ -499,6 +511,26 @@ public abstract class AbstractSensor extends SensorInfo {
     private void dispatchStopStreaming() {
         for (SensorDataProcessor sdp : mExternalHandlers) {
             sdp.onStopStreaming(this);
+        }
+    }
+
+    protected void sendStartLogging() {
+        mInternalHandler.obtainMessage(MESSAGE_START_LOGGING).sendToTarget();
+    }
+
+    private void dispatchStartLogging() {
+        for (SensorDataProcessor sdp : mExternalHandlers) {
+            sdp.onStartLogging(this);
+        }
+    }
+
+    protected void sendStopLogging() {
+        mInternalHandler.obtainMessage(MESSAGE_STOP_LOGGING).sendToTarget();
+    }
+
+    private void dispatchStopLogging() {
+        for (SensorDataProcessor sdp : mExternalHandlers) {
+            sdp.onStopLogging(this);
         }
     }
 

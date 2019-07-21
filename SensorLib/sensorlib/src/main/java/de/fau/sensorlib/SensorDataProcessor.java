@@ -28,6 +28,7 @@ public abstract class SensorDataProcessor {
      * @param sensor the corresponding sensor.
      */
     public void onSensorCreated(AbstractSensor sensor) {
+
     }
 
     /**
@@ -36,6 +37,7 @@ public abstract class SensorDataProcessor {
      * @param sensor the corresponding sensor.
      */
     public void onConnected(AbstractSensor sensor) {
+
     }
 
     /**
@@ -53,6 +55,7 @@ public abstract class SensorDataProcessor {
      * @param sensor the corresponding sensor.
      */
     public void onDisconnected(AbstractSensor sensor) {
+
     }
 
     /**
@@ -70,6 +73,7 @@ public abstract class SensorDataProcessor {
      * @param sensor the corresponding sensor.
      */
     public void onStartStreaming(AbstractSensor sensor) {
+
     }
 
     /**
@@ -78,6 +82,15 @@ public abstract class SensorDataProcessor {
      * @param sensor the corresponding sensor.
      */
     public void onStopStreaming(AbstractSensor sensor) {
+
+    }
+
+    public void onStartLogging(AbstractSensor sensor) {
+
+    }
+
+    public void onStopLogging(AbstractSensor sensor) {
+
     }
 
     /**
@@ -88,6 +101,7 @@ public abstract class SensorDataProcessor {
      * @param sensor the corresponding sensor.
      */
     public void onSamplingRateChanged(AbstractSensor sensor, double newSamplingRate) {
+
     }
 
     /**
@@ -97,5 +111,7 @@ public abstract class SensorDataProcessor {
      * @param notification an object extended class (usually a string) that contains the notification.
      */
     public void onNotify(AbstractSensor sensor, Object notification) {
+
     }
+
 }

@@ -77,6 +77,15 @@ public interface SensorCallback {
      */
     void onDataReceived(SensorDataFrame data);
 
+
+    default void onStartLogging(AbstractSensor sensor) {
+
+    }
+
+    default void onStopLogging(AbstractSensor sensor) {
+
+    }
+
     /**
      * Called when all attached sensors are disconnected.
      */
@@ -96,6 +105,10 @@ public interface SensorCallback {
      */
     default void onAllSensorsStreaming() {
         Log.d(TAG, "All sensors streaming!");
+    }
+
+    default void onAllSensorsLogging() {
+        Log.d(TAG, "All sensors logging!");
     }
 
 }

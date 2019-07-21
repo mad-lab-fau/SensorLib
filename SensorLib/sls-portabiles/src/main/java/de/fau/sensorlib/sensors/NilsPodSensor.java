@@ -296,9 +296,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
                     case LOGGING:
                         //readSessionList();
                         setState(SensorState.CONNECTED);
-                        for (NilsPodLoggingCallback callback : mCallbacks) {
-                            callback.onStopLogging(this);
-                        }
+                        sendStopLogging();
                         break;
                     case FLASH_ERASE:
                         //readSessionList();
@@ -331,10 +329,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
                 switch (oldState) {
                     case IDLE:
                         if (isConnected()) {
-                            setState(SensorState.LOGGING);
-                        }
-                        for (NilsPodLoggingCallback callback : mCallbacks) {
-                            callback.onStartLogging(this);
+                            sendStartLogging();
                         }
                         break;
                 }

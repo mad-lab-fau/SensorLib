@@ -149,6 +149,10 @@ public class SensorInfo implements Serializable {
         return (mSensorState.ordinal() >= SensorState.STREAMING.ordinal());
     }
 
+    public boolean isLogging() {
+        return mSensorState == SensorState.LOGGING;
+    }
+
     /**
      * Default constructor. The sensor class is inferred from the name or device address.
      *

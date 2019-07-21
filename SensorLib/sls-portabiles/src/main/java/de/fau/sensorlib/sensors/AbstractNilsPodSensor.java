@@ -512,7 +512,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
         if (newState == SensorState.CONNECTED) {
             if (getOperationState() == NilsPodOperationState.LOGGING) {
-                setState(SensorState.LOGGING);
+                sendStartLogging();
             }
 
             if (oldState == SensorState.STREAMING && mShouldDisconnect) {
