@@ -279,6 +279,18 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     }
 
     @Override
+    protected void onStateChange(SensorState oldState, SensorState newState) {
+        super.onStateChange(oldState, newState);
+        if (newState == SensorState.CONNECTED) {
+            if (getOperationState() == NilsPodOperationState.LOGGING) {
+                // operation state is read before sensor state is connected => check again
+                // (and notify listeners) when sensor is finally connected
+                sendStartLogging();
+            }
+        }
+    }
+
+    @Override
     protected void onOperationStateChanged(NilsPodOperationState oldState, NilsPodOperationState newState) throws SensorException {
         super.onOperationStateChanged(oldState, newState);
         switch (newState) {
