@@ -320,8 +320,8 @@ public class SensorActionDialog extends DialogFragment implements SensorConfigSe
 
     private void showSensorConfigDialog() {
         Bundle bundle = new Bundle();
-        bundle.putSerializable(Constants.KEY_SENSOR_CONFIG, ((Configurable) mSensor).getConfigMap());
-        bundle.putSerializable(Constants.KEY_SENSOR_CONFIG_DEFAULT, ((Configurable) mSensor).getCurrentConfigMap());
+        bundle.putSerializable(Constants.KEY_SENSOR_CONFIG, ((Configurable) mSensor).getConfigItemMap());
+        bundle.putSerializable(Constants.KEY_SENSOR_CONFIG_DEFAULT, ((Configurable) mSensor).getCurrentConfig());
         bundle.putString(Constants.KEY_SENSOR_NAME, mSensor.getDeviceName());
 
         SensorConfigDialog dialog = new SensorConfigDialog();

@@ -465,12 +465,12 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     }
 
     @Override
-    public HashMap<String, ConfigItem> getConfigMap() {
+    public HashMap<String, ConfigItem> getConfigItemMap() {
         return mConfigMap;
     }
 
     @Override
-    public HashMap<String, Object> getCurrentConfigMap() {
+    public HashMap<String, Object> getCurrentConfig() {
         return mCurrentConfigMap;
     }
 

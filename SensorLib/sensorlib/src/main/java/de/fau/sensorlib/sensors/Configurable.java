@@ -18,11 +18,13 @@ public interface Configurable {
      */
     void setDefaultConfig();
 
-    void setConfigMap(HashMap<String, Object> configMap);
+    void setCurrentConfig(HashMap<String, Object> configMap);
 
-    HashMap<String, ConfigItem> getConfigMap();
+    void writeConfig();
 
-    HashMap<String, Object> getCurrentConfigMap();
+    HashMap<String, ConfigItem> getConfigItemMap();
+
+    HashMap<String, Object> getCurrentConfig();
 
 
 }
