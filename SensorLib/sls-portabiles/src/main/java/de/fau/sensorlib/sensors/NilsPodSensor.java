@@ -9,7 +9,10 @@ package de.fau.sensorlib.sensors;
 
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.content.Context;
+import android.os.Message;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -17,6 +20,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
@@ -51,6 +55,41 @@ import de.fau.sensorlib.widgets.config.ConfigItem;
  */
 public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLoggable, Configurable {
 
+    protected static class NilsPodInternalHandler extends InternalHandler {
+
+        public NilsPodInternalHandler(NilsPodSensor sensor) {
+            super(sensor);
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+
+            if (getSensor() instanceof NilsPodSensor) {
+                NilsPodSensor sensor = (NilsPodSensor) getSensor();
+                switch (msg.what) {
+                    case MESSAGE_SESSION_LIST_READ:
+                        sensor.dispatchSessionListRead((List<Session>) msg.obj);
+                        break;
+                    case MESSAGE_SESSIONS_CLEARED:
+                        sensor.dispatchSessionsCleared();
+                        break;
+                    case MESSAGE_SESSION_DOWNLOAD_STARTED:
+                        sensor.dispatchSessionDownloadStarted((SessionDownloader) msg.obj);
+                        break;
+                    case MESSAGE_SESSION_DOWNLOAD_PROGRESS:
+                        sensor.dispatchSessionDownloadProgress((SessionDownloader) msg.obj);
+                        break;
+                    case MESSAGE_SESSION_DOWNLOAD_FINISHED:
+                        sensor.dispatchSessionDownloadFinished((SessionDownloader) msg.obj);
+                        break;
+                }
+            }
+        }
+    }
+
+
     private static final String TAG = NilsPodSensor.class.getSimpleName();
 
     protected ArrayList<NilsPodLoggingCallback> mCallbacks = new ArrayList<>();
@@ -78,6 +117,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     public NilsPodSensor(Context context, SensorInfo info, SensorDataProcessor dataHandler) {
         super(context, info, dataHandler);
         mConfigWriteRequests.clear();
+        mInternalHandler = new NilsPodInternalHandler(this);
     }
 
     @Override
@@ -87,7 +127,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         globalCounter = 0;
     }
 
-
+    @Override
     public void addNilsPodLoggingCallback(NilsPodLoggingCallback callback) {
         mCallbacks.add(callback);
     }
@@ -131,20 +171,14 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             computeRemainingCapacity();
             computeRemainingRuntime();
 
-            if (mCallbacks != null) {
-                for (NilsPodLoggingCallback callback : mCallbacks) {
-                    callback.onSessionListRead(this, mSessionHandler.getSessionList());
-                }
-            }
+            sendSessionListRead(mSessionHandler.getSessionList());
         }
     }
 
     protected void extractSessionData(BluetoothGattCharacteristic characteristic) {
         byte[] values = characteristic.getValue();
         mSessionDownloader.onNewData(values);
-        for (NilsPodLoggingCallback callback : mCallbacks) {
-            callback.onSessionDownloadProgress(this, mSessionDownloader);
-        }
+        sendSessionDownloadProgress(mSessionDownloader);
     }
 
     /**
@@ -193,7 +227,6 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             }
 
             // extract magnetometer data
-            // TODO check!
             if (isSensorEnabled(HardwareSensor.MAGNETOMETER)) {
                 mag = new double[3];
                 for (int j = 0; j < 3; j++) {
@@ -309,15 +342,11 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
                         sendStopLogging();
                         break;
                     case FLASH_ERASE:
-                        for (NilsPodLoggingCallback callback : mCallbacks) {
-                            callback.onClearSessions(this);
-                        }
+                        sendSessionsCleared();
                         break;
                     case DOWNLOADING_SESSION:
                         mSessionDownloader.completeDownload();
-                        for (NilsPodLoggingCallback callback : mCallbacks) {
-                            callback.onSessionDownloaded(this, mSessionDownloader.getSession());
-                        }
+                        sendSessionDownloadFinished(mSessionDownloader);
                         break;
                     case SAVING_CONFIG:
                         // remove last written item
@@ -346,9 +375,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             case DOWNLOADING_SESSION:
                 switch (oldState) {
                     case IDLE:
-                        for (NilsPodLoggingCallback callback : mCallbacks) {
-                            callback.onSessionDownloadStarted(this, mSessionDownloader.getSession());
-                        }
+                        sendSessionDownloadStarted(mSessionDownloader);
                         break;
                 }
                 break;
@@ -383,18 +410,13 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     }
 
     @Override
-    public void setConfigMap(HashMap<String, Object> configMap) {
-        double samplingRate = 0.0;
-        ArrayList<HardwareSensor> sensors = (ArrayList<HardwareSensor>) mCurrentConfigMap.get(KEY_HARDWARE_SENSORS);
-        NilsPodSensorPosition sensorPosition = (NilsPodSensorPosition) mCurrentConfigMap.get(KEY_SENSOR_POSITION);
-        NilsPodSyncGroup syncGroup = (NilsPodSyncGroup) mCurrentConfigMap.get(KEY_SYNC_GROUP);
-        NilsPodSyncRole syncRole = (NilsPodSyncRole) mCurrentConfigMap.get(KEY_SYNC_ROLE);
-        NilsPodOperationMode operationMode = (NilsPodOperationMode) mCurrentConfigMap.get(KEY_OPERATION_MODE);
-        NilsPodMotionInterrupt interrupt = (NilsPodMotionInterrupt) mCurrentConfigMap.get(KEY_MOTION_INTERRUPT);
-
+    public void setCurrentConfig(HashMap<String, Object> configMap) {
         for (String key : configMap.keySet()) {
             Log.d(TAG, "config map: " + key + ", " + configMap.get(key) + ", " + configMap.get(key).getClass());
-            switch (key) {
+            // TODO test thoroughly if this works!!!
+            mCurrentConfigMap.put(key, configMap.get(key));
+
+            /*switch (key) {
                 case KEY_SAMPLING_RATE:
                     String sr = (String) configMap.get(key);
                     samplingRate = sAvailableSamplingRates.get(sr);
@@ -417,8 +439,20 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
                 case KEY_MOTION_INTERRUPT:
                     interrupt = (NilsPodMotionInterrupt) configMap.get(key);
                     break;
-            }
+            }*/
         }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void writeConfig() {
+        double samplingRate = 0.0;
+        ArrayList<HardwareSensor> sensors = (ArrayList<HardwareSensor>) mCurrentConfigMap.get(KEY_HARDWARE_SENSORS);
+        NilsPodSensorPosition sensorPosition = (NilsPodSensorPosition) mCurrentConfigMap.get(KEY_SENSOR_POSITION);
+        NilsPodSyncGroup syncGroup = (NilsPodSyncGroup) mCurrentConfigMap.get(KEY_SYNC_GROUP);
+        NilsPodSyncRole syncRole = (NilsPodSyncRole) mCurrentConfigMap.get(KEY_SYNC_ROLE);
+        NilsPodOperationMode operationMode = (NilsPodOperationMode) mCurrentConfigMap.get(KEY_OPERATION_MODE);
+        NilsPodMotionInterrupt interrupt = (NilsPodMotionInterrupt) mCurrentConfigMap.get(KEY_MOTION_INTERRUPT);
 
         try {
             writeSamplingRateConfig(samplingRate);
@@ -439,6 +473,60 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     public HashMap<String, Object> getCurrentConfigMap() {
         return mCurrentConfigMap;
     }
+
+
+    private void sendSessionListRead(List<Session> sessionList) {
+        mInternalHandler.obtainMessage(MESSAGE_SESSION_LIST_READ, sessionList).sendToTarget();
+    }
+
+
+    private void dispatchSessionListRead(List<Session> sessionList) {
+        for (NilsPodLoggingCallback callback : mCallbacks) {
+            callback.onSessionListRead(this, sessionList);
+        }
+    }
+
+    private void sendSessionsCleared() {
+        mInternalHandler.obtainMessage(MESSAGE_SESSIONS_CLEARED).sendToTarget();
+    }
+
+
+    private void dispatchSessionsCleared() {
+        for (NilsPodLoggingCallback callback : mCallbacks) {
+            callback.onClearSessions(this);
+        }
+    }
+
+    private void sendSessionDownloadStarted(SessionDownloader sessionDownloader) {
+        mInternalHandler.obtainMessage(MESSAGE_SESSION_DOWNLOAD_STARTED, sessionDownloader).sendToTarget();
+    }
+
+    private void dispatchSessionDownloadStarted(SessionDownloader sessionDownloader) {
+        for (NilsPodLoggingCallback callback : mCallbacks) {
+            callback.onSessionDownloadStarted(this, sessionDownloader);
+        }
+    }
+
+    private void sendSessionDownloadProgress(SessionDownloader sessionDownloader) {
+        mInternalHandler.obtainMessage(MESSAGE_SESSION_DOWNLOAD_PROGRESS, sessionDownloader).sendToTarget();
+    }
+
+    private void dispatchSessionDownloadProgress(SessionDownloader sessionDownloader) {
+        for (NilsPodLoggingCallback callback : mCallbacks) {
+            callback.onSessionDownloadProgress(this, sessionDownloader);
+        }
+    }
+
+    private void sendSessionDownloadFinished(SessionDownloader sessionDownloader) {
+        mInternalHandler.obtainMessage(MESSAGE_SESSION_DOWNLOAD_FINISHED, sessionDownloader).sendToTarget();
+    }
+
+    private void dispatchSessionDownloadFinished(SessionDownloader sessionDownloader) {
+        for (NilsPodLoggingCallback callback : mCallbacks) {
+            callback.onSessionDownloadFinished(this, sessionDownloader);
+        }
+    }
+
 
     /**
      * Returns the remaining storage capacity.
@@ -489,6 +577,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         mRemainingRuntime = String.format(Locale.getDefault(), "%02d:%02d", hours, minutes);
     }
 
+    @Override
     public void setCsvExportEnabled(boolean enabled) {
         mCsvExportEnabled = enabled;
         if (mSessionDownloader != null) {
@@ -652,8 +741,8 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
 
     public static class NilsPodDataFrame extends GenericNilsPodDataFrame implements BarometricPressureDataFrame {
 
-        protected double baro;
-        protected boolean hasBaro;
+        private double baro;
+        private boolean hasBaro;
 
         /**
          * Creates a new data frame for sensor data
@@ -693,6 +782,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             }
         }
 
+        @NonNull
         @Override
         public String toString() {
             String str = super.toString();
@@ -706,8 +796,8 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
 
     public static class NilsPodTempDataFrame extends NilsPodDataFrame implements TemperatureDataFrame {
 
-        protected double temp;
-        protected boolean hasTemp;
+        private double temp;
+        private boolean hasTemp;
 
         /**
          * Creates a new data frame for sensor data
@@ -747,6 +837,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             }
         }
 
+        @NonNull
         @Override
         public String toString() {
             String str = super.toString();
@@ -761,8 +852,8 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
 
     public static class NilsPodMagDataFrame extends NilsPodTempDataFrame implements MagnetometerDataFrame {
 
-        protected double[] mag;
-        protected boolean hasMag;
+        private double[] mag;
+        private boolean hasMag;
 
 
         public NilsPodMagDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro, double baro, double temp, double[] mag) {
@@ -808,6 +899,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             }
         }
 
+        @NonNull
         @Override
         public String toString() {
             String str = super.toString();
@@ -823,8 +915,8 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
 
     public static class NilsPodAnalogDataFrame extends NilsPodMagDataFrame implements AnalogDataFrame {
 
-        protected double[] analog;
-        protected boolean hasAnalog;
+        private double[] analog;
+        private boolean hasAnalog;
 
         public NilsPodAnalogDataFrame(AbstractSensor sensor, long timestamp, double[] accel, double[] gyro, double baro, double temp, double[] mag, double[] analog) {
             super(sensor, timestamp, accel, gyro, baro, temp, mag);
@@ -877,6 +969,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             }
         }
 
+        @NonNull
         @Override
         public String toString() {
             String str = super.toString();
@@ -895,8 +988,8 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
      */
     public static class NilsPodEcgDataFrame extends NilsPodMagDataFrame implements EcgDataFrame {
 
-        protected double ecg;
-        protected boolean hasEcg;
+        private double ecg;
+        private boolean hasEcg;
 
         /**
          * Creates a new data frame for sensor data
@@ -941,6 +1034,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             }
         }
 
+        @NonNull
         @Override
         public String toString() {
             String str = super.toString();
@@ -959,8 +1053,8 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
      */
     public static class NilsPodPpgDataFrame extends NilsPodMagDataFrame implements PpgDataFrame {
 
-        protected double ppg;
-        protected boolean hasPpg;
+        private double ppg;
+        private boolean hasPpg;
 
         /**
          * Creates a new data frame for sensor data
@@ -1003,6 +1097,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             }
         }
 
+        @NonNull
         @Override
         public String toString() {
             String str = super.toString();

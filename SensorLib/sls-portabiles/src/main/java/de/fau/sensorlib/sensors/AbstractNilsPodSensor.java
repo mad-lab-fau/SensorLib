@@ -56,6 +56,12 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
     public static final String TAG = AbstractNilsPodSensor.class.getSimpleName();
 
+    protected static final int MESSAGE_SESSION_LIST_READ = 2001;
+    protected static final int MESSAGE_SESSIONS_CLEARED = 2002;
+    protected static final int MESSAGE_SESSION_DOWNLOAD_STARTED = 2003;
+    protected static final int MESSAGE_SESSION_DOWNLOAD_PROGRESS = 2004;
+    protected static final int MESSAGE_SESSION_DOWNLOAD_FINISHED = 2005;
+
     /**
      * UUID for Data Streaming Service of NilsPod sensor
      */

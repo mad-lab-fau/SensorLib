@@ -18,4 +18,12 @@ public interface NilsPodLoggable extends Loggable, Erasable {
 
     void downloadSession(int sessionId) throws SensorException;
 
+    default void setCsvExportEnabled(boolean enable) {
+
+    }
+
+    default void addNilsPodLoggingCallback(NilsPodLoggingCallback callback) {
+
+    }
+
 }

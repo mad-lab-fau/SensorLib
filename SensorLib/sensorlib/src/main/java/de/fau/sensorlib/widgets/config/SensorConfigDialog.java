@@ -109,7 +109,7 @@ public class SensorConfigDialog extends DialogFragment implements View.OnClickLi
         mSensorConfigBuilder = builder;
     }
 
-    public void setSensorConfigListener(SensorConfigSelectedListener listener) {
+    public void setSensorConfigSelectedListener(SensorConfigSelectedListener listener) {
         mSensorConfigListener = listener;
     }
 
