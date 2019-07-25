@@ -29,14 +29,13 @@ import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.apache.commons.text.WordUtils;
-
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Objects;
 
 import de.fau.sensorlib.Constants;
 import de.fau.sensorlib.R;
+import de.fau.sensorlib.enums.SensorAction;
 import de.fau.sensorlib.sensors.AbstractSensor;
 import de.fau.sensorlib.sensors.Configurable;
 import de.fau.sensorlib.sensors.Erasable;
@@ -49,28 +48,13 @@ public class SensorActionDialog extends DialogFragment implements SensorConfigSe
 
     private static final String TAG = SensorActionDialog.class.getSimpleName();
 
-    public enum SensorAction {
-        CONFIGURE,
-        DEFAULT_CONFIG,
-        RESET,
-        START_LOGGING,
-        STOP_LOGGING,
-        CLEAR_SESSIONS,
-        FULL_ERASE,
-        SENSOR_INFO;
-
-        @NonNull
-        @Override
-        public String toString() {
-            return WordUtils.capitalizeFully(name().replace('_', ' '));
-        }
-    }
-
     private Context mContext;
     private RecyclerView mRecyclerView;
     private AbstractSensor mSensor;
 
     private DialogInterface.OnDismissListener mDialogDismissCallback;
+
+    private SensorActionCallback mSensorActionCallback;
 
 
     public static class SensorActionViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
@@ -165,7 +149,7 @@ public class SensorActionDialog extends DialogFragment implements SensorConfigSe
                     if (mSensor instanceof Configurable) {
                         createAlertDialog("Setting default config of " + mSensor.getDeviceName() + "?",
                                 (dialog, which) -> {
-                                    ((Configurable) mSensor).setDefaultConfig();
+                                    mSensorActionCallback.onSensorActionSelected(mSensor, action);
                                     Toast.makeText(activity, SensorAction.values()[position] + " on " + mSensor.getDeviceName(), Toast.LENGTH_SHORT).show();
                                 });
                     } else {
@@ -175,7 +159,7 @@ public class SensorActionDialog extends DialogFragment implements SensorConfigSe
                 case RESET:
                     if (mSensor instanceof Resettable) {
                         createAlertDialog("Resetting " + mSensor.getDeviceName() + "?", (dialog, which) -> {
-                            ((Resettable) mSensor).reset();
+                            mSensorActionCallback.onSensorActionSelected(mSensor, action);
                             Toast.makeText(activity, SensorAction.values()[position] + " on " + mSensor.getDeviceName(), Toast.LENGTH_SHORT).show();
                         });
                     } else {
@@ -184,7 +168,7 @@ public class SensorActionDialog extends DialogFragment implements SensorConfigSe
                     break;
                 case START_LOGGING:
                     if (mSensor instanceof Loggable) {
-                        ((Loggable) mSensor).startLogging();
+                        mSensorActionCallback.onSensorActionSelected(mSensor, action);
                         Toast.makeText(activity, SensorAction.values()[position] + " on " + mSensor.getDeviceName(), Toast.LENGTH_SHORT).show();
                     } else {
                         return;
@@ -192,7 +176,7 @@ public class SensorActionDialog extends DialogFragment implements SensorConfigSe
                     break;
                 case STOP_LOGGING:
                     if (mSensor instanceof Loggable) {
-                        ((Loggable) mSensor).stopLogging();
+                        mSensorActionCallback.onSensorActionSelected(mSensor, action);
                         Toast.makeText(activity, SensorAction.values()[position] + " on " + mSensor.getDeviceName(), Toast.LENGTH_SHORT).show();
                     } else {
                         return;
@@ -202,7 +186,7 @@ public class SensorActionDialog extends DialogFragment implements SensorConfigSe
                     if (mSensor instanceof Erasable) {
                         createAlertDialog("Clearing sessions of " + mSensor.getDeviceName() + "?",
                                 (dialog, which) -> {
-                                    ((Erasable) mSensor).clearData();
+                                    mSensorActionCallback.onSensorActionSelected(mSensor, action);
                                     Toast.makeText(activity, SensorAction.values()[position] + " on " + mSensor.getDeviceName(), Toast.LENGTH_SHORT).show();
                                 });
                     } else {
@@ -213,7 +197,7 @@ public class SensorActionDialog extends DialogFragment implements SensorConfigSe
                     if (mSensor instanceof Erasable) {
                         createAlertDialog("Erasing full storage of " + mSensor.getDeviceName() + "?",
                                 (dialog, which) -> {
-                                    ((Erasable) mSensor).fullErase();
+                                    mSensorActionCallback.onSensorActionSelected(mSensor, action);
                                     Toast.makeText(activity, SensorAction.values()[position] + " on " + mSensor.getDeviceName(), Toast.LENGTH_SHORT).show();
                                 });
                     } else {
@@ -300,8 +284,12 @@ public class SensorActionDialog extends DialogFragment implements SensorConfigSe
         }
     }
 
-    public void setItemDisabled(View view) {
+    private void setItemDisabled(View view) {
         view.findViewById(R.id.tv_sensor_action).setEnabled(false);
+    }
+
+    public void setSensorActionCallback(SensorActionCallback callback) {
+        mSensorActionCallback = callback;
     }
 
     public void setDialogDismissCallback(DialogInterface.OnDismissListener callback) {
@@ -310,10 +298,7 @@ public class SensorActionDialog extends DialogFragment implements SensorConfigSe
 
     @Override
     public void onSensorConfigSelected(HashMap<String, Object> configMap) {
-        Log.d(TAG, "onSensorConfigSelected: " + configMap);
-        if (mSensor instanceof Configurable) {
-            ((Configurable) mSensor).setConfigMap(configMap);
-        }
+        mSensorActionCallback.onSensorActionSelected(mSensor, SensorAction.CONFIGURE, configMap);
     }
 
     private void createAlertDialog(String message, DialogInterface.OnClickListener okListener, DialogInterface.OnClickListener cancelListener) {
@@ -340,7 +325,7 @@ public class SensorActionDialog extends DialogFragment implements SensorConfigSe
         bundle.putString(Constants.KEY_SENSOR_NAME, mSensor.getDeviceName());
 
         SensorConfigDialog dialog = new SensorConfigDialog();
-        dialog.setSensorConfigListener(this);
+        dialog.setSensorConfigSelectedListener(this);
         dialog.setArguments(bundle);
 
         FragmentActivity activity = getActivity();

@@ -50,6 +50,8 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
 
     private boolean mConfigCheckWarning;
 
+    private SensorActionCallback mSensorActionCallback;
+
     public SensorInfoBar(Context context) {
         this(context, null);
     }
@@ -137,6 +139,9 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
         mAdapter.addSensor(sensor);
     }
 
+    public void setSensorActionCallback(SensorActionCallback callback) {
+        mSensorActionCallback = callback;
+    }
 
     private class SensorInfoGridAdapter extends Adapter<SensorInfoViewHolder> implements SensorInfoViewHolder.ItemClickListener {
 
@@ -240,6 +245,7 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
                     ((SensorConfigSelectedListener) getActivity()).onSensorConfigSelected(null);
                 }
             });
+            dialog.setSensorActionCallback(mSensorActionCallback);
             dialog.setArguments(bundle);
 
             AppCompatActivity activity = getActivity();
