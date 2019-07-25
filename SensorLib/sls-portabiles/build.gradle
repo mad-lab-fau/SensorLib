@@ -5,6 +5,12 @@ group = 'com.github.mad-lab-fau'
 
 android {
     compileSdkVersion 28
+
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
+
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 28
