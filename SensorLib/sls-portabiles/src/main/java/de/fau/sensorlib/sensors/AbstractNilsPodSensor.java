@@ -128,7 +128,6 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     }
 
 
-
     /**
      * Size of one sensor data sample. Default packet size: 12 Byte IMU + 2 Byte Counter
      */
@@ -461,12 +460,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
     };
 
-    private final DfuLogListener mDfuLogListener = new DfuLogListener() {
-        @Override
-        public void onLogEvent(String deviceAddress, int level, String message) {
-            Log.d(TAG, getDeviceName() + " >> " + message);
-        }
-    };
+    private final DfuLogListener mDfuLogListener = (deviceAddress, level, message) -> Log.d(TAG, getDeviceName() + " >> " + message);
 
 
     public AbstractNilsPodSensor(Context context, SensorInfo info, SensorDataProcessor dataHandler) {

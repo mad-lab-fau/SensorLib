@@ -53,7 +53,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
 
     private static final String TAG = NilsPodSensor.class.getSimpleName();
 
-    protected ArrayList<NilsPodLoggingCallback> mCallbacks;
+    protected ArrayList<NilsPodLoggingCallback> mCallbacks = new ArrayList<>();
 
     protected OnSensorConfigChangedListener mConfigChangedListener;
 
@@ -77,7 +77,6 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
 
     public NilsPodSensor(Context context, SensorInfo info, SensorDataProcessor dataHandler) {
         super(context, info, dataHandler);
-        mCallbacks = new ArrayList<>();
         mConfigWriteRequests.clear();
     }
 

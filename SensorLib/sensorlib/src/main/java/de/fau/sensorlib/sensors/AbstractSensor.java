@@ -31,18 +31,18 @@ public abstract class AbstractSensor extends SensorInfo {
 
     protected static final String TAG = AbstractSensor.class.getSimpleName();
 
-    protected static final int MESSAGE_NEW_DATA = 1010;
-    protected static final int MESSAGE_NOTIFICATION = 1011;
-    protected static final int MESSAGE_SENSOR_CREATED = 1012;
-    protected static final int MESSAGE_CONNECTING = 1013;
-    protected static final int MESSAGE_CONNECTED = 1014;
-    protected static final int MESSAGE_DISCONNECTED = 1015;
-    protected static final int MESSAGE_CONNECTION_LOST = 1016;
-    protected static final int MESSAGE_START_STREAMING = 1017;
-    protected static final int MESSAGE_STOP_STREAMING = 1018;
-    protected static final int MESSAGE_START_LOGGING = 1019;
-    protected static final int MESSAGE_STOP_LOGGING = 1020;
-    protected static final int MESSAGE_SAMPLING_RATE_CHANGED = 1021;
+    private static final int MESSAGE_NEW_DATA = 1010;
+    private static final int MESSAGE_NOTIFICATION = 1011;
+    private static final int MESSAGE_SENSOR_CREATED = 1012;
+    private static final int MESSAGE_CONNECTING = 1013;
+    private static final int MESSAGE_CONNECTED = 1014;
+    private static final int MESSAGE_DISCONNECTED = 1015;
+    private static final int MESSAGE_CONNECTION_LOST = 1016;
+    private static final int MESSAGE_START_STREAMING = 1017;
+    private static final int MESSAGE_STOP_STREAMING = 1018;
+    private static final int MESSAGE_START_LOGGING = 1019;
+    private static final int MESSAGE_STOP_LOGGING = 1020;
+    private static final int MESSAGE_SAMPLING_RATE_CHANGED = 1021;
 
     /**
      * Context this sensor is used in.
@@ -155,10 +155,6 @@ public abstract class AbstractSensor extends SensorInfo {
 
                     case AbstractSensor.MESSAGE_SAMPLING_RATE_CHANGED:
                         getSensor().dispatchSamplingRateChanged();
-                        break;
-
-                    default:
-                        Log.e(this.getClass().getSimpleName(), "Unknown message received.");
                         break;
                 }
             } catch (Exception e) {
