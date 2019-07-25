@@ -18,10 +18,10 @@ public interface NilsPodLoggingCallback {
 
     void onClearSessions(NilsPodSensor sensor);
 
-    void onSessionDownloadStarted(NilsPodSensor sensor, Session session);
+    void onSessionDownloadStarted(NilsPodSensor sensor, SessionDownloader sessionDownloader);
 
     void onSessionDownloadProgress(NilsPodSensor sensor, SessionDownloader sessionDownloader);
 
-    void onSessionDownloaded(NilsPodSensor sensor, Session session);
+    void onSessionDownloadFinished(NilsPodSensor sensor, SessionDownloader sessionDownloader);
 
 }
