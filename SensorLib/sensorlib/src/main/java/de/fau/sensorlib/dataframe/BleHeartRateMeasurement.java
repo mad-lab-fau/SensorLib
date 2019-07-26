@@ -18,7 +18,7 @@ import de.fau.sensorlib.sensors.AbstractSensor;
 /**
  * Represents a heart rate measurement specified in the BLE standard.
  */
-public class BleHeartRateMeasurement extends SensorDataFrame implements HeartRateDataFrame {
+public class BleHeartRateMeasurement extends SensorDataFrame implements HeartRateIbiDataFrame {
     byte mFlags;
     int mBeatsPerMinute;
     int mEnergyExpendedInJoule;

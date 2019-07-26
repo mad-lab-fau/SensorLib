@@ -23,8 +23,9 @@ import de.fau.sensorlib.BleSensorManager;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.dataframe.AccelDataFrame;
 import de.fau.sensorlib.dataframe.EcgDataFrame;
-import de.fau.sensorlib.dataframe.HeartRateDataFrame;
+import de.fau.sensorlib.dataframe.HeartRateIbiDataFrame;
 import de.fau.sensorlib.dataframe.RespirationDataFrame;
+import de.fau.sensorlib.dataframe.RespirationRateDataFrame;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
 
 /**
@@ -46,7 +47,7 @@ public class FitnessShirt extends AbstractSensor {
     private long startStreamingTimestamp = 0;
 
 
-    public static class FitnessShirtDataFrame extends SensorDataFrame implements EcgDataFrame, AccelDataFrame, RespirationDataFrame, HeartRateDataFrame {
+    public static class FitnessShirtDataFrame extends SensorDataFrame implements EcgDataFrame, AccelDataFrame, RespirationDataFrame, RespirationRateDataFrame, HeartRateIbiDataFrame {
         double[] ecgSamples = new double[16];
         double ecg;
         long respiration;
@@ -96,27 +97,6 @@ public class FitnessShirt extends AbstractSensor {
         @Override
         public double getAccelZ() {
             return az;
-        }
-    }
-
-    @Override
-    protected void dispatchNewData(SensorDataFrame data) {
-        if (!(data instanceof FitnessShirtDataFrame))
-            return;
-
-        FitnessShirtDataFrame fsdf = (FitnessShirtDataFrame) data;
-
-        // each data frame contains 16 consecutive ecg samples, we reuse the same dataframe to send them separately
-        for (int i = 0; i < fsdf.ecgSamples.length; i++) {
-            FitnessShirtDataFrame fdf = new FitnessShirtDataFrame(this, fsdf.getTimestamp() + i * samplingIntervalMillis);
-            fdf.ecg = fsdf.ecgSamples[i];
-            fdf.respiration = fsdf.respiration;
-
-            super.dispatchNewData(fdf);
-
-            //fsdf.ecg = fsdf.ecgSamples[i];
-            //fsdf.setTimestamp( fsdf.getTimestamp() + samplingIntervalMillis );
-            //mExternalHandler.onNewData( fsdf );
         }
     }
 
@@ -284,7 +264,22 @@ public class FitnessShirt extends AbstractSensor {
                     if (df == null)
                         continue;
 
-                    sendNewData(df);
+                    for (int i = 0; i < df.ecgSamples.length; i++) {
+                        FitnessShirtDataFrame fdf = new FitnessShirtDataFrame(FitnessShirt.this, df.getTimestamp() + i * samplingIntervalMillis);
+                        fdf.ax = df.ax;
+                        fdf.ay = df.ay;
+                        fdf.az = df.az;
+                        fdf.ecg = df.ecgSamples[i];
+                        fdf.respiration = df.respiration;
+                        fdf.respirationRate = df.respirationRate;
+                        fdf.heartRate = df.heartRate;
+
+                        sendNewData(fdf);
+
+                        //fsdf.ecg = fsdf.ecgSamples[i];
+                        //fsdf.setTimestamp( fsdf.getTimestamp() + samplingIntervalMillis );
+                        //mExternalHandler.onNewData( fsdf );
+                    }
 
 /*
                     // dispatch message with data to UI

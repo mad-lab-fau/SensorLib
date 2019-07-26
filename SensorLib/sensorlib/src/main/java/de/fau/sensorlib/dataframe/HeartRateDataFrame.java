@@ -21,10 +21,4 @@ public interface HeartRateDataFrame {
      */
     double getHeartRate();
 
-    /**
-     * Returns the interbeat interval (RR interval) in milliseconds.
-     *
-     * @return RR interval in milliseconds
-     */
-    double getInterbeatInterval();
 }

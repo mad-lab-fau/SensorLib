@@ -22,13 +22,14 @@ import android.os.Handler;
 import android.os.ParcelUuid;
 import android.util.Log;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import de.fau.sensorlib.SensorException.SensorExceptionType;
 import de.fau.sensorlib.enums.KnownSensor;
 import de.fau.sensorlib.sensors.InternalSensor;
@@ -191,9 +192,9 @@ public class BleSensorManager {
      *
      * @param activity the current activity.
      * @return the request code that can be used in onActivityResult for asynchronous feedback, or 0 if Bluetooth is already enabled.
-     * @throws Exception
+     * @throws SensorException If any error occurs during Bluetooth activation
      */
-    public static int enableBluetooth(Activity activity) throws Exception {
+    public static int enableBluetooth(Activity activity) throws SensorException {
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         if (adapter == null) {
             throw new SensorException(SensorExceptionType.btNotSupported);
@@ -293,7 +294,7 @@ public class BleSensorManager {
      * @param callback a callback implementation that receives notifications for found sensors.
      */
     public static void searchBleDevices(final SensorFoundCallback callback) throws SensorException {
-        searchBleDevices(callback, new ArrayList<ScanFilter>());
+        searchBleDevices(callback, new ArrayList<>());
     }
 
     public static void searchBleDeviceByNames(final SensorFoundCallback callback, String[] deviceNames) throws SensorException {
@@ -353,14 +354,11 @@ public class BleSensorManager {
         sBleScanner.startScan(filterList, settings, sScanCallback);
 
         // post a delayed runnable to stop the BLE scan after SCAN_PERIOD.
-        sBleScanHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                Log.d(TAG, "...Stopping BLE scan.");
-                if (sScanCallback != null) {
-                    sIsScanning = false;
-                    sBleScanner.stopScan(sScanCallback);
-                }
+        sBleScanHandler.postDelayed(() -> {
+            Log.d(TAG, "...Stopping BLE scan.");
+            if (sScanCallback != null) {
+                sIsScanning = false;
+                sBleScanner.stopScan(sScanCallback);
             }
         }, SCAN_PERIOD);
     }

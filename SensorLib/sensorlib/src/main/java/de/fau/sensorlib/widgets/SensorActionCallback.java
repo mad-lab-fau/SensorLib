@@ -6,11 +6,16 @@
  * this code you have to keep or cite this comment.
  */
 
-package de.fau.sensorlib.widgets.config;
+package de.fau.sensorlib.widgets;
 
-import java.util.HashMap;
+import de.fau.sensorlib.enums.SensorAction;
+import de.fau.sensorlib.sensors.AbstractSensor;
 
-public interface OnSensorConfigChangedListener {
+public interface SensorActionCallback {
 
-    void onSensorConfigSelected(HashMap<String, Object> configMap);
+    void onSensorActionSelected(AbstractSensor sensor, SensorAction action);
+
+    default void onSensorActionSelected(AbstractSensor sensor, SensorAction action, Object obj) {
+
+    }
 }

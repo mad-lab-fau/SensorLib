@@ -131,7 +131,8 @@ public class SensorConfigBuilder {
         @Override
         public void setConfig(String key, ConfigItem configItem, Object defaultConfig) {
             mKey = key;
-            List<Object> defaultConfigList = (List<Object>) defaultConfig;
+            List<?> defaultConfigList = (List<?>) defaultConfig;
+
             mConfigItem = configItem;
             for (Object value : mConfigItem.getConfigValues()) {
                 CheckBox checkBox = new CheckBox(getContext());
@@ -143,12 +144,7 @@ public class SensorConfigBuilder {
                 checkBoxMap.put(checkBox, value);
             }
 
-            new CheckBoxGroup<>(checkBoxMap, new CheckBoxGroup.CheckedChangeListener<Object>() {
-                @Override
-                public void onCheckedChange(ArrayList<Object> values) {
-                    mListener.onConfigItemSelected(mKey, values);
-                }
-            });
+            new CheckBoxGroup<>(checkBoxMap, values -> mListener.onConfigItemSelected(mKey, values));
         }
     }
 

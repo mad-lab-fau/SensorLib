@@ -19,20 +19,26 @@ public interface BloodPressureDataFrame {
      *
      * @return Systolic pressure value
      */
-    double getSystolicPressure();
+    default double getSystolicPressure() {
+        return 0.0;
+    }
 
     /**
      * Returns the diastolic pressure value.
      *
      * @return Diastolic pressure value
      */
-    double getDiastolicPressure();
+    default double getDiastolicPressure() {
+        return 0.0;
+    }
 
     /**
      * Returns the mean arterial pressure value.
      *
      * @return Mean arterial pressure value
      */
-    double getMeanArterialPressure();
+    default double getMeanArterialPressure() {
+        return 0.0;
+    }
 
 }

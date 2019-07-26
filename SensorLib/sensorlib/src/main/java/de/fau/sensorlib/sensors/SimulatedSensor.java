@@ -103,12 +103,7 @@ public abstract class SimulatedSensor extends AbstractSensor {
     @Override
     public void startStreaming() {
         if (mSimThread == null) {
-            mSimThread = new Thread(
-                    new Runnable() {
-                        public void run() {
-                            transmitData();
-                        }
-                    });
+            mSimThread = new Thread(this::transmitData);
         }
         if (!mSimThread.isAlive()) {
             mSimThread.start();

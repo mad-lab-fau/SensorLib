@@ -56,6 +56,12 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
     public static final String TAG = AbstractNilsPodSensor.class.getSimpleName();
 
+    protected static final int MESSAGE_SESSION_LIST_READ = 2001;
+    protected static final int MESSAGE_SESSIONS_CLEARED = 2002;
+    protected static final int MESSAGE_SESSION_DOWNLOAD_STARTED = 2003;
+    protected static final int MESSAGE_SESSION_DOWNLOAD_PROGRESS = 2004;
+    protected static final int MESSAGE_SESSION_DOWNLOAD_FINISHED = 2005;
+
     /**
      * UUID for Data Streaming Service of NilsPod sensor
      */
@@ -126,7 +132,6 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         BleGattAttributes.addCharacteristic(NILS_POD_FIRMWARE_VERSION, "NilsPod Firmware Version");
         BleGattAttributes.addCharacteristic(NILS_POD_BUTTONLESS_DFU, "NilsPod Buttonless DFU");
     }
-
 
 
     /**
@@ -461,12 +466,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
     };
 
-    private final DfuLogListener mDfuLogListener = new DfuLogListener() {
-        @Override
-        public void onLogEvent(String deviceAddress, int level, String message) {
-            Log.d(TAG, getDeviceName() + " >> " + message);
-        }
-    };
+    private final DfuLogListener mDfuLogListener = (deviceAddress, level, message) -> Log.d(TAG, getDeviceName() + " >> " + message);
 
 
     public AbstractNilsPodSensor(Context context, SensorInfo info, SensorDataProcessor dataHandler) {
@@ -511,10 +511,6 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         super.onStateChange(oldState, newState);
 
         if (newState == SensorState.CONNECTED) {
-            if (getOperationState() == NilsPodOperationState.LOGGING) {
-                setState(SensorState.LOGGING);
-            }
-
             if (oldState == SensorState.STREAMING && mShouldDisconnect) {
                 mShouldDisconnect = false;
                 disconnect();
@@ -991,7 +987,6 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
         starter.setZip(filePath);
 
-        //final DfuServiceController controller =
         starter.start(getContext(), NilsPodDfuService.class);
 
         DfuServiceListenerHelper.registerLogListener(getContext(), mDfuLogListener);
@@ -1095,6 +1090,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
             }
         }
 
+        @NonNull
         @Override
         public String toString() {
             String str = "<" + originatingSensor.getDeviceName() + ">\tctr=" + ((long) getTimestamp());

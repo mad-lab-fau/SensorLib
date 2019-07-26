@@ -60,15 +60,6 @@
             android:layout_alignParentEnd="true"
             android:text="@string/placeholder_rssi" />
 
-        <ImageView
-            android:id="@+id/iv_battery"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_alignTop="@+id/gv_sensors"
-            android:layout_alignParentEnd="true"
-            android:src="@drawable/ic_battery_not_available"
-            android:tint="@color/sensor_not_available" />
-
         <GridView
             android:id="@+id/gv_sensors"
             android:layout_width="match_parent"

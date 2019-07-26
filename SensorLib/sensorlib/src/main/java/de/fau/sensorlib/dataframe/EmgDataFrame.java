@@ -8,7 +8,7 @@
 package de.fau.sensorlib.dataframe;
 
 /**
- * Electromyography (EMG) data frame.
+ * Electromyography (EMG) data frame for one single channel.
  */
 public interface EmgDataFrame {
 

@@ -8,16 +8,16 @@
 package de.fau.sensorlib.dataframe;
 
 /**
- * Respiration data frame.
+ * Respiration rate data frame.
  */
-public interface RespirationDataFrame {
+public interface RespirationRateDataFrame {
 
-    String[] COLUMNS = new String[]{"resp_sample"};
+    String[] COLUMNS = new String[]{"resp_rate"};
 
     /**
-     * Returns the current respiration sample, e.g. from bioimpedance measurement.
+     * Returns the current respiration rate in bpm (breaths per minute).
      *
-     * @return respiration sample
+     * @return current respiration rate
      */
-    double getRespirationSample();
+    double getRespirationRate();
 }

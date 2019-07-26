@@ -17,7 +17,7 @@ public interface TemperatureDataFrame {
     /**
      * Returns the temperature value.
      *
-     * @return temperature value
+     * @return temperature value in degrees Celsius
      */
     double getTemperature();
 }

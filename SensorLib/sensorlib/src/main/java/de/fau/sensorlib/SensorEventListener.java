@@ -19,10 +19,13 @@ public interface SensorEventListener {
     /**
      * Called when the sensor state changed.
      *
-     * @param sensor The sensor whose state changed. null when the global state of all attached sensors changed (e.g. all sensors are connected now).
+     * @param sensor The sensor whose state changed. <code>null</code> when the global state of all
+     *               attached sensors changed (e.g. all sensors are connected now).
      * @param state  The new sensor state.
      */
-    void onSensorStateChange(AbstractSensor sensor, SensorState state);
+    default void onSensorStateChange(AbstractSensor sensor, SensorState state) {
+
+    }
 
     /**
      * Called when the sensor issued a message.
@@ -31,6 +34,8 @@ public interface SensorEventListener {
      * @param messageType Type of sensor message.
      * @param message     Optional sensor message.
      */
-    void onSensorMessage(AbstractSensor sensor, SensorMessage messageType, String message);
+    default void onSensorMessage(AbstractSensor sensor, SensorMessage messageType, String message) {
+
+    }
 
 }

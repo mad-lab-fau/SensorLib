@@ -5,13 +5,11 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. If you reuse
  * this code you have to keep or cite this comment.
  */
-package de.fau.sensorlib;
 
-import de.fau.sensorlib.enums.HardwareSensor;
+package de.fau.sensorlib.sensors;
 
-public class HwSensorNotAvailableException extends RuntimeException {
+public interface OnSensorConfigChangedListener {
 
-    public HwSensorNotAvailableException(HardwareSensor hwSensor) {
-        super(hwSensor + " not available!");
-    }
+    void onSensorConfigChanged(Configurable sensor);
+
 }

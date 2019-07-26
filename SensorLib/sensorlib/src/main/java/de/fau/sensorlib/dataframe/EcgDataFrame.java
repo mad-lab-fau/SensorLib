@@ -8,7 +8,7 @@
 package de.fau.sensorlib.dataframe;
 
 /**
- * Electrocardiography (ECG) data frame.
+ * Electrocardiography (ECG) data frame for one single channel.
  */
 public interface EcgDataFrame {
 

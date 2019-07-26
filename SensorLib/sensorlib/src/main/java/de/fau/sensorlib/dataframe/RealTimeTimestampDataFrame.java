@@ -18,7 +18,7 @@ public interface RealTimeTimestampDataFrame {
     /**
      * Returns the real-time timestamp.
      *
-     * @return quaternion w coordinate
+     * @return real-time timestamp in milliseconds
      */
     double getRealTimeTimestamp();
 

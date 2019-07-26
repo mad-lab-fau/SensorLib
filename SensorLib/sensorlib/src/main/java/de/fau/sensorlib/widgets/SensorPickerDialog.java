@@ -24,7 +24,6 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.GridView;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -42,7 +41,6 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 import de.fau.sensorlib.BleSensorManager;
@@ -65,8 +63,6 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
     private ProgressBar mProgressBar;
     private TextView mProgressTextView;
     private RecyclerView mRecyclerView;
-    private Button mCancelButton;
-    private Button mOkButton;
     private SensorPickerRecyclerAdapter mAdapter;
     private SensorFoundCallback mSensorFoundCallback;
 
@@ -113,7 +109,7 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
         @Override
         public SensorPickerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View layout = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_sensor_picker, parent, false);
-            return new SensorPickerViewHolder(getContext(), layout, this);
+            return new SensorPickerViewHolder(layout, this);
         }
 
         @Override
@@ -130,11 +126,6 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
 
             holder.mSensorInformationTextView.setText(address);
             holder.mSensorRssi.setText(mContext.getString(R.string.placeholder_rssi, rssi));
-            // if battery measurement is available for sensor
-            if (sensor.hasBatteryMeasurement()) {
-                holder.mBatteryImageView.setImageResource(R.drawable.ic_battery_available);
-                holder.mBatteryImageView.setColorFilter(ContextCompat.getColor(mContext, R.color.sensor_available));
-            }
 
             // highlight last connected sensors
             if (mLastConnectedSensors.contains(mFoundSensors.get(position).getString(Constants.KEY_SENSOR_NAME))) {
@@ -153,6 +144,10 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
         @Override
         public void onItemClick(View view, int position) {
             SensorPickerViewHolder viewHolder = (SensorPickerViewHolder) mRecyclerView.findViewHolderForAdapterPosition(position);
+            if (viewHolder == null) {
+                return;
+            }
+
             viewHolder.mCheckBox.setChecked(!viewHolder.mCheckBox.isChecked());
 
             Bundle bundle = mFoundSensors.get(position);
@@ -163,10 +158,6 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
                 viewHolder.mCheckBox.setChecked(true);
                 mSelectedSensors.add(bundle);
             }
-
-            //mSensorFoundCallback.onKnownSensorFound(new SensorInfo(name, address, sensor));
-            //createSelectSensorDialog(sensor);
-            //SensorPickerFragment.this.dismiss();
         }
 
 
@@ -293,28 +284,22 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
 
     private static class SensorPickerViewHolder extends ViewHolder implements View.OnClickListener {
 
-        private Context mContext;
-
         private TextView mSensorNameTextView;
         private TextView mRecentlyConnectedTextView;
         private TextView mSensorInformationTextView;
         private TextView mSensorRssi;
-        private ImageView mBatteryImageView;
         private GridView mSensorGridView;
         private CheckBox mCheckBox;
         private HardwareSensorGridAdapter mGridAdapter;
         private ItemClickListener mItemClickListener;
 
-        private SensorPickerViewHolder(Context context, View itemView, ItemClickListener listener) {
+        private SensorPickerViewHolder(View itemView, ItemClickListener listener) {
             super(itemView);
-
-            mContext = context;
 
             mSensorNameTextView = itemView.findViewById(R.id.tv_sensor_name);
             mRecentlyConnectedTextView = itemView.findViewById(R.id.tv_recently);
             mSensorInformationTextView = itemView.findViewById(R.id.tv_sensor_address);
             mSensorRssi = itemView.findViewById(R.id.tv_sensor_rssi);
-            mBatteryImageView = itemView.findViewById(R.id.iv_battery);
             mCheckBox = itemView.findViewById(R.id.checkbox);
             mCheckBox.setOnClickListener(this);
             mSensorGridView = itemView.findViewById(R.id.gv_sensors);
@@ -390,13 +375,15 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
         mContext = rootView.getContext();
         mAdapter = new SensorPickerRecyclerAdapter();
 
-        getDialog().setTitle("SensorPicker");
+        if (getDialog() != null) {
+            getDialog().setTitle("SensorPicker");
+        }
 
         setCancelable(false);
-        mCancelButton = rootView.findViewById(R.id.button_cancel);
-        mCancelButton.setOnClickListener(this);
-        mOkButton = rootView.findViewById(R.id.button_ok);
-        mOkButton.setOnClickListener(this);
+        Button cancelButton = rootView.findViewById(R.id.button_cancel);
+        cancelButton.setOnClickListener(this);
+        Button okButton = rootView.findViewById(R.id.button_ok);
+        okButton.setOnClickListener(this);
 
         mRecyclerView = rootView.findViewById(R.id.recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
@@ -417,11 +404,13 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
     @Override
     public void onStart() {
         super.onStart();
-        Objects.requireNonNull(getDialog().getWindow()).setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        if (getDialog() != null && getDialog().getWindow() != null) {
+            getDialog().getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
     }
 
     @Override
-    public void onDismiss(DialogInterface dialog) {
+    public void onDismiss(@NonNull DialogInterface dialog) {
         super.onDismiss(dialog);
         if (mDialogDismissCallback != null) {
             mDialogDismissCallback.onDismiss(dialog);
@@ -522,17 +511,14 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
     }
 
     private void stopSensorScan() {
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                // ...stop BLE Scan
-                if (BleSensorManager.isScanning()) {
-                    BleSensorManager.cancelRunningScans();
-                }
-                if (isAdded()) {
-                    mProgressBar.setVisibility(View.GONE);
-                    mProgressTextView.setText(getString(R.string.string_scan_results));
-                }
+        new Handler().postDelayed(() -> {
+            // ...stop BLE Scan
+            if (BleSensorManager.isScanning()) {
+                BleSensorManager.cancelRunningScans();
+            }
+            if (isAdded()) {
+                mProgressBar.setVisibility(View.GONE);
+                mProgressTextView.setText(getString(R.string.string_scan_results));
             }
         }, BleSensorManager.SCAN_PERIOD);
     }
