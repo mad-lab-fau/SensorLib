@@ -14,17 +14,16 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 
-import java.io.File;
-import java.io.FilenameFilter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.DialogFragment;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import de.fau.sensorlib.R;
 import de.fau.sensorlib.SensorFoundCallback;
 import de.fau.sensorlib.SensorInfo;
@@ -39,8 +38,6 @@ public class SimulationPickerFragment extends DialogFragment implements View.OnC
 
     private Context mContext;
 
-    private Button mCancelButton;
-    private Button mOkButton;
     private Spinner mFileSpinner;
     private File mSelectedFile;
 
@@ -49,19 +46,21 @@ public class SimulationPickerFragment extends DialogFragment implements View.OnC
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.widget_simulation_picker, container);
 
         mContext = rootView.getContext();
 
-        getDialog().setTitle("SimulationPicker");
+        if (getDialog() != null) {
+            getDialog().setTitle("SimulationPicker");
+        }
 
         setCancelable(false);
         mFileSpinner = rootView.findViewById(R.id.spinner_sim_dialog);
-        mCancelButton = rootView.findViewById(R.id.button_cancel);
-        mCancelButton.setOnClickListener(this);
-        mOkButton = rootView.findViewById(R.id.button_ok);
-        mOkButton.setOnClickListener(this);
+        Button cancelButton = rootView.findViewById(R.id.button_cancel);
+        cancelButton.setOnClickListener(this);
+        Button okButton = rootView.findViewById(R.id.button_ok);
+        okButton.setOnClickListener(this);
 
         return rootView;
     }
@@ -77,11 +76,13 @@ public class SimulationPickerFragment extends DialogFragment implements View.OnC
     @Override
     public void onStart() {
         super.onStart();
-        Objects.requireNonNull(getDialog().getWindow()).setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        if (getDialog() != null && getDialog().getWindow() != null) {
+            getDialog().getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
     }
 
     @Override
-    public void onDismiss(DialogInterface dialog) {
+    public void onDismiss(@NonNull DialogInterface dialog) {
         super.onDismiss(dialog);
         Activity activity = getActivity();
         if (activity instanceof DialogInterface.OnDismissListener) {
@@ -164,14 +165,10 @@ public class SimulationPickerFragment extends DialogFragment implements View.OnC
             // Read all DailyHeart recordings and add them to the list
             if (path.exists()) {
                 // add only files that are DailyHeart recordings
-                fileList = new ArrayList<>(Arrays.asList(path.listFiles(new FilenameFilter() {
-                    @Override
-                    public boolean accept(File file, String s) {
-                        //Log.d(TAG, s);
-                        //return s.contains("dailyheart") && s.contains(".csv");
-                        // TODO just for testing
-                        return s.contains("Simblee");
-                    }
+                fileList = new ArrayList<>(Arrays.asList(path.listFiles((file, s) -> {
+                    //Log.d(TAG, s);
+                    //return s.contains("dailyheart") && s.contains(".csv");
+                    return s.contains("NilsPod");
                 })));
                 // add this to the beginning of the list so that it's displayed
                 // as first option in the data spinner

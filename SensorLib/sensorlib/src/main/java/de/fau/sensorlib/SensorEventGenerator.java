@@ -14,7 +14,8 @@ import de.fau.sensorlib.enums.SensorState;
 import de.fau.sensorlib.sensors.AbstractSensor;
 
 /**
- * Sensor event generator that channels state changes or sensor messages and broadcasts it to UI elements or other classes that add listeners to this class.
+ * Sensor event generator that channels state changes or sensor messages and broadcasts it to UI
+ * elements or other classes that add listeners to this class.
  */
 public class SensorEventGenerator {
 
@@ -58,7 +59,7 @@ public class SensorEventGenerator {
     /**
      * Sets a new global state and notifies all attached listeners about the state change.
      *
-     * @param state
+     * @param state The global state of all sensors
      */
     public void setState(SensorState state) {
         setState(state, true);

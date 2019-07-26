@@ -26,12 +26,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 
 import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
-import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -43,7 +41,6 @@ import de.fau.sensorlib.SensorEventListener;
 import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
-import de.fau.sensorlib.enums.SensorMessage;
 import de.fau.sensorlib.enums.SensorState;
 import de.fau.sensorlib.sensors.AbstractSensor;
 
@@ -150,7 +147,6 @@ public class SensorPlotter extends CardView implements SensorEventListener {
         String sensorId = dataFrame.getOriginatingSensor().getDeviceName() + "@" + dataFrame.getOriginatingSensor().getDeviceAddress();
 
         for (int i = 0; i < mSensorBundles.size(); i++) {
-            //long timestamp = (long) ((time - (offset + pauseOffset)) / mSensorBundles.get(i).getSampleDistance());
             ArrayList<String> sensorList = mSensorBundles.get(i).getSensorIds();
             if (sensorList == null) {
                 return;
@@ -169,7 +165,6 @@ public class SensorPlotter extends CardView implements SensorEventListener {
                         //e.printStackTrace();
                     }
                 }
-                //mLineData.get(i).notifyDataChanged();
             }
         }
         if ((System.currentTimeMillis() - lastTimestamp) > 1000 / mRefreshRate) {
@@ -196,16 +191,11 @@ public class SensorPlotter extends CardView implements SensorEventListener {
         // 1 second
         chart.getXAxis().setGranularity(1000);
         chart.getXAxis().setLabelCount((int) (mWindowSize * bundle.getSampleDistance()));
-        chart.getXAxis().setValueFormatter(new IAxisValueFormatter() {
-            @Override
-            public String getFormattedValue(float value, AxisBase axis) {
-                return String.format(Locale.getDefault(), "%02d:%02d",
-                        TimeUnit.MILLISECONDS.toMinutes((int) value),
-                        TimeUnit.MILLISECONDS.toSeconds((int) value) -
-                                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((int) value))
-                );
-            }
-        });
+        chart.getXAxis().setValueFormatter((value, axis) -> String.format(Locale.getDefault(), "%02d:%02d",
+                TimeUnit.MILLISECONDS.toMinutes((int) value),
+                TimeUnit.MILLISECONDS.toSeconds((int) value) -
+                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((int) value))
+        ));
     }
 
     private synchronized void configureDataSets(LineData data, LineDataSet[] datasets, ArrayList<String> sensorNames, int[] colors, String[] labels) {
@@ -258,12 +248,6 @@ public class SensorPlotter extends CardView implements SensorEventListener {
         }
         previousState = state;
     }
-
-    @Override
-    public void onSensorMessage(AbstractSensor sensor, SensorMessage messageType, String message) {
-
-    }
-
 
     private static class SensorPlotterViewHolder extends ViewHolder {
 
@@ -323,12 +307,7 @@ public class SensorPlotter extends CardView implements SensorEventListener {
                 final LineDataSet[] dataSets = new LineDataSet[sensorIds.size() * columns.length];
                 final int pos = holder.getLayoutPosition();
 
-                lineChart.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        configureDataSets(mLineData.get(pos), dataSets, bundle.getSensorNames(), PlotColorMap.getColors(bundle.getHwSensor()), columns);
-                    }
-                });
+                lineChart.post(() -> configureDataSets(mLineData.get(pos), dataSets, bundle.getSensorNames(), PlotColorMap.getColors(bundle.getHwSensor()), columns));
             } catch (IllegalAccessException | NoSuchFieldException e) {
                 e.printStackTrace();
             }

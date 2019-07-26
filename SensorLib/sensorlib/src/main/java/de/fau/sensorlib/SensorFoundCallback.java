@@ -36,7 +36,7 @@ public abstract class SensorFoundCallback {
     }
 
     /**
-     * Called when a subset of Hardware sensors of the sensor deivce was selected.
+     * Called when a subset of Hardware sensors of the sensor device was selected.
      *
      * @param selectedSensors the set of selected Hardware sensors
      */

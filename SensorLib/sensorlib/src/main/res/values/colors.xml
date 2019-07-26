@@ -44,9 +44,11 @@
 
     <color name="ecg_1">#F44336</color>
     <color name="ecg_2">#B71C1C</color>
+    <color name="ecg_3">#FF1744</color>
 
     <color name="ppg_1">#E91E63</color>
     <color name="ppg_2">#880E4F</color>
+    <color name="ppg_3">#D500F9</color>
 
     <color name="baro">#3F51B5</color>
     <color name="light">#FFEB3B</color>

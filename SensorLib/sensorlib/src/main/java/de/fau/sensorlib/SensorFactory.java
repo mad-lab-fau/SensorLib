@@ -15,15 +15,15 @@ import java.lang.reflect.InvocationTargetException;
 import de.fau.sensorlib.sensors.AbstractSensor;
 
 /**
- * Class that creates and delivers sensor objects users can then work with (connect, stream, etc.).
+ * Class that creates and delivers sensor objects users can then work with (connect, stream, logging, etc.).
  */
 public class SensorFactory {
 
     /**
      * Creates a new sensor object based on the provided sensor information.
      *
-     * @param info Sensor info (containing device name, address, etc.)
-     * @param context Android context
+     * @param info                SensorInfo (containing device name, address, etc.)
+     * @param context             Android context
      * @param sensorDataProcessor Callback for sensor events
      * @return the sensor instance
      */
@@ -35,7 +35,7 @@ public class SensorFactory {
             Constructor[] constructors = info.getDeviceClass().getClassType().getConstructors();
             for (Constructor constructor : constructors) {
                 // find the constructor with 3 parameters
-                if (constructor.getParameterTypes() != null && constructor.getParameterTypes().length == 3) {
+                if (constructor.getParameterTypes().length == 3) {
                     // we found the right constructor, so create a new
                     sensor = (AbstractSensor) constructor.newInstance(context, info, sensorDataProcessor);
                     break;

@@ -13,13 +13,13 @@ import de.fau.sensorlib.sensors.AbstractSensor;
 /**
  * Base abstract class for all sensor data processors/handlers.
  */
-public abstract class SensorDataProcessor {
+public interface SensorDataProcessor {
     /**
      * This is called every time a new data frame (sample) is received from the sensor.
      *
      * @param data the data frame transmitted.
      */
-    public abstract void onNewData(SensorDataFrame data);
+    void onNewData(SensorDataFrame data);
 
     /**
      * This is called after the sensor has internally been initialized. This depends on the sensor. However it is guaranteed that it will always be called before the
@@ -27,7 +27,8 @@ public abstract class SensorDataProcessor {
      *
      * @param sensor the corresponding sensor.
      */
-    public void onSensorCreated(AbstractSensor sensor) {
+    default void onSensorCreated(AbstractSensor sensor) {
+
     }
 
     /**
@@ -35,7 +36,8 @@ public abstract class SensorDataProcessor {
      *
      * @param sensor the corresponding sensor.
      */
-    public void onConnected(AbstractSensor sensor) {
+    default void onConnected(AbstractSensor sensor) {
+
     }
 
     /**
@@ -43,7 +45,7 @@ public abstract class SensorDataProcessor {
      *
      * @param sensor the corresponding sensor.
      */
-    public void onConnecting(AbstractSensor sensor) {
+    default void onConnecting(AbstractSensor sensor) {
 
     }
 
@@ -52,7 +54,8 @@ public abstract class SensorDataProcessor {
      *
      * @param sensor the corresponding sensor.
      */
-    public void onDisconnected(AbstractSensor sensor) {
+    default void onDisconnected(AbstractSensor sensor) {
+
     }
 
     /**
@@ -60,7 +63,7 @@ public abstract class SensorDataProcessor {
      *
      * @param sensor the corresponding sensor.
      */
-    public void onConnectionLost(AbstractSensor sensor) {
+    default void onConnectionLost(AbstractSensor sensor) {
 
     }
 
@@ -69,7 +72,8 @@ public abstract class SensorDataProcessor {
      *
      * @param sensor the corresponding sensor.
      */
-    public void onStartStreaming(AbstractSensor sensor) {
+    default void onStartStreaming(AbstractSensor sensor) {
+
     }
 
     /**
@@ -77,7 +81,16 @@ public abstract class SensorDataProcessor {
      *
      * @param sensor the corresponding sensor.
      */
-    public void onStopStreaming(AbstractSensor sensor) {
+    default void onStopStreaming(AbstractSensor sensor) {
+
+    }
+
+    default void onStartLogging(AbstractSensor sensor) {
+
+    }
+
+    default void onStopLogging(AbstractSensor sensor) {
+
     }
 
     /**
@@ -87,7 +100,8 @@ public abstract class SensorDataProcessor {
      *
      * @param sensor the corresponding sensor.
      */
-    public void onSamplingRateChanged(AbstractSensor sensor, double newSamplingRate) {
+    default void onSamplingRateChanged(AbstractSensor sensor, double newSamplingRate) {
+
     }
 
     /**
@@ -96,6 +110,8 @@ public abstract class SensorDataProcessor {
      * @param sensor       the corresponding sensor.
      * @param notification an object extended class (usually a string) that contains the notification.
      */
-    public void onNotify(AbstractSensor sensor, Object notification) {
+    default void onNotify(AbstractSensor sensor, Object notification) {
+
     }
+
 }

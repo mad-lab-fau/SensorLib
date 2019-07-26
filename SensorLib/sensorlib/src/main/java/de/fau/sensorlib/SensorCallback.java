@@ -7,6 +7,8 @@
  */
 package de.fau.sensorlib;
 
+import android.util.Log;
+
 import de.fau.sensorlib.dataframe.SensorDataFrame;
 import de.fau.sensorlib.sensors.AbstractSensor;
 
@@ -14,6 +16,8 @@ import de.fau.sensorlib.sensors.AbstractSensor;
  * Callback for communication Service -> Activity
  */
 public interface SensorCallback {
+
+    String TAG = SensorCallback.class.getSimpleName();
 
     void onScanResult(boolean sensorFound);
 
@@ -72,5 +76,39 @@ public interface SensorCallback {
      * @param data Data received from the Service
      */
     void onDataReceived(SensorDataFrame data);
+
+
+    default void onStartLogging(AbstractSensor sensor) {
+
+    }
+
+    default void onStopLogging(AbstractSensor sensor) {
+
+    }
+
+    /**
+     * Called when all attached sensors are disconnected.
+     */
+    default void onAllSensorsDisconnected() {
+        Log.d(TAG, "All sensors disconnected!");
+    }
+
+    /**
+     * Called when all attached sensors are connected.
+     */
+    default void onAllSensorsConnected() {
+        Log.d(TAG, "All sensors connected!");
+    }
+
+    /**
+     * Called when all attached sensors are streaming.
+     */
+    default void onAllSensorsStreaming() {
+        Log.d(TAG, "All sensors streaming!");
+    }
+
+    default void onAllSensorsLogging() {
+        Log.d(TAG, "All sensors logging!");
+    }
 
 }

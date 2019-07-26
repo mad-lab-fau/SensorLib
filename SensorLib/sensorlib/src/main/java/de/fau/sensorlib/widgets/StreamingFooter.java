@@ -19,7 +19,6 @@ import android.widget.RelativeLayout;
 import de.fau.sensorlib.R;
 import de.fau.sensorlib.SensorEventGenerator;
 import de.fau.sensorlib.SensorEventListener;
-import de.fau.sensorlib.enums.SensorMessage;
 import de.fau.sensorlib.enums.SensorState;
 import de.fau.sensorlib.sensors.AbstractSensor;
 
@@ -28,8 +27,6 @@ import de.fau.sensorlib.sensors.AbstractSensor;
  * so can subscribe to the {@link SensorEventGenerator}.
  */
 public class StreamingFooter extends RelativeLayout implements View.OnClickListener, SensorEventListener {
-
-    private Context mContext;
 
     private ImageButton mFab;
     private Button mStartStopButton;
@@ -62,7 +59,6 @@ public class StreamingFooter extends RelativeLayout implements View.OnClickListe
     public StreamingFooter(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         inflate(context, R.layout.widget_streaming_footer, this);
-        mContext = context;
 
         mFab = findViewById(R.id.fab);
         mStartStopButton = findViewById(R.id.button_start_stop);
@@ -73,13 +69,13 @@ public class StreamingFooter extends RelativeLayout implements View.OnClickListe
         mDisconnectButton.setOnClickListener(this);
 
         // load animations for closing Start/Stop and Disconnect Buttons and animate FAB
-        mAnimLeftClose = AnimationUtils.loadAnimation(mContext, R.anim.view_start_stop_close);
-        mAnimRightClose = AnimationUtils.loadAnimation(mContext, R.anim.view_disconnnect_close);
-        mAnimFabPressed = AnimationUtils.loadAnimation(mContext, R.anim.fab_pressed);
+        mAnimLeftClose = AnimationUtils.loadAnimation(context, R.anim.view_start_stop_close);
+        mAnimRightClose = AnimationUtils.loadAnimation(context, R.anim.view_disconnnect_close);
+        mAnimFabPressed = AnimationUtils.loadAnimation(context, R.anim.fab_pressed);
 
-        mAnimLeftOpen = AnimationUtils.loadAnimation(mContext, R.anim.view_start_stop_open);
-        mAnimRightOpen = AnimationUtils.loadAnimation(mContext, R.anim.view_disconnect_open);
-        mAnimFabNotPressed = AnimationUtils.loadAnimation(mContext, R.anim.fab_not_pressed);
+        mAnimLeftOpen = AnimationUtils.loadAnimation(context, R.anim.view_start_stop_open);
+        mAnimRightOpen = AnimationUtils.loadAnimation(context, R.anim.view_disconnect_open);
+        mAnimFabNotPressed = AnimationUtils.loadAnimation(context, R.anim.fab_not_pressed);
 
         mAnimLeftCloseListener = new Animation.AnimationListener() {
             @Override
@@ -225,10 +221,5 @@ public class StreamingFooter extends RelativeLayout implements View.OnClickListe
                 break;
         }
         mState = state;
-    }
-
-    @Override
-    public void onSensorMessage(AbstractSensor sensor, SensorMessage messsageType, String message) {
-
     }
 }

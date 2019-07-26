@@ -9,7 +9,7 @@ package de.fau.sensorlib.dataframe;
 
 
 /**
- * Label data frame.
+ * Data frame for label.
  */
 public interface LabelDataFrame {
 

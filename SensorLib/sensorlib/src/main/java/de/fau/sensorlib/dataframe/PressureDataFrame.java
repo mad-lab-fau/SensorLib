@@ -14,5 +14,10 @@ public interface PressureDataFrame {
 
     String[] COLUMNS = new String[]{"pressure"};
 
+    /**
+     * Returns the current pressure sample.
+     *
+     * @return pressure sample
+     */
     double getPressure();
 }

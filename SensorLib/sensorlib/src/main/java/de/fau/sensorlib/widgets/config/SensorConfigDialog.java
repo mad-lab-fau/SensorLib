@@ -26,7 +26,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Objects;
 
 import de.fau.sensorlib.Constants;
 import de.fau.sensorlib.R;
@@ -35,47 +34,52 @@ public class SensorConfigDialog extends DialogFragment implements View.OnClickLi
 
     private static final String TAG = SensorConfigDialog.class.getSimpleName();
 
-    private Context mContext;
-
-    private RecyclerView mRecyclerView;
-    private Button mCancelButton;
-    private Button mOkButton;
-
-    private SensorConfigAdapter mAdapter;
     private HashMap<String, Object> mSelectedConfigValues = new HashMap<>();
     private HashMap<String, Object> mDefaultConfigValues = new HashMap<>();
     private HashMap<String, ConfigItem> mConfigItems = new HashMap<>();
 
     private SensorConfigBuilder mSensorConfigBuilder;
-    private OnSensorConfigChangedListener mSensorConfigListener;
+    private SensorConfigSelectedListener mSensorConfigListener;
 
     @Nullable
     @Override
+    @SuppressWarnings("unchecked")
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.widget_sensor_config_dialog, container);
-        mContext = getContext();
+        Context context = getContext();
 
-        mConfigItems = (LinkedHashMap<String, ConfigItem>) getArguments().getSerializable(Constants.KEY_SENSOR_CONFIG);
-        mDefaultConfigValues = (LinkedHashMap<String, Object>) getArguments().getSerializable(Constants.KEY_SENSOR_CONFIG_DEFAULT);
-        mSelectedConfigValues = (HashMap<String, Object>) mDefaultConfigValues.clone();
+        Bundle args = getArguments();
+        if (args == null) {
+            return rootView;
+        }
+
+        if (args.containsKey(Constants.KEY_SENSOR_CONFIG)) {
+            mConfigItems = (LinkedHashMap<String, ConfigItem>) args.getSerializable(Constants.KEY_SENSOR_CONFIG);
+        }
+        if (args.containsKey(Constants.KEY_SENSOR_CONFIG_DEFAULT)) {
+            mDefaultConfigValues = (LinkedHashMap<String, Object>) getArguments().getSerializable(Constants.KEY_SENSOR_CONFIG_DEFAULT);
+            mSelectedConfigValues = (HashMap<String, Object>) (mDefaultConfigValues != null ? mDefaultConfigValues.clone() : null);
+        }
+
         String sensorName = getArguments().getString(Constants.KEY_SENSOR_NAME, "n/a");
         TextView textView = rootView.findViewById(R.id.tv_header);
         textView.setText(getString(R.string.sensor_config, sensorName));
 
         if (mSensorConfigBuilder == null) {
-            mSensorConfigBuilder = new SensorConfigBuilder(mContext);
+            mSensorConfigBuilder = new SensorConfigBuilder(context);
             mSensorConfigBuilder.setOnSensorConfigSelectedListener(this);
         }
 
-        mRecyclerView = rootView.findViewById(R.id.recycler_view);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
-        mAdapter = new SensorConfigAdapter(mContext, mConfigItems);
-        mRecyclerView.setAdapter(mAdapter);
+        RecyclerView recyclerView = rootView.findViewById(R.id.recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(context));
 
-        mOkButton = rootView.findViewById(R.id.button_ok);
-        mOkButton.setOnClickListener(this);
-        mCancelButton = rootView.findViewById(R.id.button_cancel);
-        mCancelButton.setOnClickListener(this);
+        SensorConfigAdapter adapter = new SensorConfigAdapter(context, mConfigItems);
+        recyclerView.setAdapter(adapter);
+
+        Button okButton = rootView.findViewById(R.id.button_ok);
+        okButton.setOnClickListener(this);
+        Button cancelButton = rootView.findViewById(R.id.button_cancel);
+        cancelButton.setOnClickListener(this);
 
         return rootView;
     }
@@ -96,14 +100,16 @@ public class SensorConfigDialog extends DialogFragment implements View.OnClickLi
     @Override
     public void onStart() {
         super.onStart();
-        Objects.requireNonNull(getDialog().getWindow()).setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        if (getDialog() != null && getDialog().getWindow() != null) {
+            getDialog().getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
     }
 
     public void setSensorConfigBuilder(SensorConfigBuilder builder) {
         mSensorConfigBuilder = builder;
     }
 
-    public void setSensorConfigListener(OnSensorConfigChangedListener listener) {
+    public void setSensorConfigSelectedListener(SensorConfigSelectedListener listener) {
         mSensorConfigListener = listener;
     }
 

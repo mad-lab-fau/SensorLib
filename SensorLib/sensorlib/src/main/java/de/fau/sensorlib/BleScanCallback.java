@@ -12,10 +12,10 @@ import android.bluetooth.le.ScanResult;
 import android.util.Log;
 import android.util.SparseArray;
 
+import androidx.annotation.CallSuper;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import androidx.annotation.CallSuper;
 
 /**
  * Callback implementation for the BLE scan callback.
@@ -45,8 +45,7 @@ public class BleScanCallback extends ScanCallback {
         }
         mScannedAddresses.add(result.getDevice().getAddress());
 
-        SparseArray<byte[]> manuData = null;
-        //Log.d(TAG, "New BLE device: " + result.getDevice().getName() + "@" + result.getRssi());
+        SparseArray<byte[]> manuData;
         SensorInfo s;
         if (result.getScanRecord() != null) {
             manuData = result.getScanRecord().getManufacturerSpecificData();
@@ -62,6 +61,7 @@ public class BleScanCallback extends ScanCallback {
             // call this method for the DsSensorPickerFragment,
             // because we need some information about the Bluetooth device
             ret = mSensorCallback.onKnownSensorFound(s, result.getRssi());
+
             // Logical OR because onKnownSensorFound(KnownSensor, BluetoothDevice)
             // always returns true. If we should stop scanning, then this method returns
             // false => ret == false.

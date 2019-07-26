@@ -31,16 +31,18 @@ public abstract class AbstractSensor extends SensorInfo {
 
     protected static final String TAG = AbstractSensor.class.getSimpleName();
 
-    protected static final int MESSAGE_NEW_DATA = 1010;
-    protected static final int MESSAGE_NOTIFICATION = 1011;
-    protected static final int MESSAGE_SENSOR_CREATED = 1012;
-    protected static final int MESSAGE_CONNECTING = 1013;
-    protected static final int MESSAGE_CONNECTED = 1014;
-    protected static final int MESSAGE_DISCONNECTED = 1015;
-    protected static final int MESSAGE_CONNECTION_LOST = 1016;
-    protected static final int MESSAGE_START_STREAMING = 1017;
-    protected static final int MESSAGE_STOP_STREAMING = 1018;
-    protected static final int MESSAGE_SAMPLING_RATE_CHANGED = 1019;
+    private static final int MESSAGE_NEW_DATA = 1010;
+    private static final int MESSAGE_NOTIFICATION = 1011;
+    private static final int MESSAGE_SENSOR_CREATED = 1012;
+    private static final int MESSAGE_CONNECTING = 1013;
+    private static final int MESSAGE_CONNECTED = 1014;
+    private static final int MESSAGE_DISCONNECTED = 1015;
+    private static final int MESSAGE_CONNECTION_LOST = 1016;
+    private static final int MESSAGE_START_STREAMING = 1017;
+    private static final int MESSAGE_STOP_STREAMING = 1018;
+    private static final int MESSAGE_START_LOGGING = 1019;
+    private static final int MESSAGE_STOP_LOGGING = 1020;
+    private static final int MESSAGE_SAMPLING_RATE_CHANGED = 1021;
 
     /**
      * Context this sensor is used in.
@@ -131,6 +133,16 @@ public abstract class AbstractSensor extends SensorInfo {
                         getSensor().dispatchStopStreaming();
                         break;
 
+                    case AbstractSensor.MESSAGE_START_LOGGING:
+                        getSensor().setState(SensorState.LOGGING);
+                        getSensor().dispatchStartLogging();
+                        break;
+
+                    case AbstractSensor.MESSAGE_STOP_LOGGING:
+                        getSensor().setState(SensorState.CONNECTED);
+                        getSensor().dispatchStopLogging();
+                        break;
+
                     case AbstractSensor.MESSAGE_DISCONNECTED:
                         getSensor().setState(SensorState.DISCONNECTED);
                         getSensor().dispatchDisconnected();
@@ -143,10 +155,6 @@ public abstract class AbstractSensor extends SensorInfo {
 
                     case AbstractSensor.MESSAGE_SAMPLING_RATE_CHANGED:
                         getSensor().dispatchSamplingRateChanged();
-                        break;
-
-                    default:
-                        Log.e(this.getClass().getSimpleName(), "Unknown message received.");
                         break;
                 }
             } catch (Exception e) {
@@ -212,7 +220,7 @@ public abstract class AbstractSensor extends SensorInfo {
      * If no hardware sensor was selected by calling one of the useHardwareSensor(s) methods, all available hardware sensors will automatically be used.
      *
      * @return true if the connection has been established successfully. False otherwise.
-     * @throws SensorException
+     * @throws Exception if an error occurs during connection attempt
      */
     @CallSuper
     public boolean connect() throws Exception {
@@ -314,7 +322,7 @@ public abstract class AbstractSensor extends SensorInfo {
     }
 
     /**
-     * This method checkes whether the given kind of hardware sensor was selected for use in a previous call to {@link #useHardwareSensor(HardwareSensor)}.
+     * This method checks whether the given kind of hardware sensor was selected for use in a previous call to {@link #useHardwareSensor(HardwareSensor)}.
      *
      * @param sensor the kind of hardware sensor that should be checked.
      * @return whether the given sensor was selected for use.
@@ -405,7 +413,7 @@ public abstract class AbstractSensor extends SensorInfo {
         mInternalHandler.obtainMessage(MESSAGE_NOTIFICATION, notification).sendToTarget();
     }
 
-    protected void dispatchNotification(Object notification) {
+    private void dispatchNotification(Object notification) {
         for (SensorDataProcessor sdp : mExternalHandlers) {
             sdp.onNotify(this, notification);
         }
@@ -417,14 +425,11 @@ public abstract class AbstractSensor extends SensorInfo {
      * @param data The SensorDataFrame to send to the external handlers.
      */
     protected void sendNewData(SensorDataFrame data) {
-        //Log.d( this.getClass().getSimpleName(), "new data " + data.getOriginatingSensor() );
         mInternalHandler.obtainMessage(MESSAGE_NEW_DATA, data).sendToTarget();
     }
 
-    protected void dispatchNewData(SensorDataFrame data) {
-        //Log.d( this.getClass().getSimpleName(), "dispatch " + mExternalHandlers.size() );
+    private void dispatchNewData(SensorDataFrame data) {
         for (SensorDataProcessor sdp : mExternalHandlers) {
-            //Log.d( this.getClass().getSimpleName(), "dispatch to " + sdp.getClass().getSimpleName() );
             sdp.onNewData(data);
         }
     }
@@ -436,7 +441,7 @@ public abstract class AbstractSensor extends SensorInfo {
         mInternalHandler.sendEmptyMessage(MESSAGE_SENSOR_CREATED);
     }
 
-    protected void dispatchSensorCreated() {
+    private void dispatchSensorCreated() {
         for (SensorDataProcessor sdp : mExternalHandlers) {
             sdp.onSensorCreated(this);
         }
@@ -446,7 +451,7 @@ public abstract class AbstractSensor extends SensorInfo {
         mInternalHandler.sendEmptyMessage(MESSAGE_CONNECTING);
     }
 
-    protected void dispatchConnecting() {
+    private void dispatchConnecting() {
         for (SensorDataProcessor sdp : mExternalHandlers) {
             sdp.onConnecting(this);
         }
@@ -456,7 +461,7 @@ public abstract class AbstractSensor extends SensorInfo {
         mInternalHandler.sendEmptyMessage(MESSAGE_CONNECTED);
     }
 
-    protected void dispatchConnected() {
+    private void dispatchConnected() {
         for (SensorDataProcessor sdp : mExternalHandlers) {
             sdp.onConnected(this);
         }
@@ -469,7 +474,7 @@ public abstract class AbstractSensor extends SensorInfo {
         mInternalHandler.sendEmptyMessage(MESSAGE_DISCONNECTED);
     }
 
-    protected void dispatchDisconnected() {
+    private void dispatchDisconnected() {
         for (SensorDataProcessor sdp : mExternalHandlers) {
             sdp.onDisconnected(this);
         }
@@ -479,7 +484,7 @@ public abstract class AbstractSensor extends SensorInfo {
         mInternalHandler.sendEmptyMessage(MESSAGE_CONNECTION_LOST);
     }
 
-    protected void dispatchConnectionLost() {
+    private void dispatchConnectionLost() {
         for (SensorDataProcessor sdp : mExternalHandlers) {
             sdp.onConnectionLost(this);
         }
@@ -489,7 +494,7 @@ public abstract class AbstractSensor extends SensorInfo {
         mInternalHandler.obtainMessage(MESSAGE_START_STREAMING).sendToTarget();
     }
 
-    protected void dispatchStartStreaming() {
+    private void dispatchStartStreaming() {
         for (SensorDataProcessor sdp : mExternalHandlers) {
             sdp.onStartStreaming(this);
         }
@@ -499,9 +504,29 @@ public abstract class AbstractSensor extends SensorInfo {
         mInternalHandler.obtainMessage(MESSAGE_STOP_STREAMING).sendToTarget();
     }
 
-    protected void dispatchStopStreaming() {
+    private void dispatchStopStreaming() {
         for (SensorDataProcessor sdp : mExternalHandlers) {
             sdp.onStopStreaming(this);
+        }
+    }
+
+    protected void sendStartLogging() {
+        mInternalHandler.obtainMessage(MESSAGE_START_LOGGING).sendToTarget();
+    }
+
+    private void dispatchStartLogging() {
+        for (SensorDataProcessor sdp : mExternalHandlers) {
+            sdp.onStartLogging(this);
+        }
+    }
+
+    protected void sendStopLogging() {
+        mInternalHandler.obtainMessage(MESSAGE_STOP_LOGGING).sendToTarget();
+    }
+
+    private void dispatchStopLogging() {
+        for (SensorDataProcessor sdp : mExternalHandlers) {
+            sdp.onStopLogging(this);
         }
     }
 
@@ -509,7 +534,7 @@ public abstract class AbstractSensor extends SensorInfo {
         mInternalHandler.obtainMessage(MESSAGE_SAMPLING_RATE_CHANGED).sendToTarget();
     }
 
-    protected void dispatchSamplingRateChanged() {
+    private void dispatchSamplingRateChanged() {
         for (SensorDataProcessor sdp : mExternalHandlers) {
             sdp.onSamplingRateChanged(this, getSamplingRate());
         }

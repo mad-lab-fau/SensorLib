@@ -8,7 +8,7 @@
 package de.fau.sensorlib.dataframe;
 
 /**
- * Barometric pressure data frame.
+ * Data frame for barometer samples.
  */
 public interface BarometricPressureDataFrame {
 

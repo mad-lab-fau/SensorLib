@@ -14,10 +14,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
+
 import de.fau.sensorlib.R;
 import de.fau.sensorlib.SensorEventGenerator;
 import de.fau.sensorlib.SensorEventListener;
-import de.fau.sensorlib.enums.SensorMessage;
 import de.fau.sensorlib.enums.SensorState;
 import de.fau.sensorlib.sensors.AbstractSensor;
 
@@ -126,10 +126,5 @@ public class StatusBar extends RelativeLayout implements SensorEventListener {
         if (sensor == null) {
             setState(state);
         }
-    }
-
-    @Override
-    public void onSensorMessage(AbstractSensor sensor, SensorMessage messageType, String message) {
-
     }
 }

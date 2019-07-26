@@ -8,7 +8,7 @@
 package de.fau.sensorlib.dataframe;
 
 /**
- * Photoplethysmography (PPG) data frame
+ * Photoplethysmography (PPG) data frame for one single channel.
  */
 public interface PpgDataFrame {
 

@@ -8,24 +8,11 @@
 package de.fau.sensorlib.dataframe;
 
 /**
- * Ambient data frame.
+ * Data frame storing ambient sensor data.
  */
 
 public interface AmbientDataFrame extends BarometricPressureDataFrame, HumidityDataFrame, LightDataFrame, NoiseDataFrame, TemperatureDataFrame {
 
-    @Override
-    double getBarometricPressure();
-
-    @Override
-    double getHumidity();
-
-    @Override
-    double getLight();
-
-    @Override
-    double getNoise();
-
-    @Override
-    double getTemperature();
+    // empty interface, interface just for convenient summary of multiple single data frames
 
 }

@@ -9,7 +9,6 @@ package de.fau.sensorlib.widgets;
 
 import android.content.Context;
 import android.content.ContextWrapper;
-import android.content.DialogInterface;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.AttributeSet;
@@ -36,7 +35,7 @@ import de.fau.sensorlib.SensorEventListener;
 import de.fau.sensorlib.enums.SensorMessage;
 import de.fau.sensorlib.enums.SensorState;
 import de.fau.sensorlib.sensors.AbstractSensor;
-import de.fau.sensorlib.widgets.config.OnSensorConfigChangedListener;
+import de.fau.sensorlib.widgets.config.SensorConfigSelectedListener;
 
 
 /**
@@ -50,6 +49,8 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
     private SensorInfoGridAdapter mAdapter;
 
     private boolean mConfigCheckWarning;
+
+    private SensorActionCallback mSensorActionCallback;
 
     public SensorInfoBar(Context context) {
         this(context, null);
@@ -118,17 +119,6 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
         }
     }
 
-    /*public void onConfigChanged() {
-        ImageView configCheckView = findViewById(R.id.tv_config_check);
-        if (mConfigCheckWarning) {
-            configCheckView.setVisibility(VISIBLE);
-        } else {
-            configCheckView.setVisibility(INVISIBLE);
-        }
-
-        mAdapter.notifyDataSetChanged();
-    }*/
-
     public void onConfigChanged() {
         ImageView configCheckView = findViewById(R.id.tv_config_check);
         if (mConfigCheckWarning) {
@@ -149,12 +139,9 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
         mAdapter.addSensor(sensor);
     }
 
-    /*public void setConfigCheckWarning(boolean[] configCheckWarning) {
-        mConfigCheckWarning = configCheckWarning;
-        //onConfigChanged();
-        mAdapter.notifyDataSetChanged();
-    }*/
-
+    public void setSensorActionCallback(SensorActionCallback callback) {
+        mSensorActionCallback = callback;
+    }
 
     private class SensorInfoGridAdapter extends Adapter<SensorInfoViewHolder> implements SensorInfoViewHolder.ItemClickListener {
 
@@ -219,15 +206,6 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
         public SensorInfoViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View layout = LayoutInflater.from(mContext).inflate(R.layout.item_sensor_info_bar, parent, false);
 
-
-            /*if (mConfigCheckWarning) {
-                ImageView configCheck = layout.findViewById(R.id.tv_config_check);
-                configCheck.setVisibility(View.VISIBLE);
-            } else {
-                ImageView configCheck = layout.findViewById(R.id.tv_config_check);
-                configCheck.setVisibility(View.INVISIBLE);
-            }*/
-
             return new SensorInfoViewHolder(mContext, layout, this);
         }
 
@@ -237,7 +215,6 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
             holder.updateBatteryLevel(mAttachedSensors.get(position).getBatteryLevel());
             holder.updateAdditionalInfo(mAdditionalInfos.get(position));
             holder.setConfigCheckWarning(mConfigCheckWarning);
-            //holder.updateConfigCheckWarning(mConfigCheckWarning[position]);
         }
 
         @Override
@@ -263,14 +240,12 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
             bundle.putSerializable(Constants.KEY_SENSOR, sensor);
 
             SensorActionDialog dialog = new SensorActionDialog();
-            dialog.setDialogDismissCallback(new DialogInterface.OnDismissListener() {
-                @Override
-                public void onDismiss(DialogInterface dialog) {
-                    if (getActivity() instanceof OnSensorConfigChangedListener) {
-                        ((OnSensorConfigChangedListener) getActivity()).onSensorConfigSelected(null);
-                    }
+            dialog.setDialogDismissCallback(dialog1 -> {
+                if (getActivity() instanceof SensorConfigSelectedListener) {
+                    ((SensorConfigSelectedListener) getActivity()).onSensorConfigSelected(null);
                 }
             });
+            dialog.setSensorActionCallback(mSensorActionCallback);
             dialog.setArguments(bundle);
 
             AppCompatActivity activity = getActivity();
@@ -330,14 +305,6 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
 
         }
 
-        /*public void updateConfigCheckWarning(boolean configCheck){
-            if (configCheck) {
-                mConfigCheckWarningImageView.setVisibility(View.VISIBLE);
-            } else {
-                mConfigCheckWarningImageView.setVisibility(View.INVISIBLE);
-            }
-        }*/
-
 
         @Override
         public void onClick(View v) {
@@ -358,7 +325,7 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
         }
 
         @Override
-        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, State state) {
+        public void getItemOffsets(@NonNull Rect outRect, @NonNull View view, @NonNull RecyclerView parent, @NonNull State state) {
             outRect.set(spacing, spacing, spacing, spacing);
         }
     }
