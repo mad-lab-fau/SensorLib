@@ -15,6 +15,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import java.text.DecimalFormat;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -571,10 +572,18 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     private void computeRemainingRuntime() {
         long runtimeSeconds = (long) ((mRemainingFlashSize / mSampleSize) / getSamplingRate());
 
-        long hours = TimeUnit.SECONDS.toHours(runtimeSeconds);
-        long minutes = TimeUnit.SECONDS.toMinutes(runtimeSeconds) - TimeUnit.HOURS.toMinutes(hours);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            Duration duration = Duration.ofSeconds(runtimeSeconds);
+            long days = duration.toDays();
+            long hours = duration.minusDays(days).toHours();
+            long minutes = duration.minusDays(days).minusHours(hours).toMinutes();
+            mRemainingRuntime = days + "d : " + hours + "h : " + minutes + "min";
+        } else {
+            long hours = TimeUnit.SECONDS.toHours(runtimeSeconds);
+            long minutes = TimeUnit.SECONDS.toMinutes(runtimeSeconds) - TimeUnit.HOURS.toMinutes(hours);
 
-        mRemainingRuntime = String.format(Locale.getDefault(), "%02d:%02d", hours, minutes);
+            mRemainingRuntime = String.format(Locale.getDefault(), "%02d:%02d", hours, minutes);
+        }
     }
 
     @Override
