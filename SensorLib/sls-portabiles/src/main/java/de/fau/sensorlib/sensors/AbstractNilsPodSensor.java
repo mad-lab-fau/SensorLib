@@ -37,7 +37,6 @@ import de.fau.sensorlib.dataframe.AccelDataFrame;
 import de.fau.sensorlib.dataframe.GyroDataFrame;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
-import de.fau.sensorlib.enums.SensorMessage;
 import de.fau.sensorlib.enums.SensorState;
 import de.fau.sensorlib.sensors.dfu.NilsPodDfuService;
 import de.fau.sensorlib.sensors.enums.NilsPodMotionInterrupt;
@@ -56,11 +55,13 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
     public static final String TAG = AbstractNilsPodSensor.class.getSimpleName();
 
+    protected static final int MESSAGE_OPERATION_STATE_CHANGED = 2000;
     protected static final int MESSAGE_SESSION_LIST_READ = 2001;
     protected static final int MESSAGE_SESSIONS_CLEARED = 2002;
     protected static final int MESSAGE_SESSION_DOWNLOAD_STARTED = 2003;
     protected static final int MESSAGE_SESSION_DOWNLOAD_PROGRESS = 2004;
     protected static final int MESSAGE_SESSION_DOWNLOAD_FINISHED = 2005;
+    protected static final int MESSAGE_SENSOR_CONFIG_CHANGED = 2006;
 
     /**
      * UUID for Data Streaming Service of NilsPod sensor
@@ -538,8 +539,10 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
                 break;
         }
 
-        sendNotification(SensorMessage.OPERATION_STATE_CHANGED);
+        sendOperationStateChanged(newState);
     }
+
+    protected abstract void sendOperationStateChanged(NilsPodOperationState state);
 
     public NilsPodOperationState getOperationState() {
         return mOperationState;

@@ -12,6 +12,8 @@ import java.util.List;
 
 import de.fau.sensorlib.sensors.NilsPodSensor;
 
+import static de.fau.sensorlib.sensors.AbstractNilsPodSensor.NilsPodOperationState;
+
 public interface NilsPodLoggingCallback {
 
     void onSessionListRead(NilsPodSensor sensor, List<Session> sessionList);
@@ -23,5 +25,9 @@ public interface NilsPodLoggingCallback {
     void onSessionDownloadProgress(NilsPodSensor sensor, SessionDownloader sessionDownloader);
 
     void onSessionDownloadFinished(NilsPodSensor sensor, SessionDownloader sessionDownloader);
+
+    void onSensorConfigChanged(NilsPodSensor sensor);
+
+    void onOperationStateChanged(NilsPodSensor sensor, NilsPodOperationState operationState);
 
 }

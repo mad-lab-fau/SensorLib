@@ -70,6 +70,9 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             if (getSensor() instanceof NilsPodSensor) {
                 NilsPodSensor sensor = (NilsPodSensor) getSensor();
                 switch (msg.what) {
+                    case MESSAGE_OPERATION_STATE_CHANGED:
+                        sensor.dispatchOperationStateChanged((NilsPodOperationState) msg.obj);
+                        break;
                     case MESSAGE_SESSION_LIST_READ:
                         sensor.dispatchSessionListRead((List<Session>) msg.obj);
                         break;
@@ -85,6 +88,9 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
                     case MESSAGE_SESSION_DOWNLOAD_FINISHED:
                         sensor.dispatchSessionDownloadFinished((SessionDownloader) msg.obj);
                         break;
+                    case MESSAGE_SENSOR_CONFIG_CHANGED:
+                        sensor.dispatchSensorConfigChanged();
+                        break;
                 }
             }
         }
@@ -94,8 +100,6 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     private static final String TAG = NilsPodSensor.class.getSimpleName();
 
     protected ArrayList<NilsPodLoggingCallback> mCallbacks = new ArrayList<>();
-
-    protected OnSensorConfigChangedListener mConfigChangedListener;
 
     /**
      * Global counter for incoming packages (local counter only has 15 bit)
@@ -131,10 +135,6 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     @Override
     public void addNilsPodLoggingCallback(NilsPodLoggingCallback callback) {
         mCallbacks.add(callback);
-    }
-
-    public void setOnConfigChangedListener(OnSensorConfigChangedListener listener) {
-        mConfigChangedListener = listener;
     }
 
     @Override
@@ -358,9 +358,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
                                 throw new SensorException(SensorException.SensorExceptionType.configError);
                             }
                         }
-                        if (mConfigChangedListener != null) {
-                            mConfigChangedListener.onSensorConfigChanged(this);
-                        }
+                        sendSensorConfigChanged();
                         break;
                 }
                 break;
@@ -476,6 +474,18 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     }
 
 
+    @Override
+    protected void sendOperationStateChanged(NilsPodOperationState operationState) {
+        mInternalHandler.obtainMessage(MESSAGE_OPERATION_STATE_CHANGED, operationState).sendToTarget();
+    }
+
+
+    private void dispatchOperationStateChanged(NilsPodOperationState operationState) {
+        for (NilsPodLoggingCallback callback : mCallbacks) {
+            callback.onOperationStateChanged(this, operationState);
+        }
+    }
+
     private void sendSessionListRead(List<Session> sessionList) {
         mInternalHandler.obtainMessage(MESSAGE_SESSION_LIST_READ, sessionList).sendToTarget();
     }
@@ -525,6 +535,16 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     private void dispatchSessionDownloadFinished(SessionDownloader sessionDownloader) {
         for (NilsPodLoggingCallback callback : mCallbacks) {
             callback.onSessionDownloadFinished(this, sessionDownloader);
+        }
+    }
+
+    private void sendSensorConfigChanged() {
+        mInternalHandler.obtainMessage(MESSAGE_SENSOR_CONFIG_CHANGED).sendToTarget();
+    }
+
+    private void dispatchSensorConfigChanged() {
+        for (NilsPodLoggingCallback callback : mCallbacks) {
+            callback.onSensorConfigChanged(this);
         }
     }
 
