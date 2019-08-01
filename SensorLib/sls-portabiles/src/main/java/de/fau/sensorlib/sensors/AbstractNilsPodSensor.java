@@ -170,6 +170,10 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
     private NilsPodSensorPosition mSensorPosition;
 
+    private NilsPodSyncRole mSyncRole = NilsPodSyncRole.SYNC_ROLE_DISABLED;
+
+    private NilsPodSyncGroup mSyncGroup = NilsPodSyncGroup.SYNC_GROUP_UNKNOWN;
+
     private ArrayList<HardwareSensor> mEnabledSensorList = new ArrayList<>();
 
     private NilsPodOperationState mOperationState = NilsPodOperationState.IDLE;
@@ -554,6 +558,14 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         onOperationStateChanged(oldState, mOperationState);
     }
 
+    public NilsPodSyncRole getSyncRole() {
+        return mSyncRole;
+    }
+
+    public NilsPodSyncGroup getSyncGroup() {
+        return mSyncGroup;
+    }
+
     /**
      * Send command to sensor via Config Characteristic
      *
@@ -778,23 +790,25 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     protected synchronized void extractSyncConfig(BluetoothGattCharacteristic characteristic) throws SensorException {
         int offset = 0;
         byte[] values = characteristic.getValue();
-        NilsPodSyncRole syncRole = NilsPodSyncRole.SYNC_ROLE_DISABLED;
-        NilsPodSyncGroup syncGroup = NilsPodSyncGroup.SYNC_GROUP_UNKNOWN;
+        NilsPodSyncRole syncRole;
+        NilsPodSyncGroup syncGroup;
 
         try {
             syncRole = NilsPodSyncRole.values()[values[offset++]];
             syncGroup = NilsPodSyncGroup.inferSyncGroup(values[offset]);
+            mSyncRole = syncRole;
+            mSyncGroup = syncGroup;
         } catch (Exception e) {
             e.printStackTrace();
             throw new SensorException(SensorException.SensorExceptionType.readConfigError);
         } finally {
             Log.d(TAG, ">>>> Sync Config:");
-            Log.d(TAG, "\tSync Role: " + syncRole);
-            Log.d(TAG, "\tSync Group: " + syncGroup);
+            Log.d(TAG, "\tSync Role: " + mSyncRole);
+            Log.d(TAG, "\tSync Group: " + mSyncGroup);
         }
 
-        mCurrentConfigMap.put(KEY_SYNC_ROLE, syncRole);
-        mCurrentConfigMap.put(KEY_SYNC_GROUP, syncGroup);
+        mCurrentConfigMap.put(KEY_SYNC_ROLE, mSyncRole);
+        mCurrentConfigMap.put(KEY_SYNC_GROUP, mSyncGroup);
     }
 
     protected synchronized void extractSensorConfig(BluetoothGattCharacteristic characteristic) throws SensorException {
