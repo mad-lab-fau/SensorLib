@@ -218,12 +218,12 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
     protected static ConfigItem sSamplingRateConfig = new ConfigItem(
             "Sampling Rate",
-            new ArrayList<Object>(sAvailableSamplingRates.keySet()),
+            new ArrayList<>(sAvailableSamplingRates.keySet()),
             ConfigItem.UiType.TYPE_DROPDOWN
     );
     protected static ConfigItem sSensorConfig = new ConfigItem(
             "Sensors",
-            new ArrayList<Object>(
+            new ArrayList<>(
                     EnumSet.of(HardwareSensor.ACCELEROMETER,
                             HardwareSensor.GYROSCOPE,
                             HardwareSensor.MAGNETOMETER,
@@ -237,27 +237,27 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     );
     protected static ConfigItem sMotionInterruptConfig = new ConfigItem(
             "Motion Interrupt",
-            new ArrayList<Object>(Arrays.asList(NilsPodMotionInterrupt.values())),
+            new ArrayList<>(Arrays.asList(NilsPodMotionInterrupt.values())),
             ConfigItem.UiType.TYPE_SELECT
     );
     protected static ConfigItem sSyncRoleConfig = new ConfigItem(
             "Sync Role",
-            new ArrayList<Object>(Arrays.asList(NilsPodSyncRole.values())),
+            new ArrayList<>(Arrays.asList(NilsPodSyncRole.values())),
             ConfigItem.UiType.TYPE_SELECT
     );
     protected static ConfigItem sSyncGroupConfig = new ConfigItem(
             "Sync Group",
-            new ArrayList<Object>(Arrays.asList(NilsPodSyncGroup.values())),
+            new ArrayList<>(Arrays.asList(NilsPodSyncGroup.values())),
             ConfigItem.UiType.TYPE_DROPDOWN
     );
     protected static ConfigItem sOperationModeConfig = new ConfigItem(
             "Operation Mode",
-            new ArrayList<Object>(Arrays.asList(NilsPodOperationMode.values())),
+            new ArrayList<>(Arrays.asList(NilsPodOperationMode.values())),
             ConfigItem.UiType.TYPE_SELECT
     );
     protected static ConfigItem sSensorPositionConfig = new ConfigItem(
             "SensorPosition",
-            new ArrayList<Object>(Arrays.asList(NilsPodSensorPosition.values())),
+            new ArrayList<>(Arrays.asList(NilsPodSensorPosition.values())),
             ConfigItem.UiType.TYPE_DROPDOWN
     );
 

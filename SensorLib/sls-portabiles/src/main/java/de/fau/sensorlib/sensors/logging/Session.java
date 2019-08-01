@@ -9,10 +9,8 @@
 package de.fau.sensorlib.sensors.logging;
 
 import android.bluetooth.BluetoothGattCharacteristic;
-import android.os.Build;
 
 import java.text.SimpleDateFormat;
-import java.time.LocalTime;
 import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
@@ -96,14 +94,10 @@ public class Session {
     }
 
     public String getDurationString() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            return LocalTime.ofSecondOfDay(mDuration / 1000).toString();
-        } else {
-            long hours = TimeUnit.MILLISECONDS.toHours(mDuration);
-            long minutes = TimeUnit.MILLISECONDS.toMinutes(mDuration) - TimeUnit.HOURS.toMinutes(hours);
-            long seconds = TimeUnit.MILLISECONDS.toSeconds(mDuration) - TimeUnit.MINUTES.toSeconds(minutes) - TimeUnit.HOURS.toSeconds(hours);
-            return String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, seconds);
-        }
+        long hours = TimeUnit.MILLISECONDS.toHours(mDuration);
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(mDuration) - TimeUnit.HOURS.toMinutes(hours);
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(mDuration) - TimeUnit.MINUTES.toSeconds(minutes) - TimeUnit.HOURS.toSeconds(hours);
+        return String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, seconds);
     }
 
     public NilsPodTerminationSource getTerminationSource() {
