@@ -318,6 +318,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             if (getOperationState() == NilsPodOperationState.LOGGING) {
                 // operation state is read before sensor state is connected => check again
                 // (and notify listeners) when sensor is finally connected
+                sendOperationStateChanged(NilsPodOperationState.LOGGING);
                 sendStartLogging();
             }
         }
@@ -412,33 +413,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     public void setCurrentConfig(HashMap<String, Object> configMap) {
         for (String key : configMap.keySet()) {
             Log.d(TAG, "config map: " + key + ", " + configMap.get(key) + ", " + configMap.get(key).getClass());
-            // TODO test thoroughly if this works!!!
             mCurrentConfigMap.put(key, configMap.get(key));
-
-            /*switch (key) {
-                case KEY_SAMPLING_RATE:
-                    String sr = (String) configMap.get(key);
-                    samplingRate = sAvailableSamplingRates.get(sr);
-                    break;
-                case KEY_HARDWARE_SENSORS:
-                    sensors = (ArrayList<HardwareSensor>) configMap.get(key);
-                    break;
-                case KEY_SENSOR_POSITION:
-                    sensorPosition = (NilsPodSensorPosition) configMap.get(key);
-                    break;
-                case KEY_SYNC_GROUP:
-                    syncGroup = (NilsPodSyncGroup) configMap.get(key);
-                    break;
-                case KEY_SYNC_ROLE:
-                    syncRole = (NilsPodSyncRole) configMap.get(key);
-                    break;
-                case KEY_OPERATION_MODE:
-                    operationMode = (NilsPodOperationMode) configMap.get(key);
-                    break;
-                case KEY_MOTION_INTERRUPT:
-                    interrupt = (NilsPodMotionInterrupt) configMap.get(key);
-                    break;
-            }*/
         }
     }
 
@@ -452,6 +427,11 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         NilsPodSyncRole syncRole = (NilsPodSyncRole) mCurrentConfigMap.get(KEY_SYNC_ROLE);
         NilsPodOperationMode operationMode = (NilsPodOperationMode) mCurrentConfigMap.get(KEY_OPERATION_MODE);
         NilsPodMotionInterrupt interrupt = (NilsPodMotionInterrupt) mCurrentConfigMap.get(KEY_MOTION_INTERRUPT);
+
+        String sr = (String) mCurrentConfigMap.get(KEY_SAMPLING_RATE);
+        if (sr != null) {
+            samplingRate = sAvailableSamplingRates.get(sr);
+        }
 
         try {
             writeSamplingRateConfig(samplingRate);

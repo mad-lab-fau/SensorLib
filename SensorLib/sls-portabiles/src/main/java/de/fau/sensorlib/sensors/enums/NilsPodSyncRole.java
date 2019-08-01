@@ -13,5 +13,5 @@ package de.fau.sensorlib.sensors.enums;
 public enum NilsPodSyncRole {
     SYNC_ROLE_DISABLED,
     SYNC_ROLE_SLAVE,
-    SYNC_ROLE_MASTER;
+    SYNC_ROLE_MASTER
 }
