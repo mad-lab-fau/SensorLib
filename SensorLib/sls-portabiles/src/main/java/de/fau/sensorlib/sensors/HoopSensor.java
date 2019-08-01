@@ -53,6 +53,11 @@ public class HoopSensor extends AbstractNilsPodSensor {
     }
 
     @Override
+    protected void sendOperationStateChanged(NilsPodOperationState state) {
+
+    }
+
+    @Override
     protected void onNewCharacteristicWrite(BluetoothGattCharacteristic characteristic, int status) {
         super.onNewCharacteristicWrite(characteristic, status);
         if (NILS_POD_COMMANDS.equals(characteristic.getUuid())) {

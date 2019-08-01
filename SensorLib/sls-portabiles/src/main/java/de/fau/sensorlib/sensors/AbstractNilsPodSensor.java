@@ -37,7 +37,6 @@ import de.fau.sensorlib.dataframe.AccelDataFrame;
 import de.fau.sensorlib.dataframe.GyroDataFrame;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
-import de.fau.sensorlib.enums.SensorMessage;
 import de.fau.sensorlib.enums.SensorState;
 import de.fau.sensorlib.sensors.dfu.NilsPodDfuService;
 import de.fau.sensorlib.sensors.enums.NilsPodMotionInterrupt;
@@ -56,11 +55,13 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
     public static final String TAG = AbstractNilsPodSensor.class.getSimpleName();
 
+    protected static final int MESSAGE_OPERATION_STATE_CHANGED = 2000;
     protected static final int MESSAGE_SESSION_LIST_READ = 2001;
     protected static final int MESSAGE_SESSIONS_CLEARED = 2002;
     protected static final int MESSAGE_SESSION_DOWNLOAD_STARTED = 2003;
     protected static final int MESSAGE_SESSION_DOWNLOAD_PROGRESS = 2004;
     protected static final int MESSAGE_SESSION_DOWNLOAD_FINISHED = 2005;
+    protected static final int MESSAGE_SENSOR_CONFIG_CHANGED = 2006;
 
     /**
      * UUID for Data Streaming Service of NilsPod sensor
@@ -169,6 +170,10 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
     private NilsPodSensorPosition mSensorPosition;
 
+    private NilsPodSyncRole mSyncRole = NilsPodSyncRole.SYNC_ROLE_DISABLED;
+
+    private NilsPodSyncGroup mSyncGroup = NilsPodSyncGroup.SYNC_GROUP_UNKNOWN;
+
     private ArrayList<HardwareSensor> mEnabledSensorList = new ArrayList<>();
 
     private NilsPodOperationState mOperationState = NilsPodOperationState.IDLE;
@@ -217,12 +222,12 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
     protected static ConfigItem sSamplingRateConfig = new ConfigItem(
             "Sampling Rate",
-            new ArrayList<Object>(sAvailableSamplingRates.keySet()),
+            new ArrayList<>(sAvailableSamplingRates.keySet()),
             ConfigItem.UiType.TYPE_DROPDOWN
     );
     protected static ConfigItem sSensorConfig = new ConfigItem(
             "Sensors",
-            new ArrayList<Object>(
+            new ArrayList<>(
                     EnumSet.of(HardwareSensor.ACCELEROMETER,
                             HardwareSensor.GYROSCOPE,
                             HardwareSensor.MAGNETOMETER,
@@ -236,27 +241,27 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     );
     protected static ConfigItem sMotionInterruptConfig = new ConfigItem(
             "Motion Interrupt",
-            new ArrayList<Object>(Arrays.asList(NilsPodMotionInterrupt.values())),
+            new ArrayList<>(Arrays.asList(NilsPodMotionInterrupt.values())),
             ConfigItem.UiType.TYPE_SELECT
     );
     protected static ConfigItem sSyncRoleConfig = new ConfigItem(
             "Sync Role",
-            new ArrayList<Object>(Arrays.asList(NilsPodSyncRole.values())),
+            new ArrayList<>(Arrays.asList(NilsPodSyncRole.values())),
             ConfigItem.UiType.TYPE_SELECT
     );
     protected static ConfigItem sSyncGroupConfig = new ConfigItem(
             "Sync Group",
-            new ArrayList<Object>(Arrays.asList(NilsPodSyncGroup.values())),
+            new ArrayList<>(Arrays.asList(NilsPodSyncGroup.values())),
             ConfigItem.UiType.TYPE_DROPDOWN
     );
     protected static ConfigItem sOperationModeConfig = new ConfigItem(
             "Operation Mode",
-            new ArrayList<Object>(Arrays.asList(NilsPodOperationMode.values())),
+            new ArrayList<>(Arrays.asList(NilsPodOperationMode.values())),
             ConfigItem.UiType.TYPE_SELECT
     );
     protected static ConfigItem sSensorPositionConfig = new ConfigItem(
             "SensorPosition",
-            new ArrayList<Object>(Arrays.asList(NilsPodSensorPosition.values())),
+            new ArrayList<>(Arrays.asList(NilsPodSensorPosition.values())),
             ConfigItem.UiType.TYPE_DROPDOWN
     );
 
@@ -538,8 +543,10 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
                 break;
         }
 
-        sendNotification(SensorMessage.OPERATION_STATE_CHANGED);
+        sendOperationStateChanged(newState);
     }
+
+    protected abstract void sendOperationStateChanged(NilsPodOperationState state);
 
     public NilsPodOperationState getOperationState() {
         return mOperationState;
@@ -549,6 +556,14 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         NilsPodOperationState oldState = mOperationState;
         mOperationState = operationState;
         onOperationStateChanged(oldState, mOperationState);
+    }
+
+    public NilsPodSyncRole getSyncRole() {
+        return mSyncRole;
+    }
+
+    public NilsPodSyncGroup getSyncGroup() {
+        return mSyncGroup;
     }
 
     /**
@@ -775,23 +790,25 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     protected synchronized void extractSyncConfig(BluetoothGattCharacteristic characteristic) throws SensorException {
         int offset = 0;
         byte[] values = characteristic.getValue();
-        NilsPodSyncRole syncRole = NilsPodSyncRole.SYNC_ROLE_DISABLED;
-        NilsPodSyncGroup syncGroup = NilsPodSyncGroup.SYNC_GROUP_UNKNOWN;
+        NilsPodSyncRole syncRole;
+        NilsPodSyncGroup syncGroup;
 
         try {
             syncRole = NilsPodSyncRole.values()[values[offset++]];
             syncGroup = NilsPodSyncGroup.inferSyncGroup(values[offset]);
+            mSyncRole = syncRole;
+            mSyncGroup = syncGroup;
         } catch (Exception e) {
             e.printStackTrace();
             throw new SensorException(SensorException.SensorExceptionType.readConfigError);
         } finally {
             Log.d(TAG, ">>>> Sync Config:");
-            Log.d(TAG, "\tSync Role: " + syncRole);
-            Log.d(TAG, "\tSync Group: " + syncGroup);
+            Log.d(TAG, "\tSync Role: " + mSyncRole);
+            Log.d(TAG, "\tSync Group: " + mSyncGroup);
         }
 
-        mCurrentConfigMap.put(KEY_SYNC_ROLE, syncRole);
-        mCurrentConfigMap.put(KEY_SYNC_GROUP, syncGroup);
+        mCurrentConfigMap.put(KEY_SYNC_ROLE, mSyncRole);
+        mCurrentConfigMap.put(KEY_SYNC_GROUP, mSyncGroup);
     }
 
     protected synchronized void extractSensorConfig(BluetoothGattCharacteristic characteristic) throws SensorException {
