@@ -10,6 +10,7 @@ package de.fau.sensorlib.widgets;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -32,6 +33,7 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 
 import java.lang.reflect.Method;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
@@ -191,11 +193,21 @@ public class SensorPlotter extends CardView implements SensorEventListener {
         // 1 second
         chart.getXAxis().setGranularity(1000);
         chart.getXAxis().setLabelCount((int) (mWindowSize * bundle.getSampleDistance()));
-        chart.getXAxis().setValueFormatter((value, axis) -> String.format(Locale.getDefault(), "%02d:%02d",
-                TimeUnit.MILLISECONDS.toMinutes((int) value),
-                TimeUnit.MILLISECONDS.toSeconds((int) value) -
-                        TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((int) value))
-        ));
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            chart.getXAxis().setValueFormatter((value, axis) -> {
+                LocalTime time = LocalTime.ofNanoOfDay((int) value * 1000);
+                return time.getMinute() + ":" + time.getSecond();
+
+            });
+        } else {
+            chart.getXAxis().setValueFormatter((value, axis) -> String.format(Locale.getDefault(), "%02d:%02d",
+                    TimeUnit.MILLISECONDS.toMinutes((int) value),
+                    TimeUnit.MILLISECONDS.toSeconds((int) value) -
+                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((int) value))
+            ));
+        }
+
     }
 
     private synchronized void configureDataSets(LineData data, LineDataSet[] datasets, ArrayList<String> sensorNames, int[] colors, String[] labels) {

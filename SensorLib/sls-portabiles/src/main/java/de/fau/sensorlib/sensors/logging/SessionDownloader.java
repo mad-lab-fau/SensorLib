@@ -8,11 +8,15 @@
 
 package de.fau.sensorlib.sensors.logging;
 
+import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import java.text.DecimalFormat;
+import java.time.LocalTime;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import de.fau.sensorlib.SensorException;
 import de.fau.sensorlib.sensors.AbstractSensor;
@@ -114,6 +118,18 @@ public class SessionDownloader {
 
     public int getEstimatedRemainingTimeSeconds() {
         return (int) (getEstimatedRemainingTime() / 1000);
+    }
+
+    public String getEstimatedRemainingTimeString() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            return LocalTime.ofSecondOfDay(getEstimatedRemainingTimeSeconds()).toString();
+        } else {
+            long hours = TimeUnit.SECONDS.toHours(getEstimatedRemainingTimeSeconds());
+            long minutes = TimeUnit.SECONDS.toMinutes(getEstimatedRemainingTimeSeconds()) - TimeUnit.HOURS.toMinutes(hours);
+            long seconds = getEstimatedRemainingTimeSeconds() - TimeUnit.MINUTES.toSeconds(minutes) - TimeUnit.HOURS.toSeconds(hours);
+
+            return String.format(Locale.getDefault(), "%02dh:%02dm:%02ds", hours, minutes, seconds);
+        }
     }
 
     public void completeDownload() throws SensorException {

@@ -15,6 +15,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import java.text.DecimalFormat;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -69,6 +70,9 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             if (getSensor() instanceof NilsPodSensor) {
                 NilsPodSensor sensor = (NilsPodSensor) getSensor();
                 switch (msg.what) {
+                    case MESSAGE_OPERATION_STATE_CHANGED:
+                        sensor.dispatchOperationStateChanged((NilsPodOperationState) msg.obj);
+                        break;
                     case MESSAGE_SESSION_LIST_READ:
                         sensor.dispatchSessionListRead((List<Session>) msg.obj);
                         break;
@@ -84,6 +88,9 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
                     case MESSAGE_SESSION_DOWNLOAD_FINISHED:
                         sensor.dispatchSessionDownloadFinished((SessionDownloader) msg.obj);
                         break;
+                    case MESSAGE_SENSOR_CONFIG_CHANGED:
+                        sensor.dispatchSensorConfigChanged();
+                        break;
                 }
             }
         }
@@ -93,8 +100,6 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     private static final String TAG = NilsPodSensor.class.getSimpleName();
 
     protected ArrayList<NilsPodLoggingCallback> mCallbacks = new ArrayList<>();
-
-    protected OnSensorConfigChangedListener mConfigChangedListener;
 
     /**
      * Global counter for incoming packages (local counter only has 15 bit)
@@ -130,10 +135,6 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     @Override
     public void addNilsPodLoggingCallback(NilsPodLoggingCallback callback) {
         mCallbacks.add(callback);
-    }
-
-    public void setOnConfigChangedListener(OnSensorConfigChangedListener listener) {
-        mConfigChangedListener = listener;
     }
 
     @Override
@@ -317,6 +318,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             if (getOperationState() == NilsPodOperationState.LOGGING) {
                 // operation state is read before sensor state is connected => check again
                 // (and notify listeners) when sensor is finally connected
+                sendOperationStateChanged(NilsPodOperationState.LOGGING);
                 sendStartLogging();
             }
         }
@@ -357,9 +359,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
                                 throw new SensorException(SensorException.SensorExceptionType.configError);
                             }
                         }
-                        if (mConfigChangedListener != null) {
-                            mConfigChangedListener.onSensorConfigChanged(this);
-                        }
+                        sendSensorConfigChanged();
                         break;
                 }
                 break;
@@ -413,33 +413,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     public void setCurrentConfig(HashMap<String, Object> configMap) {
         for (String key : configMap.keySet()) {
             Log.d(TAG, "config map: " + key + ", " + configMap.get(key) + ", " + configMap.get(key).getClass());
-            // TODO test thoroughly if this works!!!
             mCurrentConfigMap.put(key, configMap.get(key));
-
-            /*switch (key) {
-                case KEY_SAMPLING_RATE:
-                    String sr = (String) configMap.get(key);
-                    samplingRate = sAvailableSamplingRates.get(sr);
-                    break;
-                case KEY_HARDWARE_SENSORS:
-                    sensors = (ArrayList<HardwareSensor>) configMap.get(key);
-                    break;
-                case KEY_SENSOR_POSITION:
-                    sensorPosition = (NilsPodSensorPosition) configMap.get(key);
-                    break;
-                case KEY_SYNC_GROUP:
-                    syncGroup = (NilsPodSyncGroup) configMap.get(key);
-                    break;
-                case KEY_SYNC_ROLE:
-                    syncRole = (NilsPodSyncRole) configMap.get(key);
-                    break;
-                case KEY_OPERATION_MODE:
-                    operationMode = (NilsPodOperationMode) configMap.get(key);
-                    break;
-                case KEY_MOTION_INTERRUPT:
-                    interrupt = (NilsPodMotionInterrupt) configMap.get(key);
-                    break;
-            }*/
         }
     }
 
@@ -453,6 +427,11 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         NilsPodSyncRole syncRole = (NilsPodSyncRole) mCurrentConfigMap.get(KEY_SYNC_ROLE);
         NilsPodOperationMode operationMode = (NilsPodOperationMode) mCurrentConfigMap.get(KEY_OPERATION_MODE);
         NilsPodMotionInterrupt interrupt = (NilsPodMotionInterrupt) mCurrentConfigMap.get(KEY_MOTION_INTERRUPT);
+
+        String sr = (String) mCurrentConfigMap.get(KEY_SAMPLING_RATE);
+        if (sr != null) {
+            samplingRate = sAvailableSamplingRates.get(sr);
+        }
 
         try {
             writeSamplingRateConfig(samplingRate);
@@ -474,6 +453,18 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         return mCurrentConfigMap;
     }
 
+
+    @Override
+    protected void sendOperationStateChanged(NilsPodOperationState operationState) {
+        mInternalHandler.obtainMessage(MESSAGE_OPERATION_STATE_CHANGED, operationState).sendToTarget();
+    }
+
+
+    private void dispatchOperationStateChanged(NilsPodOperationState operationState) {
+        for (NilsPodLoggingCallback callback : mCallbacks) {
+            callback.onOperationStateChanged(this, operationState);
+        }
+    }
 
     private void sendSessionListRead(List<Session> sessionList) {
         mInternalHandler.obtainMessage(MESSAGE_SESSION_LIST_READ, sessionList).sendToTarget();
@@ -527,6 +518,16 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         }
     }
 
+    private void sendSensorConfigChanged() {
+        mInternalHandler.obtainMessage(MESSAGE_SENSOR_CONFIG_CHANGED).sendToTarget();
+    }
+
+    private void dispatchSensorConfigChanged() {
+        for (NilsPodLoggingCallback callback : mCallbacks) {
+            callback.onSensorConfigChanged(this);
+        }
+    }
+
 
     /**
      * Returns the remaining storage capacity.
@@ -571,10 +572,18 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     private void computeRemainingRuntime() {
         long runtimeSeconds = (long) ((mRemainingFlashSize / mSampleSize) / getSamplingRate());
 
-        long hours = TimeUnit.SECONDS.toHours(runtimeSeconds);
-        long minutes = TimeUnit.SECONDS.toMinutes(runtimeSeconds) - TimeUnit.HOURS.toMinutes(hours);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            Duration duration = Duration.ofSeconds(runtimeSeconds);
+            long days = duration.toDays();
+            long hours = duration.minusDays(days).toHours();
+            long minutes = duration.minusDays(days).minusHours(hours).toMinutes();
+            mRemainingRuntime = days + "d : " + hours + "h : " + minutes + "min";
+        } else {
+            long hours = TimeUnit.SECONDS.toHours(runtimeSeconds);
+            long minutes = TimeUnit.SECONDS.toMinutes(runtimeSeconds) - TimeUnit.HOURS.toMinutes(hours);
 
-        mRemainingRuntime = String.format(Locale.getDefault(), "%02d:%02d", hours, minutes);
+            mRemainingRuntime = String.format(Locale.getDefault(), "%02d:%02d", hours, minutes);
+        }
     }
 
     @Override

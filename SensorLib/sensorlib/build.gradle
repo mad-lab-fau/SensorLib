@@ -39,7 +39,7 @@ android {
         targetSdkVersion 28
 
         def versionMajor = 0
-        def versionMinor = 10
+        def versionMinor = 11
         def versionPatch = 0
 
         versionCode versionMajor * 10000 + versionMinor * 100 + versionPatch
@@ -60,7 +60,7 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.1.0-rc01'
     implementation 'androidx.recyclerview:recyclerview:1.1.0-beta01'
     implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'com.google.android.material:material:1.1.0-alpha08'
+    implementation 'com.google.android.material:material:1.1.0-alpha09'
     implementation 'com.github.hannesa2:MPAndroidChart:3.0.6'
     implementation 'com.xeoh.android:checkboxgroup:1.0.1'
 
