@@ -318,6 +318,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             if (getOperationState() == NilsPodOperationState.LOGGING) {
                 // operation state is read before sensor state is connected => check again
                 // (and notify listeners) when sensor is finally connected
+                sendOperationStateChanged(NilsPodOperationState.LOGGING);
                 sendStartLogging();
             }
         }
