@@ -6,13 +6,12 @@
  * this code you have to keep or cite this comment.
  */
 
-package de.fau.sensorlib.sensors.logging;
+package de.fau.sensorlib.sensors;
 
 import java.util.List;
 
-import de.fau.sensorlib.sensors.NilsPodSensor;
-
-import static de.fau.sensorlib.sensors.AbstractNilsPodSensor.NilsPodOperationState;
+import de.fau.sensorlib.sensors.logging.Session;
+import de.fau.sensorlib.sensors.logging.SessionDownloader;
 
 public interface NilsPodLoggingCallback {
 
@@ -25,9 +24,5 @@ public interface NilsPodLoggingCallback {
     void onSessionDownloadProgress(NilsPodSensor sensor, SessionDownloader sessionDownloader);
 
     void onSessionDownloadFinished(NilsPodSensor sensor, SessionDownloader sessionDownloader);
-
-    void onSensorConfigChanged(NilsPodSensor sensor);
-
-    void onOperationStateChanged(NilsPodSensor sensor, NilsPodOperationState operationState);
 
 }

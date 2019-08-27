@@ -44,7 +44,6 @@ import de.fau.sensorlib.sensors.enums.NilsPodSensorPosition;
 import de.fau.sensorlib.sensors.enums.NilsPodSyncGroup;
 import de.fau.sensorlib.sensors.enums.NilsPodSyncRole;
 import de.fau.sensorlib.sensors.logging.NilsPodLoggable;
-import de.fau.sensorlib.sensors.logging.NilsPodLoggingCallback;
 import de.fau.sensorlib.sensors.logging.Session;
 import de.fau.sensorlib.sensors.logging.SessionDownloader;
 import de.fau.sensorlib.sensors.logging.SessionHandler;
@@ -56,7 +55,7 @@ import de.fau.sensorlib.widgets.config.ConfigItem;
  */
 public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLoggable, Configurable {
 
-    protected static class NilsPodInternalHandler extends InternalHandler {
+    protected static class NilsPodInternalHandler extends BasicNilsPodInternalHandler {
 
         public NilsPodInternalHandler(NilsPodSensor sensor) {
             super(sensor);
@@ -70,9 +69,6 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             if (getSensor() instanceof NilsPodSensor) {
                 NilsPodSensor sensor = (NilsPodSensor) getSensor();
                 switch (msg.what) {
-                    case MESSAGE_OPERATION_STATE_CHANGED:
-                        sensor.dispatchOperationStateChanged((NilsPodOperationState) msg.obj);
-                        break;
                     case MESSAGE_SESSION_LIST_READ:
                         sensor.dispatchSessionListRead((List<Session>) msg.obj);
                         break;
@@ -98,8 +94,6 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
 
 
     private static final String TAG = NilsPodSensor.class.getSimpleName();
-
-    protected ArrayList<NilsPodLoggingCallback> mCallbacks = new ArrayList<>();
 
     /**
      * Global counter for incoming packages (local counter only has 15 bit)
@@ -130,11 +124,6 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         super.startStreaming();
         lastCounter = 0;
         globalCounter = 0;
-    }
-
-    @Override
-    public void addNilsPodLoggingCallback(NilsPodLoggingCallback callback) {
-        mCallbacks.add(callback);
     }
 
     @Override
@@ -453,19 +442,6 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         return mCurrentConfigMap;
     }
 
-
-    @Override
-    protected void sendOperationStateChanged(NilsPodOperationState operationState) {
-        mInternalHandler.obtainMessage(MESSAGE_OPERATION_STATE_CHANGED, operationState).sendToTarget();
-    }
-
-
-    private void dispatchOperationStateChanged(NilsPodOperationState operationState) {
-        for (NilsPodLoggingCallback callback : mCallbacks) {
-            callback.onOperationStateChanged(this, operationState);
-        }
-    }
-
     private void sendSessionListRead(List<Session> sessionList) {
         mInternalHandler.obtainMessage(MESSAGE_SESSION_LIST_READ, sessionList).sendToTarget();
     }
@@ -523,7 +499,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     }
 
     private void dispatchSensorConfigChanged() {
-        for (NilsPodLoggingCallback callback : mCallbacks) {
+        for (NilsPodConfigCallback callback : mCallbacks) {
             callback.onSensorConfigChanged(this);
         }
     }

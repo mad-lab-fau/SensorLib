@@ -6,20 +6,11 @@
  * this code you have to keep or cite this comment.
  */
 
-package de.fau.sensorlib.sensors.logging;
+package de.fau.sensorlib.sensors;
 
-import de.fau.sensorlib.SensorException;
-import de.fau.sensorlib.sensors.Erasable;
-import de.fau.sensorlib.sensors.Loggable;
+import de.fau.sensorlib.sensors.AbstractNilsPodSensor.NilsPodOperationState;
 
-public interface NilsPodLoggable extends Loggable, Erasable {
+public interface NilsPodOperationStateCallback {
 
-    void readSessionList();
-
-    void downloadSession(int sessionId) throws SensorException;
-
-    default void setCsvExportEnabled(boolean enable) {
-
-    }
-
+    void onOperationStateChanged(AbstractNilsPodSensor sensor, NilsPodOperationState operationState);
 }

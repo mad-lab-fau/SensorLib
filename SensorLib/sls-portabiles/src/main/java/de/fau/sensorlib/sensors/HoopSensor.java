@@ -33,6 +33,11 @@ public class HoopSensor extends AbstractNilsPodSensor {
 
     public HoopSensor(Context context, SensorInfo info, SensorDataProcessor dataHandler) {
         super(context, info, dataHandler);
+        try {
+            setSamplingRate(200.0);
+        } catch (SensorException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -50,11 +55,6 @@ public class HoopSensor extends AbstractNilsPodSensor {
         } catch (SensorException e) {
             e.printStackTrace();
         }
-    }
-
-    @Override
-    protected void sendOperationStateChanged(NilsPodOperationState state) {
-
     }
 
     @Override
@@ -83,8 +83,6 @@ public class HoopSensor extends AbstractNilsPodSensor {
     @Override
     protected void extractSensorData(BluetoothGattCharacteristic characteristic) {
         byte[] values = characteristic.getValue();
-
-        Log.d(TAG, Arrays.toString(values));
 
         // one data packet always has size mSampleSize
         if (values.length % mSampleSize != 0) {
@@ -127,7 +125,6 @@ public class HoopSensor extends AbstractNilsPodSensor {
             HoopDataFrame df = new HoopDataFrame(this, globalCounter * (2 << 14) + localCounter, accel, gyro);
             // send new data to the SensorDataProcessor
             //Log.d(TAG, df.toString());
-            Log.d(TAG, "localCounter: [" + values[i + mSampleSize - 2] + "," + values[i + mSampleSize - 1] + "] -> " + localCounter + "  " + ((int) df.getTimestamp()));
             sendNewData(df);
 
             lastCounter = localCounter;

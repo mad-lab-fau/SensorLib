@@ -12,6 +12,7 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
 import android.os.Build;
+import android.os.Message;
 import android.util.Log;
 import android.util.SparseArray;
 import android.widget.Toast;
@@ -182,6 +183,8 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
     private NilsPodOperationMode mOperationMode = NilsPodOperationMode.NORMAL_MODE;
 
+    protected ArrayList<NilsPodCallback> mCallbacks = new ArrayList<>();
+
     private SensorRecorderListener mSensorRecorderListener;
 
     private FirmwareUpgradeListener mFirmwareUpgradeListener;
@@ -276,6 +279,27 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     }
 
     protected HashMap<String, Object> mCurrentConfigMap = new LinkedHashMap<>();
+
+    protected static class BasicNilsPodInternalHandler extends InternalHandler {
+
+        public BasicNilsPodInternalHandler(AbstractNilsPodSensor sensor) {
+            super(sensor);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+
+            if (getSensor() instanceof AbstractNilsPodSensor) {
+                AbstractNilsPodSensor sensor = (AbstractNilsPodSensor) getSensor();
+                switch (msg.what) {
+                    case MESSAGE_OPERATION_STATE_CHANGED:
+                        sensor.dispatchOperationStateChanged((NilsPodOperationState) msg.obj);
+                        break;
+                }
+            }
+        }
+    }
 
 
     /**
@@ -477,6 +501,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     public AbstractNilsPodSensor(Context context, SensorInfo info, SensorDataProcessor dataHandler) {
         // set sampling rate to default value
         super(context, info.getDeviceName(), info.getDeviceAddress(), dataHandler, BleConnectionMode.MODE_NILSPOD);
+        mInternalHandler = new BasicNilsPodInternalHandler(this);
     }
 
     @Override
@@ -546,7 +571,16 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         sendOperationStateChanged(newState);
     }
 
-    protected abstract void sendOperationStateChanged(NilsPodOperationState state);
+    protected void sendOperationStateChanged(NilsPodOperationState operationState) {
+        mInternalHandler.obtainMessage(MESSAGE_OPERATION_STATE_CHANGED, operationState).sendToTarget();
+    }
+
+
+    private void dispatchOperationStateChanged(NilsPodOperationState operationState) {
+        for (NilsPodOperationStateCallback callback : mCallbacks) {
+            callback.onOperationStateChanged(this, operationState);
+        }
+    }
 
     public NilsPodOperationState getOperationState() {
         return mOperationState;
@@ -601,6 +635,10 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         }
 
         return writeCharacteristic(characteristic, data);
+    }
+
+    public void addNilsPodCallback(NilsPodCallback callback) {
+        mCallbacks.add(callback);
     }
 
     public void setSensorRecorderListener(SensorRecorderListener listener) {
