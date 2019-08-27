@@ -76,6 +76,17 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
 
     private DialogInterface.OnDismissListener mDialogDismissCallback;
 
+    private long mScanDuration;
+
+
+    public SensorPickerDialog() {
+        mScanDuration = -1;
+    }
+
+    public SensorPickerDialog(long scanPeriod) {
+        mScanDuration = scanPeriod;
+    }
+
     @Override
     public void onClick(View view) {
         int i = view.getId();
@@ -471,7 +482,7 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
             if (BleSensorManager.enableBluetooth(getActivity()) == BleSensorManager.BT_ENABLED) {
                 if (BleSensorManager.checkBtLePermissions(getActivity(), true) == BleSensorManager.PERMISSIONS_GRANTED) {
                     // Start with BLE scan...
-                    BleSensorManager.searchBleDevices(new SensorFoundCallback() {
+                    SensorFoundCallback callback = new SensorFoundCallback() {
                         @Override
                         public boolean onKnownSensorFound(SensorInfo sensor) {
                             return true;
@@ -500,7 +511,14 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
                             }
                             return true;
                         }
-                    });
+                    };
+
+                    if (mScanDuration >= 0) {
+                        BleSensorManager.searchBleDevices(callback, mScanDuration);
+                    } else {
+                        BleSensorManager.searchBleDevices(callback);
+                    }
+
                 }
 
             }
@@ -520,7 +538,7 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
                 mProgressBar.setVisibility(View.GONE);
                 mProgressTextView.setText(getString(R.string.string_scan_results));
             }
-        }, BleSensorManager.SCAN_PERIOD);
+        }, mScanDuration);
     }
 
     @Override

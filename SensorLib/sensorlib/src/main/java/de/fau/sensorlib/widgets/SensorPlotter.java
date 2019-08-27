@@ -196,9 +196,8 @@ public class SensorPlotter extends CardView implements SensorEventListener {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             chart.getXAxis().setValueFormatter((value, axis) -> {
-                LocalTime time = LocalTime.ofNanoOfDay((int) value * 1000);
-                return time.getMinute() + ":" + time.getSecond();
-
+                LocalTime time = LocalTime.ofNanoOfDay((int) value * 1000L * 1000L);
+                return String.format(Locale.getDefault(), "%02d:%02d", time.getMinute() + time.getHour() * 60, time.getSecond());
             });
         } else {
             chart.getXAxis().setValueFormatter((value, axis) -> String.format(Locale.getDefault(), "%02d:%02d",

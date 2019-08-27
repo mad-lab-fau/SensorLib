@@ -780,7 +780,8 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
         if (errorFlags > 0) {
             if ((errorFlags & (0x01 << 7)) != 0) {
-                throw new SensorException(SensorException.SensorExceptionType.powerLossWarning, errorFlags);
+                //throw new SensorException(SensorException.SensorExceptionType.powerLossWarning, errorFlags);
+                return;
             }
             throw new SensorException(SensorException.SensorExceptionType.hardwareSensorError, errorFlags);
         }
