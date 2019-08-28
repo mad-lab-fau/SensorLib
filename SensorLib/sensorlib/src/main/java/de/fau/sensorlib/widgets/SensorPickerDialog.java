@@ -80,11 +80,11 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
 
 
     public SensorPickerDialog() {
-        mScanDuration = -1;
+        mScanDuration = BleSensorManager.DEFAULT_SCAN_DURATION;
     }
 
-    public SensorPickerDialog(long scanPeriod) {
-        mScanDuration = scanPeriod;
+    public SensorPickerDialog(long scanDuration) {
+        mScanDuration = scanDuration;
     }
 
     @Override
@@ -513,11 +513,7 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
                         }
                     };
 
-                    if (mScanDuration >= 0) {
-                        BleSensorManager.searchBleDevices(callback, mScanDuration);
-                    } else {
-                        BleSensorManager.searchBleDevices(callback);
-                    }
+                    BleSensorManager.searchBleDevices(callback, mScanDuration);
 
                 }
 
