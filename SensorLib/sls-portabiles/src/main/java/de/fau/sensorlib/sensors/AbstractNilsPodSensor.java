@@ -884,7 +884,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
             if ((sensors & 0x0080) != 0) {
                 mEnabledSensorList.add(HardwareSensor.TEMPERATURE);
             }
-            sampleSize = values[offset];
+            sampleSize = values[values.length - 1];
         } catch (Exception e) {
             e.printStackTrace();
             throw new SensorException(SensorException.SensorExceptionType.readConfigError);
