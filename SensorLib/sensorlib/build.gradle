@@ -56,7 +56,7 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.6'
+    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.7'
     implementation 'androidx.appcompat:appcompat:1.1.0-rc01'
     implementation 'androidx.recyclerview:recyclerview:1.1.0-beta03'
     implementation 'androidx.cardview:cardview:1.0.0'
