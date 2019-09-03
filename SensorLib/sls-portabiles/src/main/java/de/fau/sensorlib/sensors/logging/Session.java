@@ -97,7 +97,7 @@ public class Session {
         long hours = TimeUnit.MILLISECONDS.toHours(mDuration);
         long minutes = TimeUnit.MILLISECONDS.toMinutes(mDuration) - TimeUnit.HOURS.toMinutes(hours);
         long seconds = TimeUnit.MILLISECONDS.toSeconds(mDuration) - TimeUnit.MINUTES.toSeconds(minutes) - TimeUnit.HOURS.toSeconds(hours);
-        return String.format(Locale.getDefault(), "%02d:%02d:%02d", hours, minutes, seconds);
+        return String.format(Locale.getDefault(), "%02dh:%02dm:%02ds", hours, minutes, seconds);
     }
 
     public NilsPodTerminationSource getTerminationSource() {
