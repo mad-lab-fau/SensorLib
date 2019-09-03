@@ -378,8 +378,8 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         IDLE,
         STREAMING,
         LOGGING,
-        DOWNLOADING_SESSION,
-        READING_SESSION_LIST,
+        SESSION_DOWNLOAD,
+        SESSION_LIST,
         FLASH_ERASE,
         SAVING_CONFIG
     }

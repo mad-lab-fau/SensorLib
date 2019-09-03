@@ -133,10 +133,10 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         } else {
             if (NILS_POD_STREAMING.equals(characteristic.getUuid())) {
                 switch (getOperationState()) {
-                    case READING_SESSION_LIST:
+                    case SESSION_LIST:
                         extractSessionListData(characteristic);
                         return true;
-                    case DOWNLOADING_SESSION:
+                    case SESSION_DOWNLOAD:
                         extractSessionData(characteristic);
                         return true;
                 }
@@ -335,7 +335,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
                     case FLASH_ERASE:
                         sendSessionsCleared();
                         break;
-                    case DOWNLOADING_SESSION:
+                    case SESSION_DOWNLOAD:
                         mSessionDownloader.completeDownload();
                         sendSessionDownloadFinished(mSessionDownloader);
                         break;
@@ -361,7 +361,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
                         break;
                 }
                 break;
-            case DOWNLOADING_SESSION:
+            case SESSION_DOWNLOAD:
                 switch (oldState) {
                     case IDLE:
                         sendSessionDownloadStarted(mSessionDownloader);
