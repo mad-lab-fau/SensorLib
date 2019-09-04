@@ -23,6 +23,7 @@ public class SensorException extends Exception {
         hardwareSensorError("Error during hardware sensor initialization."),
         powerLossWarning("Sensor was terminated by power loss. Consider resetting the sensor before using."),
         permissionsMissing("The app does not have sufficient Android permissions to list available BLE devices."),
+        locationDisabled("Location disabled. Please enable location services when scanning for BLE devices."),
         bleScannerError("BLE scanner unavailable."),
         btNotSupported("Bluetooth not supported on this device."),
         bleNotSupported("Bluetooth LE not supported on this device."),

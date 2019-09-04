@@ -26,6 +26,7 @@ import android.widget.CheckBox;
 import android.widget.GridView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -80,7 +81,7 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
 
 
     public SensorPickerDialog() {
-        mScanDuration = BleSensorManager.DEFAULT_SCAN_DURATION;
+        this(BleSensorManager.DEFAULT_SCAN_DURATION);
     }
 
     public SensorPickerDialog(long scanDuration) {
@@ -466,7 +467,7 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
     /**
      * Starts scanning for available sensors.
      */
-    private void startSensorScan() {
+    private boolean startSensorScan() {
         try {
             if ((mHwSensorFilter.isEmpty() && mSensorFilter.isEmpty()) || (KnownSensor.INTERNAL.getAvailableSensors().containsAll(mHwSensorFilter) && mSensorFilter.contains(KnownSensor.INTERNAL))) {
                 // Add internal sensor (can always be selected)
@@ -513,14 +514,19 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
                         }
                     };
 
-                    BleSensorManager.searchBleDevices(callback, mScanDuration);
-
+                    BleSensorManager.searchBleDevices(getContext(), callback, mScanDuration);
+                    if (isAdded()) {
+                        mProgressBar.setVisibility(View.VISIBLE);
+                    }
                 }
-
             }
         } catch (Exception e) {
             e.printStackTrace();
+            Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+            mProgressTextView.setText(getString(R.string.string_scan_results));
+            return false;
         }
+        return true;
         // TODO Do Bluetooth Classic Discovery
     }
 
@@ -548,8 +554,9 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        startSensorScan();
-        stopSensorScan();
+        if (startSensorScan()) {
+            stopSensorScan();
+        }
     }
 
     public void show(Activity activity) {

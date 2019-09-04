@@ -17,6 +17,7 @@ import android.bluetooth.le.ScanSettings;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.ParcelUuid;
@@ -293,8 +294,8 @@ public class BleSensorManager {
      *
      * @param callback a callback implementation that receives notifications for found sensors.
      */
-    public static void searchBleDevices(final SensorFoundCallback callback) throws SensorException {
-        searchBleDevices(callback, DEFAULT_SCAN_DURATION);
+    public static void searchBleDevices(Context context, final SensorFoundCallback callback) throws SensorException {
+        searchBleDevices(context, callback, DEFAULT_SCAN_DURATION);
     }
 
     /**
@@ -302,15 +303,15 @@ public class BleSensorManager {
      *
      * @param callback a callback implementation that receives notifications for found sensors.
      */
-    public static void searchBleDevices(final SensorFoundCallback callback, long scanDuration) throws SensorException {
-        searchBleDevices(callback, new ArrayList<>(), scanDuration);
+    public static void searchBleDevices(Context context, final SensorFoundCallback callback, long scanDuration) throws SensorException {
+        searchBleDevices(context, callback, new ArrayList<>(), scanDuration);
     }
 
-    public static void searchBleDeviceByNames(final SensorFoundCallback callback, String[] deviceNames) throws SensorException {
-        searchBleDeviceByNames(callback, deviceNames, DEFAULT_SCAN_DURATION);
+    public static void searchBleDeviceByNames(Context context, final SensorFoundCallback callback, String[] deviceNames) throws SensorException {
+        searchBleDeviceByNames(context, callback, deviceNames, DEFAULT_SCAN_DURATION);
     }
 
-    public static void searchBleDeviceByNames(final SensorFoundCallback callback, String[] deviceNames, long scanDuration) throws SensorException {
+    public static void searchBleDeviceByNames(Context context, final SensorFoundCallback callback, String[] deviceNames, long scanDuration) throws SensorException {
         List<ScanFilter> filterList = new ArrayList<>();
         if (deviceNames != null) {
             for (String name : deviceNames) {
@@ -318,14 +319,14 @@ public class BleSensorManager {
             }
         }
 
-        searchBleDevices(callback, filterList, scanDuration);
+        searchBleDevices(context, callback, filterList, scanDuration);
     }
 
-    public static void searchBleDeviceByUUIDs(SensorFoundCallback callback, UUID[] uuids) throws SensorException {
-        searchBleDeviceByUUIDs(callback, uuids, DEFAULT_SCAN_DURATION);
+    public static void searchBleDeviceByUUIDs(Context context, SensorFoundCallback callback, UUID[] uuids) throws SensorException {
+        searchBleDeviceByUUIDs(context, callback, uuids, DEFAULT_SCAN_DURATION);
     }
 
-    public static void searchBleDeviceByUUIDs(SensorFoundCallback callback, UUID[] uuids, long scanDuration) throws SensorException {
+    public static void searchBleDeviceByUUIDs(Context context, SensorFoundCallback callback, UUID[] uuids, long scanDuration) throws SensorException {
         List<ScanFilter> filterList = new ArrayList<>();
         if (uuids != null) {
             for (UUID uuid : uuids) {
@@ -333,7 +334,7 @@ public class BleSensorManager {
             }
         }
 
-        searchBleDevices(callback, filterList, scanDuration);
+        searchBleDevices(context, callback, filterList, scanDuration);
     }
 
     /**
@@ -342,7 +343,7 @@ public class BleSensorManager {
      * @param callback   a callback implementation that receives notifications for found sensors.
      * @param filterList list to filter scanned devices
      */
-    private static void searchBleDevices(final SensorFoundCallback callback, List<ScanFilter> filterList, long scanPeriod) throws SensorException {
+    private static void searchBleDevices(Context context, final SensorFoundCallback callback, List<ScanFilter> filterList, long scanPeriod) throws SensorException {
         //searchBleDeviceByNames(callback, null);
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
             sBleScanner = BluetoothAdapter.getDefaultAdapter().getBluetoothLeScanner();
@@ -362,6 +363,10 @@ public class BleSensorManager {
             cancelRunningScans();
         }
 
+        if (!checkLocationEnabled(context)) {
+            throw new SensorException(SensorExceptionType.locationDisabled);
+        }
+
         // create new scan callback
         sScanCallback = new BleScanCallback(callback);
 
@@ -379,5 +384,10 @@ public class BleSensorManager {
                 sIsScanning = false;
             }
         }, scanPeriod);
+    }
+
+    private static boolean checkLocationEnabled(Context context) {
+        LocationManager lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        return lm.isProviderEnabled(LocationManager.GPS_PROVIDER) || lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
     }
 }
