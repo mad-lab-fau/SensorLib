@@ -203,7 +203,7 @@ public class SessionByteWriter {
 
     public void checkFileSize() throws SensorException {
         if (mSession.getSessionSize() != mFileHandler.length()) {
-            throw new SensorException(SensorException.SensorExceptionType.sessionDownloadError, "Downloaded size does not match session size!");
+            throw new SensorException(SensorException.SensorExceptionType.sessionDownloadError, "Downloaded size does not match session size!\nExpected: " + mSession.getSessionSize() + ", Actual: " + mFileHandler.length());
         }
     }
 }

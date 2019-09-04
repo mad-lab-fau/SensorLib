@@ -793,7 +793,11 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
             powerState = NilsPodPowerState.inferPowerState(values[offset++]);
             errorFlags = values[offset++] & 0xFF;
             mBatteryLevel = values[offset];
+        } catch (SensorException e) {
+            // Let sensor exceptions through
+            throw e;
         } catch (Exception e) {
+            // handle all other exceptions and throw a readStateError
             e.printStackTrace();
             throw new SensorException(SensorException.SensorExceptionType.readStateError);
         } finally {
