@@ -38,6 +38,9 @@ import de.fau.sensorlib.dataframe.PpgDataFrame;
 import de.fau.sensorlib.dataframe.TemperatureDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
 import de.fau.sensorlib.enums.SensorState;
+import de.fau.sensorlib.sensors.enums.NilsPodAccRange;
+import de.fau.sensorlib.sensors.enums.NilsPodGyroRange;
+import de.fau.sensorlib.sensors.enums.NilsPodIndicationLed;
 import de.fau.sensorlib.sensors.enums.NilsPodMotionInterrupt;
 import de.fau.sensorlib.sensors.enums.NilsPodOperationMode;
 import de.fau.sensorlib.sensors.enums.NilsPodSensorPosition;
@@ -318,9 +321,9 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         super.onOperationStateChanged(oldState, newState);
         switch (newState) {
             case IDLE:
-                if (mModelNumber.length() > 0) {
+                if (mModelNumberString.length() > 0) {
                     // extract flash size from model number
-                    int flashType = mModelNumber.charAt(mModelNumber.length() - 1) == '4' ? 4 : 2;
+                    int flashType = mModelNumberString.charAt(mModelNumberString.length() - 1) == '4' ? 4 : 2;
                     // convert from Gigabit to Byte
                     mTotalFlashSize = ((double) flashType * 1e9) / 8;
                     computeRemainingCapacity();
@@ -411,11 +414,14 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     public void writeConfig() {
         double samplingRate = 0.0;
         ArrayList<HardwareSensor> sensors = (ArrayList<HardwareSensor>) mCurrentConfigMap.get(KEY_HARDWARE_SENSORS);
+        NilsPodAccRange accRange = (NilsPodAccRange) mCurrentConfigMap.get(KEY_ACC_RANGE);
+        NilsPodGyroRange gyroRange = (NilsPodGyroRange) mCurrentConfigMap.get(KEY_GYRO_RANGE);
         NilsPodSensorPosition sensorPosition = (NilsPodSensorPosition) mCurrentConfigMap.get(KEY_SENSOR_POSITION);
         NilsPodSyncGroup syncGroup = (NilsPodSyncGroup) mCurrentConfigMap.get(KEY_SYNC_GROUP);
         NilsPodSyncRole syncRole = (NilsPodSyncRole) mCurrentConfigMap.get(KEY_SYNC_ROLE);
         NilsPodOperationMode operationMode = (NilsPodOperationMode) mCurrentConfigMap.get(KEY_OPERATION_MODE);
         NilsPodMotionInterrupt interrupt = (NilsPodMotionInterrupt) mCurrentConfigMap.get(KEY_MOTION_INTERRUPT);
+        NilsPodIndicationLed indicationLed = (NilsPodIndicationLed) mCurrentConfigMap.get(KEY_INDICATION_LED);
 
         String sr = (String) mCurrentConfigMap.get(KEY_SAMPLING_RATE);
         if (sr != null) {
@@ -425,16 +431,17 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         try {
             writeSamplingRateConfig(samplingRate);
             writeSyncConfig(syncRole, syncGroup);
-            writeSensorConfig(sensors);
-            writeSystemSettingsConfig(sensorPosition, operationMode, interrupt);
+            writeSensorConfig(sensors, accRange, gyroRange);
+            writeSystemSettingsConfig(sensorPosition, operationMode, interrupt, indicationLed);
         } catch (SensorException e) {
             e.printStackTrace();
         }
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public HashMap<String, ConfigItem> getConfigItemMap() {
-        return mConfigMap;
+        return (HashMap<String, ConfigItem>) sConfigMap.clone();
     }
 
     @Override
@@ -617,19 +624,26 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         byte[] value = oldValue.clone();
 
         int offset = 0;
-
-        value[offset++] = (byte) syncRole.ordinal();
-        value[offset++] = (byte) syncGroup.getSyncChannel();
-        System.arraycopy(syncGroup.getSyncAddress(), 0, value, offset, 5);
+        if (syncRole != null) {
+            value[offset++] = (byte) syncRole.ordinal();
+        }
+        if (syncGroup != null) {
+            value[offset++] = (byte) syncGroup.getSyncChannel();
+            System.arraycopy(syncGroup.getSyncAddress(), 0, value, offset, 5);
+        }
 
         writeNilsPodConfig(config, oldValue, value);
     }
 
-    protected void writeSensorConfig(ArrayList<HardwareSensor> sensors) throws SensorException {
+    protected void writeSensorConfig(ArrayList<HardwareSensor> sensors, NilsPodAccRange accRange, NilsPodGyroRange gyroRange) throws SensorException {
+        if (sensors == null) {
+            return;
+        }
+
         BluetoothGattCharacteristic config = getConfigurationService().getCharacteristic(AbstractNilsPodSensor.NILS_POD_SENSOR_CONFIG);
         byte[] oldValue = config.getValue();
+        byte[] value = oldValue.clone();
 
-        byte[] value = new byte[2];
         int sensorField = 0;
         for (HardwareSensor sensor : sensors) {
             switch (sensor) {
@@ -663,24 +677,44 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         value[0] = (byte) (sensorField & 0xFF);
         value[1] = (byte) ((sensorField >> 8) & 0xFF);
 
-        writeNilsPodConfig(config, new byte[]{oldValue[0], oldValue[1]}, value);
+        if (accRange != null || gyroRange != null) {
+            value[2] = 0;
+            if (accRange != null) {
+                value[2] |= (byte) accRange.getRangeVal() & 0xFF;
+            }
+
+            if (gyroRange != null) {
+                value[2] |= (byte) gyroRange.getRangeVal() & 0xFF;
+            }
+        }
+
+        if (getFirmwareRevision().isAtLeast(NilsPodFirmwareRevisions.FW_0_16_0)) {
+            writeNilsPodConfig(config, new byte[]{oldValue[0], oldValue[1], oldValue[2]}, value);
+        } else {
+            writeNilsPodConfig(config, new byte[]{oldValue[0], oldValue[1]}, value);
+        }
     }
 
-    protected void writeSystemSettingsConfig(NilsPodSensorPosition sensorPosition, NilsPodOperationMode operationMode, NilsPodMotionInterrupt motionInterrupt) throws SensorException {
+    protected void writeSystemSettingsConfig(NilsPodSensorPosition sensorPosition, NilsPodOperationMode operationMode, NilsPodMotionInterrupt motionInterrupt, NilsPodIndicationLed indicationLed) throws SensorException {
         BluetoothGattCharacteristic config = getConfigurationService().getCharacteristic(AbstractNilsPodSensor.NILS_POD_SYSTEM_SETTINGS_CONFIG);
         byte[] oldValue = config.getValue();
         byte[] value = oldValue.clone();
 
         int offset = 0;
 
-        value[offset++] = (byte) sensorPosition.ordinal();
+        if (sensorPosition != null) {
+            value[offset++] = (byte) sensorPosition.ordinal();
+        }
 
         int byteVal = 0;
         if (operationMode == NilsPodOperationMode.HOME_MONITORING_MODE) {
-            byteVal = byteVal | 0x40;
+            byteVal |= 0x40;
         }
         if (motionInterrupt == NilsPodMotionInterrupt.MOTION_INTERRUPT_ENABLED) {
-            byteVal = byteVal | 0x80;
+            byteVal |= 0x80;
+        }
+        if (indicationLed == null || indicationLed == NilsPodIndicationLed.INDICATION_LED_ENABLED) {
+            byteVal |= 0x01;
         }
 
         value[offset] = (byte) byteVal;

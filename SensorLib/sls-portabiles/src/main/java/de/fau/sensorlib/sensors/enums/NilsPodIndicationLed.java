@@ -5,25 +5,12 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. If you reuse
  * this code you have to keep or cite this comment.
  */
-
 package de.fau.sensorlib.sensors.enums;
 
 /**
- * Enum describing the sensor position
+ * Enum indicating whether indication LED is enabled on NilsPod or not.
  */
-public enum NilsPodSensorPosition {
-    NO_POSITION_DEFINED,
-    LEFT_FOOT,
-    RIGHT_FOOT,
-    HIP,
-    LEFT_WRIST,
-    RIGHT_WRIST,
-    CHEST;
-
-    public static NilsPodSensorPosition inferSensorPosition(int position) {
-        if (position < values().length) {
-            return values()[position];
-        }
-        return NO_POSITION_DEFINED;
-    }
+public enum NilsPodIndicationLed {
+    INDICATION_LED_DISABLED,
+    INDICATION_LED_ENABLED;
 }

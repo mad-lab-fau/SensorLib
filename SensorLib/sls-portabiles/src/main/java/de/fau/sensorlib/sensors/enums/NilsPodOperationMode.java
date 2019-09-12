@@ -12,5 +12,9 @@ package de.fau.sensorlib.sensors.enums;
  */
 public enum NilsPodOperationMode {
     NORMAL_MODE,
-    HOME_MONITORING_MODE,
+    HOME_MONITORING_MODE;
+
+    public static NilsPodOperationMode inferOperationMode(int operationMode) {
+        return (operationMode & 0x40) == 0 ? NORMAL_MODE : HOME_MONITORING_MODE;
+    }
 }
