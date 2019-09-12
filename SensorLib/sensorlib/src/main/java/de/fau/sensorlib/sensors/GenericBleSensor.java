@@ -480,7 +480,21 @@ public class GenericBleSensor extends AbstractSensor {
         mNotificationsList = new ConcurrentLinkedQueue<>();
         mServiceList = new ArrayList<>();
 
+        // manually discover Device Information Service first
+        if (mGatt.getService(BleGattAttributes.DEVICE_INFORMATION_SERVICE) != null) {
+            BluetoothGattService devInfoService = mGatt.getService(BleGattAttributes.DEVICE_INFORMATION_SERVICE);
+            onDiscoveredService(devInfoService);
+            for (BluetoothGattCharacteristic chara : devInfoService.getCharacteristics()) {
+                onDiscoveredCharacteristic(devInfoService, chara);
+            }
+        }
+
         for (BluetoothGattService gattService : mGatt.getServices()) {
+            // skip this service since we already looked for and discovered this service
+            if (gattService.getUuid().equals(BleGattAttributes.DEVICE_INFORMATION_SERVICE)) {
+                continue;
+            }
+
             // report the discovered service, maybe a child class want to implement its own check.
             onDiscoveredService(gattService);
 
@@ -635,20 +649,24 @@ public class GenericBleSensor extends AbstractSensor {
             mDeviceName = characteristic.getStringValue(0);
             Log.d(TAG, "<" + getDeviceName() + "> Name: " + mDeviceName);
         } else if (BleGattAttributes.SERIAL_NUMBER_STRING.equals(characteristic.getUuid())) {
-            mSerialNumber = characteristic.getStringValue(0);
-            Log.d(TAG, "<" + getDeviceName() + "> Serial number: " + mSerialNumber);
+            mSerialNumberString = characteristic.getStringValue(0);
+            Log.d(TAG, "<" + getDeviceName() + "> Serial number: " + mSerialNumberString);
         } else if (BleGattAttributes.FIRMWARE_REVISION_STRING.equals(characteristic.getUuid())) {
-            mFirmwareRevision = characteristic.getStringValue(0);
-            Log.d(TAG, "<" + getDeviceName() + "> Firmware revision: " + mFirmwareRevision);
+            mFirmwareRevisionString = characteristic.getStringValue(0);
+            mFirmwareRevision = new FirmwareRevision(mFirmwareRevisionString);
+            Log.d(TAG, "<" + getDeviceName() + "> Firmware revision: " + mFirmwareRevisionString);
         } else if (BleGattAttributes.SOFTWARE_REVISION_STRING.equals(characteristic.getUuid())) {
-            mSoftwareRevision = characteristic.getStringValue(0);
-            Log.d(TAG, "<" + getDeviceName() + "> Software revision: " + mSoftwareRevision);
+            mSoftwareRevisionString = characteristic.getStringValue(0);
+            Log.d(TAG, "<" + getDeviceName() + "> Software revision: " + mSoftwareRevisionString);
+        } else if (BleGattAttributes.HARDWARE_REVISION_STRING.equals(characteristic.getUuid())) {
+            mHardwareRevisionString = characteristic.getStringValue(0);
+            Log.d(TAG, "<" + getDeviceName() + "> Hardware revision: " + mHardwareRevisionString);
         } else if (BleGattAttributes.MANUFACTURER_NAME_STRING.equals(characteristic.getUuid())) {
-            mManufacturer = characteristic.getStringValue(0);
-            Log.d(TAG, "<" + getDeviceName() + "> Manufacturer: " + mManufacturer);
+            mManufacturerString = characteristic.getStringValue(0);
+            Log.d(TAG, "<" + getDeviceName() + "> Manufacturer: " + mManufacturerString);
         } else if (BleGattAttributes.MODEL_NUMBER_STRING.equals(characteristic.getUuid())) {
-            mModelNumber = characteristic.getStringValue(0);
-            Log.d(TAG, "<" + getDeviceName() + "> Model Number: " + mModelNumber);
+            mModelNumberString = characteristic.getStringValue(0);
+            Log.d(TAG, "<" + getDeviceName() + "> Model Number: " + mModelNumberString);
         } else if (BleGattAttributes.SYSTEM_ID.equals(characteristic.getUuid())) {
             mSensorSystemID = BleGattAttributes.valueToInt64(characteristic);
             Log.d(TAG, "<" + getDeviceName() + "> Sensor System ID: " + mSensorSystemID);
