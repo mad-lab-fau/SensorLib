@@ -642,7 +642,9 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
 
         BluetoothGattCharacteristic config = getConfigurationService().getCharacteristic(AbstractNilsPodSensor.NILS_POD_SENSOR_CONFIG);
         byte[] oldValue = config.getValue();
-        byte[] value = oldValue.clone();
+        byte[] value = new byte[oldValue.length - 1];
+        // Read-modify-write
+        System.arraycopy(oldValue, 0, value, 0, value.length);
 
         int sensorField = 0;
         for (HardwareSensor sensor : sensors) {
