@@ -13,6 +13,7 @@ public final class Constants {
     public static final String KEY_SENSOR_RSSI = "SENSOR_RSSI";
     public static final String KEY_SENSOR_ADDRESS = "SENSOR_ADDRESS";
     public static final String KEY_SENSOR_NAME = "SENSOR_NAME";
+    public static final String KEY_CONFIG_WARNING = "CONFIG_WARNING";
     public static final String KEY_KNOWN_SENSOR = "KNOWN_SENSOR";
     public static final String KEY_SENSOR = "SENSOR";
     public static final String KEY_SENSOR_LIST = "SENSOR_LIST";

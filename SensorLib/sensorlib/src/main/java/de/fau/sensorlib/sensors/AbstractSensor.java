@@ -70,11 +70,13 @@ public abstract class AbstractSensor extends SensorInfo {
      */
     protected int mBatteryLevel;
 
-    protected String mSerialNumber = "";
-    protected String mManufacturer = "";
-    protected String mModelNumber = "";
-    protected String mFirmwareRevision = "";
-    protected String mSoftwareRevision = "";
+    protected String mSerialNumberString = "";
+    protected String mManufacturerString = "";
+    protected String mModelNumberString = "";
+    protected String mHardwareRevisionString = "";
+    protected String mFirmwareRevisionString = "";
+    protected String mSoftwareRevisionString = "";
+    protected FirmwareRevision mFirmwareRevision = new FirmwareRevision();
     protected long mSensorSystemID;
 
     /**
@@ -380,24 +382,32 @@ public abstract class AbstractSensor extends SensorInfo {
         return mBatteryLevel;
     }
 
-    public String getSerialNumber() {
-        return mSerialNumber;
+    public String getSerialNumberString() {
+        return mSerialNumberString;
     }
 
-    public String getManufacturer() {
-        return mManufacturer;
+    public String getManufacturerString() {
+        return mManufacturerString;
     }
 
-    public String getModelNumber() {
-        return mModelNumber;
+    public String getModelNumberString() {
+        return mModelNumberString;
     }
 
-    public String getFirmwareRevision() {
+    public String getHardwareRevisionString() {
+        return mHardwareRevisionString;
+    }
+
+    public String getFirmwareRevisionString() {
+        return mFirmwareRevisionString;
+    }
+
+    public FirmwareRevision getFirmwareRevision() {
         return mFirmwareRevision;
     }
 
-    public String getSoftwareRevision() {
-        return mSoftwareRevision;
+    public String getSoftwareRevisionString() {
+        return mSoftwareRevisionString;
     }
 
     private long getSensorSystemID() {
