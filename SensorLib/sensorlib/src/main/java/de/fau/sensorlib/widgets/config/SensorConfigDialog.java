@@ -56,9 +56,18 @@ public class SensorConfigDialog extends DialogFragment implements View.OnClickLi
         if (args.containsKey(Constants.KEY_SENSOR_CONFIG)) {
             mConfigItems = (LinkedHashMap<String, ConfigItem>) args.getSerializable(Constants.KEY_SENSOR_CONFIG);
         }
+
         if (args.containsKey(Constants.KEY_SENSOR_CONFIG_DEFAULT)) {
             mDefaultConfigValues = (LinkedHashMap<String, Object>) getArguments().getSerializable(Constants.KEY_SENSOR_CONFIG_DEFAULT);
             mSelectedConfigValues = (HashMap<String, Object>) (mDefaultConfigValues != null ? mDefaultConfigValues.clone() : null);
+        }
+
+        HashMap<String, ConfigItem> configItemsCopy = (HashMap<String, ConfigItem>) mConfigItems.clone();
+
+        for (String key : configItemsCopy.keySet()) {
+            if (!mDefaultConfigValues.containsKey(key)) {
+                mConfigItems.remove(key);
+            }
         }
 
         String sensorName = getArguments().getString(Constants.KEY_SENSOR_NAME, "n/a");
