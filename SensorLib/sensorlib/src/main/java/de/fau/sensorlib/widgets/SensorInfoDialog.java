@@ -44,9 +44,9 @@ public class SensorInfoDialog extends DialogFragment implements View.OnClickList
             if (sensor != null) {
                 sensorName = sensor.getDeviceName();
                 sensorAddress = sensor.getDeviceAddress();
-                manufacturer = sensor.getManufacturer();
-                modelNumber = sensor.getModelNumber();
-                firmwareRevision = sensor.getFirmwareRevision();
+                manufacturer = sensor.getManufacturerString();
+                modelNumber = sensor.getModelNumberString();
+                firmwareRevision = sensor.getFirmwareRevisionString();
             }
         }
 
