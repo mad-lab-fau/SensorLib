@@ -167,13 +167,6 @@ public class SensorActionDialog extends DialogFragment implements SensorConfigSe
                     }
                     break;
                 case START_LOGGING:
-                    if (mSensor instanceof Loggable) {
-                        mSensorActionCallback.onSensorActionSelected(mSensor, action);
-                        Toast.makeText(activity, SensorAction.values()[position] + " on " + mSensor.getDeviceName(), Toast.LENGTH_SHORT).show();
-                    } else {
-                        return;
-                    }
-                    break;
                 case STOP_LOGGING:
                     if (mSensor instanceof Loggable) {
                         mSensorActionCallback.onSensorActionSelected(mSensor, action);

@@ -40,6 +40,9 @@ import de.fau.sensorlib.dataframe.SensorDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
 import de.fau.sensorlib.enums.SensorState;
 import de.fau.sensorlib.sensors.dfu.NilsPodDfuService;
+import de.fau.sensorlib.sensors.enums.NilsPodAccRange;
+import de.fau.sensorlib.sensors.enums.NilsPodGyroRange;
+import de.fau.sensorlib.sensors.enums.NilsPodIndicationLed;
 import de.fau.sensorlib.sensors.enums.NilsPodMotionInterrupt;
 import de.fau.sensorlib.sensors.enums.NilsPodOperationMode;
 import de.fau.sensorlib.sensors.enums.NilsPodSensorPosition;
@@ -55,6 +58,13 @@ import no.nordicsemi.android.dfu.DfuServiceListenerHelper;
 public abstract class AbstractNilsPodSensor extends GenericBleSensor implements Recordable, Resettable, FirmwareUpgradable {
 
     public static final String TAG = AbstractNilsPodSensor.class.getSimpleName();
+
+    public static final class NilsPodFirmwareRevisions {
+        public static final FirmwareRevision FW_0_14_0 = new FirmwareRevision(0, 14, 0);
+        public static final FirmwareRevision FW_0_15_0 = new FirmwareRevision(0, 15, 0);
+        public static final FirmwareRevision FW_0_16_0 = new FirmwareRevision(0, 16, 0);
+    }
+
 
     protected static final int MESSAGE_OPERATION_STATE_CHANGED = 2000;
     protected static final int MESSAGE_SESSION_LIST_READ = 2001;
@@ -110,10 +120,6 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
      */
     protected static final UUID NILS_POD_SAMPLING_RATE_CONFIG = UUID.fromString("98ff0505-770d-4a83-9e9b-ce6bbd75e472");
     /**
-     * UUID for Firmware Version Characteristic (read) of NilsPod Sensor
-     */
-    protected static final UUID NILS_POD_FIRMWARE_VERSION = UUID.fromString("98ff0f0f-770d-4a83-9e9b-ce6bbd75e472");
-    /**
      * UUID for Buttonless DFU Characteristic (write) of NilsPod Sensor
      */
     protected static final UUID NILS_POD_BUTTONLESS_DFU = UUID.fromString("8ec90003-f315-4f60-9fb8-838830daea50");
@@ -131,7 +137,6 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         BleGattAttributes.addCharacteristic(NILS_POD_SENSOR_CONFIG, "NilsPod Sensor Configuration");
         BleGattAttributes.addCharacteristic(NILS_POD_SYSTEM_SETTINGS_CONFIG, "NilsPod System Settings Configuration");
         BleGattAttributes.addCharacteristic(NILS_POD_DATE_TIME_CONFIG, "NilsPod Date Time Configuration");
-        BleGattAttributes.addCharacteristic(NILS_POD_FIRMWARE_VERSION, "NilsPod Firmware Version");
         BleGattAttributes.addCharacteristic(NILS_POD_BUTTONLESS_DFU, "NilsPod Buttonless DFU");
     }
 
@@ -177,9 +182,15 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
     private ArrayList<HardwareSensor> mEnabledSensorList = new ArrayList<>();
 
+    private NilsPodAccRange mAccRange = NilsPodAccRange.ACC_RANGE_16_G;
+
+    private NilsPodGyroRange mGyroRange = NilsPodGyroRange.GYRO_RANGE_2000_DPS;
+
     private NilsPodOperationState mOperationState = NilsPodOperationState.IDLE;
 
     private boolean mMotionInterruptEnabled = false;
+
+    private boolean mIndicationLedEnabled = true;
 
     private NilsPodOperationMode mOperationMode = NilsPodOperationMode.NORMAL_MODE;
 
@@ -192,13 +203,16 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
     public static final String KEY_SAMPLING_RATE = "sampling_rate";
     public static final String KEY_HARDWARE_SENSORS = "hardware_sensors";
+    public static final String KEY_ACC_RANGE = "acc_range";
+    public static final String KEY_GYRO_RANGE = "gyro_range";
+    public static final String KEY_INDICATION_LED = "indication_led";
     public static final String KEY_MOTION_INTERRUPT = "motion_interrupt";
     public static final String KEY_SYNC_ROLE = "sync_role";
     public static final String KEY_SYNC_GROUP = "sync_group";
     public static final String KEY_SENSOR_POSITION = "sensor_position";
     public static final String KEY_OPERATION_MODE = "operation_mode";
 
-    protected static HashMap<String, ConfigItem> mConfigMap = new LinkedHashMap<>();
+    protected static HashMap<String, ConfigItem> sConfigMap = new LinkedHashMap<>();
 
     protected static SparseArray<Double> sSamplingRateCommands = new SparseArray<>();
 
@@ -263,19 +277,37 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
             ConfigItem.UiType.TYPE_SELECT
     );
     protected static ConfigItem sSensorPositionConfig = new ConfigItem(
-            "SensorPosition",
+            "Sensor Position",
             new ArrayList<>(Arrays.asList(NilsPodSensorPosition.values())),
             ConfigItem.UiType.TYPE_DROPDOWN
     );
+    protected static ConfigItem sAccRangeConfig = new ConfigItem(
+            "Accelerometer Range",
+            new ArrayList<>(Arrays.asList(NilsPodAccRange.values())),
+            ConfigItem.UiType.TYPE_DROPDOWN
+    );
+    protected static ConfigItem sGyroRangeConfig = new ConfigItem(
+            "Gyroscope Range",
+            new ArrayList<>(Arrays.asList(NilsPodGyroRange.values())),
+            ConfigItem.UiType.TYPE_DROPDOWN
+    );
+    protected static ConfigItem sIndicationLedConfig = new ConfigItem(
+            "Indication LED",
+            new ArrayList<>(Arrays.asList(NilsPodIndicationLed.values())),
+            ConfigItem.UiType.TYPE_SELECT
+    );
 
     static {
-        mConfigMap.put(KEY_SAMPLING_RATE, sSamplingRateConfig);
-        mConfigMap.put(KEY_HARDWARE_SENSORS, sSensorConfig);
-        mConfigMap.put(KEY_MOTION_INTERRUPT, sMotionInterruptConfig);
-        mConfigMap.put(KEY_SENSOR_POSITION, sSensorPositionConfig);
-        mConfigMap.put(KEY_SYNC_ROLE, sSyncRoleConfig);
-        mConfigMap.put(KEY_SYNC_GROUP, sSyncGroupConfig);
-        mConfigMap.put(KEY_OPERATION_MODE, sOperationModeConfig);
+        sConfigMap.put(KEY_SAMPLING_RATE, sSamplingRateConfig);
+        sConfigMap.put(KEY_HARDWARE_SENSORS, sSensorConfig);
+        sConfigMap.put(KEY_ACC_RANGE, sAccRangeConfig);
+        sConfigMap.put(KEY_GYRO_RANGE, sGyroRangeConfig);
+        sConfigMap.put(KEY_MOTION_INTERRUPT, sMotionInterruptConfig);
+        sConfigMap.put(KEY_SENSOR_POSITION, sSensorPositionConfig);
+        sConfigMap.put(KEY_SYNC_ROLE, sSyncRoleConfig);
+        sConfigMap.put(KEY_SYNC_GROUP, sSyncGroupConfig);
+        sConfigMap.put(KEY_OPERATION_MODE, sOperationModeConfig);
+        sConfigMap.put(KEY_INDICATION_LED, sIndicationLedConfig);
     }
 
     protected HashMap<String, Object> mCurrentConfigMap = new LinkedHashMap<>();
@@ -452,6 +484,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
             return errorCode;
         }
     }
+
 
     private final DfuProgressListener mDfuProgressListener = new DfuProgressListenerAdapter() {
 
@@ -888,6 +921,11 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
             if ((sensors & 0x0080) != 0) {
                 mEnabledSensorList.add(HardwareSensor.TEMPERATURE);
             }
+
+            if (getFirmwareRevision().isAtLeast(NilsPodFirmwareRevisions.FW_0_16_0)) {
+                mAccRange = NilsPodAccRange.inferAccRange(values[offset] & 0x0F);
+                mGyroRange = NilsPodGyroRange.inferGyroRange(values[offset] & 0xF0);
+            }
             sampleSize = values[values.length - 1];
         } catch (Exception e) {
             e.printStackTrace();
@@ -896,6 +934,8 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
             Log.d(TAG, ">>>> Sensor Config:");
             Log.d(TAG, "\tEnabled Sensors: " + mEnabledSensorList);
             Log.d(TAG, "\tSample Size: " + sampleSize);
+            Log.d(TAG, "\tAcc Range: " + mAccRange);
+            Log.d(TAG, "\tGyro Range: " + mGyroRange);
         }
 
         EnumSet<HardwareSensor> set = EnumSet.noneOf(HardwareSensor.class);
@@ -903,27 +943,31 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         useHardwareSensors(set);
         mSampleSize = sampleSize;
         mCurrentConfigMap.put(KEY_HARDWARE_SENSORS, mEnabledSensorList);
+
+        if (getFirmwareRevision().isAtLeast(NilsPodFirmwareRevisions.FW_0_16_0)) {
+            mCurrentConfigMap.put(KEY_ACC_RANGE, mAccRange);
+            mCurrentConfigMap.put(KEY_GYRO_RANGE, mGyroRange);
+        }
     }
 
     protected synchronized void extractSystemSettings(BluetoothGattCharacteristic characteristic) throws SensorException {
         int offset = 0;
         try {
             int sensorPosition = characteristic.getValue()[offset++];
-            if (sensorPosition < NilsPodSensorPosition.values().length) {
-                mSensorPosition = NilsPodSensorPosition.values()[sensorPosition];
-            } else {
-                mSensorPosition = NilsPodSensorPosition.NO_POSITION_DEFINED;
-            }
+            mSensorPosition = NilsPodSensorPosition.inferSensorPosition(sensorPosition);
             int operationMode = characteristic.getValue()[offset];
-            mOperationMode = (operationMode & 0x40) == 0 ? NilsPodOperationMode.NORMAL_MODE : NilsPodOperationMode.HOME_MONITORING_MODE;
+            if (getFirmwareRevision().isAtLeast(NilsPodFirmwareRevisions.FW_0_16_0)) {
+                mIndicationLedEnabled = (operationMode & 0x01) != 0;
+            }
+            mOperationMode = NilsPodOperationMode.inferOperationMode(operationMode);
             mMotionInterruptEnabled = (operationMode & 0x80) != 0;
-
         } catch (Exception e) {
             e.printStackTrace();
             throw new SensorException(SensorException.SensorExceptionType.readStateError);
         } finally {
             Log.d(TAG, ">>>> System Settings:");
             Log.d(TAG, "\tSensor Position: " + mSensorPosition);
+            Log.d(TAG, "\tLED Indication Enabled: " + mIndicationLedEnabled);
             Log.d(TAG, "\tOperation Mode: " + mOperationMode);
             Log.d(TAG, "\tMotion Interrupt Enabled: " + mMotionInterruptEnabled);
         }
@@ -931,6 +975,10 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         mCurrentConfigMap.put(KEY_MOTION_INTERRUPT, mMotionInterruptEnabled ? NilsPodMotionInterrupt.MOTION_INTERRUPT_ENABLED : NilsPodMotionInterrupt.MOTION_INTERRUPT_DISABLED);
         mCurrentConfigMap.put(KEY_OPERATION_MODE, mOperationMode);
         mCurrentConfigMap.put(KEY_SENSOR_POSITION, mSensorPosition);
+
+        if (getFirmwareRevision().isAtLeast(NilsPodFirmwareRevisions.FW_0_16_0)) {
+            mCurrentConfigMap.put(KEY_INDICATION_LED, mIndicationLedEnabled ? NilsPodIndicationLed.INDICATION_LED_ENABLED : NilsPodIndicationLed.INDICATION_LED_DISABLED);
+        }
     }
 
     protected synchronized void extractSamplingRate(BluetoothGattCharacteristic characteristic) throws SensorException {
