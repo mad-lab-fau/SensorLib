@@ -31,6 +31,7 @@ import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.formatter.ValueFormatter;
 
 import java.lang.reflect.Method;
 import java.time.LocalTime;
@@ -93,21 +94,20 @@ public class SensorPlotter extends CardView implements SensorEventListener {
         mContext = context;
 
         TypedArray attributes = mContext.obtainStyledAttributes(attrs, R.styleable.SensorPlotter);
-        if (attributes != null) {
-            try {
-                mScrollEnabled = attributes.getBoolean(R.styleable.SensorPlotter_scrollable, true);
-                mWindowSize = attributes.getInteger(R.styleable.SensorPlotter_windowSize, 10);
-                mRefreshRate = attributes.getInteger(R.styleable.SensorPlotter_refreshRate, 25);
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                attributes.recycle();
-            }
+        try {
+            mScrollEnabled = attributes.getBoolean(R.styleable.SensorPlotter_scrollable, true);
+            mWindowSize = attributes.getInteger(R.styleable.SensorPlotter_windowSize, 10);
+            mRefreshRate = attributes.getInteger(R.styleable.SensorPlotter_refreshRate, 25);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            attributes.recycle();
         }
 
         mRecyclerView = findViewById(R.id.recycler_view);
         mRecyclerView.setDrawingCacheEnabled(true);
         mRecyclerView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_HIGH);
+        mRecyclerView.setItemViewCacheSize(10);
 
         SensorPlotterLayoutManager manager = new SensorPlotterLayoutManager(mContext);
         manager.setScrollEnabled(mScrollEnabled);
@@ -195,16 +195,23 @@ public class SensorPlotter extends CardView implements SensorEventListener {
         chart.getXAxis().setLabelCount((int) (mWindowSize * bundle.getSampleDistance()));
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            chart.getXAxis().setValueFormatter((value, axis) -> {
-                LocalTime time = LocalTime.ofNanoOfDay((int) value * 1000L * 1000L);
-                return String.format(Locale.getDefault(), "%02d:%02d", time.getMinute() + time.getHour() * 60, time.getSecond());
+            chart.getXAxis().setValueFormatter(new ValueFormatter() {
+                @Override
+                public String getFormattedValue(float value) {
+                    LocalTime time = LocalTime.ofNanoOfDay((int) value * 1000L * 1000L);
+                    return String.format(Locale.getDefault(), "%02d:%02d", time.getMinute() + time.getHour() * 60, time.getSecond());
+                }
             });
         } else {
-            chart.getXAxis().setValueFormatter((value, axis) -> String.format(Locale.getDefault(), "%02d:%02d",
-                    TimeUnit.MILLISECONDS.toMinutes((int) value),
-                    TimeUnit.MILLISECONDS.toSeconds((int) value) -
-                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((int) value))
-            ));
+            chart.getXAxis().setValueFormatter(new ValueFormatter() {
+                @Override
+                public String getFormattedValue(float value) {
+                    return String.format(Locale.getDefault(), "%02d:%02d",
+                            TimeUnit.MILLISECONDS.toMinutes((int) value),
+                            TimeUnit.MILLISECONDS.toSeconds((int) value) -
+                                    TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes((int) value)));
+                }
+            });
         }
 
     }
@@ -383,10 +390,14 @@ public class SensorPlotter extends CardView implements SensorEventListener {
             SensorPlotterViewHolder viewHolder = (SensorPlotterViewHolder) mRecyclerView.findViewHolderForAdapterPosition(position);
             if (viewHolder != null && viewHolder.mLineChart.getData().getEntryCount() != 0) {
                 //viewHolder.mLineChart.getData().notifyDataChanged();
-                viewHolder.mLineChart.notifyDataSetChanged();
-                viewHolder.mLineChart.setAutoScaleMinMaxEnabled(true);
-                viewHolder.mLineChart.setVisibleXRange((float) (mSensorBundles.get(position).getSamplingRate() * mSensorBundles.get(position).getSampleDistance() * mWindowSize), (float) (mSensorBundles.get(position).getSamplingRate() * mSensorBundles.get(position).getSampleDistance() * mWindowSize));
-                viewHolder.mLineChart.moveViewToX(viewHolder.mLineChart.getData().getXMax());
+                try {
+                    viewHolder.mLineChart.notifyDataSetChanged();
+                    viewHolder.mLineChart.setAutoScaleMinMaxEnabled(true);
+                    viewHolder.mLineChart.setVisibleXRange((float) (mSensorBundles.get(position).getSamplingRate() * mSensorBundles.get(position).getSampleDistance() * mWindowSize), (float) (mSensorBundles.get(position).getSamplingRate() * mSensorBundles.get(position).getSampleDistance() * mWindowSize));
+                    viewHolder.mLineChart.moveViewToX(viewHolder.mLineChart.getData().getXMax());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
 
