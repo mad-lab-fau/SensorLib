@@ -105,15 +105,6 @@ public class GenericBleSensor extends AbstractSensor {
 
     private BleConnectionMode mStateMachineMode = BleConnectionMode.MODE_DEFAULT;
 
-    private boolean mHasBatteryMeasurement = false;
-
-
-    @Override
-    public boolean hasBatteryMeasurement() {
-        // Overrides hardcoded value from KnownSensor
-        return mHasBatteryMeasurement;
-    }
-
     /**
      * Returns the Body Sensor Location.
      *
@@ -639,7 +630,6 @@ public class GenericBleSensor extends AbstractSensor {
         if (BleGattAttributes.BATTERY_LEVEL.equals(characteristic.getUuid())) {
             mBatteryLevel = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, 0);
             // Once battery level was read it means that battery measurement is available
-            mHasBatteryMeasurement = true;
             sendNotification(SensorMessage.BATTERY_LEVEL_CHANGED);
             Log.d(TAG, "<" + getDeviceName() + "> Battery level: " + mBatteryLevel);
         }

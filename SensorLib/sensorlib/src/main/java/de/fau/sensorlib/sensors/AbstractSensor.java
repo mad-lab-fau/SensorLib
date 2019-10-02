@@ -64,12 +64,6 @@ public abstract class AbstractSensor extends SensorInfo {
      */
     protected EnumSet<HardwareSensor> mSelectedHwSensors = EnumSet.noneOf(HardwareSensor.class);
 
-
-    /**
-     * 0-100 (%).
-     */
-    protected int mBatteryLevel;
-
     protected String mSerialNumberString = "";
     protected String mManufacturerString = "";
     protected String mModelNumberString = "";
@@ -372,14 +366,6 @@ public abstract class AbstractSensor extends SensorInfo {
 
     public EnumSet<HardwareSensor> getSelectedSensors() {
         return mSelectedHwSensors;
-    }
-
-    public boolean hasBatteryMeasurement() {
-        return mDeviceClass.hasBatteryMeasurement();
-    }
-
-    public int getBatteryLevel() {
-        return mBatteryLevel;
     }
 
     public String getSerialNumberString() {
