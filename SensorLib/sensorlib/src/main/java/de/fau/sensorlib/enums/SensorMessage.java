@@ -13,6 +13,7 @@ package de.fau.sensorlib.enums;
 public enum SensorMessage {
 
     BATTERY_LEVEL_CHANGED("Battery Level Changed"),
+    CHARGING_STATE_CHANGED("Charging State Changed"),
     SAMPLING_RATE_CHANGED("Sampling Rate Changed"),
     OPERATION_STATE_CHANGED("Operation State Changed"),
     ACCURACY_CHANGED("Sensor Accuracy Changed");
