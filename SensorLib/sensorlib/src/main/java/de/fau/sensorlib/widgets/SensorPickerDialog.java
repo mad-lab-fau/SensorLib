@@ -72,7 +72,7 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
     private EnumSet<HardwareSensor> mHwSensorFilter = EnumSet.noneOf(HardwareSensor.class);
     private EnumSet<KnownSensor> mSensorFilter = EnumSet.noneOf(KnownSensor.class);
     private ArrayList<String> mLastConnectedSensors = new ArrayList<>();
-    private ArrayList<Bundle> mFoundSensors = new ArrayList<>();
+    private ArrayList<Bundle> mSensorBundleList = new ArrayList<>();
     private ArrayList<Bundle> mSelectedSensors = new ArrayList<>();
 
     private DialogInterface.OnDismissListener mDialogDismissCallback;
@@ -114,7 +114,7 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
     private class SensorPickerRecyclerAdapter extends Adapter<SensorPickerViewHolder> implements SensorPickerViewHolder.ItemClickListener {
 
         private SensorPickerRecyclerAdapter() {
-            mFoundSensors = new ArrayList<>(0);
+            mSensorBundleList = new ArrayList<>(0);
         }
 
         @NonNull
@@ -126,21 +126,26 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
 
         @Override
         public void onBindViewHolder(@NonNull final SensorPickerViewHolder holder, int position) {
-            final KnownSensor sensor = (KnownSensor) mFoundSensors.get(position).getSerializable(Constants.KEY_KNOWN_SENSOR);
+            Bundle sensorBundle = mSensorBundleList.get(position);
+
+            final KnownSensor sensor = (KnownSensor) sensorBundle.getSerializable(Constants.KEY_KNOWN_SENSOR);
             if (sensor == null) {
                 return;
             }
 
-            String name = mFoundSensors.get(position).getString(Constants.KEY_SENSOR_NAME);
-            String address = mFoundSensors.get(position).getString(Constants.KEY_SENSOR_ADDRESS);
-            int rssi = mFoundSensors.get(position).getInt(Constants.KEY_SENSOR_RSSI);
+
+            String name = sensorBundle.getString(Constants.KEY_SENSOR_NAME);
+            String address = sensorBundle.getString(Constants.KEY_SENSOR_ADDRESS);
+            int rssi = sensorBundle.getInt(Constants.KEY_SENSOR_RSSI);
+            int batteryLevel = sensorBundle.getInt(Constants.KEY_BATTERY_LEVEL);
+
             holder.mSensorNameTextView.setText(name);
 
             holder.mSensorInformationTextView.setText(address);
             holder.mSensorRssi.setText(mContext.getString(R.string.placeholder_rssi, rssi));
 
             // highlight last connected sensors
-            if (mLastConnectedSensors.contains(mFoundSensors.get(position).getString(Constants.KEY_SENSOR_NAME))) {
+            if (mLastConnectedSensors.contains(mSensorBundleList.get(position).getString(Constants.KEY_SENSOR_NAME))) {
                 holder.mSensorNameTextView.setTypeface(null, Typeface.ITALIC);
                 holder.mRecentlyConnectedTextView.setVisibility(View.VISIBLE);
             }
@@ -162,7 +167,7 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
 
             viewHolder.mCheckBox.setChecked(!viewHolder.mCheckBox.isChecked());
 
-            Bundle bundle = mFoundSensors.get(position);
+            Bundle bundle = mSensorBundleList.get(position);
             if (mSelectedSensors.contains(bundle)) {
                 viewHolder.mCheckBox.setChecked(false);
                 mSelectedSensors.remove(bundle);
@@ -175,7 +180,7 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
 
         @Override
         public int getItemCount() {
-            return (mFoundSensors == null) ? 0 : mFoundSensors.size();
+            return (mSensorBundleList == null) ? 0 : mSensorBundleList.size();
         }
 
         /**
@@ -186,8 +191,8 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
          * @param element  Sensor element as {@link Bundle}
          */
         public void addAt(int position, Bundle element) {
-            if (!mFoundSensors.contains(element)) {
-                mFoundSensors.add(position, element);
+            if (!mSensorBundleList.contains(element)) {
+                mSensorBundleList.add(position, element);
                 notifyItemInserted(position);
             }
         }
@@ -199,18 +204,18 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
          * @param element Sensor element as {@link Bundle}
          */
         public void add(Bundle element) {
-            addAt(mFoundSensors.size(), element);
+            addAt(mSensorBundleList.size(), element);
         }
 
         public void addByRssi(Bundle element) {
             int rssi = element.getInt(Constants.KEY_SENSOR_RSSI);
             // skip first sensor (internal sensor)
-            for (int i = 1; i < mFoundSensors.size(); i++) {
+            for (int i = 1; i < mSensorBundleList.size(); i++) {
                 // skip "last connected" sensors because they should be at the front
-                if (mLastConnectedSensors.contains(mFoundSensors.get(i).getString(Constants.KEY_SENSOR_NAME))) {
+                if (mLastConnectedSensors.contains(mSensorBundleList.get(i).getString(Constants.KEY_SENSOR_NAME))) {
                     continue;
                 }
-                int rssiTmp = mFoundSensors.get(i).getInt(Constants.KEY_SENSOR_RSSI);
+                int rssiTmp = mSensorBundleList.get(i).getInt(Constants.KEY_SENSOR_RSSI);
                 if (rssi > rssiTmp) {
                     // add at right position
                     addAt(i, element);
@@ -229,9 +234,9 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
          * @param position Position to remove
          */
         public void removeAt(int position) {
-            mFoundSensors.remove(position);
+            mSensorBundleList.remove(position);
             notifyItemRemoved(position);
-            notifyItemRangeChanged(position, mFoundSensors.size() - position);
+            notifyItemRangeChanged(position, mSensorBundleList.size() - position);
         }
 
         /**
@@ -239,7 +244,7 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
          * notifies the {@link SensorPickerRecyclerAdapter} that the underlying list has changed.
          */
         public void remove() {
-            removeAt(mFoundSensors.size() - 1);
+            removeAt(mSensorBundleList.size() - 1);
         }
     }
 
@@ -498,6 +503,7 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
                                 bundle.putString(Constants.KEY_SENSOR_ADDRESS, sensor.getDeviceAddress());
                                 bundle.putString(Constants.KEY_SENSOR_NAME, sensor.getDeviceName());
                                 bundle.putSerializable(Constants.KEY_KNOWN_SENSOR, sensor.getDeviceClass());
+                                bundle.putInt(Constants.KEY_BATTERY_LEVEL, sensor.getBatteryLevel());
                                 bundle.putInt(Constants.KEY_SENSOR_RSSI, rssi);
                                 if (mLastConnectedSensors.contains(sensor.getDeviceName())) {
                                     // add after internal sensor
