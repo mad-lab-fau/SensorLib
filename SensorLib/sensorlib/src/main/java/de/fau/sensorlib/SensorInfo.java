@@ -8,7 +8,6 @@
 package de.fau.sensorlib;
 
 import android.util.Log;
-import android.util.SparseArray;
 
 import androidx.annotation.NonNull;
 
@@ -52,12 +51,14 @@ public class SensorInfo implements Serializable {
     protected double mSamplingRate;
 
 
-    protected SparseArray<byte[]> mManufacturerData;
+    protected byte[] mManufacturerData;
 
     /**
      * Battery level in % (0-100).
      */
     protected int mBatteryLevel;
+
+    protected boolean mIsCharging;
 
 
     /**
@@ -89,7 +90,7 @@ public class SensorInfo implements Serializable {
         return mDeviceClass;
     }
 
-    public SparseArray<byte[]> getManufacturerData() {
+    public byte[] getManufacturerData() {
         return mManufacturerData;
     }
 
@@ -100,6 +101,14 @@ public class SensorInfo implements Serializable {
      */
     public int getBatteryLevel() {
         return mBatteryLevel;
+    }
+
+    public boolean getChargingState() {
+        return mIsCharging;
+    }
+
+    public void setChargingState(boolean isCharging) {
+        mIsCharging = isCharging;
     }
 
     /**
@@ -195,7 +204,7 @@ public class SensorInfo implements Serializable {
      * @param deviceName    name of the device.
      * @param deviceAddress address of the device.
      */
-    public SensorInfo(String deviceName, String deviceAddress, SparseArray<byte[]> manufacturerData) {
+    public SensorInfo(String deviceName, String deviceAddress, byte[] manufacturerData) {
         this(deviceName, deviceAddress, KnownSensor.inferSensorClass(deviceName), -1, manufacturerData);
     }
 
@@ -210,12 +219,14 @@ public class SensorInfo implements Serializable {
         this(deviceName, deviceAddress, deviceClass, -1, null);
     }
 
-    public SensorInfo(String deviceName, String deviceAddress, KnownSensor deviceClass, double samplingRate, SparseArray<byte[]> manufacturerData) {
+    public SensorInfo(String deviceName, String deviceAddress, KnownSensor deviceClass, double samplingRate, byte[] manufacturerData) {
         mDeviceName = deviceName;
         mDeviceAddress = deviceAddress;
         mDeviceClass = deviceClass;
         mManufacturerData = manufacturerData;
         mSamplingRate = samplingRate;
+        mBatteryLevel = BleManufacturerDataHelper.getBatteryLevel(deviceClass, mManufacturerData);
+        mIsCharging = BleManufacturerDataHelper.getChargingState(deviceClass, mManufacturerData);
     }
 
     @Override

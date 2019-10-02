@@ -22,6 +22,7 @@ import de.fau.sensorlib.SensorException;
 import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
+import de.fau.sensorlib.enums.SensorMessage;
 import de.fau.sensorlib.enums.SensorState;
 
 /**
@@ -398,6 +399,12 @@ public abstract class AbstractSensor extends SensorInfo {
 
     private long getSensorSystemID() {
         return mSensorSystemID;
+    }
+
+    @Override
+    public void setChargingState(boolean isCharging) {
+        super.setChargingState(isCharging);
+        sendNotification(SensorMessage.CHARGING_STATE_CHANGED);
     }
 
     /**
