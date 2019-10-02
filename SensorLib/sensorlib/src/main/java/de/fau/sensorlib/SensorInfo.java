@@ -54,6 +54,11 @@ public class SensorInfo implements Serializable {
 
     protected SparseArray<byte[]> mManufacturerData;
 
+    /**
+     * Battery level in % (0-100).
+     */
+    protected int mBatteryLevel;
+
 
     /**
      * @return a not necessarily unique, human readable name for this sensor.
@@ -86,6 +91,15 @@ public class SensorInfo implements Serializable {
 
     public SparseArray<byte[]> getManufacturerData() {
         return mManufacturerData;
+    }
+
+    /**
+     * Returns the battery level.
+     *
+     * @return Battery level of the sensor in %.
+     */
+    public int getBatteryLevel() {
+        return mBatteryLevel;
     }
 
     /**
