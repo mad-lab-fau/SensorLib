@@ -824,6 +824,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
             // call callback
             onOperationStateChanged(oldState, mOperationState);
             powerState = NilsPodPowerState.inferPowerState(values[offset++]);
+            setChargingState(powerState != NilsPodPowerState.NO_POWER);
             errorFlags = values[offset++] & 0xFF;
             mBatteryLevel = values[offset];
         } catch (SensorException e) {
