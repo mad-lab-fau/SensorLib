@@ -562,7 +562,11 @@ public class InternalSensor extends AbstractSensor implements SensorEventListene
 
     @Override
     public int getBatteryLevel() {
-        Intent batteryIntent = mContext.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        return getBatteryLevel(mContext);
+    }
+
+    public static int getBatteryLevel(Context context) {
+        Intent batteryIntent = context.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         if (batteryIntent == null) {
             return 0;
         }

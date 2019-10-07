@@ -15,6 +15,7 @@ import android.util.SparseArray;
 import androidx.annotation.CallSuper;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -45,12 +46,22 @@ public class BleScanCallback extends ScanCallback {
         }
         mScannedAddresses.add(result.getDevice().getAddress());
 
-        SparseArray<byte[]> manuData;
+        byte[] manuData;
         SensorInfo s;
         if (result.getScanRecord() != null) {
-            manuData = result.getScanRecord().getManufacturerSpecificData();
+            SparseArray<byte[]> data = result.getScanRecord().getManufacturerSpecificData();
+            if (data != null && data.size() > 0) {
+                manuData = data.valueAt(0);
+            } else {
+                manuData = new byte[0];
+            }
+
             s = new SensorInfo(result.getDevice().getName(), result.getDevice().getAddress(), manuData);
-            //Log.d(TAG, "Manufacturer Data: " + s.getDeviceClass() + ", " + Arrays.toString(manuData.valueAt(0)));
+
+            if (s.getDeviceClass() != null) {
+                Log.d(TAG, "Manufacturer Data: " + s.getDeviceClass() + ", " + Arrays.toString(manuData));
+            }
+
         } else {
             s = new SensorInfo(result.getDevice().getName(), result.getDevice().getAddress());
         }
