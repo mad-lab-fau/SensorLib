@@ -9,6 +9,7 @@
 package de.fau.sensorlib.sensors.logging;
 
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.hardware.SensorManager;
 import android.util.Log;
 
 import java.nio.BufferOverflowException;
@@ -18,8 +19,10 @@ import java.util.ArrayList;
 import de.fau.sensorlib.SensorDataRecorder;
 import de.fau.sensorlib.SensorException;
 import de.fau.sensorlib.enums.HardwareSensor;
+import de.fau.sensorlib.sensors.AbstractNilsPodSensor;
 import de.fau.sensorlib.sensors.AbstractSensor;
 import de.fau.sensorlib.sensors.NilsPodSensor;
+import de.fau.sensorlib.sensors.enums.NilsPodGyroRange;
 import de.fau.sensorlib.sensors.enums.NilsPodSensorPosition;
 import de.fau.sensorlib.sensors.enums.NilsPodSyncRole;
 import de.fau.sensorlib.sensors.enums.NilsPodTerminationSource;
@@ -39,6 +42,9 @@ public class SessionCsvConverter {
     private Session mSession;
 
     private SensorDataRecorder mRecorder;
+
+    private double gyroScalingFactor = 1.0;
+    private double accScalingFactor = 1.0;
 
     public SessionCsvConverter(AbstractSensor sensor, Session session) {
         mSensor = sensor;
@@ -124,6 +130,12 @@ public class SessionCsvConverter {
 
             // Byte 9
             int gyroRange = values[offset++] * 125; // in dps
+
+            // acc scaling factor for conversion from raw values to m/s^2
+            accScalingFactor = (AbstractNilsPodSensor.BASE_SCALING_FACTOR_ACC / mHeader.getAccRange()) * SensorManager.GRAVITY_EARTH;
+
+            // gyro scaling factor for conversion from raw values to dps
+            gyroScalingFactor = (AbstractNilsPodSensor.BASE_SCALING_FACTOR_GYRO * NilsPodGyroRange.GYRO_RANGE_2000_DPS.getRangeDps()) / mHeader.getGyroRange();
 
 
             // Bytes 10-14: System Settings
@@ -251,7 +263,7 @@ public class SessionCsvConverter {
         int offset = 0;
 
         double[] gyro = null;
-        double[] accel = null;
+        double[] acc = null;
         double[] mag = null;
         double[] analog = null;
         double baro = Double.MIN_VALUE;
@@ -262,16 +274,19 @@ public class SessionCsvConverter {
         // extract gyroscope data
         if (isSensorEnabled(HardwareSensor.GYROSCOPE)) {
             gyro = new double[3];
+
             for (int j = 0; j < 3; j++) {
-                gyro[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
+                gyro[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset) / gyroScalingFactor;
                 offset += 2;
             }
         }
+
         // extract accelerometer data
         if (isSensorEnabled(HardwareSensor.ACCELEROMETER)) {
-            accel = new double[3];
+            acc = new double[3];
+
             for (int j = 0; j < 3; j++) {
-                accel[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
+                acc[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset) / accScalingFactor;
                 offset += 2;
             }
         }
@@ -318,17 +333,17 @@ public class SessionCsvConverter {
 
         NilsPodSensor.NilsPodDataFrame df;
         if (isSensorEnabled(HardwareSensor.ANALOG)) {
-            df = new NilsPodSensor.NilsPodAnalogDataFrame(mSensor, timestamp, accel, gyro, baro, temp, mag, analog);
+            df = new NilsPodSensor.NilsPodAnalogDataFrame(mSensor, timestamp, acc, gyro, baro, temp, mag, analog);
         } else if (isSensorEnabled(HardwareSensor.ECG)) {
-            df = new NilsPodSensor.NilsPodEcgDataFrame(mSensor, timestamp, accel, gyro, baro, temp, mag, ecg);
+            df = new NilsPodSensor.NilsPodEcgDataFrame(mSensor, timestamp, acc, gyro, baro, temp, mag, ecg);
         } else if (isSensorEnabled(HardwareSensor.PPG)) {
-            df = new NilsPodSensor.NilsPodPpgDataFrame(mSensor, timestamp, accel, gyro, baro, temp, mag, ppg);
+            df = new NilsPodSensor.NilsPodPpgDataFrame(mSensor, timestamp, acc, gyro, baro, temp, mag, ppg);
         } else if (isSensorEnabled(HardwareSensor.MAGNETOMETER)) {
-            df = new NilsPodSensor.NilsPodMagDataFrame(mSensor, timestamp, accel, gyro, baro, temp, mag);
+            df = new NilsPodSensor.NilsPodMagDataFrame(mSensor, timestamp, acc, gyro, baro, temp, mag);
         } else if (isSensorEnabled(HardwareSensor.TEMPERATURE)) {
-            df = new NilsPodSensor.NilsPodTempDataFrame(mSensor, timestamp, accel, gyro, baro, temp);
+            df = new NilsPodSensor.NilsPodTempDataFrame(mSensor, timestamp, acc, gyro, baro, temp);
         } else {
-            df = new NilsPodSensor.NilsPodDataFrame(mSensor, timestamp, accel, gyro, baro);
+            df = new NilsPodSensor.NilsPodDataFrame(mSensor, timestamp, acc, gyro, baro);
         }
 
         Log.d(TAG, df.toString());
