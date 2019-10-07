@@ -541,14 +541,7 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
                             if ((mHwSensorFilter.isEmpty() && mSensorFilter.isEmpty()) ||
                                     (sensor.getDeviceClass().getAvailableSensors().containsAll(mHwSensorFilter)
                                             && mSensorFilter.contains(sensor.getDeviceClass()))) {
-                                Bundle bundle = new Bundle();
-                                bundle.putString(Constants.KEY_SENSOR_ADDRESS, sensor.getDeviceAddress());
-                                bundle.putString(Constants.KEY_SENSOR_NAME, sensor.getDeviceName());
-                                bundle.putSerializable(Constants.KEY_KNOWN_SENSOR, sensor.getDeviceClass());
-                                bundle.putSerializable(Constants.KEY_SENSOR_STATE, BleManufacturerDataHelper.getSensorState(sensor.getDeviceClass(), sensor.getManufacturerData()));
-                                bundle.putInt(Constants.KEY_BATTERY_LEVEL, sensor.getBatteryLevel());
-                                bundle.putBoolean(Constants.KEY_CHARGING_STATE, sensor.getChargingState());
-                                bundle.putInt(Constants.KEY_SENSOR_RSSI, rssi);
+                                Bundle bundle = createBundle(sensor, rssi);
                                 if (mLastConnectedSensors.contains(sensor.getDeviceName())) {
                                     // add after internal sensor
                                     mAdapter.addAt(1, bundle);
@@ -591,6 +584,19 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
                 mProgressTextView.setText(getString(R.string.string_scan_results));
             }
         }, mScanDuration);
+    }
+
+    private Bundle createBundle(SensorInfo sensor, int rssi) {
+        Bundle bundle = new Bundle();
+        bundle.putString(Constants.KEY_SENSOR_ADDRESS, sensor.getDeviceAddress());
+        bundle.putString(Constants.KEY_SENSOR_NAME, sensor.getDeviceName());
+        bundle.putSerializable(Constants.KEY_KNOWN_SENSOR, sensor.getDeviceClass());
+        bundle.putSerializable(Constants.KEY_SENSOR_STATE, BleManufacturerDataHelper.getSensorState(sensor.getDeviceClass(), sensor.getManufacturerData()));
+        bundle.putInt(Constants.KEY_BATTERY_LEVEL, sensor.getBatteryLevel());
+        bundle.putBoolean(Constants.KEY_CHARGING_STATE, sensor.getChargingState());
+        bundle.putInt(Constants.KEY_SENSOR_RSSI, rssi);
+
+        return bundle;
     }
 
     @Override
