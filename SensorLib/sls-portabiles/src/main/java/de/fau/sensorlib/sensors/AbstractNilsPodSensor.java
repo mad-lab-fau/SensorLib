@@ -11,6 +11,7 @@ package de.fau.sensorlib.sensors;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
+import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Message;
 import android.util.Log;
@@ -64,6 +65,9 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         public static final FirmwareRevision FW_0_15_0 = new FirmwareRevision(0, 15, 0);
         public static final FirmwareRevision FW_0_16_0 = new FirmwareRevision(0, 16, 0);
     }
+
+    public static final double BASE_SCALING_FACTOR_GYRO = 16.4;
+    public static final double BASE_SCALING_FACTOR_ACC = 2 << 14;
 
 
     protected static final int MESSAGE_OPERATION_STATE_CHANGED = 2000;
@@ -185,6 +189,10 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     private NilsPodAccRange mAccRange = NilsPodAccRange.ACC_RANGE_16_G;
 
     private NilsPodGyroRange mGyroRange = NilsPodGyroRange.GYRO_RANGE_2000_DPS;
+
+    private double mAccScalingFactor = 1.0;
+
+    private double mGyroScalingFactor = 1.0;
 
     private NilsPodOperationState mOperationState = NilsPodOperationState.IDLE;
 
@@ -633,6 +641,22 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         return mSyncGroup;
     }
 
+    public NilsPodAccRange getAccRange() {
+        return mAccRange;
+    }
+
+    public NilsPodGyroRange getGyroRange() {
+        return mGyroRange;
+    }
+
+    public double getAccScalingFactor() {
+        return mAccScalingFactor;
+    }
+
+    public double getGyroScalingFactor() {
+        return mGyroScalingFactor;
+    }
+
     /**
      * Send command to sensor via Config Characteristic
      *
@@ -824,6 +848,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
             // call callback
             onOperationStateChanged(oldState, mOperationState);
             powerState = NilsPodPowerState.inferPowerState(values[offset++]);
+            setChargingState(powerState != NilsPodPowerState.NO_POWER);
             errorFlags = values[offset++] & 0xFF;
             mBatteryLevel = values[offset];
         } catch (SensorException e) {
@@ -924,7 +949,12 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
             if (getFirmwareRevision().isAtLeast(NilsPodFirmwareRevisions.FW_0_16_0)) {
                 mAccRange = NilsPodAccRange.inferAccRange(values[offset] & 0x0F);
+                // scaling factor for conversion from raw values to m/s^2
+                mAccScalingFactor = (BASE_SCALING_FACTOR_ACC / getAccRange().getRangeG()) * SensorManager.GRAVITY_EARTH;
+
                 mGyroRange = NilsPodGyroRange.inferGyroRange(values[offset] & 0xF0);
+                // scaling factor for conversion from raw values to dps
+                mGyroScalingFactor = (BASE_SCALING_FACTOR_GYRO * NilsPodGyroRange.GYRO_RANGE_2000_DPS.getRangeDps()) / getGyroRange().getRangeDps();
             }
             sampleSize = values[values.length - 1];
         } catch (Exception e) {

@@ -60,14 +60,43 @@
             android:layout_alignParentEnd="true"
             android:text="@string/placeholder_rssi" />
 
+        <RelativeLayout
+            android:id="@+id/icon_container"
+            android:layout_width="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginTop="4dp"
+            android:layout_below="@id/tv_sensor_address"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/iv_battery_level"
+                android:src="@drawable/ic_battery_full_black_24dp"
+                android:layout_width="wrap_content"
+                android:layout_alignParentTop="true"
+                android:tint="@color/sensor_available"
+                android:layout_height="wrap_content" />
+
+
+            <ImageView
+                android:id="@+id/iv_sensor_state"
+                android:src="@drawable/ic_logging_black_24dp"
+                android:layout_width="wrap_content"
+                android:visibility="gone"
+                android:tint="@color/sensor_available"
+                android:layout_alignParentBottom="true"
+                android:layout_height="wrap_content" />
+
+        </RelativeLayout>
+
         <GridView
             android:id="@+id/gv_sensors"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/tv_sensor_address"
             android:layout_alignParentBottom="true"
+            android:layout_toStartOf="@+id/icon_container"
             android:layout_marginTop="4dp"
-            android:layout_toStartOf="@+id/iv_battery"
             android:layout_toEndOf="@id/checkbox"
             android:horizontalSpacing="1dp"
             android:numColumns="9"

@@ -22,6 +22,7 @@ import de.fau.sensorlib.SensorException;
 import de.fau.sensorlib.SensorInfo;
 import de.fau.sensorlib.dataframe.SensorDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
+import de.fau.sensorlib.enums.SensorMessage;
 import de.fau.sensorlib.enums.SensorState;
 
 /**
@@ -63,12 +64,6 @@ public abstract class AbstractSensor extends SensorInfo {
      * A list of HardwareSensors that were selected by the calling application. Only these sensors report their data to the application.
      */
     protected EnumSet<HardwareSensor> mSelectedHwSensors = EnumSet.noneOf(HardwareSensor.class);
-
-
-    /**
-     * 0-100 (%).
-     */
-    protected int mBatteryLevel;
 
     protected String mSerialNumberString = "";
     protected String mManufacturerString = "";
@@ -374,14 +369,6 @@ public abstract class AbstractSensor extends SensorInfo {
         return mSelectedHwSensors;
     }
 
-    public boolean hasBatteryMeasurement() {
-        return mDeviceClass.hasBatteryMeasurement();
-    }
-
-    public int getBatteryLevel() {
-        return mBatteryLevel;
-    }
-
     public String getSerialNumberString() {
         return mSerialNumberString;
     }
@@ -412,6 +399,12 @@ public abstract class AbstractSensor extends SensorInfo {
 
     private long getSensorSystemID() {
         return mSensorSystemID;
+    }
+
+    @Override
+    public void setChargingState(boolean isCharging) {
+        super.setChargingState(isCharging);
+        sendNotification(SensorMessage.CHARGING_STATE_CHANGED);
     }
 
     /**

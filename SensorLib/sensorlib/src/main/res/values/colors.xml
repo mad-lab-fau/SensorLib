@@ -63,4 +63,8 @@
     <color name="press_2">#607D8B</color>
     <color name="press_3">#455A64</color>
 
+    <color name="mic">#FF5722</color>
+
+    <color name="rssi">#4CAF50</color>
+
 </resources>

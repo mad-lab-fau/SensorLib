@@ -28,17 +28,17 @@ public enum KnownSensor {
                     HardwareSensor.BAROMETER,
                     HardwareSensor.TEMPERATURE,
                     HardwareSensor.HUMIDITY
-            ), true, "InternalSensor"),
+            ), "InternalSensor"),
 
     GENERIC_BLE("Generic BLE Sensor", new String[]{"BLE", "Polar", "miCoach"},
             EnumSet.noneOf(
                     HardwareSensor.class
-            ), false, "GenericBleSensor"),
+            ), "GenericBleSensor"),
 
     GENERIC_SIMULATED("Generic Simulated Sensor", new String[]{"Simulator"},
             EnumSet.noneOf(
                     HardwareSensor.class
-            ), true, "SimulatedSensor"),
+            ), "SimulatedSensor"),
 
     EMPATICA("Empatica", new String[]{"Empatica"},
             EnumSet.of(
@@ -46,7 +46,7 @@ public enum KnownSensor {
                     HardwareSensor.BLOOD_VOLUME_PRESSURE,
                     HardwareSensor.GALVANIC_SKIN_RESPONSE,
                     HardwareSensor.HEART_RATE
-            ), true, "EmpaticaSensor"),
+            ), "EmpaticaSensor"),
 
     FITNESS_SHIRT("FitnessSHIRT", new String[]{"FSv3"},
             EnumSet.of(
@@ -54,7 +54,7 @@ public enum KnownSensor {
                     HardwareSensor.ECG,
                     HardwareSensor.HEART_RATE,
                     HardwareSensor.RESPIRATION
-            ), false, "FitnessShirt"),
+            ), "FitnessShirt"),
 
     MYO("Myo", new String[]{"Myo"},
             EnumSet.of(
@@ -62,12 +62,12 @@ public enum KnownSensor {
                     HardwareSensor.ACCELEROMETER,
                     HardwareSensor.GYROSCOPE,
                     HardwareSensor.ORIENTATION
-            ), false, "MyoSensor"),
+            ), "MyoSensor"),
 
     MYO_RAW("Myo Raw", new String[]{"Myo Raw"},
             EnumSet.of(
                     HardwareSensor.EMG
-            ), false, "MyoRawSensor"),
+            ), "MyoRawSensor"),
 
     SHIMMER("Shimmer", new String[]{"RN42", "Shimmer3"},
             EnumSet.of(
@@ -76,12 +76,12 @@ public enum KnownSensor {
                     HardwareSensor.MAGNETOMETER,
                     HardwareSensor.ECG,
                     HardwareSensor.EMG
-            ), false, "ShimmerSensor"),
+            ), "ShimmerSensor"),
 
     BLE_ECG_SENSOR("BleEcgSensor", new String[]{"POSTAGE"},
             EnumSet.of(
                     HardwareSensor.ECG
-            ), false, "BleEcgSensor"),
+            ), "BleEcgSensor"),
 
     SIMBLEE("Simblee", new String[]{"Simblee"},
             EnumSet.of(
@@ -89,14 +89,14 @@ public enum KnownSensor {
                     HardwareSensor.ACCELEROMETER,
                     HardwareSensor.MAGNETOMETER,
                     HardwareSensor.RESPIRATION
-            ), false, "SimbleeSensor"),
+            ), "SimbleeSensor"),
 
     SMARTWATCH("SmartWatch", new String[]{"Moto"},
             EnumSet.of(
                     HardwareSensor.ACCELEROMETER,
                     HardwareSensor.GYROSCOPE,
                     HardwareSensor.MAGNETOMETER
-            ), true, "SmartWatch"),
+            ), "SmartWatch"),
 
     TEK("Bosch TEK", new String[]{"PRM-TECH"},
             EnumSet.of(
@@ -109,17 +109,17 @@ public enum KnownSensor {
                     HardwareSensor.PRESSURE,
                     HardwareSensor.LIGHT,
                     HardwareSensor.NOISE
-            ), true, "TekSensor"),
+            ), "TekSensor"),
 
     SMARTBAND2("Smartband 2", new String[]{"SWR12"},
             EnumSet.of(
                     HardwareSensor.HEART_RATE
-            ), true, "Smartband2Sensor"),
+            ), "Smartband2Sensor"),
 
     FIT_SMART("FIT SMART", new String[]{"FIT SMART"},
             EnumSet.of(
                     HardwareSensor.HEART_RATE
-            ), true),
+            ), "FitSmart"),
 
     MUSE("Muse", new String[]{"Muse"},
             EnumSet.of(
@@ -127,13 +127,13 @@ public enum KnownSensor {
                     HardwareSensor.EEG_FREQ_BANDS,
                     HardwareSensor.GYROSCOPE,
                     HardwareSensor.ACCELEROMETER
-            ), true, "MuseSensor"),
+            ), "MuseSensor"),
 
     HOOP_SENSOR("Hoop Sensor", new String[]{"Hoop", "HOOP", "Portabiles"},
             EnumSet.of(
                     HardwareSensor.ACCELEROMETER,
                     HardwareSensor.GYROSCOPE
-            ), true, "HoopSensor"),
+            ), "HoopSensor"),
 
     NILSPOD("NilsPod", new String[]{"NilsPod-", "NilsPodX"},
             EnumSet.of(
@@ -142,10 +142,16 @@ public enum KnownSensor {
                     HardwareSensor.MAGNETOMETER,
                     HardwareSensor.BAROMETER,
                     HardwareSensor.TEMPERATURE
-            ), true, "NilsPodSensor"),
+            ), "NilsPodSensor"),
+    OPEN_BADGE("OpenBadge", new String[]{"HDBDG", "BADGE"},
+            EnumSet.of(
+                    HardwareSensor.MICROPHONE,
+                    HardwareSensor.ACCELEROMETER,
+                    HardwareSensor.RSSI
+            ), "OpenBadgeSensor"),
     DFU_TARG("DfuTarg", new String[]{"DfuTarg"},
             EnumSet.noneOf(HardwareSensor.class),
-            false, "DfuTargSensor"
+            "DfuTargSensor"
     );
 
     // =============================================================================================
@@ -164,11 +170,6 @@ public enum KnownSensor {
      */
     private EnumSet<HardwareSensor> mAvailableSensors;
 
-    /**
-     * Boolean indicating whether the sensor device offers battery measurement
-     */
-    private boolean mHasBatteryMeasurement;
-
     private Class<?> mSensorClass;
 
     /**
@@ -177,8 +178,8 @@ public enum KnownSensor {
      * @param descriptiveName     a descriptive name for the sensor type/class.
      * @param identifyingKeywords keywords that can be used to identify this sensor type/class given only the name e.g. reported via Bluetooth.
      */
-    KnownSensor(String descriptiveName, String[] identifyingKeywords, EnumSet<HardwareSensor> availableSensors, boolean hasBatteryMeasurement) {
-        this(descriptiveName, identifyingKeywords, availableSensors, hasBatteryMeasurement, null);
+    KnownSensor(String descriptiveName, String[] identifyingKeywords, EnumSet<HardwareSensor> availableSensors) {
+        this(descriptiveName, identifyingKeywords, availableSensors, null);
     }
 
     /**
@@ -187,11 +188,10 @@ public enum KnownSensor {
      * @param descriptiveName     a descriptive name for the sensor type/class.
      * @param identifyingKeywords keywords that can be used to identify this sensor type/class given only the name e.g. reported via Bluetooth.
      */
-    KnownSensor(String descriptiveName, String[] identifyingKeywords, EnumSet<HardwareSensor> availableSensors, boolean hasBatteryMeasurement, String className) {
+    KnownSensor(String descriptiveName, String[] identifyingKeywords, EnumSet<HardwareSensor> availableSensors, String className) {
         mDescriptiveName = descriptiveName;
         mIdentifyingKeywords = identifyingKeywords;
         mAvailableSensors = availableSensors;
-        mHasBatteryMeasurement = hasBatteryMeasurement;
         try {
             mSensorClass = Class.forName("de.fau.sensorlib.sensors." + className);
         } catch (ClassNotFoundException ignored) {
@@ -206,15 +206,6 @@ public enum KnownSensor {
      */
     public EnumSet<HardwareSensor> getAvailableSensors() {
         return mAvailableSensors;
-    }
-
-    /**
-     * Checks if the sensor offers battery measurement.
-     *
-     * @return true if battery measurement is available, false otherwise
-     */
-    public boolean hasBatteryMeasurement() {
-        return mHasBatteryMeasurement;
     }
 
 

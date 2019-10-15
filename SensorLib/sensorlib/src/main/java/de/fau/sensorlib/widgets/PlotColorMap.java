@@ -32,6 +32,8 @@ public class PlotColorMap {
         sColorMap.put(HardwareSensor.LIGHT, new int[]{R.color.light});
         sColorMap.put(HardwareSensor.HUMIDITY, new int[]{R.color.humidity});
         sColorMap.put(HardwareSensor.TEMPERATURE, new int[]{R.color.temp});
+        sColorMap.put(HardwareSensor.MICROPHONE, new int[]{R.color.mic});
+        sColorMap.put(HardwareSensor.RSSI, new int[]{R.color.rssi});
     }
 
 

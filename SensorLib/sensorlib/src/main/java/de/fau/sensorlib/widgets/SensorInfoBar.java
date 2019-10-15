@@ -114,6 +114,7 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
             case OPERATION_STATE_CHANGED:
                 mAdapter.updateAdditionalInfo(sensor, message);
             case BATTERY_LEVEL_CHANGED:
+            case CHARGING_STATE_CHANGED:
                 mAdapter.updateSensor(sensor);
                 break;
         }
@@ -212,7 +213,7 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
         @Override
         public void onBindViewHolder(@NonNull SensorInfoViewHolder holder, int position) {
             holder.setSensorName(mAttachedSensors.get(position).getDeviceName());
-            holder.updateBatteryLevel(mAttachedSensors.get(position).getBatteryLevel());
+            holder.updateBatteryLevel(mAttachedSensors.get(position).getBatteryLevel(), mAttachedSensors.get(position).getChargingState());
             holder.updateAdditionalInfo(mAdditionalInfos.get(position));
             holder.setConfigCheckWarning(mConfigCheckWarning);
         }
@@ -267,6 +268,7 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
         private Context mContext;
         private TextView mSensorNameTextView;
         private TextView mBatteryLevelTextView;
+        private ImageView mBatteryLevelImageView;
         private TextView mAdditionalInfoTextView;
         private ImageView mConfigCheckWarningImageView;
         private ItemClickListener mItemClickListener;
@@ -276,6 +278,7 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
             mContext = context;
             mSensorNameTextView = itemView.findViewById(R.id.tv_sensor_name);
             mBatteryLevelTextView = itemView.findViewById(R.id.tv_battery_level);
+            mBatteryLevelImageView = itemView.findViewById(R.id.iv_battery_level);
             mAdditionalInfoTextView = itemView.findViewById(R.id.tv_additional_info);
             mConfigCheckWarningImageView = itemView.findViewById(R.id.tv_config_check);
             mItemClickListener = listener;
@@ -287,8 +290,9 @@ public class SensorInfoBar extends RecyclerView implements SensorEventListener {
             TextViewCompat.setAutoSizeTextTypeUniformWithPresetSizes(mSensorNameTextView, new int[]{8, 10, 12}, TextViewCompat.AUTO_SIZE_TEXT_TYPE_UNIFORM);
         }
 
-        public void updateBatteryLevel(int batteryLevel) {
+        public void updateBatteryLevel(int batteryLevel, boolean isCharging) {
             mBatteryLevelTextView.setText(mContext.getString(R.string.placeholder_battery_level, batteryLevel));
+            mBatteryLevelImageView.setImageResource(BatteryIconHelper.getIconForBatteryLevel(batteryLevel, isCharging));
         }
 
         public void updateAdditionalInfo(String message) {
