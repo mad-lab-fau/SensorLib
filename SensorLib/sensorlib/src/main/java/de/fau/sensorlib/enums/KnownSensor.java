@@ -143,6 +143,12 @@ public enum KnownSensor {
                     HardwareSensor.BAROMETER,
                     HardwareSensor.TEMPERATURE
             ), "NilsPodSensor"),
+    OPEN_BADGE("OpenBadge", new String[]{"HDBDG", "BADGE"},
+            EnumSet.of(
+                    HardwareSensor.MICROPHONE,
+                    HardwareSensor.ACCELEROMETER,
+                    HardwareSensor.RSSI
+            ), "OpenBadgeSensor"),
     DFU_TARG("DfuTarg", new String[]{"DfuTarg"},
             EnumSet.noneOf(HardwareSensor.class),
             "DfuTargSensor"

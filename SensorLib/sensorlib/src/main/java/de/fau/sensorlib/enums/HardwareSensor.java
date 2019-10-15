@@ -21,12 +21,14 @@ import de.fau.sensorlib.dataframe.HeartRateDataFrame;
 import de.fau.sensorlib.dataframe.HumidityDataFrame;
 import de.fau.sensorlib.dataframe.LightDataFrame;
 import de.fau.sensorlib.dataframe.MagnetometerDataFrame;
+import de.fau.sensorlib.dataframe.MicrophoneDataFrame;
 import de.fau.sensorlib.dataframe.NoiseDataFrame;
 import de.fau.sensorlib.dataframe.OrientationDataFrame;
 import de.fau.sensorlib.dataframe.PpgDataFrame;
 import de.fau.sensorlib.dataframe.PressureDataFrame;
 import de.fau.sensorlib.dataframe.QuaternionDataFrame;
 import de.fau.sensorlib.dataframe.RespirationDataFrame;
+import de.fau.sensorlib.dataframe.RssiDataFrame;
 import de.fau.sensorlib.dataframe.TemperatureDataFrame;
 
 /**
@@ -56,7 +58,9 @@ public enum HardwareSensor {
     QUATERNION("QUA", QuaternionDataFrame.class),
     GESTURE("GES", GestureDataFrame.class),
     NOISE("NOIS", NoiseDataFrame.class),
-    HUMIDITY("HUM", HumidityDataFrame.class);
+    HUMIDITY("HUM", HumidityDataFrame.class),
+    MICROPHONE("MIC", MicrophoneDataFrame.class),
+    RSSI("RSSI", RssiDataFrame.class);
 
     private String mShortDescription;
     private Class<?> mDf;

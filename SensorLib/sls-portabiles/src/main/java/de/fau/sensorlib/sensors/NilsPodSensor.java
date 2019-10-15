@@ -206,15 +206,16 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             if (isSensorEnabled(HardwareSensor.GYROSCOPE)) {
                 gyro = new double[3];
                 for (int j = 0; j < 3; j++) {
-                    gyro[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
+                    gyro[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset) / getGyroScalingFactor();
                     offset += 2;
                 }
             }
+
             // extract accelerometer data
             if (isSensorEnabled(HardwareSensor.ACCELEROMETER)) {
                 accel = new double[3];
                 for (int j = 0; j < 3; j++) {
-                    accel[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset);
+                    accel[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT16, offset) / getAccScalingFactor();
                     offset += 2;
                 }
             }
@@ -289,7 +290,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             // send new data to the SensorDataProcessor
             sendNewData(df);
 
-            //Log.d(TAG, df.toString());
+            Log.d(TAG, df.toString());
 
             lastCounter = localCounter;
             if (mRecordingEnabled) {
