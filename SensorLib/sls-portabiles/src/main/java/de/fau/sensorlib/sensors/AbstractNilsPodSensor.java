@@ -950,7 +950,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
             if (getFirmwareRevision().isAtLeast(NilsPodFirmwareRevisions.FW_0_16_0)) {
                 mAccRange = NilsPodAccRange.inferAccRange(values[offset] & 0x0F);
                 // scaling factor for conversion from raw values to m/s^2
-                mAccScalingFactor = (BASE_SCALING_FACTOR_ACC / getAccRange().getRangeG()) * SensorManager.GRAVITY_EARTH;
+                mAccScalingFactor = (BASE_SCALING_FACTOR_ACC / getAccRange().getRangeG()) / SensorManager.GRAVITY_EARTH;
 
                 mGyroRange = NilsPodGyroRange.inferGyroRange(values[offset] & 0xF0);
                 // scaling factor for conversion from raw values to dps

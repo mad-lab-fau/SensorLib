@@ -131,13 +131,6 @@ public class SessionCsvConverter {
             // Byte 9
             int gyroRange = values[offset++] * 125; // in dps
 
-            // acc scaling factor for conversion from raw values to m/s^2
-            accScalingFactor = (AbstractNilsPodSensor.BASE_SCALING_FACTOR_ACC / mHeader.getAccRange()) * SensorManager.GRAVITY_EARTH;
-
-            // gyro scaling factor for conversion from raw values to dps
-            gyroScalingFactor = (AbstractNilsPodSensor.BASE_SCALING_FACTOR_GYRO * NilsPodGyroRange.GYRO_RANGE_2000_DPS.getRangeDps()) / mHeader.getGyroRange();
-
-
             // Bytes 10-14: System Settings
             // Byte 10: Sensor Position
             NilsPodSensorPosition sensorPosition = NilsPodSensorPosition.values()[values[offset++]];
@@ -224,6 +217,11 @@ public class SessionCsvConverter {
             mHeader.setHardwareVersion(hardwareVersion);
             mHeader.setMacAddress(macAddress);
             mHeader.setFirmwareVersion(firmwareVersion);
+
+            // acc scaling factor for conversion from raw values to m/s^2
+            accScalingFactor = (AbstractNilsPodSensor.BASE_SCALING_FACTOR_ACC / mHeader.getAccRange()) / SensorManager.GRAVITY_EARTH;
+            // gyro scaling factor for conversion from raw values to dps
+            gyroScalingFactor = (AbstractNilsPodSensor.BASE_SCALING_FACTOR_GYRO * NilsPodGyroRange.GYRO_RANGE_2000_DPS.getRangeDps()) / mHeader.getGyroRange();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -346,7 +344,7 @@ public class SessionCsvConverter {
             df = new NilsPodSensor.NilsPodDataFrame(mSensor, timestamp, acc, gyro, baro);
         }
 
-        Log.d(TAG, df.toString());
+        //Log.d(TAG, df.toString());
         mRecorder.writeData(df);
 
     }
