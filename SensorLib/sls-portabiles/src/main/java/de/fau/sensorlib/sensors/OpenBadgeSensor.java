@@ -8,7 +8,6 @@ import android.util.Log;
 import java.util.Arrays;
 import java.util.UUID;
 
-import de.fau.sensorlib.BleGattAttributes;
 import de.fau.sensorlib.SensorDataProcessor;
 import de.fau.sensorlib.SensorInfo;
 
@@ -31,9 +30,9 @@ public class OpenBadgeSensor extends GenericBleSensor {
     protected static final UUID BADGE_STREAMING = UUID.fromString("6e400003-b5a3-f393-e0a9-e50e24dcca9e");
 
     static {
-        BleGattAttributes.addService(NORDIC_UART_SERVICE, "OpenBadge UART Service");
-        BleGattAttributes.addCharacteristic(BADGE_COMMANDS, " OpenBadge Commands");
-        BleGattAttributes.addCharacteristic(BADGE_STREAMING, " OpenBadge Streaming");
+        //BleGattAttributes.addService(NORDIC_UART_SERVICE, "OpenBadge UART Service");
+        //BleGattAttributes.addCharacteristic(BADGE_COMMANDS, " OpenBadge Commands");
+        //BleGattAttributes.addCharacteristic(BADGE_STREAMING, " OpenBadge Streaming");
     }
 
     public OpenBadgeSensor(Context context, SensorInfo info, SensorDataProcessor dataHandler) {
