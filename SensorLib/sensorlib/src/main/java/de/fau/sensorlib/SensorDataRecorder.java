@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Environment;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
 
@@ -45,7 +44,7 @@ public class SensorDataRecorder {
     /**
      * Directory name where data will be stored on the external storage
      */
-    private String mDirName = "SensorLibRecordings";
+    private String DIR_NAME = "SensorLibRecordings";
     /**
      * File header
      */
@@ -54,7 +53,6 @@ public class SensorDataRecorder {
     private String mAbsolutePath;
     private BufferedWriter mBufferedWriter;
     private File mFileHandler;
-    private boolean mStorageWritable;
     private boolean mFileCreated;
     private Context mContext;
 
@@ -94,7 +92,7 @@ public class SensorDataRecorder {
         }
 
         if (subDir != null) {
-            mDirName += ("/" + subDir);
+            DIR_NAME += ("/" + subDir);
         }
 
         headerBuilder.append("timestamp").append(SEPARATOR);
@@ -124,8 +122,22 @@ public class SensorDataRecorder {
         Log.d(TAG, mHeader);
 
         if (checkPermissions()) {
-            createFile();
-            prepareWriter();
+            File directory = getDirectory();
+            if (directory != null) {
+                mFileHandler = new File(directory + "/" + mFilename);
+                try {
+                    mFileCreated = mFileHandler.createNewFile();
+                    if (!mFileCreated) {
+                        mFileCreated = mFileHandler.exists();
+                    }
+                    mAbsolutePath = mFileHandler.getAbsolutePath();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                prepareWriter();
+                Log.d(TAG, getClass().getSimpleName() + " \"" + mFilename + "\" successfully created!");
+            }
         } else {
             throw new SensorException(SensorException.SensorExceptionType.permissionsMissing);
         }
@@ -184,8 +196,22 @@ public class SensorDataRecorder {
         Log.d(TAG, mHeader);
 
         if (checkPermissions()) {
-            createFile();
-            prepareWriter();
+            File directory = getDirectory();
+            if (directory != null) {
+                mFileHandler = new File(directory + "/" + mFilename);
+                try {
+                    mFileCreated = mFileHandler.createNewFile();
+                    if (!mFileCreated) {
+                        mFileCreated = mFileHandler.exists();
+                    }
+                    mAbsolutePath = mFileHandler.getAbsolutePath();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                prepareWriter();
+                Log.d(TAG, getClass().getSimpleName() + " \"" + mFilename + "\" successfully created!");
+            }
         } else {
             throw new SensorException(SensorException.SensorExceptionType.permissionsMissing);
         }
@@ -205,78 +231,76 @@ public class SensorDataRecorder {
                         == PackageManager.PERMISSION_GRANTED;
     }
 
-    private void createFile() {
+    private File getRootDirectory() {
+        boolean storageWritable;
         String state;
-        File root = null;
-        File path;
+        File root;
 
+        root = mContext.getExternalFilesDir(null);
         // try to write on SD card
         state = Environment.getExternalStorageState();
         switch (state) {
             case Environment.MEDIA_MOUNTED:
                 // media readable and writable
-                root = Environment.getExternalStorageDirectory();
-                mStorageWritable = true;
+                storageWritable = true;
                 break;
             case Environment.MEDIA_MOUNTED_READ_ONLY:
                 // media only readable
-                mStorageWritable = false;
+                storageWritable = false;
                 Log.e(TAG, "SD card only readable!");
                 break;
             default:
                 // not readable or writable
-                mStorageWritable = false;
+                storageWritable = false;
                 Log.e(TAG, "SD card not readable and writable!");
                 break;
         }
 
-        if (!mStorageWritable) {
+        if (!storageWritable) {
             // try to write on external storage
-            root = Environment.getDataDirectory();
-            if (root.canWrite()) {
-                mStorageWritable = true;
-            } else {
+            root = ContextCompat.getDataDir(mContext);
+            if (root == null || !root.canWrite()) {
                 Log.e(TAG, "External storage not readable and writable!");
-                Toast.makeText(mContext, "External storage not readable and writable!", Toast.LENGTH_SHORT).show();
             }
         }
+        return root;
+    }
 
-        if (mStorageWritable) {
+    private File getDirectory() {
+        boolean fileCreated;
+        File directory;
+        File root = getRootDirectory();
+
+        if (root != null) {
             try {
                 // create directory
-                path = new File(root, mDirName);
-                mFileCreated = path.mkdirs();
-                if (!mFileCreated) {
-                    mFileCreated = path.exists();
-                    if (!mFileCreated) {
-                        Log.e(TAG, "File could not be created!");
-                        return;
+                directory = new File(root, DIR_NAME);
+                fileCreated = directory.mkdirs();
+
+                if (!fileCreated) {
+                    fileCreated = directory.exists();
+                    if (!fileCreated) {
+                        Log.e(TAG, "Directory could not be created!");
+                        return null;
                     } else {
-                        Log.i(TAG, "Working directory is " + path.getAbsolutePath());
+                        Log.i(TAG, "Working directory is " + directory.getAbsolutePath());
                     }
-                }
-                // create files
-                mFileHandler = new File(path + "/" + mFilename);
-                mFileCreated = mFileHandler.createNewFile();
-                if (!mFileCreated) {
-                    mFileCreated = mFileHandler.exists();
-                    if (!mFileCreated) {
-                        Log.e(TAG, "File could not be created!");
-                    }
+                } else {
+                    Log.i(TAG, "Directory created at " + directory.getAbsolutePath());
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Exception on dir and file create!", e);
-                mFileCreated = false;
+                return null;
             }
+            return directory;
+        } else {
+            return null;
         }
-
-        mAbsolutePath = mFileHandler.getAbsolutePath();
-        Log.d(TAG, "File successfully created!");
     }
 
     private void prepareWriter() {
         FileWriter fw;
-        if (mStorageWritable && mFileCreated) {
+        if (mFileCreated) {
             try {
                 // open buffered writer and write header line
                 fw = new FileWriter(mFileHandler);
@@ -353,7 +377,7 @@ public class SensorDataRecorder {
      * @return true if data can be written, false otherwise
      */
     private boolean isWritable() {
-        return (mStorageWritable && mFileCreated && (mBufferedWriter != null));
+        return (mFileCreated && (mBufferedWriter != null));
     }
 
 }
