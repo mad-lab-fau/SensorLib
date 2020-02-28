@@ -519,6 +519,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
             setState(SensorState.DISCONNECTED);
             if (mFirmwareUpgradeListener != null) {
                 mFirmwareUpgradeListener.onFirmwareUpgradeFinished(AbstractNilsPodSensor.this);
+                sendDisconnected();
             } else {
                 Log.e(TAG, "No FirmwareUpgradeListener attached!");
             }
@@ -534,6 +535,34 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
             }
         }
 
+        @Override
+        public void onError(@NonNull String deviceAddress, int error, int errorType, String message) {
+            super.onError(deviceAddress, error, errorType, message);
+            String errorString = "";
+            switch (errorType) {
+                case NilsPodDfuService.ERROR_TYPE_COMMUNICATION_STATE:
+                    errorString = "COMMUNICATION_STATE";
+                    break;
+                case NilsPodDfuService.ERROR_TYPE_COMMUNICATION:
+                    errorString = "COMMUNICATION";
+                    break;
+                case NilsPodDfuService.ERROR_TYPE_DFU_REMOTE:
+                    errorString = "DFU_REMOTE";
+                    break;
+                case NilsPodDfuService.ERROR_TYPE_OTHER:
+                    errorString = "OTHER";
+                    break;
+            }
+            Log.e(TAG, getDeviceName() + " >> DFU Error: " + errorString + ", message: " + message);
+            mFirmwareUpgradeListener.onFirmwareUpgradeError(AbstractNilsPodSensor.this, message);
+        }
+
+        @Override
+        public void onDfuAborted(@NonNull String deviceAddress) {
+            super.onDfuAborted(deviceAddress);
+            Log.e(TAG, getDeviceName() + " >> DFU Aborted");
+            mFirmwareUpgradeListener.onFirmwareUpgradeAbort(AbstractNilsPodSensor.this);
+        }
     };
 
     private final DfuLogListener mDfuLogListener = (deviceAddress, level, message) -> Log.d(TAG, getDeviceName() + " >> " + message);

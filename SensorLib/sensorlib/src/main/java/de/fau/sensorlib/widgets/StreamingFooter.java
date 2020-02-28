@@ -15,6 +15,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import de.fau.sensorlib.R;
 import de.fau.sensorlib.SensorEventGenerator;
@@ -183,6 +184,10 @@ public class StreamingFooter extends RelativeLayout implements View.OnClickListe
     public void onClick(View v) {
         int id = v.getId();
         if (id == R.id.fab) {
+            if (mState == SensorState.UPGRADING_FIRMWARE) {
+                Toast.makeText(getContext(), "Firmware upgrade in progress!", Toast.LENGTH_SHORT).show();
+                return;
+            }
             animateFAB();
         } else if (id == R.id.button_start_stop) {
             onStartStopButtonPressed();
