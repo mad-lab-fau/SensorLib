@@ -40,8 +40,18 @@ public class RecorderShareDialog extends AlertDialog {
             sharingIntent.setType("application/octet-stream");
             sharingIntent.putExtra(Intent.EXTRA_STREAM, uri);
             sharingIntent.putExtra(Intent.EXTRA_SUBJECT, filename);
-            getContext().startActivity(Intent.createChooser(sharingIntent, "Share Session via..."));
+            getContext().startActivity(Intent.createChooser(sharingIntent, context.getString(R.string.share_recording)));
         });
+        setButton(BUTTON_NEUTRAL, context.getString(R.string.open_folder),
+                (dialog, which) -> {
+                    Uri selectedUri = Uri.parse(absolutePath.replace(filename, ""));
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setDataAndType(selectedUri, "resource/folder");
+                    Intent chooser = Intent.createChooser(intent, context.getString(R.string.open_folder));
+                    if (intent.resolveActivity(context.getPackageManager()) != null) {
+                        context.startActivity(chooser);
+                    }
+                });
         setButton(BUTTON_POSITIVE, getContext().getResources().getString(R.string.cancel), (dialog, which) -> dismiss());
 
         show();
