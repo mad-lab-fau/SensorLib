@@ -60,6 +60,8 @@ public class SensorDataRecorder {
 
     private AbstractSensor mSensor;
 
+    private SimpleDateFormat mTimeFormat = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault());
+
 
     /**
      * Creates a new data recorder instance
@@ -75,14 +77,12 @@ public class SensorDataRecorder {
         mContext = context;
         mSensor = sensor;
 
-        String time;
         if (date == null) {
             date = new Date();
         }
-        time = new SimpleDateFormat("yyyyMMdd_HHmm", Locale.getDefault()).format(date);
 
         // Filename consists of sensor device name and start time of data recording
-        mFilename = mSensor.getDeviceName() + "_" + time + ".csv";
+        mFilename = mSensor.getDeviceName() + "_" + mTimeFormat.format(date) + ".csv";
 
         StringBuilder headerBuilder = new StringBuilder();
         if (header == null) {
@@ -165,9 +165,8 @@ public class SensorDataRecorder {
         mContext = context;
         mSensor = sensor;
 
-        String currTime = new SimpleDateFormat("yyyyMMdd_HHmm", Locale.getDefault()).format(new Date());
         // Filename consists of sensor device name and start time of data recording
-        mFilename = mSensor.getDeviceName() + "_" + hwSensor.getShortDescription() + "_" + currTime + ".csv";
+        mFilename = mSensor.getDeviceName() + "_" + hwSensor.getShortDescription() + "_" + mTimeFormat.format(new Date()) + ".csv";
 
         StringBuilder headerBuilder = new StringBuilder();
         headerBuilder.append("samplingrate" + SEPARATOR).append(sensor.getSamplingRate()).append(DELIMITER);
