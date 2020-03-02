@@ -16,4 +16,7 @@ public interface FirmwareUpgradeListener {
 
     void onFirmwareUpgradeFinished(AbstractSensor sensor);
 
+    void onFirmwareUpgradeError(AbstractSensor sensor, String message);
+
+    void onFirmwareUpgradeAbort(AbstractSensor sensor);
 }

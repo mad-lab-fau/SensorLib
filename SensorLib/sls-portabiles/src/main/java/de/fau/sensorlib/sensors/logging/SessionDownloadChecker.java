@@ -18,7 +18,6 @@ import android.widget.Toast;
 import androidx.core.content.ContextCompat;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -40,12 +39,9 @@ public class SessionDownloadChecker {
     /**
      * Directory name where data will be stored on the external storage
      */
-    private String mDirName = "SensorLibRecordings/NilsPodSessionDownloads";
+    private static final String DIR_NAME = "SensorLibRecordings/NilsPodSessionDownloads";
     private File mPath;
     private String mAbsoluteDirPath = "";
-
-    private boolean mStorageReadable;
-    private boolean mDirectoryCreated;
 
     private AbstractSensor mSensor;
     private ArrayList<Session> mSessionList;
@@ -59,12 +55,16 @@ public class SessionDownloadChecker {
         mAlreadyDownloadedList = new ArrayList<>();
 
         if (checkPermissions()) {
-            checkDirectory();
+            File directory = getDirectory();
+            if (directory != null) {
+                mPath = directory;
+                listFiles();
+            }
         } else {
             throw new SensorException(SensorException.SensorExceptionType.permissionsMissing);
         }
 
-        Log.d(TAG, getClass().getSimpleName() + " checking on folder \"" + mDirName + "\"");
+        Log.d(TAG, getClass().getSimpleName() + " checking on folder \"" + DIR_NAME + "\"");
     }
 
     /**
@@ -79,76 +79,86 @@ public class SessionDownloadChecker {
                         == PackageManager.PERMISSION_GRANTED;
     }
 
-    private void checkDirectory() {
+    private File getRootDirectory() {
+        boolean storageWritable;
         String state;
-        File root = null;
+        File root;
 
+        root = mContext.getExternalFilesDir(null);
         // try to write on SD card
         state = Environment.getExternalStorageState();
         switch (state) {
             case Environment.MEDIA_MOUNTED:
                 // media readable and writable
-                // fall through
+                storageWritable = true;
+                break;
             case Environment.MEDIA_MOUNTED_READ_ONLY:
                 // media only readable
-                mStorageReadable = true;
-                root = Environment.getExternalStorageDirectory();
+                storageWritable = false;
+                Log.e(TAG, "SD card only readable!");
                 break;
             default:
                 // not readable or writable
-                mStorageReadable = false;
+                storageWritable = false;
                 Log.e(TAG, "SD card not readable and writable!");
                 break;
         }
 
-        if (!mStorageReadable) {
+        if (!storageWritable) {
             // try to write on external storage
-            root = Environment.getDataDirectory();
-            if (root.canRead()) {
-                mStorageReadable = true;
-            } else {
-                Log.e(TAG, "External storage not readable!");
-                Toast.makeText(mContext, "External storage not readable!", Toast.LENGTH_SHORT).show();
-                return;
+            root = ContextCompat.getDataDir(mContext);
+            if (root == null || !root.canWrite()) {
+                Log.e(TAG, "External storage not readable and writable!");
             }
         }
-
-        try {
-            // create directory
-            mPath = new File(root, mDirName);
-            mDirectoryCreated = mPath.mkdirs();
-            if (!mDirectoryCreated) {
-                mDirectoryCreated = mPath.exists();
-                if (!mDirectoryCreated) {
-                    Log.e(TAG, "Directory could not be created!");
-                    return;
-                } else {
-                    mAbsoluteDirPath = mPath.getAbsolutePath();
-                    Log.i(TAG, "Working directory is " + mAbsoluteDirPath);
-                }
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Exception on directory create!", e);
-            mDirectoryCreated = false;
-            return;
-        }
-
-        listFiles();
+        return root;
     }
 
+    private File getDirectory() {
+        boolean fileCreated;
+        File directory;
+        File root = getRootDirectory();
 
-    public void listFiles() {
+        if (root != null) {
+            try {
+                // create directory
+                directory = new File(root, DIR_NAME);
+                fileCreated = directory.mkdirs();
+
+                if (!fileCreated) {
+                    fileCreated = directory.exists();
+                    if (!fileCreated) {
+                        Log.e(TAG, "Directory could not be created!");
+                        return null;
+                    } else {
+                        mAbsoluteDirPath = directory.getAbsolutePath();
+                        Log.i(TAG, "Working directory is " + directory.getAbsolutePath());
+                    }
+                } else {
+                    Log.i(TAG, "Directory created at " + directory.getAbsolutePath());
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Exception on dir and file create!", e);
+                return null;
+            }
+            return directory;
+        } else {
+            return null;
+        }
+    }
+
+    private void listFiles() {
         if (mPath == null) {
             return;
         }
         // list files
-        String[] files = mPath.list(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.contains(mSensor.getDeviceName());
-            }
-        });
-        mFileList = new ArrayList<>(Arrays.asList(files));
+        String[] files = mPath.list((dir, name) -> name.contains(mSensor.getDeviceName()));
+        if (files != null) {
+            mFileList = new ArrayList<>(Arrays.asList(files));
+        } else {
+            Toast.makeText(mContext, "Path " + mPath.getAbsolutePath() +
+                    " is no valid directory or I/O error occurred!", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void addSessions(ArrayList<Session> sessionList) {
