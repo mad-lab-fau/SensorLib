@@ -39,8 +39,8 @@ android {
         targetSdkVersion 29
 
         def versionMajor = 0
-        def versionMinor = 13
-        def versionPatch = 1
+        def versionMinor = 14
+        def versionPatch = 0
 
         versionCode versionMajor * 10000 + versionMinor * 100 + versionPatch
         versionName "${versionMajor}.${versionMinor}.${versionPatch}" + "_" + getGitDate() + "-" + getGitHash()
@@ -58,9 +58,9 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation group: 'org.apache.commons', name: 'commons-text', version: '1.7'
     implementation 'androidx.appcompat:appcompat:1.1.0'
-    implementation 'androidx.recyclerview:recyclerview:1.1.0-rc01'
+    implementation 'androidx.recyclerview:recyclerview:1.2.0-alpha01'
     implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'com.google.android.material:material:1.2.0-alpha01'
+    implementation 'com.google.android.material:material:1.2.0-alpha05'
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
     implementation 'com.xeoh.android:checkboxgroup:1.0.1'
 
