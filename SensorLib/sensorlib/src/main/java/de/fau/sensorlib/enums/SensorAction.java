@@ -17,6 +17,7 @@ public enum SensorAction {
     CONFIGURE,
     DEFAULT_CONFIG,
     RESET,
+    DISCONNECT,
     START_LOGGING,
     STOP_LOGGING,
     CLEAR_SESSIONS,
