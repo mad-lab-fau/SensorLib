@@ -123,7 +123,7 @@ public class SensorActionDialog extends DialogFragment implements SensorConfigSe
                     }
                     break;
                 case STREAMING:
-                    for (SensorAction action : EnumSet.of(SensorAction.CONFIGURE, SensorAction.START_LOGGING, SensorAction.STOP_LOGGING, SensorAction.CLEAR_SESSIONS, SensorAction.FULL_ERASE)) {
+                    for (SensorAction action : EnumSet.of(SensorAction.CONFIGURE, SensorAction.DISCONNECT, SensorAction.START_LOGGING, SensorAction.STOP_LOGGING, SensorAction.CLEAR_SESSIONS, SensorAction.FULL_ERASE)) {
                         if (position == action.ordinal()) {
                             Toast.makeText(getContext(), "Sensor is currently streaming. Stop streaming first!", Toast.LENGTH_SHORT).show();
                             return;
@@ -167,7 +167,11 @@ public class SensorActionDialog extends DialogFragment implements SensorConfigSe
                     }
                     break;
                 case DISCONNECT:
-                    mSensorActionCallback.onSensorActionSelected(mSensor, action);
+                    createAlertDialog("Disconnect from " + mSensor.getDeviceName() + "?",
+                            (dialog, which) -> {
+                                mSensorActionCallback.onSensorActionSelected(mSensor, action);
+                                Toast.makeText(activity, SensorAction.values()[position] + " on " + mSensor.getDeviceName(), Toast.LENGTH_SHORT).show();
+                            });
                     break;
                 case START_LOGGING:
                 case STOP_LOGGING:
@@ -245,7 +249,7 @@ public class SensorActionDialog extends DialogFragment implements SensorConfigSe
                     break;
                 case STREAMING:
                     // disable all Logging actions
-                    for (SensorAction action : EnumSet.of(SensorAction.CONFIGURE, SensorAction.STOP_LOGGING, SensorAction.START_LOGGING, SensorAction.CLEAR_SESSIONS, SensorAction.FULL_ERASE)) {
+                    for (SensorAction action : EnumSet.of(SensorAction.CONFIGURE, SensorAction.DISCONNECT, SensorAction.STOP_LOGGING, SensorAction.START_LOGGING, SensorAction.CLEAR_SESSIONS, SensorAction.FULL_ERASE)) {
                         setItemDisabled(mRecyclerView.getChildAt(action.ordinal()));
                     }
                     break;
