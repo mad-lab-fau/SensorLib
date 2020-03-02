@@ -166,6 +166,9 @@ public class SensorActionDialog extends DialogFragment implements SensorConfigSe
                         return;
                     }
                     break;
+                case DISCONNECT:
+                    mSensorActionCallback.onSensorActionSelected(mSensor, action);
+                    break;
                 case START_LOGGING:
                 case STOP_LOGGING:
                     if (mSensor instanceof Loggable) {
