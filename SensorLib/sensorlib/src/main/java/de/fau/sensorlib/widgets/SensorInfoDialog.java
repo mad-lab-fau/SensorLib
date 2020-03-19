@@ -30,6 +30,7 @@ public class SensorInfoDialog extends DialogFragment implements View.OnClickList
         TextView manufacturerTextView = rootView.findViewById(R.id.tv_sensor_manufacturer);
         TextView modelNumberTextView = rootView.findViewById(R.id.tv_sensor_model_number);
         TextView firmwareRevisionTextView = rootView.findViewById(R.id.tv_sensor_firmware_revision);
+        TextView hardwareRevisionTextView = rootView.findViewById(R.id.tv_sensor_hardware_revision);
         Button okButton = rootView.findViewById(de.fau.sensorlib.R.id.button_ok);
         okButton.setOnClickListener(this);
 
@@ -38,6 +39,7 @@ public class SensorInfoDialog extends DialogFragment implements View.OnClickList
         String manufacturer = "n/a";
         String modelNumber = "n/a";
         String firmwareRevision = "n/a";
+        String hardwareRevision = "n/a";
 
         if (getArguments() != null) {
             AbstractSensor sensor = (AbstractSensor) getArguments().getSerializable(Constants.KEY_SENSOR);
@@ -47,6 +49,7 @@ public class SensorInfoDialog extends DialogFragment implements View.OnClickList
                 manufacturer = sensor.getManufacturerString();
                 modelNumber = sensor.getModelNumberString();
                 firmwareRevision = sensor.getFirmwareRevisionString();
+                hardwareRevision = sensor.getHardwareRevisionString();
             }
         }
 
@@ -55,9 +58,9 @@ public class SensorInfoDialog extends DialogFragment implements View.OnClickList
         manufacturerTextView.setText(Html.fromHtml(getResources().getString(R.string.string_manufacturer, manufacturer)));
         modelNumberTextView.setText(Html.fromHtml(getResources().getString(R.string.string_model_number, modelNumber)));
         firmwareRevisionTextView.setText(Html.fromHtml(getResources().getString(R.string.string_firmware_revision, firmwareRevision)));
+        hardwareRevisionTextView.setText(Html.fromHtml(getResources().getString(R.string.string_hardware_revision, hardwareRevision)));
 
         return rootView;
-
     }
 
     @Override

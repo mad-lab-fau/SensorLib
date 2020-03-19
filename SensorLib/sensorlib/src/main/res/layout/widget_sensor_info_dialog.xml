@@ -46,18 +46,19 @@
         android:text="@string/string_firmware_revision"
         android:textSize="14sp" />
 
+    <TextView
+        android:id="@+id/tv_sensor_hardware_revision"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:text="@string/string_hardware_revision"
+        android:textSize="14sp" />
+
 
     <RelativeLayout
         android:id="@+id/footer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-
-        <!--<Button
-            android:id="@+id/button_cancel"
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:text="@string/string_cancel" />-->
 
         <Button
             android:id="@+id/button_ok"
