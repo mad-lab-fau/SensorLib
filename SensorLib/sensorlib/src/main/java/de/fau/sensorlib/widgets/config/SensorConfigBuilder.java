@@ -8,10 +8,12 @@
 
 package de.fau.sensorlib.widgets.config;
 
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -22,6 +24,7 @@ import android.widget.Spinner;
 import com.xeoh.android.checkboxgroup.CheckBoxGroup;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 
@@ -37,8 +40,12 @@ public class SensorConfigBuilder {
 
     public abstract class BaseConfig extends RelativeLayout {
 
-        public BaseConfig(Context context) {
+        protected String mKey;
+        protected ConfigItem mConfigItem;
+
+        public BaseConfig(Context context, int resId) {
             super(context);
+            inflate(context, resId, this);
         }
 
         public abstract void setConfig(String key, ConfigItem configItem, Object defaultConfig);
@@ -46,14 +53,11 @@ public class SensorConfigBuilder {
 
     public class DropdownConfig extends BaseConfig implements AdapterView.OnItemSelectedListener {
 
-        private String mKey;
         private Spinner mSpinner;
-        private ConfigItem mConfigItem;
         private Object mDefaultConfig;
 
         public DropdownConfig(Context context) {
-            super(context);
-            inflate(context, R.layout.layout_dropdown_config, this);
+            super(context, R.layout.layout_dropdown_config);
             mSpinner = findViewById(R.id.spinner);
             mSpinner.setOnItemSelectedListener(this);
         }
@@ -80,14 +84,11 @@ public class SensorConfigBuilder {
 
     public class SelectConfig extends BaseConfig implements RadioGroup.OnCheckedChangeListener {
 
-        private String mKey;
         private RadioGroup mRadioGroup;
-        private ConfigItem mConfigItem;
         private ArrayList<String> mConfigValuesString = new ArrayList<>();
 
         public SelectConfig(Context context) {
-            super(context);
-            inflate(context, R.layout.layout_select_config, this);
+            super(context, R.layout.layout_select_config);
             mRadioGroup = findViewById(R.id.radio_group);
             mRadioGroup.setOnCheckedChangeListener(this);
         }
@@ -117,14 +118,11 @@ public class SensorConfigBuilder {
 
     public class MultiSelectConfig extends BaseConfig {
 
-        private String mKey;
         private LinearLayout mCheckboxContainer;
-        private ConfigItem mConfigItem;
         private HashMap<CheckBox, Object> checkBoxMap = new HashMap<>();
 
         public MultiSelectConfig(Context context) {
-            super(context);
-            inflate(context, R.layout.layout_multi_select_config, this);
+            super(context, R.layout.layout_multi_select_config);
             mCheckboxContainer = findViewById(R.id.checkbox_container);
         }
 
@@ -145,6 +143,36 @@ public class SensorConfigBuilder {
             }
 
             new CheckBoxGroup<>(checkBoxMap, values -> mListener.onConfigItemSelected(mKey, values));
+        }
+    }
+
+
+    public class TimePickerConfig extends BaseConfig implements View.OnClickListener {
+
+        public TimePickerConfig(Context context) {
+            super(context, R.layout.layout_time_picker_config);
+            Button timePickerButton = findViewById(R.id.button_time_picker);
+            timePickerButton.setOnClickListener(this);
+        }
+
+        @Override
+        public void setConfig(String key, ConfigItem configItem, Object defaultConfig) {
+            mKey = key;
+            mConfigItem = configItem;
+
+        }
+
+        @Override
+        public void onClick(View v) {
+            if (v.getId() == R.id.button_time_picker) {
+                TimePickerDialog timePickerDialog = new TimePickerDialog(getContext(), (view, hourOfDay, minute) -> {
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                    calendar.set(Calendar.MINUTE, minute);
+                    mListener.onConfigItemSelected(mKey, calendar);
+                }, 0, 0, true);
+                timePickerDialog.show();
+            }
         }
     }
 
@@ -175,6 +203,10 @@ public class SensorConfigBuilder {
                 break;
             case TYPE_MULTI_SELECT:
                 config = new MultiSelectConfig(mContext);
+                config.setConfig(key, item, defaultConfig);
+                break;
+            case TYPE_TIME:
+                config = new TimePickerConfig(mContext);
                 config.setConfig(key, item, defaultConfig);
                 break;
         }

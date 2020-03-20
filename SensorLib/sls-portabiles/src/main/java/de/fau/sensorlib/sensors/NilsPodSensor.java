@@ -39,6 +39,7 @@ import de.fau.sensorlib.dataframe.TemperatureDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
 import de.fau.sensorlib.enums.SensorState;
 import de.fau.sensorlib.sensors.enums.NilsPodAccRange;
+import de.fau.sensorlib.sensors.enums.NilsPodAlarmMode;
 import de.fau.sensorlib.sensors.enums.NilsPodGyroRange;
 import de.fau.sensorlib.sensors.enums.NilsPodIndicationLed;
 import de.fau.sensorlib.sensors.enums.NilsPodMotionInterrupt;
@@ -424,6 +425,11 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         NilsPodMotionInterrupt interrupt = (NilsPodMotionInterrupt) mCurrentConfigMap.get(KEY_MOTION_INTERRUPT);
         NilsPodIndicationLed indicationLed = (NilsPodIndicationLed) mCurrentConfigMap.get(KEY_INDICATION_LED);
 
+        boolean alarmEnabled = mCurrentConfigMap.get(KEY_ALARM_ENABLED) == NilsPodAlarmMode.ALARM_ENABLED;
+        Calendar alarmStart = (Calendar) mCurrentConfigMap.get(KEY_ALARM_START_TIME);
+        Calendar alarmStop = (Calendar) mCurrentConfigMap.get(KEY_ALARM_STOP_TIME);
+        NilsPodAlarm alarmConfig = new NilsPodAlarm(alarmStart, alarmStop, alarmEnabled);
+
         String sr = (String) mCurrentConfigMap.get(KEY_SAMPLING_RATE);
         if (sr != null) {
             samplingRate = sAvailableSamplingRates.get(sr);
@@ -434,6 +440,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             writeSyncConfig(syncRole, syncGroup);
             writeSensorConfig(sensors, accRange, gyroRange);
             writeSystemSettingsConfig(sensorPosition, operationMode, interrupt, indicationLed);
+            writeAlarmConfig(alarmConfig);
         } catch (SensorException e) {
             e.printStackTrace();
         }
@@ -591,14 +598,14 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
 
         if (mConfigWriteRequests.size() == 1) {
             BluetoothGattCharacteristic chara = mConfigWriteRequests.peek();
-            if (!writeCharacteristic(chara, chara.getValue())) {
+            if (chara != null && !writeCharacteristic(chara, chara.getValue())) {
                 throw new SensorException(SensorException.SensorExceptionType.configError);
             }
         }
     }
 
     protected void writeSamplingRateConfig(double samplingRate) throws SensorException {
-        BluetoothGattCharacteristic config = getConfigurationService().getCharacteristic(AbstractNilsPodSensor.NILS_POD_SAMPLING_RATE_CONFIG);
+        BluetoothGattCharacteristic config = getConfigurationService().getCharacteristic(NILS_POD_SAMPLING_RATE_CONFIG);
         byte[] oldValue = config.getValue();
         byte[] value = oldValue.clone();
 
@@ -621,7 +628,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
 
 
     protected void writeSyncConfig(NilsPodSyncRole syncRole, NilsPodSyncGroup syncGroup) throws SensorException {
-        BluetoothGattCharacteristic config = getConfigurationService().getCharacteristic(AbstractNilsPodSensor.NILS_POD_SYNC_CONFIG);
+        BluetoothGattCharacteristic config = getConfigurationService().getCharacteristic(NILS_POD_SYNC_CONFIG);
         byte[] oldValue = config.getValue();
         byte[] value = oldValue.clone();
 
@@ -642,7 +649,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             return;
         }
 
-        BluetoothGattCharacteristic config = getConfigurationService().getCharacteristic(AbstractNilsPodSensor.NILS_POD_SENSOR_CONFIG);
+        BluetoothGattCharacteristic config = getConfigurationService().getCharacteristic(NILS_POD_SENSOR_CONFIG);
         byte[] oldValue = config.getValue();
         byte[] value = new byte[oldValue.length - 1];
         // Read-modify-write
@@ -700,7 +707,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     }
 
     protected void writeSystemSettingsConfig(NilsPodSensorPosition sensorPosition, NilsPodOperationMode operationMode, NilsPodMotionInterrupt motionInterrupt, NilsPodIndicationLed indicationLed) throws SensorException {
-        BluetoothGattCharacteristic config = getConfigurationService().getCharacteristic(AbstractNilsPodSensor.NILS_POD_SYSTEM_SETTINGS_CONFIG);
+        BluetoothGattCharacteristic config = getConfigurationService().getCharacteristic(NILS_POD_SYSTEM_SETTINGS_CONFIG);
         byte[] oldValue = config.getValue();
         byte[] value = oldValue.clone();
 
@@ -722,6 +729,21 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         }
 
         value[offset] = (byte) byteVal;
+
+        writeNilsPodConfig(config, oldValue, value);
+    }
+
+    protected void writeAlarmConfig(NilsPodAlarm alarmConfig) throws SensorException {
+        BluetoothGattCharacteristic config = getConfigurationService().getCharacteristic(NILS_POD_SYSTEM_SETTINGS_CONFIG);
+        byte[] oldValue = config.getValue();
+        byte[] value = oldValue.clone();
+        int offset = 0;
+
+        value[offset++] = (byte) (alarmConfig.isAlarmEnabled() ? 0x01 : 0x00);
+        value[offset++] = (byte) alarmConfig.getStartHour();
+        value[offset++] = (byte) alarmConfig.getStartMinute();
+        value[offset++] = (byte) alarmConfig.getStopHour();
+        value[offset] = (byte) alarmConfig.getStopMinute();
 
         writeNilsPodConfig(config, oldValue, value);
     }
