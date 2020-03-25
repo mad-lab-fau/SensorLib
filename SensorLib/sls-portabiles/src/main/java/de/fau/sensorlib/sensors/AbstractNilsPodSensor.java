@@ -49,6 +49,7 @@ import de.fau.sensorlib.sensors.enums.NilsPodOperationMode;
 import de.fau.sensorlib.sensors.enums.NilsPodSensorPosition;
 import de.fau.sensorlib.sensors.enums.NilsPodSyncGroup;
 import de.fau.sensorlib.sensors.enums.NilsPodSyncRole;
+import de.fau.sensorlib.sensors.enums.NilsPodTimerMode;
 import de.fau.sensorlib.widgets.config.ConfigItem;
 import no.nordicsemi.android.dfu.DfuLogListener;
 import no.nordicsemi.android.dfu.DfuProgressListener;
@@ -64,6 +65,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         public static final FirmwareRevision FW_0_14_0 = new FirmwareRevision(0, 14, 0);
         public static final FirmwareRevision FW_0_15_0 = new FirmwareRevision(0, 15, 0);
         public static final FirmwareRevision FW_0_16_0 = new FirmwareRevision(0, 16, 0);
+        public static final FirmwareRevision FW_0_17_0 = new FirmwareRevision(0, 17, 0);
     }
 
     public static final double BASE_SCALING_FACTOR_GYRO = 16.4;
@@ -124,6 +126,10 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
      */
     protected static final UUID NILS_POD_SAMPLING_RATE_CONFIG = UUID.fromString("98ff0505-770d-4a83-9e9b-ce6bbd75e472");
     /**
+     * UUID for Timer Characteristic (read/write) of NilsPod Sensor
+     */
+    protected static final UUID NILS_POD_TIMER_CONFIG = UUID.fromString("98ff0606-770d-4a83-9e9b-ce6bbd75e472");
+    /**
      * UUID for Buttonless DFU Characteristic (write) of NilsPod Sensor
      */
     protected static final UUID NILS_POD_BUTTONLESS_DFU = UUID.fromString("8ec90003-f315-4f60-9fb8-838830daea50");
@@ -141,6 +147,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         BleGattAttributes.addCharacteristic(NILS_POD_SENSOR_CONFIG, "NilsPod Sensor Configuration");
         BleGattAttributes.addCharacteristic(NILS_POD_SYSTEM_SETTINGS_CONFIG, "NilsPod System Settings Configuration");
         BleGattAttributes.addCharacteristic(NILS_POD_DATE_TIME_CONFIG, "NilsPod Date Time Configuration");
+        BleGattAttributes.addCharacteristic(NILS_POD_TIMER_CONFIG, "NilsPod Timer Configuration");
         BleGattAttributes.addCharacteristic(NILS_POD_BUTTONLESS_DFU, "NilsPod Buttonless DFU");
     }
 
@@ -202,6 +209,8 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
     private NilsPodOperationMode mOperationMode = NilsPodOperationMode.NORMAL_MODE;
 
+    private NilsPodTimer mNilsPodTimer = new NilsPodTimer();
+
     protected ArrayList<NilsPodCallback> mCallbacks = new ArrayList<>();
 
     private SensorRecorderListener mSensorRecorderListener;
@@ -219,6 +228,9 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
     public static final String KEY_SYNC_GROUP = "sync_group";
     public static final String KEY_SENSOR_POSITION = "sensor_position";
     public static final String KEY_OPERATION_MODE = "operation_mode";
+    public static final String KEY_TIMER_ENABLED = "timer_enabled";
+    public static final String KEY_TIMER_START_TIME = "timer_start_time";
+    public static final String KEY_TIMER_STOP_TIME = "timer_stop_time";
 
     protected static HashMap<String, ConfigItem> sConfigMap = new LinkedHashMap<>();
 
@@ -304,6 +316,21 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
             new ArrayList<>(Arrays.asList(NilsPodIndicationLed.values())),
             ConfigItem.UiType.TYPE_SELECT
     );
+    protected static ConfigItem sTimerEnabledConfig = new ConfigItem(
+            "Timer",
+            new ArrayList<>(Arrays.asList(NilsPodTimerMode.values())),
+            ConfigItem.UiType.TYPE_SELECT
+    );
+    protected static ConfigItem sTimerStartTimeConfig = new ConfigItem(
+            "Timer Start",
+            null,
+            ConfigItem.UiType.TYPE_TIME
+    );
+    protected static ConfigItem sTimerStopTimeConfig = new ConfigItem(
+            "Timer Stop",
+            null,
+            ConfigItem.UiType.TYPE_TIME
+    );
 
     static {
         sConfigMap.put(KEY_SAMPLING_RATE, sSamplingRateConfig);
@@ -316,6 +343,9 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         sConfigMap.put(KEY_SYNC_GROUP, sSyncGroupConfig);
         sConfigMap.put(KEY_OPERATION_MODE, sOperationModeConfig);
         sConfigMap.put(KEY_INDICATION_LED, sIndicationLedConfig);
+        sConfigMap.put(KEY_TIMER_ENABLED, sTimerEnabledConfig);
+        sConfigMap.put(KEY_TIMER_START_TIME, sTimerStartTimeConfig);
+        sConfigMap.put(KEY_TIMER_STOP_TIME, sTimerStopTimeConfig);
     }
 
     protected HashMap<String, Object> mCurrentConfigMap = new LinkedHashMap<>();
@@ -819,6 +849,13 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
                     handleSensorException(e);
                 }
                 return true;
+            } else if (NILS_POD_TIMER_CONFIG.equals(characteristic.getUuid())) {
+                try {
+                    extractTimerConfig(characteristic);
+                } catch (SensorException e) {
+                    handleSensorException(e);
+                }
+                return true;
             }
         }
         return false;
@@ -1022,7 +1059,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
             mMotionInterruptEnabled = (operationMode & 0x80) != 0;
         } catch (Exception e) {
             e.printStackTrace();
-            throw new SensorException(SensorException.SensorExceptionType.readStateError);
+            throw new SensorException(SensorException.SensorExceptionType.readConfigError);
         } finally {
             Log.d(TAG, ">>>> System Settings:");
             Log.d(TAG, "\tSensor Position: " + mSensorPosition);
@@ -1051,6 +1088,35 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         }
 
         mCurrentConfigMap.put(KEY_SAMPLING_RATE, getSamplingRateString(mSamplingRate));
+    }
+
+    protected synchronized void extractTimerConfig(BluetoothGattCharacteristic characteristic) throws SensorException {
+        int offset = 0;
+        byte[] value = characteristic.getValue();
+
+        if (getFirmwareRevision().isAtLeast(NilsPodFirmwareRevisions.FW_0_17_0)) {
+            try {
+                int startHour = value[offset++];
+                int startMinute = value[offset++];
+                int stopHour = value[offset++];
+                int stopMinute = value[offset++];
+                boolean timerEnabled = value[offset] == 0x01;
+
+                mNilsPodTimer = new NilsPodTimer(startHour, startMinute, stopHour, stopMinute, timerEnabled);
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new SensorException(SensorException.SensorExceptionType.readConfigError);
+            } finally {
+                Log.d(TAG, ">>>> Timer Config:");
+                Log.d(TAG, "\tEnabled: " + mNilsPodTimer.isTimerEnabled() + " [Start: " + mNilsPodTimer.getStartTimerString() + "  |  Stop: " + mNilsPodTimer.getStopTimerString() + "]");
+            }
+        }
+
+        if (getFirmwareRevision().isAtLeast(NilsPodFirmwareRevisions.FW_0_17_0)) {
+            mCurrentConfigMap.put(KEY_TIMER_ENABLED, mNilsPodTimer.isTimerEnabled() ? NilsPodTimerMode.TIMER_ENABLED : NilsPodTimerMode.TIMER_DISABLED);
+            mCurrentConfigMap.put(KEY_TIMER_START_TIME, mNilsPodTimer.getStartTimer());
+            mCurrentConfigMap.put(KEY_TIMER_STOP_TIME, mNilsPodTimer.getStopTimer());
+        }
     }
 
 
