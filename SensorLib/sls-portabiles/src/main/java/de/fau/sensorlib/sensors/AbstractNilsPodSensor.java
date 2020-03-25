@@ -68,6 +68,30 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         public static final FirmwareRevision FW_0_17_0 = new FirmwareRevision(0, 17, 0);
     }
 
+    public static final class NilsPodHardwareRevisions {
+        public static final HardwareRevision WP_V1 = new HardwareRevision("1.0", "WP_V1");
+        public static final HardwareRevision DOCK_V1 = new HardwareRevision("1.1", "Dock_V1");
+        public static final HardwareRevision WP_V2 = new HardwareRevision("2.0", "WP_V2");
+        public static final HardwareRevision USB = new HardwareRevision("2.1", "USB");
+        public static final HardwareRevision V3 = new HardwareRevision("3.0", "V3");
+
+        public static HardwareRevision inferHardwareRevision(HardwareRevision hwRevision) {
+            if (hwRevision.equals(WP_V1)) {
+                return WP_V1;
+            } else if (hwRevision.equals(DOCK_V1)) {
+                return DOCK_V1;
+            } else if (hwRevision.equals(WP_V2)) {
+                return WP_V2;
+            } else if (hwRevision.equals(USB)) {
+                return USB;
+            } else if (hwRevision.equals(V3)) {
+                return V3;
+            } else {
+                return new HardwareRevision();
+            }
+        }
+    }
+
     public static final double BASE_SCALING_FACTOR_GYRO = 16.4;
     public static final double BASE_SCALING_FACTOR_ACC = 2 << 14;
 
@@ -602,6 +626,11 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         // set sampling rate to default value
         super(context, info.getDeviceName(), info.getDeviceAddress(), dataHandler, BleConnectionMode.MODE_NILSPOD);
         mInternalHandler = new BasicNilsPodInternalHandler(this);
+    }
+
+    @Override
+    public HardwareRevision getHardwareRevision() {
+        return NilsPodHardwareRevisions.inferHardwareRevision(super.getHardwareRevision());
     }
 
     @Override

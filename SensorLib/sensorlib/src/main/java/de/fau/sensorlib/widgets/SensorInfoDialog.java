@@ -15,6 +15,8 @@ import androidx.fragment.app.DialogFragment;
 import de.fau.sensorlib.Constants;
 import de.fau.sensorlib.R;
 import de.fau.sensorlib.sensors.AbstractSensor;
+import de.fau.sensorlib.sensors.FirmwareRevision;
+import de.fau.sensorlib.sensors.HardwareRevision;
 
 public class SensorInfoDialog extends DialogFragment implements View.OnClickListener {
 
@@ -38,8 +40,8 @@ public class SensorInfoDialog extends DialogFragment implements View.OnClickList
         String sensorAddress = "n/a";
         String manufacturer = "n/a";
         String modelNumber = "n/a";
-        String firmwareRevision = "n/a";
-        String hardwareRevision = "n/a";
+        FirmwareRevision firmwareRevision = new FirmwareRevision();
+        HardwareRevision hardwareRevision = new HardwareRevision();
 
         if (getArguments() != null) {
             AbstractSensor sensor = (AbstractSensor) getArguments().getSerializable(Constants.KEY_SENSOR);
@@ -48,8 +50,8 @@ public class SensorInfoDialog extends DialogFragment implements View.OnClickList
                 sensorAddress = sensor.getDeviceAddress();
                 manufacturer = sensor.getManufacturerString();
                 modelNumber = sensor.getModelNumberString();
-                firmwareRevision = sensor.getFirmwareRevisionString();
-                hardwareRevision = sensor.getHardwareRevisionString();
+                firmwareRevision = sensor.getFirmwareRevision();
+                hardwareRevision = sensor.getHardwareRevision();
             }
         }
 

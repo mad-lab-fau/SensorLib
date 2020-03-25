@@ -72,6 +72,7 @@ public abstract class AbstractSensor extends SensorInfo {
     protected String mFirmwareRevisionString = "";
     protected String mSoftwareRevisionString = "";
     protected FirmwareRevision mFirmwareRevision = new FirmwareRevision();
+    protected HardwareRevision mHardwareRevision = new HardwareRevision();
     protected long mSensorSystemID;
 
     /**
@@ -391,6 +392,10 @@ public abstract class AbstractSensor extends SensorInfo {
 
     public FirmwareRevision getFirmwareRevision() {
         return mFirmwareRevision;
+    }
+
+    public HardwareRevision getHardwareRevision() {
+        return mHardwareRevision;
     }
 
     public String getSoftwareRevisionString() {
