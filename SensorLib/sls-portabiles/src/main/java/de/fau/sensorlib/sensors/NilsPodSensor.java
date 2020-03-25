@@ -39,7 +39,6 @@ import de.fau.sensorlib.dataframe.TemperatureDataFrame;
 import de.fau.sensorlib.enums.HardwareSensor;
 import de.fau.sensorlib.enums.SensorState;
 import de.fau.sensorlib.sensors.enums.NilsPodAccRange;
-import de.fau.sensorlib.sensors.enums.NilsPodAlarmMode;
 import de.fau.sensorlib.sensors.enums.NilsPodGyroRange;
 import de.fau.sensorlib.sensors.enums.NilsPodIndicationLed;
 import de.fau.sensorlib.sensors.enums.NilsPodMotionInterrupt;
@@ -47,6 +46,7 @@ import de.fau.sensorlib.sensors.enums.NilsPodOperationMode;
 import de.fau.sensorlib.sensors.enums.NilsPodSensorPosition;
 import de.fau.sensorlib.sensors.enums.NilsPodSyncGroup;
 import de.fau.sensorlib.sensors.enums.NilsPodSyncRole;
+import de.fau.sensorlib.sensors.enums.NilsPodTimerMode;
 import de.fau.sensorlib.sensors.logging.NilsPodLoggable;
 import de.fau.sensorlib.sensors.logging.Session;
 import de.fau.sensorlib.sensors.logging.SessionDownloader;
@@ -425,10 +425,11 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         NilsPodMotionInterrupt interrupt = (NilsPodMotionInterrupt) mCurrentConfigMap.get(KEY_MOTION_INTERRUPT);
         NilsPodIndicationLed indicationLed = (NilsPodIndicationLed) mCurrentConfigMap.get(KEY_INDICATION_LED);
 
-        boolean alarmEnabled = mCurrentConfigMap.get(KEY_ALARM_ENABLED) == NilsPodAlarmMode.ALARM_ENABLED;
-        Calendar alarmStart = (Calendar) mCurrentConfigMap.get(KEY_ALARM_START_TIME);
-        Calendar alarmStop = (Calendar) mCurrentConfigMap.get(KEY_ALARM_STOP_TIME);
-        NilsPodAlarm alarmConfig = new NilsPodAlarm(alarmStart, alarmStop, alarmEnabled);
+        boolean timerEnabled = mCurrentConfigMap.get(KEY_TIMER_ENABLED) == NilsPodTimerMode.TIMER_ENABLED;
+        Calendar timerStart = (Calendar) mCurrentConfigMap.get(KEY_TIMER_START_TIME);
+        Calendar timerStop = (Calendar) mCurrentConfigMap.get(KEY_TIMER_STOP_TIME);
+
+        NilsPodTimer timerConfig = new NilsPodTimer(timerStart, timerStop, timerEnabled);
 
         String sr = (String) mCurrentConfigMap.get(KEY_SAMPLING_RATE);
         if (sr != null) {
@@ -440,7 +441,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             writeSyncConfig(syncRole, syncGroup);
             writeSensorConfig(sensors, accRange, gyroRange);
             writeSystemSettingsConfig(sensorPosition, operationMode, interrupt, indicationLed);
-            writeAlarmConfig(alarmConfig);
+            writeTimerConfig(timerConfig);
         } catch (SensorException e) {
             e.printStackTrace();
         }
@@ -733,17 +734,17 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         writeNilsPodConfig(config, oldValue, value);
     }
 
-    protected void writeAlarmConfig(NilsPodAlarm alarmConfig) throws SensorException {
-        BluetoothGattCharacteristic config = getConfigurationService().getCharacteristic(NILS_POD_SYSTEM_SETTINGS_CONFIG);
+    protected void writeTimerConfig(NilsPodTimer timerConfig) throws SensorException {
+        BluetoothGattCharacteristic config = getConfigurationService().getCharacteristic(NILS_POD_TIMER_CONFIG);
         byte[] oldValue = config.getValue();
         byte[] value = oldValue.clone();
         int offset = 0;
 
-        value[offset++] = (byte) (alarmConfig.isAlarmEnabled() ? 0x01 : 0x00);
-        value[offset++] = (byte) alarmConfig.getStartHour();
-        value[offset++] = (byte) alarmConfig.getStartMinute();
-        value[offset++] = (byte) alarmConfig.getStopHour();
-        value[offset] = (byte) alarmConfig.getStopMinute();
+        value[offset++] = (byte) timerConfig.getStartHour();
+        value[offset++] = (byte) timerConfig.getStartMinute();
+        value[offset++] = (byte) timerConfig.getStopHour();
+        value[offset++] = (byte) timerConfig.getStopMinute();
+        value[offset] = (byte) (timerConfig.isTimerEnabled() ? 0x01 : 0x00);
 
         writeNilsPodConfig(config, oldValue, value);
     }

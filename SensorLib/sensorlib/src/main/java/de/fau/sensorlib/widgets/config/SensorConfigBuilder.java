@@ -20,13 +20,17 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.xeoh.android.checkboxgroup.CheckBoxGroup;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import de.fau.sensorlib.R;
 
@@ -149,8 +153,13 @@ public class SensorConfigBuilder {
 
     public class TimePickerConfig extends BaseConfig implements View.OnClickListener {
 
+        private TextView mTimeInfoTextView;
+        private Calendar mTime;
+        private SimpleDateFormat mTimerFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+
         public TimePickerConfig(Context context) {
             super(context, R.layout.layout_time_picker_config);
+            mTimeInfoTextView = findViewById(R.id.tv_time_info);
             Button timePickerButton = findViewById(R.id.button_time_picker);
             timePickerButton.setOnClickListener(this);
         }
@@ -159,7 +168,14 @@ public class SensorConfigBuilder {
         public void setConfig(String key, ConfigItem configItem, Object defaultConfig) {
             mKey = key;
             mConfigItem = configItem;
+            mTime = ((Calendar) defaultConfig);
+            mTime = (Calendar) ((Calendar) defaultConfig).clone();
+            mTime.setTimeZone(TimeZone.getDefault());
+            updateTextView(mTime);
+        }
 
+        private void updateTextView(Calendar calendar) {
+            mTimeInfoTextView.setText(mContext.getString(R.string.time_info, mTimerFormat.format(calendar.getTime())));
         }
 
         @Override
@@ -169,8 +185,12 @@ public class SensorConfigBuilder {
                     Calendar calendar = Calendar.getInstance();
                     calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
                     calendar.set(Calendar.MINUTE, minute);
+                    // getter needs to be there, otherwise time zone will not be converted (don't ask why)
+                    calendar.get(Calendar.HOUR_OF_DAY);
+                    calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
+                    updateTextView(calendar);
                     mListener.onConfigItemSelected(mKey, calendar);
-                }, 0, 0, true);
+                }, mTime.get(Calendar.HOUR_OF_DAY), mTime.get(Calendar.MINUTE), true);
                 timePickerDialog.show();
             }
         }

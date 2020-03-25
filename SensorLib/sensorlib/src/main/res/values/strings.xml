@@ -42,5 +42,6 @@
     <string name="share_recording">Share Recording via…</string>
 
     <!-- Config -->
-    <string name="select_time">Select Time</string>
+    <string name="set_time">Set Time</string>
+    <string name="time_info">%1$s</string>
 </resources>
