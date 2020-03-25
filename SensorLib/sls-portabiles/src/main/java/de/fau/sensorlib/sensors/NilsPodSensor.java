@@ -326,7 +326,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
                     // extract flash size from model number
                     int flashType = mModelNumberString.charAt(mModelNumberString.length() - 1) == '4' ? 4 : 2;
                     // convert from Gigabit to Byte
-                    mTotalFlashSize = ((double) flashType * 1e9) / 8;
+                    mTotalFlashSize = ((double) flashType * Math.pow(1024, 3)) / 8;
                     computeRemainingCapacity();
                     computeRemainingRuntime();
                 }
@@ -532,7 +532,8 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         }
 
         for (Session session : mSessionHandler.getSessionList()) {
-            occupiedStorage += session.getSessionSize();
+            // round up to integer page sizes because new sessions are always started on a new page
+            occupiedStorage += (Math.ceil(((double) session.getSessionSize()) / Session.PAGE_SIZE)) * Session.PAGE_SIZE;
         }
 
         mRemainingFlashSize -= occupiedStorage;
