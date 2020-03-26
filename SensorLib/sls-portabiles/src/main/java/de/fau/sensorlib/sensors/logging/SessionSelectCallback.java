@@ -8,9 +8,11 @@
 
 package de.fau.sensorlib.sensors.logging;
 
+import java.util.List;
+
 import de.fau.sensorlib.sensors.AbstractSensor;
 
 public interface SessionSelectCallback {
 
-    void onSessionSelected(AbstractSensor sensor, Session session);
+    void onSessionSelected(AbstractSensor sensor, List<Session> selectedSessions);
 }
