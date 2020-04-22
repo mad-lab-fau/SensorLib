@@ -48,6 +48,10 @@ public class SessionDownloadChecker {
     private ArrayList<SessionDownloadFlag> mAlreadyDownloadedList;
     private ArrayList<String> mFileList;
 
+    public SessionDownloadChecker(Context context) throws SensorException {
+        this(context, null);
+    }
+
     public SessionDownloadChecker(Context context, AbstractSensor sensor) throws SensorException {
         mContext = context;
         mSensor = sensor;
@@ -152,7 +156,13 @@ public class SessionDownloadChecker {
             return;
         }
         // list files
-        String[] files = mPath.list((dir, name) -> name.contains(mSensor.getDeviceName()));
+        String[] files;
+        if (mSensor == null) {
+            files = mPath.list();
+        } else {
+            files = mPath.list((dir, name) -> name.contains(mSensor.getDeviceName()));
+        }
+
         if (files != null) {
             mFileList = new ArrayList<>(Arrays.asList(files));
         } else {

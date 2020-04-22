@@ -40,4 +40,8 @@
     <!-- Share Dialog -->
     <string name="open_folder">Open Folder</string>
     <string name="share_recording">Share Recording via…</string>
+
+    <!-- Config -->
+    <string name="set_time">Set Time</string>
+    <string name="time_info">%1$s</string>
 </resources>

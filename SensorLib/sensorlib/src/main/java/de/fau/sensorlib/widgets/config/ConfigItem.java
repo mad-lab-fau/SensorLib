@@ -19,6 +19,7 @@ public class ConfigItem implements Serializable {
         TYPE_SELECT,
         TYPE_MULTI_SELECT,
         TYPE_DROPDOWN,
+        TYPE_TIME,
         TYPE_UNKNOWN
     }
 

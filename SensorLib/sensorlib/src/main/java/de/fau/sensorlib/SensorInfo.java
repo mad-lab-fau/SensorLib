@@ -60,6 +60,8 @@ public class SensorInfo implements Serializable {
 
     protected boolean mIsCharging;
 
+    protected int mNumRecordings;
+
 
     /**
      * @return a not necessarily unique, human readable name for this sensor.
@@ -227,6 +229,7 @@ public class SensorInfo implements Serializable {
         mSamplingRate = samplingRate;
         mBatteryLevel = BleManufacturerDataHelper.getBatteryLevel(deviceClass, mManufacturerData);
         mIsCharging = BleManufacturerDataHelper.getChargingState(deviceClass, mManufacturerData);
+        mNumRecordings = BleManufacturerDataHelper.getNumberOfRecordings(deviceClass, mManufacturerData);
     }
 
     @Override

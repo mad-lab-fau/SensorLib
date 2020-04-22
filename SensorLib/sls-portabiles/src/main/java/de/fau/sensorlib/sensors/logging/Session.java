@@ -25,7 +25,7 @@ public class Session {
     /**
      * Flash page size in Byte
      */
-    private static final int PAGE_SIZE = 2048;
+    public static final int PAGE_SIZE = 2048;
 
     private int mSessionId;
 

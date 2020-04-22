@@ -644,13 +644,14 @@ public class GenericBleSensor extends AbstractSensor {
         } else if (BleGattAttributes.FIRMWARE_REVISION_STRING.equals(characteristic.getUuid())) {
             mFirmwareRevisionString = characteristic.getStringValue(0);
             mFirmwareRevision = new FirmwareRevision(mFirmwareRevisionString);
-            Log.d(TAG, "<" + getDeviceName() + "> Firmware revision: " + mFirmwareRevisionString);
+            Log.d(TAG, "<" + getDeviceName() + "> Firmware revision: " + mFirmwareRevision);
         } else if (BleGattAttributes.SOFTWARE_REVISION_STRING.equals(characteristic.getUuid())) {
             mSoftwareRevisionString = characteristic.getStringValue(0);
             Log.d(TAG, "<" + getDeviceName() + "> Software revision: " + mSoftwareRevisionString);
         } else if (BleGattAttributes.HARDWARE_REVISION_STRING.equals(characteristic.getUuid())) {
             mHardwareRevisionString = characteristic.getStringValue(0);
-            Log.d(TAG, "<" + getDeviceName() + "> Hardware revision: " + mHardwareRevisionString);
+            mHardwareRevision = new HardwareRevision(mHardwareRevisionString);
+            Log.d(TAG, "<" + getDeviceName() + "> Hardware revision: " + mHardwareRevision);
         } else if (BleGattAttributes.MANUFACTURER_NAME_STRING.equals(characteristic.getUuid())) {
             mManufacturerString = characteristic.getStringValue(0);
             Log.d(TAG, "<" + getDeviceName() + "> Manufacturer: " + mManufacturerString);
