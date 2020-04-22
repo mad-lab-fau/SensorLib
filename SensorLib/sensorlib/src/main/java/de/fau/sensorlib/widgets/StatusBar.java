@@ -109,6 +109,10 @@ public class StatusBar extends RelativeLayout implements SensorEventListener {
                 setBackgroundColor(ContextCompat.getColor(mContext, R.color.status_bar_upgrading_firmware));
                 mStateTextView.setText(getResources().getString(R.string.status_bar_upgrading_firmware, mSensorName).toUpperCase());
                 break;
+            case DOWNLOADING:
+                setBackgroundColor(ContextCompat.getColor(mContext, R.color.status_bar_downloading));
+                mStateTextView.setText(getResources().getString(R.string.status_bar_downloading, mSensorName).toUpperCase());
+                break;
             case UNDEFINED:
                 // fall through
             case INITIALIZED:

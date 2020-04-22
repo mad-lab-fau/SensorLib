@@ -21,6 +21,7 @@
     <string name="status_bar_loggging">%1$s logging</string>
     <string name="status_bar_simulating">%1$s simulating</string>
     <string name="status_bar_upgrading_firmware">%1$s upgrading firmware</string>
+    <string name="status_bar_downloading">%1$s downloading data</string>
 
     <!-- Streaming Footer -->
     <string name="start">Start</string>
