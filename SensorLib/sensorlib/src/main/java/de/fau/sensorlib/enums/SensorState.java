@@ -51,5 +51,9 @@ public enum SensorState {
     /**
      * Sensor is currently upgrading firmware
      */
-    UPGRADING_FIRMWARE
+    UPGRADING_FIRMWARE,
+    /**
+     * Sensor is currently transmitting logged data
+     */
+    DOWNLOADING
 }

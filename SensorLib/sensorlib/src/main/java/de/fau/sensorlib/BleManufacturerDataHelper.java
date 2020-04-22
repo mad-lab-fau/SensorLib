@@ -35,7 +35,7 @@ public class BleManufacturerDataHelper {
 
         switch (sensor) {
             case NILSPOD:
-                return manuData[1] != 0x00;
+                return manuData[1] != 0;
         }
 
         return false;
@@ -49,12 +49,31 @@ public class BleManufacturerDataHelper {
 
         switch (sensor) {
             case NILSPOD:
-                if (manuData[0] == 2) {
-                    return SensorState.LOGGING;
+                switch (manuData[0]) {
+                    case 1:
+                        return SensorState.STREAMING;
+                    case 2:
+                        return SensorState.LOGGING;
+                    case 3:
+                    case 4:
+                        return SensorState.DOWNLOADING;
                 }
                 return SensorState.UNDEFINED;
         }
-
         return SensorState.UNDEFINED;
+    }
+
+
+    public static int getNumberOfRecordings(KnownSensor sensor, byte[] manuData) {
+        if (manuData == null || sensor == null) {
+            return 0;
+        }
+
+        switch (sensor) {
+            case NILSPOD:
+                return manuData[3];
+        }
+
+        return 0;
     }
 }
