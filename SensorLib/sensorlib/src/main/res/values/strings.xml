@@ -10,6 +10,7 @@
     <string name="string_scan">Scanning for sensors…</string>
     <string name="string_select_sensors">Select sensors:</string>
     <string name="placeholder_rssi">\@ %1$d dB</string>
+    <string name="placeholder_num_recordings">%1$d Recordings</string>
     <string name="placeholder_battery_level">%1$d %%</string>
     <string name="recently">Recent</string>
 
@@ -21,6 +22,7 @@
     <string name="status_bar_loggging">%1$s logging</string>
     <string name="status_bar_simulating">%1$s simulating</string>
     <string name="status_bar_upgrading_firmware">%1$s upgrading firmware</string>
+    <string name="status_bar_downloading">%1$s downloading data</string>
 
     <!-- Streaming Footer -->
     <string name="start">Start</string>

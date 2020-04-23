@@ -18,6 +18,7 @@ public final class Constants {
     public static final String KEY_SENSOR_STATE = "SENSOR_STATE";
     public static final String KEY_BATTERY_LEVEL = "BATTERY_LEVEL";
     public static final String KEY_CHARGING_STATE = "CHARGING_STATE";
+    public static final String KEY_NUM_RECORDINGS = "NUM_RECORDINGS";
     public static final String KEY_SENSOR = "SENSOR";
     public static final String KEY_SENSOR_LIST = "SENSOR_LIST";
     public static final String KEY_PREF_DEFAULT = "DEFAULT_PREFERENCES";
