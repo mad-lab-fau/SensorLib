@@ -2,7 +2,7 @@
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="112dp"
+    android:layout_height="140dp"
     android:layout_margin="10dp"
     android:foreground="?android:attr/selectableItemBackground"
     card_view:cardCornerRadius="@dimen/cardview_default_radius"
@@ -53,6 +53,14 @@
             android:textSize="12sp" />
 
         <TextView
+            android:id="@+id/tv_num_recordings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tv_sensor_address"
+            android:layout_toEndOf="@id/checkbox"
+            android:textSize="12sp" />
+
+        <TextView
             android:id="@+id/tv_sensor_rssi"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -93,7 +101,7 @@
             android:id="@+id/gv_sensors"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/tv_sensor_address"
+            android:layout_below="@+id/tv_num_recordings"
             android:layout_alignParentBottom="true"
             android:layout_toStartOf="@+id/icon_container"
             android:layout_marginTop="4dp"

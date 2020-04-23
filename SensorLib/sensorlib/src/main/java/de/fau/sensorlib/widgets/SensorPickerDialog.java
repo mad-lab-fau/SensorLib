@@ -142,12 +142,14 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
             int batteryLevel = sensorBundle.getInt(Constants.KEY_BATTERY_LEVEL);
             SensorState state = (SensorState) sensorBundle.getSerializable(Constants.KEY_SENSOR_STATE);
             boolean chargingState = sensorBundle.getBoolean(Constants.KEY_CHARGING_STATE);
+            int numRecordings = sensorBundle.getInt(Constants.KEY_NUM_RECORDINGS);
 
             holder.setSensorName(name);
             holder.setSensorInfo(address);
             holder.setRssi(rssi);
             holder.setBatteryLevel(batteryLevel, chargingState);
             holder.setSensorState(state);
+            holder.setNumRecordings(numRecordings);
             // highlight last connected sensors
             holder.setRecentlyConnected(mLastConnectedSensors.contains(mSensorBundleList.get(position).getString(Constants.KEY_SENSOR_NAME)));
             holder.setSensorsAvailable(sensor.getAvailableSensors());
@@ -308,6 +310,7 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
         private TextView mSensorInformationTextView;
         private ImageView mBatteryLevelImageView;
         private ImageView mSensorStateImageView;
+        private TextView mNumRecordingsTextView;
         private TextView mSensorRssiTextView;
         private GridView mSensorGridView;
         private CheckBox mCheckBox;
@@ -323,6 +326,7 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
             mSensorInformationTextView = itemView.findViewById(R.id.tv_sensor_address);
             mBatteryLevelImageView = itemView.findViewById(R.id.iv_battery_level);
             mSensorStateImageView = itemView.findViewById(R.id.iv_sensor_state);
+            mNumRecordingsTextView = itemView.findViewById(R.id.tv_num_recordings);
             mSensorRssiTextView = itemView.findViewById(R.id.tv_sensor_rssi);
             mCheckBox = itemView.findViewById(R.id.checkbox);
             mCheckBox.setOnClickListener(this);
@@ -353,6 +357,10 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
             if (state == SensorState.LOGGING) {
                 mSensorStateImageView.setVisibility(View.VISIBLE);
             }
+        }
+
+        public void setNumRecordings(int numRecordings) {
+            mNumRecordingsTextView.setText(mContext.getString(R.string.placeholder_num_recordings, numRecordings));
         }
 
         @Override
@@ -594,6 +602,7 @@ public class SensorPickerDialog extends DialogFragment implements View.OnClickLi
         bundle.putSerializable(Constants.KEY_SENSOR_STATE, BleManufacturerDataHelper.getSensorState(sensor.getDeviceClass(), sensor.getManufacturerData()));
         bundle.putInt(Constants.KEY_BATTERY_LEVEL, sensor.getBatteryLevel());
         bundle.putBoolean(Constants.KEY_CHARGING_STATE, sensor.getChargingState());
+        bundle.putInt(Constants.KEY_NUM_RECORDINGS, sensor.getNumRecordings());
         bundle.putInt(Constants.KEY_SENSOR_RSSI, rssi);
 
         return bundle;
