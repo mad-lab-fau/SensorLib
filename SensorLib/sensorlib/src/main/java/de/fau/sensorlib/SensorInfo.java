@@ -113,6 +113,10 @@ public class SensorInfo implements Serializable {
         mIsCharging = isCharging;
     }
 
+    public int getNumRecordings() {
+        return mNumRecordings;
+    }
+
     /**
      * Changes the sensor state.
      *
