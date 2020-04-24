@@ -164,8 +164,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             Log.d(TAG, "All Sessions read!");
             computeRemainingCapacity();
             computeRemainingRuntime();
-
-            sendSessionListRead(mSessionHandler.getSessionList());
+            //sendSessionListRead(mSessionHandler.getSessionList());
         }
     }
 
@@ -339,6 +338,11 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
                         break;
                     case FLASH_ERASE:
                         sendSessionsCleared();
+                        break;
+                    case SESSION_LIST:
+                        if (mSessionHandler != null) {
+                            sendSessionListRead(mSessionHandler.getSessionList());
+                        }
                         break;
                     case SESSION_DOWNLOAD:
                         mSessionDownloader.completeDownload();
