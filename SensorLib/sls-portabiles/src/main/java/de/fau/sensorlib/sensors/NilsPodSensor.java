@@ -429,11 +429,13 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
         NilsPodMotionInterrupt interrupt = (NilsPodMotionInterrupt) mCurrentConfigMap.get(KEY_MOTION_INTERRUPT);
         NilsPodIndicationLed indicationLed = (NilsPodIndicationLed) mCurrentConfigMap.get(KEY_INDICATION_LED);
 
-        boolean timerEnabled = mCurrentConfigMap.get(KEY_TIMER_ENABLED) == NilsPodTimerMode.TIMER_ENABLED;
-        Calendar timerStart = (Calendar) mCurrentConfigMap.get(KEY_TIMER_START_TIME);
-        Calendar timerStop = (Calendar) mCurrentConfigMap.get(KEY_TIMER_STOP_TIME);
-
-        NilsPodTimer timerConfig = new NilsPodTimer(timerStart, timerStop, timerEnabled);
+        NilsPodTimer timerConfig = null;
+        if (getFirmwareRevision().isAtLeast(NilsPodFirmwareRevisions.FW_0_17_0)) {
+            boolean timerEnabled = mCurrentConfigMap.get(KEY_TIMER_ENABLED) == NilsPodTimerMode.TIMER_ENABLED;
+            Calendar timerStart = (Calendar) mCurrentConfigMap.get(KEY_TIMER_START_TIME);
+            Calendar timerStop = (Calendar) mCurrentConfigMap.get(KEY_TIMER_STOP_TIME);
+            timerConfig = new NilsPodTimer(timerStart, timerStop, timerEnabled);
+        }
 
         String sr = (String) mCurrentConfigMap.get(KEY_SAMPLING_RATE);
         if (sr != null) {
@@ -445,7 +447,9 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             writeSyncConfig(syncRole, syncGroup);
             writeSensorConfig(sensors, accRange, gyroRange);
             writeSystemSettingsConfig(sensorPosition, operationMode, interrupt, indicationLed);
-            writeTimerConfig(timerConfig);
+            if (getFirmwareRevision().isAtLeast(NilsPodFirmwareRevisions.FW_0_17_0) && timerConfig != null) {
+                writeTimerConfig(timerConfig);
+            }
         } catch (SensorException e) {
             e.printStackTrace();
         }
