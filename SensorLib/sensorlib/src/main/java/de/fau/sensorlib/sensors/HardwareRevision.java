@@ -5,8 +5,8 @@ import androidx.annotation.Nullable;
 
 public final class HardwareRevision {
 
-    public String hwRevision;
-    public String hwRevisionName;
+    private String hwRevision;
+    private String hwRevisionName;
 
     public HardwareRevision() {
         this("", "");
@@ -19,6 +19,14 @@ public final class HardwareRevision {
     public HardwareRevision(String hwRevision, String hwRevisionName) {
         this.hwRevision = hwRevision;
         this.hwRevisionName = hwRevisionName;
+    }
+
+    public String getHwRevision() {
+        return hwRevision;
+    }
+
+    public String getHwRevisionName() {
+        return hwRevisionName;
     }
 
     @Override
