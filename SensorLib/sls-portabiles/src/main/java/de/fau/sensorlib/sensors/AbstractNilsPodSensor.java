@@ -70,7 +70,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
     public static final class NilsPodHardwareRevisions {
         public static final HardwareRevision WP_V1 = new HardwareRevision("1.0", "WP_V1");
-        public static final HardwareRevision DOCK_V1 = new HardwareRevision("1.1", "Dock_V1");
+        public static final HardwareRevision DOCK_V1 = new HardwareRevision("1.1", "DOCK_V1");
         public static final HardwareRevision WP_V2 = new HardwareRevision("2.0", "WP_V2");
         public static final HardwareRevision USB = new HardwareRevision("2.1", "USB");
         public static final HardwareRevision V3 = new HardwareRevision("3.0", "V3");
