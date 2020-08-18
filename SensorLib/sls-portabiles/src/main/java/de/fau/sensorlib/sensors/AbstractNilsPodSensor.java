@@ -935,7 +935,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         int errorFlags = 0;
 
         try {
-            errorCode = NilsPodErrorCode.values()[offset++];
+            errorCode = NilsPodErrorCode.values()[values[offset++]];
             operationState = NilsPodOperationState.values()[values[offset++]];
             NilsPodOperationState oldState = mOperationState;
             // set new state

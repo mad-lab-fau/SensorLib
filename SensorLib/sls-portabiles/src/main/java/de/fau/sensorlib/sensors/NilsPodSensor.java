@@ -110,7 +110,7 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
     private String mRemainingRuntime = "n/a";
 
 
-    private SessionHandler mSessionHandler;
+    private SessionHandler mSessionHandler = new SessionHandler();
     private SessionDownloader mSessionDownloader;
     private boolean mCsvExportEnabled = false;
 
@@ -536,6 +536,15 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
      */
     public double getRemainingCapacity() {
         return mRemainingCapacity;
+    }
+
+    /**
+     * Returns the session handler associated with this sensor.
+     *
+     * @return SessionHandler object
+     */
+    public SessionHandler getSessionHandler() {
+        return mSessionHandler;
     }
 
     private void computeRemainingCapacity() {

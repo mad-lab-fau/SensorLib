@@ -13,6 +13,8 @@ import java.util.List;
 
 public class SessionHandler {
 
+    public static final int MAX_NUM_SESSIONS = 25;
+
     private boolean mFirstPacketRead;
 
     private int mSessionCount;
