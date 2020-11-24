@@ -115,7 +115,7 @@ public class SensorActionDialog extends DialogFragment implements SensorConfigSe
                     }
                     break;
                 case LOGGING:
-                    for (SensorAction action : EnumSet.of(SensorAction.CONFIGURE, SensorAction.START_LOGGING, SensorAction.CLEAR_SESSIONS, SensorAction.FULL_ERASE, SensorAction.RESET)) {
+                    for (SensorAction action : EnumSet.of(SensorAction.CONFIGURE_SENSOR, SensorAction.START_LOGGING, SensorAction.CLEAR_SESSIONS, SensorAction.FULL_ERASE_STORAGE, SensorAction.RESET_SENSOR)) {
                         if (position == action.ordinal()) {
                             Toast.makeText(getContext(), "Sensor is currently logging. Stop logging first!", Toast.LENGTH_SHORT).show();
                             return;
@@ -123,7 +123,7 @@ public class SensorActionDialog extends DialogFragment implements SensorConfigSe
                     }
                     break;
                 case STREAMING:
-                    for (SensorAction action : EnumSet.of(SensorAction.CONFIGURE, SensorAction.DISCONNECT, SensorAction.START_LOGGING, SensorAction.STOP_LOGGING, SensorAction.CLEAR_SESSIONS, SensorAction.FULL_ERASE)) {
+                    for (SensorAction action : EnumSet.of(SensorAction.CONFIGURE_SENSOR, SensorAction.DISCONNECT, SensorAction.START_LOGGING, SensorAction.STOP_LOGGING, SensorAction.CLEAR_SESSIONS, SensorAction.FULL_ERASE_STORAGE)) {
                         if (position == action.ordinal()) {
                             Toast.makeText(getContext(), "Sensor is currently streaming. Stop streaming first!", Toast.LENGTH_SHORT).show();
                             return;
@@ -140,12 +140,12 @@ public class SensorActionDialog extends DialogFragment implements SensorConfigSe
             final Activity activity = getActivity();
 
             switch (action) {
-                case CONFIGURE:
+                case CONFIGURE_SENSOR:
                     if (mSensor instanceof Configurable) {
                         showSensorConfigDialog();
                     }
                     break;
-                case DEFAULT_CONFIG:
+                case SET_DEFAULT_CONFIG:
                     if (mSensor instanceof Configurable) {
                         createAlertDialog("Setting default config of " + mSensor.getDeviceName() + "?",
                                 (dialog, which) -> {
@@ -156,7 +156,7 @@ public class SensorActionDialog extends DialogFragment implements SensorConfigSe
                         return;
                     }
                     break;
-                case RESET:
+                case RESET_SENSOR:
                     if (mSensor instanceof Resettable) {
                         createAlertDialog("Resetting " + mSensor.getDeviceName() + "?", (dialog, which) -> {
                             mSensorActionCallback.onSensorActionSelected(mSensor, action);
@@ -193,7 +193,7 @@ public class SensorActionDialog extends DialogFragment implements SensorConfigSe
                         return;
                     }
                     break;
-                case FULL_ERASE:
+                case FULL_ERASE_STORAGE:
                     if (mSensor instanceof Erasable) {
                         createAlertDialog("Erasing full storage of " + mSensor.getDeviceName() + "?",
                                 (dialog, which) -> {
@@ -236,7 +236,7 @@ public class SensorActionDialog extends DialogFragment implements SensorConfigSe
             switch (Objects.requireNonNull(mSensor).getState()) {
                 case LOGGING:
                     // disable Configure Start Logging and Clear Flash
-                    for (SensorAction action : EnumSet.of(SensorAction.CONFIGURE, SensorAction.START_LOGGING, SensorAction.CLEAR_SESSIONS, SensorAction.FULL_ERASE)) {
+                    for (SensorAction action : EnumSet.of(SensorAction.CONFIGURE_SENSOR, SensorAction.START_LOGGING, SensorAction.CLEAR_SESSIONS, SensorAction.FULL_ERASE_STORAGE)) {
                         setItemDisabled(mRecyclerView.getChildAt(action.ordinal()));
                     }
                     break;
@@ -249,26 +249,26 @@ public class SensorActionDialog extends DialogFragment implements SensorConfigSe
                     break;
                 case STREAMING:
                     // disable all Logging actions
-                    for (SensorAction action : EnumSet.of(SensorAction.CONFIGURE, SensorAction.DISCONNECT, SensorAction.STOP_LOGGING, SensorAction.START_LOGGING, SensorAction.CLEAR_SESSIONS, SensorAction.FULL_ERASE)) {
+                    for (SensorAction action : EnumSet.of(SensorAction.CONFIGURE_SENSOR, SensorAction.DISCONNECT, SensorAction.STOP_LOGGING, SensorAction.START_LOGGING, SensorAction.CLEAR_SESSIONS, SensorAction.FULL_ERASE_STORAGE)) {
                         setItemDisabled(mRecyclerView.getChildAt(action.ordinal()));
                     }
                     break;
             }
 
             if (!(mSensor instanceof Configurable)) {
-                for (SensorAction action : EnumSet.of(SensorAction.CONFIGURE, SensorAction.DEFAULT_CONFIG)) {
+                for (SensorAction action : EnumSet.of(SensorAction.CONFIGURE_SENSOR, SensorAction.SET_DEFAULT_CONFIG)) {
                     setItemDisabled(mRecyclerView.getChildAt(action.ordinal()));
                 }
             }
 
             if (!(mSensor instanceof Loggable)) {
-                for (SensorAction action : EnumSet.of(SensorAction.START_LOGGING, SensorAction.STOP_LOGGING, SensorAction.CLEAR_SESSIONS, SensorAction.FULL_ERASE)) {
+                for (SensorAction action : EnumSet.of(SensorAction.START_LOGGING, SensorAction.STOP_LOGGING, SensorAction.CLEAR_SESSIONS, SensorAction.FULL_ERASE_STORAGE)) {
                     setItemDisabled(mRecyclerView.getChildAt(action.ordinal()));
                 }
             }
 
             if (!(mSensor instanceof Resettable)) {
-                for (SensorAction action : EnumSet.of(SensorAction.RESET)) {
+                for (SensorAction action : EnumSet.of(SensorAction.RESET_SENSOR)) {
                     setItemDisabled(mRecyclerView.getChildAt(action.ordinal()));
                 }
             }
@@ -298,7 +298,7 @@ public class SensorActionDialog extends DialogFragment implements SensorConfigSe
 
     @Override
     public void onSensorConfigSelected(HashMap<String, Object> configMap) {
-        mSensorActionCallback.onSensorActionSelected(mSensor, SensorAction.CONFIGURE, configMap);
+        mSensorActionCallback.onSensorActionSelected(mSensor, SensorAction.CONFIGURE_SENSOR, configMap);
     }
 
     private void createAlertDialog(String message, DialogInterface.OnClickListener okListener, DialogInterface.OnClickListener cancelListener) {

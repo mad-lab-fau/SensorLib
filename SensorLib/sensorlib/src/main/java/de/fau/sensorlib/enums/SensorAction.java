@@ -14,15 +14,15 @@ import org.apache.commons.text.WordUtils;
 
 
 public enum SensorAction {
-    CONFIGURE,
-    DEFAULT_CONFIG,
-    RESET,
-    DISCONNECT,
+    CONFIGURE_SENSOR,
+    SENSOR_INFO,
     START_LOGGING,
     STOP_LOGGING,
+    DISCONNECT,
+    SET_DEFAULT_CONFIG,
+    RESET_SENSOR,
     CLEAR_SESSIONS,
-    FULL_ERASE,
-    SENSOR_INFO;
+    FULL_ERASE_STORAGE;
 
     @NonNull
     @Override
