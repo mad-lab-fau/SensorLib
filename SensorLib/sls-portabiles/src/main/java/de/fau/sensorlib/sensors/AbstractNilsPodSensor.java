@@ -969,8 +969,9 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
                 throw new SensorException(SensorException.SensorExceptionType.maxNumSessions);
             case UNKNOWN_COMMAND:
             case INVALID_ARGUMENT:
-            case INVALID_STATE:
                 throw new SensorException(SensorException.SensorExceptionType.sensorStateError, errorCode.toString());
+            case INVALID_STATE:
+                // ignore
         }
 
         if (errorFlags > 0) {
