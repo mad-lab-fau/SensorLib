@@ -74,6 +74,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         public static final HardwareRevision WP_V2 = new HardwareRevision("2.0", "WP_V2");
         public static final HardwareRevision USB = new HardwareRevision("2.1", "USB");
         public static final HardwareRevision V3 = new HardwareRevision("3.0", "V3");
+        public static final HardwareRevision ECG = new HardwareRevision("4.0", "ECG");
 
         public static HardwareRevision inferHardwareRevision(HardwareRevision hwRevision) {
             if (hwRevision.equals(WP_V1)) {
@@ -86,6 +87,8 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
                 return USB;
             } else if (hwRevision.equals(V3)) {
                 return V3;
+            } else if (hwRevision.equals(ECG)) {
+                return ECG;
             } else {
                 return new HardwareRevision();
             }
