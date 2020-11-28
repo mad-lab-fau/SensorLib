@@ -46,7 +46,7 @@ public class SessionDownloadChecker {
     private AbstractSensor mSensor;
     private ArrayList<Session> mSessionList;
     private ArrayList<SessionDownloadFlag> mAlreadyDownloadedList;
-    private ArrayList<String> mFileList;
+    private ArrayList<String> mFileList = new ArrayList<>();
 
     public SessionDownloadChecker(Context context) throws SensorException {
         this(context, null);
@@ -62,7 +62,7 @@ public class SessionDownloadChecker {
             File directory = getDirectory();
             if (directory != null) {
                 mPath = directory;
-                listFiles();
+                mFileList = listFiles();
             }
         } else {
             throw new SensorException(SensorException.SensorExceptionType.permissionsMissing);
@@ -151,9 +151,9 @@ public class SessionDownloadChecker {
         }
     }
 
-    private void listFiles() {
+    public ArrayList<String> listFiles() {
         if (mPath == null) {
-            return;
+            return new ArrayList<>();
         }
         // list files
         String[] files;
@@ -163,12 +163,15 @@ public class SessionDownloadChecker {
             files = mPath.list((dir, name) -> name.contains(mSensor.getDeviceName()));
         }
 
+        ArrayList<String> fileList = new ArrayList<>();
+
         if (files != null) {
-            mFileList = new ArrayList<>(Arrays.asList(files));
+            fileList = new ArrayList<>(Arrays.asList(files));
         } else {
             Toast.makeText(mContext, "Path " + mPath.getAbsolutePath() +
                     " is no valid directory or I/O error occurred!", Toast.LENGTH_SHORT).show();
         }
+        return fileList;
     }
 
     public void addSessions(ArrayList<Session> sessionList) {
@@ -176,7 +179,7 @@ public class SessionDownloadChecker {
         mAlreadyDownloadedList = new ArrayList<>();
 
         // reload file list
-        listFiles();
+        mFileList = listFiles();
 
         for (Session session : mSessionList) {
             mAlreadyDownloadedList.add(SessionDownloadFlag.NOT_DOWNLOADED);
@@ -219,7 +222,7 @@ public class SessionDownloadChecker {
 
     public String getAbsolutePathForSession(Session session) {
         // reload file list
-        listFiles();
+        mFileList = listFiles();
 
         for (String filename : mFileList) {
             if (filename.contains(session.getSessionStartString())) {
@@ -233,7 +236,7 @@ public class SessionDownloadChecker {
 
     public String getFileNameForSession(Session session) {
         // reload file list
-        listFiles();
+        mFileList = listFiles();
 
         if (getSessionDownloadStatus(session) == SessionDownloadFlag.DOWNLOAD_SUCCESS) {
             for (String filename : mFileList) {
