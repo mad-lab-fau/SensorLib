@@ -18,10 +18,10 @@ public enum SensorAction {
     SENSOR_INFO,
     START_LOGGING,
     STOP_LOGGING,
+    CLEAR_SESSIONS,
     DISCONNECT,
     SET_DEFAULT_CONFIG,
     RESET_SENSOR,
-    CLEAR_SESSIONS,
     FULL_ERASE_STORAGE;
 
     @NonNull
