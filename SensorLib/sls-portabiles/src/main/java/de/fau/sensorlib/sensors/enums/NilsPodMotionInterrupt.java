@@ -7,10 +7,20 @@
  */
 package de.fau.sensorlib.sensors.enums;
 
+import androidx.annotation.NonNull;
+
+import org.apache.commons.text.WordUtils;
+
 /**
  * Enum indicating whether motion interrupt is enabled on NilsPod or not.
  */
 public enum NilsPodMotionInterrupt {
     MOTION_INTERRUPT_DISABLED,
-    MOTION_INTERRUPT_ENABLED,
+    MOTION_INTERRUPT_ENABLED;
+
+    @NonNull
+    @Override
+    public String toString() {
+        return WordUtils.capitalizeFully(name().replace("MOTION_INTERRUPT", "").replace('_', ' '));
+    }
 }

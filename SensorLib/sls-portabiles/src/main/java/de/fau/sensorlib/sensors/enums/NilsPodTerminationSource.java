@@ -1,5 +1,9 @@
 package de.fau.sensorlib.sensors.enums;
 
+import androidx.annotation.NonNull;
+
+import org.apache.commons.text.WordUtils;
+
 public enum NilsPodTerminationSource {
 
     NO_MEMORY,
@@ -21,5 +25,11 @@ public enum NilsPodTerminationSource {
             default:
                 return UNKNOWN;
         }
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return WordUtils.capitalizeFully(name().replace('_', ' '));
     }
 }

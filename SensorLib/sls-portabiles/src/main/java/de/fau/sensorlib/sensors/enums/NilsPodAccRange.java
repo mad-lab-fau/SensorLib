@@ -7,15 +7,19 @@
  */
 package de.fau.sensorlib.sensors.enums;
 
+import androidx.annotation.NonNull;
+
+import org.apache.commons.text.WordUtils;
+
 /**
  * Enum describing the possible accelerometer range of the NilsPod.
  */
 public enum NilsPodAccRange {
 
-    ACC_RANGE_2_G(0x03),
-    ACC_RANGE_4_G(0x05),
-    ACC_RANGE_8_G(0x08),
-    ACC_RANGE_16_G(0x0C);
+    ACC_RANGE_2G(0x03),
+    ACC_RANGE_4G(0x05),
+    ACC_RANGE_8G(0x08),
+    ACC_RANGE_16G(0x0C);
 
     private int accRange;
 
@@ -29,7 +33,7 @@ public enum NilsPodAccRange {
                 return accRange;
             }
         }
-        return ACC_RANGE_16_G;
+        return ACC_RANGE_16G;
     }
 
     public int getRangeG() {
@@ -38,5 +42,11 @@ public enum NilsPodAccRange {
 
     public int getRangeVal() {
         return accRange;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return WordUtils.capitalizeFully(name().replace("ACC_RANGE", "").replace('_', ' '));
     }
 }

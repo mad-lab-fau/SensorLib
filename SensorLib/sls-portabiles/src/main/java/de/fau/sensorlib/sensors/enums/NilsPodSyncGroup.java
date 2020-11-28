@@ -8,6 +8,10 @@
 
 package de.fau.sensorlib.sensors.enums;
 
+import androidx.annotation.NonNull;
+
+import org.apache.commons.text.WordUtils;
+
 import java.util.Arrays;
 
 public enum NilsPodSyncGroup {
@@ -51,8 +55,13 @@ public enum NilsPodSyncGroup {
     }
 
 
+    public String toLongString() {
+        return "[" + syncGroup + "]: Channel " + syncChannel + " @ " + Arrays.toString(syncAddress);
+    }
+
+    @NonNull
     @Override
     public String toString() {
-        return "[" + syncGroup + "]: Channel " + syncChannel + " @ " + Arrays.toString(syncAddress);
+        return WordUtils.capitalizeFully(name().replace('_', ' '));
     }
 }

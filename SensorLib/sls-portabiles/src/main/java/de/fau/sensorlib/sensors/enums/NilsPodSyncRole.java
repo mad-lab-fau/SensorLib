@@ -7,11 +7,21 @@
  */
 package de.fau.sensorlib.sensors.enums;
 
+import androidx.annotation.NonNull;
+
+import org.apache.commons.text.WordUtils;
+
 /**
  * Enum describing the synchronization role of the NilsPod sensor
  */
 public enum NilsPodSyncRole {
     SYNC_ROLE_DISABLED,
     SYNC_ROLE_SLAVE,
-    SYNC_ROLE_MASTER
+    SYNC_ROLE_MASTER;
+
+    @NonNull
+    @Override
+    public String toString() {
+        return WordUtils.capitalizeFully(name().replace("SYNC_ROLE", "").replace('_', ' '));
+    }
 }

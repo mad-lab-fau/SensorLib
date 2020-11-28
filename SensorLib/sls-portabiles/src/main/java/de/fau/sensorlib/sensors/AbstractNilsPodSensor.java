@@ -220,7 +220,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
 
     private ArrayList<HardwareSensor> mEnabledSensorList = new ArrayList<>();
 
-    private NilsPodAccRange mAccRange = NilsPodAccRange.ACC_RANGE_16_G;
+    private NilsPodAccRange mAccRange = NilsPodAccRange.ACC_RANGE_16G;
 
     private NilsPodGyroRange mGyroRange = NilsPodGyroRange.GYRO_RANGE_2000_DPS;
 
@@ -1004,7 +1004,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         } finally {
             Log.d(TAG, ">>>> Sync Config:");
             Log.d(TAG, "\tSync Role: " + mSyncRole);
-            Log.d(TAG, "\tSync Group: " + mSyncGroup);
+            Log.d(TAG, "\tSync Group: " + mSyncGroup.toLongString());
         }
 
         mCurrentConfigMap.put(KEY_SYNC_ROLE, mSyncRole);

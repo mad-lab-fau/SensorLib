@@ -56,9 +56,9 @@ public enum HardwareSensor {
     GALVANIC_SKIN_RESPONSE("GSR", EdaDataFrame.class),
     ORIENTATION("ORI", OrientationDataFrame.class),
     QUATERNION("QUA", QuaternionDataFrame.class),
-    GESTURE("GES", GestureDataFrame.class),
+    GESTURE("GEST", GestureDataFrame.class),
     NOISE("NOIS", NoiseDataFrame.class),
-    HUMIDITY("HUM", HumidityDataFrame.class),
+    HUMIDITY("HUMI", HumidityDataFrame.class),
     MICROPHONE("MIC", MicrophoneDataFrame.class),
     RSSI("RSSI", RssiDataFrame.class);
 

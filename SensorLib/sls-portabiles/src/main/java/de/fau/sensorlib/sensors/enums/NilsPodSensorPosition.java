@@ -8,6 +8,10 @@
 
 package de.fau.sensorlib.sensors.enums;
 
+import androidx.annotation.NonNull;
+
+import org.apache.commons.text.WordUtils;
+
 /**
  * Enum describing the sensor position
  */
@@ -25,5 +29,11 @@ public enum NilsPodSensorPosition {
             return values()[position];
         }
         return NO_POSITION_DEFINED;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return WordUtils.capitalizeFully(name().replace('_', ' '));
     }
 }
