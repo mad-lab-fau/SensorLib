@@ -122,6 +122,9 @@ public class SessionDownloader {
 
     public String getEstimatedRemainingTimeString() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (getEstimatedRemainingTimeSeconds() > LocalTime.MAX.toSecondOfDay()) {
+                return "n/a";
+            }
             return LocalTime.ofSecondOfDay(getEstimatedRemainingTimeSeconds()).toString();
         } else {
             long hours = TimeUnit.SECONDS.toHours(getEstimatedRemainingTimeSeconds());
