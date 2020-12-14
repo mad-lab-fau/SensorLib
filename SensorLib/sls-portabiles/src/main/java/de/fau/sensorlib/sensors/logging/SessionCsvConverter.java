@@ -307,7 +307,8 @@ public class SessionCsvConverter {
         if (isSensorEnabled(HardwareSensor.ANALOG)) {
             analog = new double[3];
             for (int j = 0; j < 3; j++) {
-                analog[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset++);
+                analog[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
+                offset += 2;
             }
         }
 
