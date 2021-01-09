@@ -12,7 +12,7 @@ android {
         versionCode 1
         versionName "1.0"
     }
-    
+
     lintOptions {
         abortOnError false
     }
@@ -33,15 +33,4 @@ dependencies {
     implementation group: 'org.apache.commons', name: 'commons-math3', version: '3.5'
     implementation group: 'java3d', name: 'vecmath', version: '1.3.1'
 
-}
-
-tasks.create(name: 'copyApk', type: Copy) {
-    from 'build/outputs/aar'
-    into '../../Precompiled'
-}
-
-tasks.whenTaskAdded { task ->
-    if (task.name == 'mockableAndroidJar') {
-        task.dependsOn 'copyApk'
-    }
 }

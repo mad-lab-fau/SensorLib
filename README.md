@@ -14,20 +14,18 @@ Right now, the following external libraries are required to compile all sensor m
 ## Minimal example
 Using the SensorLib is very easy.
 
-First, you have to include the sensorlib.aar and the respective sensor-submodule you want to use into your build.gradle file. To do this, just add the following line to your build.gradle:
+First, you have to include the Jitpack.io maven repository to your project build.grade file and then add the sensorlib and the respective sensor-submodule you want to use into your module build.gradle file. To do this, just add the following line to the respective files:
 ```
+# build.gradle
 repositories {
-    flatDir {
-        dirs 'libs'
-    }
+    maven { url 'https://jitpack.io' }
 }
 
-...
-
+# app/build.gradle
 dependencies {
     ...
-    compile(name: 'sensorlib', ext: 'aar')
-    compile(name: 'sls-tek', ext: 'aar')
+    implementation 'com.github.mad-lab-fau.sensorlib:sensorlib:0.15.7'
+    implementation 'com.github.mad-lab-fau.sensorlib:sls-tek:0.15.7'
     ...
 }
 ```

@@ -27,14 +27,3 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.1.0-alpha05'
     implementation 'com.google.android.gms:play-services-wearable:16.0.1'
 }
-
-tasks.create(name: 'copyApk', type: Copy) {
-    from 'build/outputs/aar'
-    into '../../Precompiled'
-}
-
-tasks.whenTaskAdded { task ->
-    if (task.name == 'mockableAndroidJar') {
-        task.dependsOn 'copyApk'
-    }
-}
