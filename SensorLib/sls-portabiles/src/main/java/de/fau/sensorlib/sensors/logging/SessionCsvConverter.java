@@ -20,7 +20,9 @@ import de.fau.sensorlib.SensorDataRecorder;
 import de.fau.sensorlib.SensorException;
 import de.fau.sensorlib.enums.HardwareSensor;
 import de.fau.sensorlib.sensors.AbstractNilsPodSensor;
+import de.fau.sensorlib.sensors.AbstractNilsPodSensor.NilsPodFirmwareRevisions;
 import de.fau.sensorlib.sensors.AbstractSensor;
+import de.fau.sensorlib.sensors.FirmwareRevision;
 import de.fau.sensorlib.sensors.NilsPodSensor;
 import de.fau.sensorlib.sensors.enums.NilsPodGyroRange;
 import de.fau.sensorlib.sensors.enums.NilsPodSensorPosition;
@@ -304,11 +306,18 @@ public class SessionCsvConverter {
             offset += 2;
         }
 
+        FirmwareRevision fwRevision = new FirmwareRevision(mHeader.getFirmwareVersion());
+
         if (isSensorEnabled(HardwareSensor.ANALOG)) {
             analog = new double[3];
             for (int j = 0; j < 3; j++) {
-                analog[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
-                offset += 2;
+                if (fwRevision.isAtLeast(NilsPodFirmwareRevisions.FW_0_18_0)) {
+                    analog[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
+                    offset += 2;
+                } else {
+                    analog[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset);
+                    offset += 1;
+                }
             }
         }
 

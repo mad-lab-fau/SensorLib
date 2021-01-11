@@ -66,6 +66,7 @@ public abstract class AbstractNilsPodSensor extends GenericBleSensor implements 
         public static final FirmwareRevision FW_0_15_0 = new FirmwareRevision(0, 15, 0);
         public static final FirmwareRevision FW_0_16_0 = new FirmwareRevision(0, 16, 0);
         public static final FirmwareRevision FW_0_17_0 = new FirmwareRevision(0, 17, 0);
+        public static final FirmwareRevision FW_0_18_0 = new FirmwareRevision(0, 18, 0);
     }
 
     public static final class NilsPodHardwareRevisions {
