@@ -238,7 +238,13 @@ public class NilsPodSensor extends AbstractNilsPodSensor implements NilsPodLogga
             if (isSensorEnabled(HardwareSensor.ANALOG)) {
                 analog = new double[3];
                 for (int j = 0; j < 3; j++) {
-                    analog[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset++);
+                    if (getFirmwareRevision().isAtLeast(NilsPodFirmwareRevisions.FW_0_18_0)) {
+                        analog[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset);
+                        offset += 2;
+                    } else {
+                        analog[j] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT8, offset);
+                        offset += 1;
+                    }
                 }
             }
 
