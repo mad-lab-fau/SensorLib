@@ -372,7 +372,8 @@ public class MuseSensor extends AbstractSensor {
                     "\nfirmware version: " + museVersion.getFirmwareVersion() +
                     "\nprotocol version: " + museVersion.getProtocolVersion());
 
-            mFirmwareRevision = museVersion.getFirmwareVersion();
+            mFirmwareRevisionString = museVersion.getFirmwareVersion();
+            mFirmwareRevision = new FirmwareRevision(mFirmwareRevisionString);
         }
 
 
