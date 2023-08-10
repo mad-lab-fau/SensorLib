@@ -10,6 +10,7 @@ package de.fau.sensorlib.dataframe;
 /**
  * @deprecated use EdaDataFrame
  */
+@Deprecated
 public interface GalvanicSkinResponseDataFrame {
 
     String[] COLUMNS = new String[]{"gsr"};

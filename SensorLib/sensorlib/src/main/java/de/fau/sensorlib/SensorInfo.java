@@ -74,6 +74,7 @@ public class SensorInfo implements Serializable {
      * @return a not necessarily unique, human readable name for this sensor.
      * @deprecated use {@link SensorInfo#getDeviceName()} instead.
      */
+    @Deprecated
     public String getName() {
         return getDeviceName();
     }
