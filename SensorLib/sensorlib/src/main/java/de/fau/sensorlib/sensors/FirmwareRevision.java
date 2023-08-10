@@ -8,6 +8,8 @@ import java.util.regex.PatternSyntaxException;
 
 public final class FirmwareRevision implements Comparable<FirmwareRevision> {
 
+    private static final String TAG = FirmwareRevision.class.getSimpleName();
+
     public int majorVersion = 0;
     public int minorVersion = 0;
     public int patchVersion = 0;
@@ -42,9 +44,12 @@ public final class FirmwareRevision implements Comparable<FirmwareRevision> {
             }
             minorVersion = Integer.parseInt(split[1]);
             patchVersion = Integer.parseInt(split[2]);
+        } catch (PatternSyntaxException | NumberFormatException e) {
+            majorVersion = 0;
+            minorVersion = 0;
+            patchVersion = 0;
+        } finally {
             versionCode = getVersionCode(majorVersion, minorVersion, patchVersion);
-        } catch (PatternSyntaxException ignore) {
-
         }
     }
 
