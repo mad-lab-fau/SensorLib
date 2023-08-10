@@ -72,47 +72,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9c8ca608-48e3-4220-91de-793a796f5c01" name="Default" comment="- added experimental NilsPodPpgSensor">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradle.properties" beforeDir="false" afterPath="$PROJECT_DIR$/gradle.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sensorlib/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/sensorlib/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sensorlib/version.properties" beforeDir="false" afterPath="$PROJECT_DIR$/sensorlib/version.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sensorlibutils/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/sensorlibutils/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sensorlibutils/sensorlibutils.iml" beforeDir="false" afterPath="$PROJECT_DIR$/sensorlibutils/sensorlibutils.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sls-empatica/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/sls-empatica/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sls-empatica/sls-empatica.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sls-fitnessshirt/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/sls-fitnessshirt/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sls-fitnessshirt/sls-fitnessshirt.iml" beforeDir="false" afterPath="$PROJECT_DIR$/sls-fitnessshirt/sls-fitnessshirt.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sls-fitnessshirt/src/main/java/de/fau/sensorlib/sensors/FitnessShirt.java" beforeDir="false" afterPath="$PROJECT_DIR$/sls-fitnessshirt/src/main/java/de/fau/sensorlib/sensors/FitnessShirt.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sls-muse/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/sls-muse/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sls-myo/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/sls-myo/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sls-myo/sls-myo.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sls-portabiles/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/sls-portabiles/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sls-shimmer/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/sls-shimmer/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sls-shimmer/libs/commons-math3-3.5.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sls-shimmer/libs/vecmath-1.3.1.jar" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sls-shimmer/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/sls-shimmer/src/main/AndroidManifest.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sls-shimmer/src/main/java/de/fau/sensorlib/sensors/ShimmerSensor.java" beforeDir="false" afterPath="$PROJECT_DIR$/sls-shimmer/src/main/java/de/fau/sensorlib/sensors/ShimmerSensor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sls-simblee/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/sls-simblee/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sls-simblee/src/main/java/de/fau/sensorlib/sensors/BleEcgSensor.java" beforeDir="false" afterPath="$PROJECT_DIR$/sls-simblee/src/main/java/de/fau/sensorlib/sensors/BleEcgSensor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sls-simblee/src/main/java/de/fau/sensorlib/sensors/SimbleeSensor.java" beforeDir="false" afterPath="$PROJECT_DIR$/sls-simblee/src/main/java/de/fau/sensorlib/sensors/SimbleeSensor.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sls-smartband2/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/sls-smartband2/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sls-smartwatch/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/sls-smartwatch/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sls-smartwatch/sls-smartwatch.iml" beforeDir="false" afterPath="$PROJECT_DIR$/sls-smartwatch/sls-smartwatch.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sls-smartwatch/src/main/java/de/fau/sensorlib/sensors/SmartWatch.java" beforeDir="false" afterPath="$PROJECT_DIR$/sls-smartwatch/src/main/java/de/fau/sensorlib/sensors/SmartWatch.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sls-tek/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/sls-tek/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sls-tek/sls-tek.iml" beforeDir="false" afterPath="$PROJECT_DIR$/sls-tek/sls-tek.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sls-tek/src/main/java/de/fau/sensorlib/sensors/TekSensor.java" beforeDir="false" afterPath="$PROJECT_DIR$/sls-tek/src/main/java/de/fau/sensorlib/sensors/TekSensor.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
     </list>
-    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[8B8X15GTQ]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -124,46 +92,6 @@
         <projects_view />
       </state>
     </system>
-  </component>
-  <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/sls-smartwatch/build.gradle">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="258">
-              <caret line="27" column="68" selection-start-line="27" selection-start-column="68" selection-end-line="27" selection-end-column="68" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/sls-tek/build.gradle">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="113">
-              <caret line="14" column="25" selection-start-line="14" selection-start-column="25" selection-end-line="14" selection-end-column="25" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/sensorlibutils/build.gradle">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="375">
-              <caret line="25" column="46" selection-start-line="25" selection-start-column="46" selection-end-line="25" selection-end-column="46" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/sls-portabiles/build.gradle">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="345">
-              <caret line="23" column="4" selection-start-line="23" selection-start-column="4" selection-end-line="23" selection-end-column="46" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -223,6 +151,7 @@
     <option name="width" value="1440" />
     <option name="height" value="817" />
   </component>
+  <component name="ProjectId" id="2Tn5Ah5s0GEe1Bd3QewEgPSvUGM" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
     <navigator currentView="ProjectPane" proportions="" version="1">
@@ -290,44 +219,29 @@
       <pane id="PackagesPane" />
     </panes>
   </component>
-  <component name="PropertiesComponent">
-    <property name="GoToClass.includeLibraries" value="false" />
-    <property name="GoToClass.toSaveIncludeLibraries" value="false" />
-    <property name="GoToFile.includeJavaFiles" value="false" />
-    <property name="MemberChooser.copyJavadoc" value="false" />
-    <property name="MemberChooser.showClasses" value="true" />
-    <property name="MemberChooser.sorted" value="false" />
-    <property name="android.project.structure.last.selected" value="sls-bitalino" />
-    <property name="android.project.structure.proportion" value="0.15" />
-    <property name="android.sdk.path" value="$USER_HOME$/Library/Android/sdk" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="options.lastSelected" value="vcs.Subversion" />
-    <property name="options.searchVisible" value="true" />
-    <property name="options.splitter.details.proportions" value="0.2" />
-    <property name="options.splitter.main.proportions" value="0.3" />
-    <property name="project.structure.last.edited" value="Dependencies" />
-    <property name="project.structure.proportion" value="0.17" />
-    <property name="project.structure.side.proportion" value="0.2" />
-    <property name="settings.editor.selected.configurable" value="android.sdk-updates" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
   </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "cidr.known.project.marker": "true"
+  }
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyClassDialog.RECENTS_KEY">
       <recent name="de.fau.sensorlib.sensors" />
     </key>
   </component>
-  <component name="RunDashboard">
-    <option name="ruleStates">
-      <list>
-        <RuleState>
-          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
-        </RuleState>
-        <RuleState>
-          <option name="name" value="StatusDashboardGroupingRule" />
-        </RuleState>
-      </list>
-    </option>
-  </component>
   <component name="RunManager">
+    <configuration default="true" type="AndroidJUnit" factoryName="Android JUnit">
+      <option name="TEST_OBJECT" value="class" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <method v="2">
+        <option name="Android.Gradle.BeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="&lt;template&gt;" type="Applet" default="true" selected="false">
       <option name="MAIN_CLASS_NAME" />
       <option name="HTML_FILE_NAME" />
@@ -337,40 +251,9 @@
       <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
       <option name="VM_PARAMETERS" />
     </configuration>
-    <configuration default="true" type="JUnit" factoryName="JUnit">
-      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
-      <module name="" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
-      <option name="PACKAGE_NAME" />
-      <option name="MAIN_CLASS_NAME" />
-      <option name="METHOD_NAME" />
-      <option name="TEST_OBJECT" value="class" />
-      <option name="VM_PARAMETERS" value="-ea" />
-      <option name="PARAMETERS" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="ENV_VARIABLES" />
-      <option name="PASS_PARENT_ENVS" value="true" />
-      <option name="TEST_SEARCH_SCOPE">
-        <value defaultName="moduleWithDependencies" />
-      </option>
-      <envs />
-      <patterns />
-      <method />
-    </configuration>
     <configuration name="&lt;template&gt;" type="WebApp" default="true" selected="false">
       <Host>localhost</Host>
       <Port>5050</Port>
-    </configuration>
-    <configuration name="&lt;template&gt;" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType" default="true" selected="false">
-      <option name="VM_PARAMETERS" value="-Xmx512m -Xms256m -XX:MaxPermSize=250m -ea" />
-    </configuration>
-    <configuration default="true" type="AndroidJUnit" factoryName="Android JUnit">
-      <option name="TEST_OBJECT" value="class" />
-      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
-      <method v="2">
-        <option name="Android.Gradle.BeforeRunTask" enabled="true" />
-      </method>
     </configuration>
     <configuration name="app" type="AndroidRunConfigurationType" factoryName="Android App">
       <module name="app" />
@@ -379,16 +262,15 @@
       <option name="DEPLOY_AS_INSTANT" value="false" />
       <option name="ARTIFACT_NAME" value="" />
       <option name="PM_INSTALL_OPTIONS" value="" />
-      <option name="DYNAMIC_FEATURES_DISABLED_LIST" value="" />
+      <option name="ALL_USERS" value="false" />
+      <option name="ALWAYS_INSTALL_WITH_PM" value="false" />
+      <option name="CLEAR_APP_STORAGE" value="false" />
       <option name="ACTIVITY_EXTRA_FLAGS" value="" />
       <option name="MODE" value="default_activity" />
       <option name="CLEAR_LOGCAT" value="false" />
       <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
-      <option name="SKIP_NOOP_APK_INSTALLATIONS" value="true" />
-      <option name="FORCE_STOP_RUNNING_APP" value="true" />
+      <option name="INSPECTION_WITHOUT_ACTIVITY_RESTART" value="false" />
       <option name="TARGET_SELECTION_MODE" value="SHOW_DIALOG" />
-      <option name="USE_LAST_SELECTED_DEVICE" value="false" />
-      <option name="PREFERRED_AVD" value="" />
       <option name="SELECTED_CLOUD_MATRIX_CONFIGURATION_ID" value="-1" />
       <option name="SELECTED_CLOUD_MATRIX_PROJECT_ID" value="" />
       <option name="DEBUGGER_TYPE" value="Auto" />
@@ -398,6 +280,8 @@
         <option name="WORKING_DIR" value="" />
         <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
         <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
+        <option name="DEBUG_SANDBOX_SDK" value="false" />
       </Auto>
       <Hybrid>
         <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
@@ -405,22 +289,34 @@
         <option name="WORKING_DIR" value="" />
         <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
         <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
+        <option name="DEBUG_SANDBOX_SDK" value="false" />
       </Hybrid>
-      <Java />
+      <Java>
+        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
+        <option name="DEBUG_SANDBOX_SDK" value="false" />
+      </Java>
       <Native>
         <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
         <option name="SHOW_STATIC_VARS" value="true" />
         <option name="WORKING_DIR" value="" />
         <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
         <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+        <option name="ATTACH_ON_WAIT_FOR_DEBUGGER" value="false" />
+        <option name="DEBUG_SANDBOX_SDK" value="false" />
       </Native>
       <Profilers>
         <option name="ADVANCED_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_PROFILING_ENABLED" value="false" />
         <option name="STARTUP_CPU_PROFILING_ENABLED" value="false" />
         <option name="STARTUP_CPU_PROFILING_CONFIGURATION_NAME" value="Sample Java Methods" />
+        <option name="STARTUP_NATIVE_MEMORY_PROFILING_ENABLED" value="false" />
+        <option name="NATIVE_MEMORY_SAMPLE_RATE_BYTES" value="2048" />
       </Profilers>
       <option name="DEEP_LINK" value="" />
       <option name="ACTIVITY_CLASS" value="" />
+      <option name="SEARCH_ACTIVITY_IN_GLOBAL_SCOPE" value="false" />
+      <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
       <method v="2">
         <option name="Android.Gradle.BeforeRunTask" enabled="true" />
       </method>
@@ -431,7 +327,18 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration default="true" type="JUnit" factoryName="JUnit">
+      <option name="TEST_OBJECT" value="class" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="moduleWithDependencies" />
+      </option>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration default="true" type="TestNG">
+      <option name="TEST_OBJECT" value="CLASS" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="TEST_SEARCH_SCOPE">
         <value defaultName="moduleWithDependencies" />
@@ -442,7 +349,17 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration default="true" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType">
+      <module name="" />
+      <option name="VM_PARAMETERS" value="-Xmx512m -Xms256m -XX:MaxPermSize=250m -ea" />
+      <option name="PROGRAM_PARAMETERS" />
+      <predefined_log_file enabled="true" id="idea.log" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
   </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="SvnConfiguration">
     <configuration>$USER_HOME$/.subversion</configuration>
   </component>
