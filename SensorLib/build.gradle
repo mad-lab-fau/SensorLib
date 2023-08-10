@@ -1,6 +1,5 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
-
 buildscript {
     repositories {
         jcenter()
@@ -17,10 +16,28 @@ buildscript {
 }
 
 allprojects {
+    plugins {
+        id 'com.android.library'
+        id 'maven-publish'
+    }
+
     repositories {
         jcenter()
         google()
         mavenCentral()
         maven { url 'https://jitpack.io' }
     }
+
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                groupId = 'de.fau'
+                artifactId = 'sensorlib'
+                version = '1.0'
+
+                from components.java
+            }
+        }
+    }
+
 }
