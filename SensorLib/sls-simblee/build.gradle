@@ -3,9 +3,9 @@ apply plugin: 'maven-publish'
 
 group = 'com.github.mad-lab-fau'
 
-
 android {
     compileSdkVersion 33
+    namespace 'de.fau.sensorlib'
     
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
