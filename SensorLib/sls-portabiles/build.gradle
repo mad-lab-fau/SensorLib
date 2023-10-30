@@ -4,7 +4,7 @@ apply plugin: 'maven-publish'
 group = 'com.github.mad-lab-fau'
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 34
     namespace 'de.fau.sensorlib.sensors'
 
     compileOptions {
@@ -14,7 +14,7 @@ android {
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 31
+        targetSdkVersion 34
         versionCode 1
         versionName "1.0"
     }
@@ -30,19 +30,7 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation project(path: ':sensorlib')
     implementation group: 'org.apache.commons', name: 'commons-text', version: '1.7'
-    implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.code.gson:gson:2.8.9'
     implementation 'no.nordicsemi.android:dfu:1.9.0'
-}
-
-
-tasks.create(name: 'copyApk', type: Copy) {
-    from 'build/outputs/aar'
-    into '../../Precompiled'
-}
-
-tasks.whenTaskAdded { task ->
-    if (task.name == 'mockableAndroidJar') {
-        task.dependsOn 'copyApk'
-    }
 }

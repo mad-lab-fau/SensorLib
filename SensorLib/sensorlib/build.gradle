@@ -4,7 +4,7 @@ apply plugin: 'maven-publish'
 group = 'com.github.mad-lab-fau'
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 34
     namespace 'de.fau.sensorlib'
 
     compileOptions {
@@ -36,11 +36,11 @@ android {
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 31
+        targetSdkVersion 34
 
         def versionMajor = 0
-        def versionMinor = 17
-        def versionPatch = 10
+        def versionMinor = 18
+        def versionPatch = 0
 
         versionCode versionMajor * 10000 + versionMinor * 100 + versionPatch
         versionName "${versionMajor}.${versionMinor}.${versionPatch}" + "_" + getGitDate() + "-" + getGitHash()
@@ -66,10 +66,10 @@ android {
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation group: 'org.apache.commons', name: 'commons-text', version: '1.7'
-    implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'androidx.recyclerview:recyclerview:1.2.0-beta01'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.recyclerview:recyclerview:1.4.0-alpha01'
     implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'com.google.android.material:material:1.3.0-beta01'
+    implementation 'com.google.android.material:material:1.11.0-beta01'
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
     implementation 'com.xeoh.android:checkboxgroup:1.0.1'
 
