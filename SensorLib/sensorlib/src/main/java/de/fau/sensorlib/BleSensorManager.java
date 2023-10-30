@@ -58,14 +58,6 @@ public class BleSensorManager {
     private static BluetoothLeScanner sBleScanner;
     private static BleScanCallback sScanCallback;
 
-    private static final String[] PERMISSIONS_BT_LE =
-            new String[]{
-                    Manifest.permission.BLUETOOTH,
-                    Manifest.permission.BLUETOOTH_ADMIN,
-                    Manifest.permission.ACCESS_COARSE_LOCATION,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-            };
-
     private static boolean sIsScanning = false;
 
     public static boolean isScanning() {
@@ -222,6 +214,26 @@ public class BleSensorManager {
 
         if (!isBleSupported(activity)) {
             throw new SensorException(SensorExceptionType.bleNotSupported);
+        }
+        final String[] PERMISSIONS_BT_LE;
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            PERMISSIONS_BT_LE =
+                    new String[]{
+                            Manifest.permission.BLUETOOTH,
+                            Manifest.permission.BLUETOOTH_ADMIN,
+                            Manifest.permission.ACCESS_COARSE_LOCATION,
+                            Manifest.permission.ACCESS_FINE_LOCATION
+                    };
+        } else {
+            PERMISSIONS_BT_LE =
+                    new String[]{
+                            Manifest.permission.BLUETOOTH,
+                            Manifest.permission.BLUETOOTH_ADMIN,
+                            Manifest.permission.ACCESS_COARSE_LOCATION,
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.BLUETOOTH_SCAN,
+                            Manifest.permission.BLUETOOTH_CONNECT
+                    };
         }
 
         // Android SDK: An app must hold ACCESS_COARSE_LOCATION or ACCESS_FINE_LOCATION permission in order to get results.

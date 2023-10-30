@@ -5,8 +5,8 @@ group = 'com.github.mad-lab-fau'
 
 
 android {
-    compileSdkVersion 33
-    namespace 'de.fau.sensorlib'
+    compileSdkVersion 31
+    namespace 'de.fau.sensorlib.sensors'
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -15,7 +15,7 @@ android {
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 33
+        targetSdkVersion 31
         versionCode 1
         versionName "1.0"
     }
