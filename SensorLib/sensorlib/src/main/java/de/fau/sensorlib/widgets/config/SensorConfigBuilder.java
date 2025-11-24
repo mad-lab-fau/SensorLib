@@ -22,8 +22,6 @@ import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.xeoh.android.checkboxgroup.CheckBoxGroup;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -146,7 +144,7 @@ public class SensorConfigBuilder {
                 checkBoxMap.put(checkBox, value);
             }
 
-            new CheckBoxGroup<>(checkBoxMap, values -> mListener.onConfigItemSelected(mKey, values));
+            //new CheckBoxGroup<>(checkBoxMap, values -> mListener.onConfigItemSelected(mKey, values));
         }
     }
 

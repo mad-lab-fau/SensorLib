@@ -4,7 +4,7 @@ apply plugin: 'maven-publish'
 group = 'com.github.mad-lab-fau'
 
 android {
-    compileSdkVersion 34
+    compileSdkVersion 36
     namespace 'de.fau.sensorlib.sensors'
 
     compileOptions {
@@ -14,7 +14,7 @@ android {
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 34
+        targetSdkVersion 36
         versionCode 1
         versionName "1.0"
     }
